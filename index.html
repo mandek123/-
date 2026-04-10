@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>만득월드</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0b0e11;
+            --card-bg: #15191d;
+            --inner-card: #1c2128;
+            --input-bg: #0b0e11;
+            --border: #30363d;
+            --text-main: #adbac7;
+            --text-highlight: #ffffff;
+            --accent: #2ea043;
+            --accent-blue: #539bf5;
+            --accent-orange: #fca311;
+            --hover-bg: rgba(144, 157, 171, 0.1);
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            width: 100%;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+        }
+        .nav-logo { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-menu { display: flex; gap: 5px; }
+        .nav-item { 
+            text-decoration: none; 
+            color: var(--text-main); 
+            font-size: 13px; 
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+        .nav-item:hover { background-color: var(--hover-bg); }
+        .nav-item.active { color: var(--accent-blue); font-weight: bold; background: rgba(83, 155, 245, 0.1); }
+
+        .main-container {
+            width: 100%;
+            max-width: 1100px;
+            display: none;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 25px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        .main-container.active { display: grid; }
+
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 25px; 
+            height: fit-content;
+        }
+        .card-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; color: var(--text-highlight); display: flex; align-items: center; gap: 10px; }
+
+        label { display: block; font-size: 13px; margin-bottom: 8px; color: #768390; }
+
+        input, select {
+            width: 100%; padding: 10px; background: var(--input-bg); border: 1px solid var(--border);
+            border-radius: 6px; color: #fff; font-size: 15px; outline: none; margin-bottom: 18px;
+            box-sizing: border-box;
+        }
+        input:disabled, select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-calc { 
+            width: 100%; padding: 15px; color: white; border: none; 
+            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .res-box { background: var(--inner-card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; }
+        .res-label { font-size: 11px; color: #768390; margin-bottom: 5px; }
+        .res-val { font-size: 1.1rem; font-weight: bold; color: var(--accent-blue); }
+
+        details { border: 1px solid var(--border); border-radius: 8px; background: var(--inner-card); margin-top: 15px; }
+        summary { padding: 12px; font-weight: bold; font-size: 14px; cursor: pointer; color: var(--text-highlight); }
+        .table-content { max-height: 250px; overflow-y: auto; padding: 10px; font-size: 13px; }
+        .table-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+
+        .footer { width: 100%; max-width: 1100px; text-align: center; padding: 30px 0; border-top: 1px solid var(--border); font-size: 13px; margin-top: auto; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; grid-column: span 2; }
+        .empty-state i { font-size: 3rem; margin-bottom: 20px; color: var(--accent-orange); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" onclick="showPage('page-exp')">
+                <i class="fa-solid fa-dog"></i> 만득월드
+            </a>
+            <div class="nav-menu">
+                <a class="nav-item active" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
+                <a class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
+                <a class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
+                <a class="nav-item" id="menu-ency" onclick="showPage('page-ency')">📚 도감</a>
+                </div>
+        </div>
+    </nav>
+
+    <div class="main-container active" id="page-exp">
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-sliders"></i> 설정</div>
+            
+            <label>계산 모드</label>
+            <select id="calcMode" onchange="toggleMode()">
+                <option value="auto">자동 계산 (사냥터 선택)</option>
+                <option value="manual">수동 계산 (시간당 경험치 직접입력)</option>
+            </select>
+
+            <label>레벨 구간</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="number" id="curLv" value="120" min="1" max="144">
+                <span style="margin-bottom:18px">→</span>
+                <input type="number" id="targetLv" value="130" min="2" max="145">
+            </div>
+
+            <label>현재 경험치량 (수치)</label>
+            <input type="number" id="curExp" value="0">
+
+            <label>사냥터 선택</label>
+            <select id="huntingGround" onchange="applyGround()">
+                <option value="0">선택하세요</option>
+                <option value="191442">채석장 (LV30~65)</option>
+                <option value="0" disabled>지하 (정보없음)</option>
+                <option value="0" disabled>폐허 (정보없음)</option>
+                <option value="0" disabled>눈동 (정보없음)</option>
+                <option value="0" disabled>어동 (정보없음)</option>
+                <option value="1670052">해저 (LV120~)</option>
+            </select>
+
+            <label>시간당 경험치 (1배율)</label>
+            <input type="number" id="hourlyExp" placeholder="시간당 경험치 입력">
+
+            <label>적용 배율</label>
+            <input type="number" id="multiplier" value="1.00" step="0.01">
+
+            <button class="btn-calc" onclick="runCalculation()" style="background: var(--accent);">계산하기</button>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-chart-simple"></i> 리포트</div>
+            <div class="result-grid">
+                <div class="res-box"><div class="res-label">소요 시간 🕒</div><div id="resTime" class="res-val">-</div></div>
+                <div class="res-box"><div class="res-label">탑펫 소요시간 🐾</div><div id="resPetTime" class="res-val">-</div></div>
+                <div class="res-box"><div class="res-label">필요 경험치 💎</div><div id="resNeeded" class="res-val">-</div></div>
+                <div class="res-box"><div class="res-label">최종 시간당 경험치 📈</div><div id="resFinalExp" class="res-val">-</div></div>
+            </div>
+
+            <details open>
+                <summary>📍 사냥터별 상세 데이터 (1배율 기준)</summary>
+                <div class="table-content">
+                    <div class="table-row"><strong>사냥터</strong><strong>상세 정보</strong></div>
+                    <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 191,442 EXP</span></div>
+                    <div class="table-row"><span>지하 (LV65~80)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>폐허 (LV80~100)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>눈동/피피아 (LV100~110)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>어동 (LV110~120)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>해저 (LV120~)</span><span>마리당: 4,892 / 시간당: 약 1,670,052 EXP</span></div>
+                </div>
+            </details>
+
+            <details>
+                <summary><i class="fa-solid fa-table-list"></i> 경험치 테이블 (1~144)</summary>
+                <div class="table-content" id="fullExpTable"></div>
+            </details>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-acc">
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-crosshairs"></i> 명중률 계산</div>
+            <label>공격자 순발력 (A)</label>
+            <input type="number" id="attSpd" placeholder="예: 252">
+            <label>방어자 순발력 (B)</label>
+            <input type="number" id="defSpd" placeholder="예: 61">
+            <button class="btn-calc" onclick="calcAccuracy()" style="background: var(--accent-blue);">명중률 측정</button>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-square-poll-vertical"></i> 결과</div>
+            <div class="res-box" style="text-align:center; padding: 40px 0;">
+                <div class="res-label">최종 회피 확률 / 명중 확률</div>
+                <div id="accResult" class="res-val" style="font-size:2rem; color:var(--accent-blue);">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-rev">
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-arrows-left-right"></i> 역순 순발력 범위</div>
+            <label>캐릭터 기본 순발력</label>
+            <input type="number" id="statSpd" placeholder="예: 300">
+            <button class="btn-calc" onclick="calcReverse()" style="background: var(--accent-orange);">난수 범위 계산</button>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-list-ol"></i> 전투 순발력 리포트</div>
+            <div class="res-box" style="margin-bottom: 15px;">
+                <div class="res-label">최대 전투 순발력 (R=0)</div>
+                <div id="revMax" class="res-val" style="color:var(--accent-orange);">-</div>
+            </div>
+            <div class="res-box">
+                <div class="res-label">최소 전투 순발력 (R=Max)</div>
+                <div id="revMin" class="res-val" style="color:var(--accent-orange);">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-ency">
+        <div class="card empty-state">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <h2 style="color: #fff;">도감 데이터 준비 중</h2>
+            <p>현재 도감 데이터를 정리하고 있습니다.<br>추후 업데이트 예정입니다.</p>
+        </div>
+    </div>
+
+    <div class="footer">만든이 만득 <i class="fa-solid fa-dog"></i></div>
+
+    <script>
+        const EXP_TABLE = {
+            0: 0, 1: 2, 2: 6, 3: 17, 4: 37, 5: 67, 6: 111, 7: 169, 8: 247, 9: 344,
+            10: 464, 11: 609, 12: 783, 13: 985, 14: 1221, 15: 1491, 16: 1799, 17: 2145, 18: 2535, 19: 2968,
+            20: 3448, 21: 3978, 22: 4558, 23: 5194, 24: 5885, 25: 6635, 26: 7446, 27: 8322, 28: 9262, 29: 10272,
+            30: 11352, 31: 12506, 32: 13734, 33: 15042, 34: 16429, 35: 17899, 36: 19454, 37: 21098, 38: 22830, 39: 24656,
+            40: 26576, 41: 28594, 42: 30710, 43: 32930, 44: 35253, 45: 37683, 46: 40222, 47: 42874, 48: 45638, 49: 48520,
+            50: 51520, 51: 54642, 52: 57886, 53: 61258, 54: 64757, 55: 68387, 56: 72150, 57: 76050, 58: 80086, 59: 84264,
+            60: 106110, 61: 113412, 62: 121149, 63: 129352, 64: 138044, 65: 147256, 66: 157019, 67: 167366, 68: 178334, 69: 189958,
+            70: 202282, 71: 215348, 72: 229205, 73: 243901, 74: 259495, 75: 276041, 76: 293606, 77: 312258, 78: 332071, 79: 353126,
+            80: 375511, 81: 399318, 82: 424655, 83: 451631, 84: 480370, 85: 511007, 86: 543686, 87: 578571, 88: 615838, 89: 655680,
+            90: 698312, 91: 743971, 92: 792917, 93: 845443, 94: 901868, 95: 962554, 96: 1027899, 97: 1098353, 98: 1174420, 99: 1256663,
+            100: 1345723, 101: 1442322, 102: 1547281, 103: 1661531, 104: 1786143, 105: 1922340, 106: 2071533, 107: 2235351, 108: 2415689, 109: 2914754,
+            110: 3535137, 111: 3979892, 112: 4452633, 113: 5057676, 114: 5600195, 115: 6186445, 116: 6724041, 117: 7322323, 118: 7892866, 119: 9050125,
+            120: 12326614, 121: 15496114, 122: 20025638, 123: 26821885, 124: 37698249, 125: 56734876, 126: 68097265, 127: 68290815, 128: 68487425, 129: 68687119,
+            130: 68889921, 131: 69095855, 132: 69304945, 133: 69517214, 134: 69732689, 135: 69951391, 136: 70173345, 137: 70398575, 138: 70627105, 139: 70858959,
+            140: 81244161, 141: 97134273, 142: 108000000, 143: 181830095, 144: 202078929
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.main-container').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            let menuId;
+            if (pageId === 'page-exp') menuId = 'menu-exp';
+            else if (pageId === 'page-acc') menuId = 'menu-acc';
+            else if (pageId === 'page-rev') menuId = 'menu-rev';
+            else if (pageId === 'page-ency') menuId = 'menu-ency';
+            
+            if(menuId) document.getElementById(menuId).classList.add('active');
+        }
+
+        function toggleMode() {
+            const mode = document.getElementById('calcMode').value;
+            const hg = document.getElementById('huntingGround');
+            const he = document.getElementById('hourlyExp');
+            if(mode === 'auto') {
+                hg.disabled = false;
+                he.readOnly = true;
+            } else {
+                hg.disabled = true;
+                he.readOnly = false;
+            }
+        }
+
+        function applyGround() {
+            const val = document.getElementById('huntingGround').value;
+            if (val !== "0") document.getElementById('hourlyExp').value = val;
+        }
+
+        function formatNumber(num) {
+            if (num >= 100000000) return (num / 100000000).toFixed(2) + "억";
+            if (num >= 10000) return Math.floor(num / 10000).toLocaleString() + "만";
+            return num.toLocaleString();
+        }
+
+        // 3. 소요 시간 계산 로직 수정 (시간 + 일자 병기)
+        function runCalculation() {
+            const curLv = parseInt(document.getElementById('curLv').value);
+            const curExp = parseInt(document.getElementById('curExp').value) || 0;
+            const targetLv = parseInt(document.getElementById('targetLv').value);
+            const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
+            const mult = parseFloat(document.getElementById('multiplier').value) || 1;
+
+            if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
+
+            let needed = (EXP_TABLE[curLv] || 0) - curExp;
+            for(let i = curLv + 1; i < targetLv; i++) {
+                needed += (EXP_TABLE[i] || 0);
+            }
+
+            const finalHourly = hourlyBase * mult;
+            const hours = finalHourly > 0 ? needed / finalHourly : 0;
+            const days = hours / 24;
+            
+            document.getElementById('resNeeded').innerText = formatNumber(needed);
+            document.getElementById('resTime').innerText = `${hours.toFixed(1)}시간 (${days.toFixed(1)}일)`;
+            document.getElementById('resPetTime').innerText = `${(hours / 0.6).toFixed(1)}시간 (${(days / 0.6).toFixed(1)}일)`;
+            document.getElementById('resFinalExp').innerText = formatNumber(finalHourly);
+        }
+
+        function calcAccuracy() {
+            const A = parseInt(document.getElementById('attSpd').value);
+            const B = parseInt(document.getElementById('defSpd').value);
+            if(!A || !B) return;
+            let base = Math.sqrt(Math.abs(B - A) / 200) * (B / A) * 100;
+            let softCap = Math.min(Math.max(base, 10), 80);
+            document.getElementById('accResult').innerText = `회피 ${softCap.toFixed(1)}% / 명중 ${(100-softCap).toFixed(1)}%`;
+        }
+
+        function calcReverse() {
+            const baseSpd = parseInt(document.getElementById('statSpd').value);
+            if(!baseSpd) return;
+            const maxR = (baseSpd * 0.15) + 20;
+            document.getElementById('revMax').innerText = Math.floor(baseSpd + 20);
+            document.getElementById('revMin').innerText = Math.floor(baseSpd + 20 - maxR);
+        }
+
+        function initExpTable() {
+            const container = document.getElementById('fullExpTable');
+            container.innerHTML = `<div class="table-row" style="position: sticky; top:0; background: var(--inner-card); z-index:1;"><strong>레벨</strong><strong>필요 경험치</strong></div>`;
+            for(let lv = 1; lv <= 144; lv++) {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `<span>Lv.${lv}</span> <span>${EXP_TABLE[lv].toLocaleString()}</span>`;
+                container.appendChild(row);
+            }
+        }
+
+        window.onload = () => {
+            toggleMode();
+            initExpTable();
+        };
+    </script>
+</body>
+</html>
