@@ -194,7 +194,7 @@
             </details>
 
             <details>
-                <summary><i class="fa-solid fa-table-list"></i> 경험치 테이블 (1~144)</summary>
+                <summary><i class="fa-solid fa-table-list"></i> 경험치 테이블 (1~145)</summary>
                 <div class="table-content" id="fullExpTable"></div>
             </details>
         </div>
@@ -250,7 +250,7 @@
 
     <script>
         const EXP_TABLE = {
-            -: -, 1: 0, 2: 2, 3: 6, 4: 17, 5: 37, 6: 67, 7: 111, 8: 169, 9: 247, 10: 344,
+            1: 0, 2: 2, 3: 6, 4: 17, 5: 37, 6: 67, 7: 111, 8: 169, 9: 247, 10: 344,
             11: 464, 12: 609, 13: 783, 14: 985, 15: 1221, 16: 1491, 17: 1799, 18: 2145, 19: 2535, 20: 2968,
             21: 3448, 22: 3978, 23: 4558, 24: 5194, 25: 5885, 26: 6635, 27: 7446, 28: 8322, 29: 9262, 30: 10272,
             31: 11352, 32: 12506, 33: 13734, 34: 15042, 35: 16429, 36: 17899, 37: 19454, 38: 21098, 39: 22830, 40: 24656,
@@ -305,7 +305,6 @@
             return num.toLocaleString();
         }
 
-        // 3. 소요 시간 계산 로직 수정 (시간 + 일자 병기)
         function runCalculation() {
             const curLv = parseInt(document.getElementById('curLv').value);
             const curExp = parseInt(document.getElementById('curExp').value) || 0;
@@ -315,8 +314,10 @@
 
             if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
 
-            let needed = (EXP_TABLE[curLv] || 0) - curExp;
-            for(let i = curLv + 1; i < targetLv; i++) {
+            // 현재 레벨에서 다음 레벨로 가기 위한 남은 경험치 계산
+            let needed = (EXP_TABLE[curLv + 1] || 0) - curExp;
+            // 다음 레벨부터 목표 레벨까지의 경험치 합산
+            for(let i = curLv + 2; i <= targetLv; i++) {
                 needed += (EXP_TABLE[i] || 0);
             }
 
@@ -350,10 +351,10 @@
         function initExpTable() {
             const container = document.getElementById('fullExpTable');
             container.innerHTML = `<div class="table-row" style="position: sticky; top:0; background: var(--inner-card); z-index:1;"><strong>레벨</strong><strong>필요 경험치</strong></div>`;
-            for(let lv = 1; lv <= 144; lv++) {
+            for(let lv = 1; lv <= 145; lv++) {
                 const row = document.createElement('div');
                 row.className = 'table-row';
-                row.innerHTML = `<span>Lv.${lv}</span> <span>${EXP_TABLE[lv].toLocaleString()}</span>`;
+                row.innerHTML = `<span>Lv.${lv}</span> <span>${(EXP_TABLE[lv] || 0).toLocaleString()}</span>`;
                 container.appendChild(row);
             }
         }
