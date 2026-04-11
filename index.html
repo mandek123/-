@@ -70,7 +70,7 @@
             width: 100%;
             max-width: 1100px;
             display: none;
-            grid-template-columns: 1fr 1.2fr;
+            grid-template-columns: 1fr 1fr; /* 1.2fr에서 1fr로 변경하여 양쪽 균형을 맞춤 */
             gap: 25px;
             padding: 40px 20px;
             box-sizing: border-box;
@@ -203,7 +203,7 @@
             display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
         }
         .filter-row input, .filter-row select { margin-bottom: 0; padding: 10px; font-size: 14px; }
-        .filter-row select { width: 130px; }
+        .filter-row select { width: auto; flex: 1; min-width: 120px; max-width: 160px; }
         
         .tag { font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
         .tag-top { background: rgba(252, 163, 17, 0.15); color: #fca311; border: 1px solid rgba(252,163,17,0.3); } /* 최상급 */
@@ -214,7 +214,7 @@
 
         .ency-group { border: none; background: transparent; margin-top: 0; margin-bottom: 20px; }
         .ency-group > summary { background: var(--inner-card); border: 1px solid var(--border); font-size: 1.1rem; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; }
-        .ency-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 0; overflow: visible; max-height: none; }
+        .ency-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 0; overflow: visible; max-height: none; }
         
         .raid-buff-box {
             display: flex;
@@ -367,7 +367,7 @@
             </div>
 
             <div class="filter-row">
-                <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()" style="flex: 1; min-width: 150px;">
+                <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()" style="flex: 2; min-width: 200px; max-width: 350px;">
                 <select id="petElement" onchange="filterPets()">
                     <option value="all" style="color:#fff">모든 속성</option>
                     <option value="지" style="color:#fff">지속성</option>
@@ -385,10 +385,6 @@
                     <option value="all" style="color:#fff">모든 패시브</option>
                     <option value="치유" style="color:#fff">치유</option>
                     <option value="질주" style="color:#fff">질주</option>
-                    <option value="신속" style="color:#fff">신속</option>
-                    <option value="맹공" style="color:#fff">맹공</option>
-                    <option value="철벽" style="color:#fff">철벽</option>
-                    <option value="없음" style="color:#fff">없음</option>
                 </select>
             </div>
 
@@ -490,8 +486,8 @@
                     card.innerHTML = `
                         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
                             
-                            <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0;">
-                                <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                            <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;">
+                                <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                             </div>
 
                             <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
