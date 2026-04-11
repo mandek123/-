@@ -251,7 +251,7 @@
         .tag-passive::after {
             content: attr(data-desc);
             position: absolute;
-            bottom: 100%; /* 태그 위에 위치 */
+            bottom: 100%; 
             left: 50%;
             transform: translateX(-50%) translateY(-8px);
             background-color: #232a32;
@@ -267,12 +267,12 @@
             transition: all 0.2s ease;
             z-index: 100;
             font-weight: 500;
-            pointer-events: none; /* 마우스 이벤트 간섭 방지 */
+            pointer-events: none; 
         }
         .tag-passive:hover::after {
             opacity: 1;
             visibility: visible;
-            transform: translateX(-50%) translateY(-4px); /* 호버 시 살짝 내려오는 애니메이션 */
+            transform: translateX(-50%) translateY(-4px); 
         }
 
         .ency-group { 
@@ -281,7 +281,7 @@
             margin-top: 0; 
             margin-bottom: 25px; 
             box-shadow: none; 
-            overflow: visible; /* 툴팁이 잘리지 않도록 visible 설정 */
+            overflow: visible; 
         }
         .ency-group > summary { 
             background: #1e242b; 
@@ -310,7 +310,7 @@
 
     <nav class="navbar">
         <div class="nav-container">
-            <a href="https://saworld.net/home/" class="nav-logo">
+            <a href="javascript:void(0);" class="nav-logo" onclick="showPage('page-exp')">
                 <i class="fa-solid fa-dog"></i> 만득월드
             </a>
             <div class="nav-menu">
@@ -486,7 +486,12 @@
         </div>
     </div>
 
-    <div class="footer">만든이 만득 <i class="fa-solid fa-dog"></i></div>
+    <div class="footer">
+        <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            만든이 만득 
+            <img src="./images/zzz.png" alt="혁명" style="height: 16px; width: auto; object-fit: contain; border-radius: 4px;">
+        </span>
+    </div>
 
     <script>
         const EXP_TABLE = {
@@ -584,10 +589,9 @@
                         return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
                     }).join(' ');
 
-                    // 툴팁에 띄워줄 패시브 설명 세팅
                     let passiveDesc = "";
-                    if (pet.passive === "치유") passiveDesc = "본인과 펫, 3턴 동안 HP 회복 (LV 별 수치: 100/150/200/250/350)";
-                    else if (pet.passive === "질주") passiveDesc = "본인과 펫, 3턴 동안 회피율 증가 + 명중률 고정 증가 (LV 별 수치: 회피 3/4/5/6/8% + 명중 3%)";
+                    if (pet.passive === "치유") passiveDesc = "매 턴마다 일정량의 HP를 회복합니다.";
+                    else if (pet.passive === "질주") passiveDesc = "전투 중 순발력이 크게 증가합니다.";
 
                     card.innerHTML = `
                         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
