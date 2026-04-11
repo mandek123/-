@@ -70,7 +70,7 @@
             width: 100%;
             max-width: 1100px;
             display: none;
-            grid-template-columns: 1fr 1fr; /* 1.2fr에서 1fr로 변경하여 양쪽 균형을 맞춤 */
+            grid-template-columns: 1fr 1fr;
             gap: 25px;
             padding: 40px 20px;
             box-sizing: border-box;
@@ -385,6 +385,10 @@
                     <option value="all" style="color:#fff">모든 패시브</option>
                     <option value="치유" style="color:#fff">치유</option>
                     <option value="질주" style="color:#fff">질주</option>
+                    <option value="신속" style="color:#fff">신속</option>
+                    <option value="맹공" style="color:#fff">맹공</option>
+                    <option value="철벽" style="color:#fff">철벽</option>
+                    <option value="없음" style="color:#fff">없음</option>
                 </select>
             </div>
 
@@ -483,13 +487,14 @@
                     if(pet.grade === '최상급') gradeClass = 'tag-top';
                     if(pet.grade === '상급') gradeClass = 'tag-high';
 
+                    // [추가된 로직] 속성 텍스트를 분리해서 각각 색상을 입혀줍니다.
                     let coloredElements = pet.elements.split(' ').map(el => {
                         let color = '#d2a8ff'; // 기본 보라색
                         if (el.includes('지')) color = '#3fb950'; // 초록색
                         else if (el.includes('수')) color = '#539bf5'; // 파란색
                         else if (el.includes('화')) color = '#ff7b72'; // 빨간색
                         else if (el.includes('풍')) color = '#e3b341'; // 노란색
-                        return `<span style="color: ${color};">${el}</span>`;
+                        return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
                     }).join(' ');
 
                     card.innerHTML = `
@@ -508,28 +513,7 @@
                                 </div>
                                 <div style="display: flex; gap: 5px; align-items: center;">
                                     ${pet.passive !== "없음" ? `<span class="tag tag-passive">${pet.passive}</span>` : ''}
-                                    
                                     <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
-                                </div>
-                            </div>
-                        </div>
-                    card.innerHTML = `
-                        <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                            
-                            <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;">
-                                <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
-                            </div>
-
-                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span style="font-weight: bold; font-size: 1.2rem; color: var(--text-highlight);">${pet.name}</span>
-                                    </div>
-                                    <span class="tag ${gradeClass}">${pet.grade}</span>
-                                </div>
-                                <div style="display: flex; gap: 5px; align-items: center;">
-                                    ${pet.passive !== "없음" ? `<span class="tag tag-passive">${pet.passive}</span>` : ''}
-                                    <span class="tag-element" style="font-size: 0.8rem;">${pet.elements}</span>
                                 </div>
                             </div>
                         </div>
