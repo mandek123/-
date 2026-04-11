@@ -73,7 +73,7 @@
             top: 100%;
             left: 0;
             width: 100%;
-            height: 15px; /* 호버 유지용 투명 다리 */
+            height: 15px;
             background: transparent;
         }
 
@@ -174,7 +174,7 @@
             top: 100%;
             left: 0;
             width: 100%;
-            height: 15px; /* 공간을 넓게 잡아 안정적으로 호버 유지 */
+            height: 15px;
             background: transparent;
             z-index: 998;
         }
@@ -234,7 +234,7 @@
         select {
             appearance: none;
             -webkit-appearance: none;
-            display: none; /* 커스텀 셀렉트로 교체됨 */
+            display: none; 
         }
         input::placeholder { color: #8b949e; }
         input:disabled { opacity: 0.4; cursor: not-allowed; background: var(--input-bg); }
@@ -525,17 +525,45 @@
                 
                 <select id="petPassive" onchange="filterPets()">
                     <option value="all">모든 패시브</option>
-                    <option value="추격">추격</option>
-                    <option value="흡수">흡수</option>
-                    <option value="질주">질주</option>
-                    <option value="수호">수호</option>
+                    <option value="격노">격노</option>
+                    <option value="전투 집중">전투 집중</option>
+                    <option value="야수의 포효">야수의 포효</option>
+                    <option value="심장 관통">심장 관통</option>
+                    <option value="신속">신속</option>
+                    <option value="질풍의 눈">질풍의 눈</option>
+                    <option value="광휘">광휘</option>
+                    <option value="전광 석화">전광 석화</option>
+                    <option value="잔상">잔상</option>
+                    <option value="심판">심판</option>
+                    <option value="조준">조준</option>
+                    <option value="불굴의 의지">불굴의 의지</option>
+                    <option value="강철">강철</option>
                     <option value="치유">치유</option>
-                    <option value="돌격">돌격</option>
-                    <option value="저주">저주</option>
-                    <option value="도발">도발</option>
-                    <option value="반격">반격</option>
-                    <option value="위압">위압</option>
-                    <option value="강인">강인</option>
+                    <option value="질주">질주</option>
+                    <option value="파열">파열</option>
+                    <option value="암살">암살</option>
+                    <option value="충성">충성</option>
+                    <option value="투혼">투혼</option>
+                    <option value="난무">난무</option>
+                    <option value="창공의 권능">창공의 권능</option>
+                    <option value="철갑의 수호">철갑의 수호</option>
+                    <option value="광휘의 화조">광휘의 화조</option>
+                    <option value="질풍의 포효">질풍의 포효</option>
+                    <option value="대지의 심장">대지의 심장</option>
+                    <option value="서리의 심장">서리의 심장</option>
+                    <option value="불타는 날개">불타는 날개</option>
+                    <option value="폭풍의 날개">폭풍의 날개</option>
+                    <option value="티아트의 축복">티아트의 축복</option>
+                    <option value="에니키의 축복">에니키의 축복</option>
+                    <option value="이라의 축복">이라의 축복</option>
+                    <option value="윌의 축복">윌의 축복</option>
+                    <option value="폭주">폭주</option>
+                    <option value="심판의 혼">심판의 혼</option>
+                    <option value="심연의 보주">심연의 보주</option>
+                    <option value="청영의 화조">청영의 화조</option>
+                    <option value="광휘의 권능">광휘의 권능</option>
+                    <option value="왜곡">왜곡</option>
+                    <option value="황혼의 날개">황혼의 날개</option>
                 </select>
                 
                 <select id="petEncyBuff" onchange="filterPets()">
@@ -563,7 +591,7 @@
             </div>
             
             <div style="background: var(--inner-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 600px; width: 100%;">
-                <img src="./images/yyy.png" alt="만득봇" style="width: 100%; max-width: 250px; border-radius: 16px; margin-bottom: 30px; object-fit: contain; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <img src="여기에_만득봇_사진_주소_입력.png" alt="만득봇" style="width: 100%; max-width: 250px; border-radius: 16px; margin-bottom: 30px; object-fit: contain; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
                 <h3 style="color: var(--text-highlight); font-size: 1.2rem; margin-bottom: 15px; line-height: 1.5;">
                     해당 홈페이지에 있는 기능들을<br>디스코드에서도 사용할 수 있게 만득봇도 만들었습니다.
                 </h3>
@@ -599,7 +627,7 @@
     <div class="footer">
         <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
             만든이 만득 
-            <img src="./images/zzz.png" alt="만득 로고" style="height: 16px; width: auto; object-fit: contain; border-radius: 4px;">
+            <img src="여기에_이미지_주소_입력.png" alt="만득 로고" style="height: 16px; width: auto; object-fit: contain; border-radius: 4px;">
         </span>
     </div>
 
@@ -639,6 +667,7 @@
             { category: "두리류", name: "환생얼룩우리", img: "./images/14.gif", elements: "지5 풍5", hp: 56.63, atk: 9.13, def: 9.81, spd: 7.13, ghp: 10.31, gatk: 1.66, gdef: 1.78, gspd: 1.30, passive: "치유", grade: "최상급", encyBuff: "레이드 캐릭터 순발력 1% 증가" }
         ];
 
+        // 사용자가 제공한 실제 레이드 전투 패시브 39종 데이터
         const RAID_PASSIVE_DATABASE = [
             { name: "격노", effect: "본인과 펫, 3턴 동안 공격력 증가", values: ["8%", "9%", "10%", "12%", "15%"] },
             { name: "전투 집중", effect: "본인과 펫, 3턴 동안\n명중률 증가 + 공격력 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
@@ -707,20 +736,6 @@
                 return;
             }
 
-            const PASSIVE_INFO = {
-                "추격": "아군 공격 시 일정 확률로\n연계 공격을 합니다. (1인)",
-                "흡수": "피격 시 받은 피해의 일부를\n체력으로 회복합니다.",
-                "질주": "자신의 순발력을 증가시키며,\n공격 시 확률적 추가 피해를 입힙니다.",
-                "수호": "아군 피격 시 일정 확률로\n대신 맞으며 피해를 감소시킵니다.",
-                "치유": "매 턴 종료 시 자신과 아군의\n체력을 일정량 회복시킵니다.",
-                "돌격": "공격 시 대상의 방어력을 무시하며\n강력한 피해를 입힙니다.",
-                "저주": "공격 시 일정 확률로 대상에게\n해로운 효과를 부여합니다.",
-                "도발": "적의 공격을 자신에게 집중시키며\n자신의 방어력을 증가시킵니다.",
-                "반격": "근접 공격 시 일정 확률로\n대상에게 반격을 가합니다.",
-                "위압": "전투 시작 시 적 전체의\n공격력과 순발력을 감소시킵니다.",
-                "강인": "상시 피해 감소 및\n상태이상 저항이 증가합니다."
-            };
-
             const grouped = {};
             data.forEach(pet => {
                 if(!grouped[pet.category]) grouped[pet.category] = [];
@@ -758,7 +773,12 @@
                         return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
                     }).join(' ');
 
-                    let passiveDesc = PASSIVE_INFO[pet.passive] || "";
+                    // 수정: 올바른 레이드 패시브 설명을 RAID_PASSIVE_DATABASE에서 찾아 연동합니다.
+                    let passiveDesc = "";
+                    const passiveData = RAID_PASSIVE_DATABASE.find(p => p.name === pet.passive);
+                    if (passiveData) {
+                        passiveDesc = passiveData.effect;
+                    }
 
                     card.innerHTML = `
                         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
@@ -773,7 +793,7 @@
                                     <span class="tag ${gradeClass}">${pet.grade}</span>
                                 </div>
                                 <div style="display: flex; gap: 5px; align-items: center;">
-                                    ${pet.passive !== "없음" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
+                                    ${pet.passive && pet.passive !== "없음" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
                                     <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
                                 </div>
                             </div>
