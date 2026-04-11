@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>만득월드</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0b0e11;
+            --card-bg: #15191d;
+            --inner-card: #1c2128;
+            --input-bg: #0b0e11;
+            --border: #30363d;
+            --text-main: #adbac7;
+            --text-highlight: #ffffff;
+            --accent: #2ea043;
+            --accent-blue: #539bf5;
+            --accent-orange: #fca311;
+            --hover-bg: rgba(144, 157, 171, 0.1);
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            width: 100%;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .nav-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+        }
+        .nav-logo { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-menu { display: flex; gap: 5px; }
+        .nav-item { 
+            text-decoration: none; 
+            color: var(--text-main); 
+            font-size: 13px; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        .nav-item:hover { background-color: var(--hover-bg); transform: translateY(-1px); }
+        .nav-item.active { color: var(--accent-blue); font-weight: bold; background: rgba(83, 155, 245, 0.1); }
+
+        .main-container {
+            width: 100%;
+            max-width: 1100px;
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        .main-container.active { display: grid; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes resultFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-result {
+            animation: resultFadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 25px; 
+            height: fit-content;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transition: box-shadow 0.3s ease;
+        }
+        .card:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
+        .card-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; color: var(--text-highlight); display: flex; align-items: center; gap: 10px; }
+
+        label { display: block; font-size: 13px; margin-bottom: 8px; color: #8b949e; font-weight: 500; }
+
+        /* 입력창 디자인 부드럽게 개선 (글로벌 폼 요소 일괄 라운드 처리) */
+        input, select {
+            width: 100%; 
+            padding: 12px 20px; 
+            background: #1e242b; 
+            border: 1px solid #3d4550;
+            border-radius: 30px; 
+            color: #fff; 
+            font-size: 14px; 
+            outline: none; 
+            margin-bottom: 18px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--accent-blue);
+            background: #232a32;
+            box-shadow: 0 0 0 3px rgba(83, 155, 245, 0.15), 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23adbac7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 16px;
+            padding-right: 45px;
+            color: #8b949e;
+            cursor: pointer;
+        }
+        select option {
+            color: #fff;
+            background: var(--input-bg);
+        }
+
+        input::placeholder { color: #8b949e; }
+        input:disabled, select:disabled { opacity: 0.4; cursor: not-allowed; background: var(--input-bg); }
+
+        .btn-calc { 
+            width: 100%; 
+            padding: 15px; 
+            color: white; 
+            border: none; 
+            border-radius: 30px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
+        }
+        .btn-calc:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        .btn-calc:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .res-box { 
+            background: var(--inner-card); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 18px 15px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .res-box:hover { transform: translateY(-2px); }
+        .res-label { font-size: 12px; color: #8b949e; margin-bottom: 8px; font-weight: 500; }
+        .res-val { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); letter-spacing: 0.5px; }
+
+        /* 클릭해서 열리는 창(details, summary) 디자인 세련되게 수정 */
+        details { 
+            border: 1px solid #3d4550; 
+            border-radius: 24px; 
+            background: #1e242b; 
+            margin-top: 15px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        summary { 
+            padding: 16px 20px; 
+            font-weight: bold; 
+            font-size: 14px; 
+            cursor: pointer; 
+            color: var(--text-highlight); 
+            transition: background 0.2s ease; 
+        }
+        summary:hover { background: rgba(144, 157, 171, 0.05); }
+        .table-content { max-height: 250px; overflow-y: auto; padding: 10px 24px 20px 24px; font-size: 13px; }
+        .table-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .table-row:last-child { border-bottom: none; }
+
+        .footer { width: 100%; max-width: 1100px; text-align: center; padding: 30px 0; border-top: 1px solid var(--border); font-size: 13px; margin-top: auto; color: #768390; }
+        
+        /* 도감 전용 CSS 추가 */
+        .notice-banner {
+            font-size: 12px;
+            color: var(--accent-orange);
+            text-align: center;
+            background: rgba(252, 163, 17, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(252, 163, 17, 0.2);
+            font-weight: 500;
+        }
+        
+        .filter-row {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; align-items: center;
+        }
+        .filter-row input, .filter-row select { 
+            margin-bottom: 0; 
+        }
+        .filter-row select { 
+            width: auto; 
+            flex: 1; 
+            min-width: 140px; 
+            max-width: 180px; 
+        }
+        .filter-row input { 
+            flex: 2; 
+            min-width: 200px; 
+            max-width: 350px; 
+        }
+        
+        .tag { font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
+        .tag-top { background: rgba(252, 163, 17, 0.15); color: #fca311; border: 1px solid rgba(252,163,17,0.3); } /* 최상급 */
+        .tag-high { background: rgba(83, 155, 245, 0.15); color: #539bf5; border: 1px solid rgba(83,155,245,0.3); } /* 상급 */
+        .tag-normal { background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.3); } /* 일반 */
+        .tag-passive { background: rgba(46, 160, 67, 0.15); color: #2ea043; border: 1px solid rgba(46,160,67,0.3); } /* 패시브 */
+        .tag-element { font-size: 0.9rem; color: #d2a8ff; font-weight: bold; }
+
+        /* 도감 카테고리(두리류 등) 탭 디자인 둥글게 적용 */
+        .ency-group { 
+            border: none; 
+            background: transparent; 
+            margin-top: 0; 
+            margin-bottom: 25px; 
+            box-shadow: none; 
+        }
+        .ency-group > summary { 
+            background: #1e242b; 
+            border: 1px solid #3d4550; 
+            font-size: 1.1rem; 
+            padding: 16px 24px; 
+            border-radius: 30px; /* 완전한 알약(Pill) 형태 */
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .ency-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 0; overflow: visible; max-height: none; }
+        
+        .raid-buff-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: rgba(83, 155, 245, 0.05);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(83, 155, 245, 0.15);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="https://saworld.net/home/" class="nav-logo">
+                <i class="fa-solid fa-dog"></i> 만득월드
+            </a>
+            <div class="nav-menu">
+                <a href="javascript:void(0);" class="nav-item active" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-ency" onclick="showPage('page-ency')">📚 도감</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container active" id="page-exp">
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-sliders"></i> 설정</div>
+            
+            <label>계산 모드</label>
+            <select id="calcMode" onchange="toggleMode()">
+                <option value="none" disabled selected hidden>계산 모드를 선택하세요</option>
+                <option value="auto">자동 계산 (사냥터 선택)</option>
+                <option value="manual">수동 계산 (시간당 경험치 직접입력)</option>
+            </select>
+
+            <label>레벨 구간</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="number" id="curLv" value="120" min="1" max="144">
+                <span style="margin-bottom:18px; color:#8b949e; font-weight:bold;">→</span>
+                <input type="number" id="targetLv" value="130" min="2" max="145">
+            </div>
+
+            <label>현재 경험치량 (수치)</label>
+            <input type="number" id="curExp" value="0">
+
+            <label>사냥터 선택</label>
+            <select id="huntingGround" onchange="applyGround()">
+                <option value="0" disabled selected hidden>사냥터를 선택하세요</option>
+                <option value="191442">채석장 (LV30~65)</option>
+                <option value="0" disabled>지하 (정보없음)</option>
+                <option value="0" disabled>폐허 (정보없음)</option>
+                <option value="0" disabled>눈동 (정보없음)</option>
+                <option value="0" disabled>어동 (정보없음)</option>
+                <option value="1670052">해저 (LV120~)</option>
+            </select>
+
+            <label>시간당 경험치 (1배율)</label>
+            <input type="number" id="hourlyExp" placeholder="시간당 경험치 입력">
+
+            <label>적용 배율</label>
+            <input type="number" id="multiplier" value="1.00" step="0.01">
+
+            <button class="btn-calc" onclick="runCalculation()" style="background: var(--accent);">계산하기</button>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-chart-simple"></i> 리포트</div>
+            <div id="exp-result-container">
+                <div class="result-grid">
+                    <div class="res-box"><div class="res-label">소요 시간 🕒</div><div id="resTime" class="res-val">-</div></div>
+                    <div class="res-box"><div class="res-label">탑펫 소요시간 🐾</div><div id="resPetTime" class="res-val">-</div></div>
+                    <div class="res-box"><div class="res-label">필요 경험치 💎</div><div id="resNeeded" class="res-val">-</div></div>
+                    <div class="res-box"><div class="res-label">최종 시간당 경험치 📈</div><div id="resFinalExp" class="res-val">-</div></div>
+                </div>
+            </div>
+
+            <details open>
+                <summary>📍 사냥터별 상세 데이터 (1배율 기준)</summary>
+                <div class="table-content">
+                    <div class="table-row"><strong>사냥터</strong><strong>상세 정보</strong></div>
+                    <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 191,442 EXP</span></div>
+                    <div class="table-row"><span>지하 (LV65~80)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>폐허 (LV80~100)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>눈동/피피아 (LV100~110)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>어동 (LV110~120)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+                    <div class="table-row"><span>해저 (LV120~)</span><span>마리당: 4,892 / 시간당: 약 1,670,052 EXP</span></div>
+                </div>
+            </details>
+
+            <details>
+                <summary><i class="fa-solid fa-table-list"></i> 경험치 테이블 (1~145)</summary>
+                <div class="table-content" id="fullExpTable"></div>
+            </details>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-acc">
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-crosshairs"></i> 명중률 계산</div>
+            <label>공격자 순발력 (A)</label>
+            <input type="number" id="attSpd" placeholder="예: 252">
+            <label>방어자 순발력 (B)</label>
+            <input type="number" id="defSpd" placeholder="예: 61">
+            <button class="btn-calc" onclick="calcAccuracy()" style="background: var(--accent-blue);">명중률 측정</button>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-square-poll-vertical"></i> 결과</div>
+            <div class="res-box" id="acc-result-container" style="text-align:center; padding: 50px 0;">
+                <div class="res-label">최종 회피 확률 / 명중 확률</div>
+                <div id="accResult" class="res-val" style="font-size:2.2rem; color:var(--accent-blue); margin-top: 10px;">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-rev">
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-arrows-left-right"></i> 역순 순발력 범위</div>
+            <label>캐릭터 기본 순발력</label>
+            <input type="number" id="statSpd" placeholder="예: 300">
+            <button class="btn-calc" onclick="calcReverse()" style="background: var(--accent-orange);">난수 범위 계산</button>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-list-ol"></i> 전투 순발력 리포트</div>
+            <div id="rev-result-container">
+                <div class="res-box" style="margin-bottom: 15px;">
+                    <div class="res-label">최대 전투 순발력 (R=0)</div>
+                    <div id="revMax" class="res-val" style="color:var(--accent-orange); font-size:1.5rem;">-</div>
+                </div>
+                <div class="res-box">
+                    <div class="res-label">최소 전투 순발력 (R=Max)</div>
+                    <div id="revMin" class="res-val" style="color:var(--accent-orange); font-size:1.5rem;">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-ency">
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-header" style="justify-content: space-between;">
+                <span><i class="fa-solid fa-book"></i> 펫 도감</span>
+            </div>
+            
+            <div class="notice-banner">
+                <i class="fa-solid fa-circle-info"></i> 도감 데이터는 지속적으로 업데이트 중입니다.
+            </div>
+
+            <div class="filter-row">
+                <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()">
+                
+                <select id="petElement" onchange="filterPets()">
+                    <option value="all" style="color:#fff">모든 속성</option>
+                    <option value="지" style="color:#fff">지속성</option>
+                    <option value="수" style="color:#fff">수속성</option>
+                    <option value="화" style="color:#fff">화속성</option>
+                    <option value="풍" style="color:#fff">풍속성</option>
+                </select>
+                
+                <select id="petGrade" onchange="filterPets()">
+                    <option value="all" style="color:#fff">모든 등급</option>
+                    <option value="일반" style="color:#fff">일반</option>
+                    <option value="상급" style="color:#fff">상급</option>
+                    <option value="최상급" style="color:#fff">최상급</option>
+                </select>
+                
+                <select id="petPassive" onchange="filterPets()">
+                    <option value="all" style="color:#fff">모든 패시브</option>
+                    <option value="치유" style="color:#fff">치유</option>
+                    <option value="질주" style="color:#fff">질주</option>
+                    <option value="없음" style="color:#fff">없음</option>
+                </select>
+                
+                <select id="petEncyBuff" onchange="filterPets()">
+                    <option value="all" style="color:#fff">모든 도감능력</option>
+                    <option value="펫 방어력" style="color:#fff">펫 방어력</option>
+                    <option value="펫 공격력" style="color:#fff">펫 공격력</option>
+                    <option value="펫 순발력" style="color:#fff">펫 순발력</option>
+                    <option value="캐릭터 방어력" style="color:#fff">캐릭터 방어력</option>
+                    <option value="캐릭터 공격력" style="color:#fff">캐릭터 공격력</option>
+                    <option value="캐릭터 순발력" style="color:#fff">캐릭터 순발력</option>
+                    <option value="HP" style="color:#fff">HP 회복</option>
+                </select>
+            </div>
+
+            <div id="ency-list">
+                </div>
+        </div>
+    </div>
+
+    <div class="footer">만든이 만득 <i class="fa-solid fa-dog"></i></div>
+
+    <script>
+        const EXP_TABLE = {
+            1: 0, 2: 2, 3: 6, 4: 17, 5: 37, 6: 67, 7: 111, 8: 169, 9: 247, 10: 344,
+            11: 464, 12: 609, 13: 783, 14: 985, 15: 1221, 16: 1491, 17: 1799, 18: 2145, 19: 2535, 20: 2968,
+            21: 3448, 22: 3978, 23: 4558, 24: 5194, 25: 5885, 26: 6635, 27: 7446, 28: 8322, 29: 9262, 30: 10272,
+            31: 11352, 32: 12506, 33: 13734, 34: 15042, 35: 16429, 36: 17899, 37: 19454, 38: 21098, 39: 22830, 40: 24656,
+            41: 26576, 42: 28594, 43: 30710, 44: 32930, 45: 35253, 46: 37683, 47: 40222, 48: 42874, 49: 45638, 50: 48520,
+            51: 51520, 52: 54642, 53: 57886, 54: 61258, 55: 64757, 56: 68387, 57: 72150, 58: 76050, 59: 80086, 60: 84264,
+            61: 106110, 62: 113412, 63: 121149, 64: 129352, 65: 138044, 66: 147256, 67: 157019, 68: 167366, 69: 178334, 70: 189958,
+            71: 202282, 72: 215348, 73: 229205, 74: 243901, 75: 259495, 76: 276041, 77: 293606, 78: 312258, 79: 332071, 80: 353126,
+            81: 375511, 82: 399318, 83: 424655, 84: 451631, 85: 480370, 86: 511007, 87: 543686, 88: 578571, 89: 615838, 90: 655680,
+            91: 698312, 92: 743971, 93: 792917, 94: 845443, 95: 901868, 96: 962554, 97: 1027899, 98: 1098353, 99: 1174420, 100: 1256663,
+            101: 1345723, 102: 1442322, 103: 1547281, 104: 1661531, 105: 1786143, 106: 1922340, 107: 2071533, 108: 2235351, 109: 2415689, 110: 2914754,
+            111: 3535137, 112: 3979892, 113: 4452633, 114: 5057676, 115: 5600195, 116: 6186445, 117: 6724041, 118: 7322323, 119: 7892866, 120: 9050125,
+            121: 12326614, 122: 15496114, 123: 20025638, 124: 26821885, 125: 37698249, 126: 56734876, 127: 68097265, 128: 68290815, 129: 68487425, 130: 68687119,
+            131: 68889921, 132: 69095855, 133: 69304945, 134: 69517214, 135: 69732689, 136: 69951391, 137: 70173345, 138: 70398575, 139: 70627105, 140: 70858959,
+            141: 81244161, 142: 97134273, 143: 108000000, 144: 181830095, 145: 202078929
+        };
+
+        const PET_DATABASE = [
+            { category: "두리류", name: "녹우리", img: "./images/1.gif", elements: "지6 풍4", hp: 42.98, atk: 9.00, def: 6.64, spd: 5.72, ghp: 10.06, gatk: 2.11, gdef: 1.55, gspd: 1.34, passive: "치유", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "두리류", name: "두리", img: "./images/2.gif", elements: "수4 화6", hp: 36.08, atk: 6.73, def: 4.61, spd: 5.53, ghp: 10.16, gatk: 1.89, gdef: 1.30, gspd: 1.56, passive: "치유", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "두리류", name: "두리[還]", img: "./images/3.gif", elements: "수4 화6", hp: 36.56, atk: 6.98, def: 4.73, spd: 5.68, ghp: 10.30, gatk: 1.97, gdef: 1.33, gspd: 1.60, passive: "치유", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "두리류", name: "복우리", img: "./images/4.gif", elements: "풍10", hp: 39.59, atk: 9.08, def: 5.49, spd: 4.73, ghp: 10.08, gatk: 2.31, gdef: 1.40, gspd: 1.20, passive: "치유", grade: "최상급", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "두리류", name: "불그리", img: "./images/5.gif", elements: "화7 풍3", hp: 21.04, atk: 3.50, def: 3.10, spd: 3.90, ghp: 9.73, gatk: 1.62, gdef: 1.43, gspd: 1.80, passive: "없음", grade: "상급", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
+            { category: "두리류", name: "실버우리", img: "./images/6.gif", elements: "지5 풍5", hp: 49.61, atk: 8.53, def: 9.61, spd: 8.01, ghp: 9.82, gatk: 1.69, gdef: 1.90, gspd: 1.59, passive: "치유", grade: "최상급", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "두리류", name: "실버우리[還]", img: "./images/7.gif", elements: "지5 풍5", hp: 54.79, atk: 9.69, def: 10.54, spd: 8.94, ghp: 9.93, gatk: 1.76, gdef: 1.91, gspd: 1.62, passive: "치유", grade: "최상급", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "두리류", name: "얼룩우리", img: "./images/8.gif", elements: "지10", hp: 26.17, atk: 4.15, def: 4.22, spd: 3.00, ghp: 10.03, gatk: 1.59, gdef: 1.62, gspd: 1.15, passive: "치유", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "두리류", name: "얼룩우리[還]", img: "./images/9.gif", elements: "지10", hp: 26.54, atk: 4.23, def: 4.39, spd: 3.16, ghp: 10.17, gatk: 1.62, gdef: 1.68, gspd: 1.21, passive: "치유", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "두리류", name: "우리", img: "./images/10.gif", elements: "지8 수2", hp: 17.85, atk: 2.55, def: 2.47, spd: 2.62, ghp: 10.27, gatk: 1.47, gdef: 1.42, gspd: 1.51, passive: "치유", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "두리류", name: "우리[還]", img: "./images/11.gif", elements: "지8 수2", hp: 21.75, atk: 3.22, def: 3.15, spd: 3.16, ghp: 10.42, gatk: 1.54, gdef: 1.51, gspd: 1.51, passive: "치유", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "두리류", name: "킹우리", img: "./images/12.gif", elements: "화2 풍8", hp: 49.19, atk: 11.13, def: 6.75, spd: 6.62, ghp: 10.19, gatk: 2.30, gdef: 1.40, gspd: 1.37, passive: "질주", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
+            { category: "두리류", name: "푸우리", img: "./images/13.gif", elements: "수8 화2", hp: 42.73, atk: 8.94, def: 5.38, spd: 6.96, ghp: 10.00, gatk: 2.09, gdef: 1.26, gspd: 1.63, passive: "치유", grade: "일반", encyBuff: "매턴 캐릭터 HP 5 회복" },
+            { category: "두리류", name: "환생얼룩우리", img: "./images/14.gif", elements: "지5 풍5", hp: 56.63, atk: 9.13, def: 9.81, spd: 7.13, ghp: 10.31, gatk: 1.66, gdef: 1.78, gspd: 1.30, passive: "치유", grade: "최상급", encyBuff: "레이드 캐릭터 순발력 1% 증가" }
+        ];
+
+        function showPage(pageId) {
+            document.querySelectorAll('.main-container').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            let menuId;
+            if (pageId === 'page-exp') menuId = 'menu-exp';
+            else if (pageId === 'page-acc') menuId = 'menu-acc';
+            else if (pageId === 'page-rev') menuId = 'menu-rev';
+            else if (pageId === 'page-ency') menuId = 'menu-ency';
+            
+            if(menuId) document.getElementById(menuId).classList.add('active');
+        }
+
+        // 도감 렌더링 함수
+        function renderPets(data) {
+            const container = document.getElementById('ency-list');
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: #8b949e;"><i class="fa-solid fa-magnifying-glass" style="font-size:2rem; margin-bottom:10px;"></i><br>검색 결과가 없습니다.</div>`;
+                return;
+            }
+
+            const grouped = {};
+            data.forEach(pet => {
+                if(!grouped[pet.category]) grouped[pet.category] = [];
+                grouped[pet.category].push(pet);
+            });
+
+            for (const [category, pets] of Object.entries(grouped)) {
+                const details = document.createElement('details');
+                details.className = 'ency-group';
+                details.open = true;
+                
+                details.innerHTML = `
+                    <summary>${category} <span style="font-size:0.9rem; color:#8b949e; font-weight:normal;">(${pets.length}종)</span></summary>
+                    <div class="ency-grid"></div>
+                `;
+                
+                const grid = details.querySelector('.ency-grid');
+
+                pets.forEach(pet => {
+                    const card = document.createElement('div');
+                    card.className = 'res-box';
+                    card.style.display = 'flex';
+                    card.style.flexDirection = 'column';
+                    
+                    let gradeClass = 'tag-normal';
+                    if(pet.grade === '최상급') gradeClass = 'tag-top';
+                    if(pet.grade === '상급') gradeClass = 'tag-high';
+
+                    let coloredElements = pet.elements.split(' ').map(el => {
+                        let color = '#d2a8ff'; // 기본 보라색
+                        if (el.includes('지')) color = '#3fb950'; // 초록색
+                        else if (el.includes('수')) color = '#539bf5'; // 파란색
+                        else if (el.includes('화')) color = '#ff7b72'; // 빨간색
+                        else if (el.includes('풍')) color = '#e3b341'; // 노란색
+                        return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
+                    }).join(' ');
+
+                    card.innerHTML = `
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                            
+                            <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;">
+                                <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                            </div>
+
+                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-weight: bold; font-size: 1.2rem; color: var(--text-highlight);">${pet.name}</span>
+                                    </div>
+                                    <span class="tag ${gradeClass}">${pet.grade}</span>
+                                </div>
+                                <div style="display: flex; gap: 5px; align-items: center;">
+                                    ${pet.passive !== "없음" ? `<span class="tag tag-passive">${pet.passive}</span>` : ''}
+                                    <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 13px; color: #adbac7;">
+                            <div style="display:flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 6px;">
+                                <span style="color:#8b949e">초기치 (체/공/방/순)</span>
+                                <span>${pet.hp} / ${pet.atk} / ${pet.def} / ${pet.spd}</span>
+                            </div>
+                            <div style="display:flex; justify-content: space-between; padding-bottom: 6px; margin-bottom: 4px;">
+                                <span style="color:#8b949e">성장률 (체/공/방/순)</span>
+                                <span>${pet.ghp} / ${pet.gatk} / ${pet.gdef} / ${pet.gspd}</span>
+                            </div>
+                            <div class="raid-buff-box">
+                                <span style="color:#539bf5; font-weight:bold; font-size: 11px;"><i class="fa-solid fa-book-open"></i> 도감능력 (140Lv)</span>
+                                <span style="color:#ffffff;">${pet.encyBuff}</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                
+                container.appendChild(details);
+            }
+        }
+
+        // 도감 필터링 함수
+        function filterPets() {
+            const searchText = document.getElementById('petSearch').value.toLowerCase();
+            const element = document.getElementById('petElement').value;
+            const grade = document.getElementById('petGrade').value;
+            const passive = document.getElementById('petPassive').value;
+            const encyBuff = document.getElementById('petEncyBuff').value; // 도감능력 필터 값
+
+            const filtered = PET_DATABASE.filter(pet => {
+                const matchName = pet.name.toLowerCase().includes(searchText);
+                const matchElement = element === 'all' || pet.elements.includes(element);
+                const matchGrade = grade === 'all' || pet.grade === grade;
+                const matchPassive = passive === 'all' || pet.passive.includes(passive);
+                // 도감능력(레이드버프)에 해당 단어가 포함되어 있으면 매치
+                const matchEncyBuff = encyBuff === 'all' || pet.encyBuff.includes(encyBuff); 
+                
+                return matchName && matchElement && matchGrade && matchPassive && matchEncyBuff;
+            });
+
+            updateSelectColor('petElement');
+            updateSelectColor('petGrade');
+            updateSelectColor('petPassive');
+            updateSelectColor('petEncyBuff'); // 도감능력 선택창 색상 업데이트
+
+            renderPets(filtered);
+        }
+
+        function updateSelectColor(selectId) {
+            const el = document.getElementById(selectId);
+            if(el.value === "none" || el.value === "0" || el.value === "" || el.value === "all") {
+                el.style.color = "#8b949e";
+            } else {
+                el.style.color = "#ffffff";
+            }
+        }
+
+        function toggleMode() {
+            updateSelectColor('calcMode');
+            const mode = document.getElementById('calcMode').value;
+            const hg = document.getElementById('huntingGround');
+            const he = document.getElementById('hourlyExp');
+            if(mode === 'auto') {
+                hg.disabled = false;
+                he.readOnly = true;
+            } else if(mode === 'manual') {
+                hg.disabled = true;
+                he.readOnly = false;
+            } else {
+                hg.disabled = true;
+                he.readOnly = true;
+            }
+        }
+
+        function applyGround() {
+            updateSelectColor('huntingGround');
+            const val = document.getElementById('huntingGround').value;
+            if (val !== "0" && val !== "none") document.getElementById('hourlyExp').value = val;
+        }
+
+        function formatNumber(num) {
+            if (num >= 100000000) return (num / 100000000).toFixed(2) + "억";
+            if (num >= 10000) return Math.floor(num / 10000).toLocaleString() + "만";
+            return num.toLocaleString();
+        }
+
+        function animateResults(containerId) {
+            const container = document.getElementById(containerId);
+            container.classList.remove('animate-result');
+            void container.offsetWidth; 
+            container.classList.add('animate-result');
+        }
+
+        function runCalculation() {
+            const mode = document.getElementById('calcMode').value;
+            if(mode === "none") { alert("계산 모드를 선택해주세요."); return; }
+
+            const curLv = parseInt(document.getElementById('curLv').value);
+            const curExp = parseInt(document.getElementById('curExp').value) || 0;
+            const targetLv = parseInt(document.getElementById('targetLv').value);
+            const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
+            const mult = parseFloat(document.getElementById('multiplier').value) || 1;
+
+            if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
+
+            let needed = (EXP_TABLE[curLv + 1] || 0) - curExp;
+            for(let i = curLv + 2; i <= targetLv; i++) {
+                needed += (EXP_TABLE[i] || 0);
+            }
+
+            const finalHourly = hourlyBase * mult;
+            const hours = finalHourly > 0 ? needed / finalHourly : 0;
+            const days = hours / 24;
+            
+            document.getElementById('resNeeded').innerText = formatNumber(needed);
+            document.getElementById('resTime').innerText = `${hours.toFixed(1)}시간 (${days.toFixed(1)}일)`;
+            document.getElementById('resPetTime').innerText = `${(hours / 0.6).toFixed(1)}시간 (${(days / 0.6).toFixed(1)}일)`;
+            document.getElementById('resFinalExp').innerText = formatNumber(finalHourly);
+
+            animateResults('exp-result-container');
+        }
+
+        function calcAccuracy() {
+            const A = parseInt(document.getElementById('attSpd').value);
+            const B = parseInt(document.getElementById('defSpd').value);
+            if(!A || !B) return;
+            let base = Math.sqrt(Math.abs(B - A) / 200) * (B / A) * 100;
+            let softCap = Math.min(Math.max(base, 10), 80);
+            document.getElementById('accResult').innerText = `회피 ${softCap.toFixed(1)}% / 명중 ${(100-softCap).toFixed(1)}%`;
+            
+            animateResults('acc-result-container');
+        }
+
+        function calcReverse() {
+            const baseSpd = parseInt(document.getElementById('statSpd').value);
+            if(!baseSpd) return;
+            const maxR = (baseSpd * 0.15) + 20;
+            document.getElementById('revMax').innerText = Math.floor(baseSpd + 20);
+            document.getElementById('revMin').innerText = Math.floor(baseSpd + 20 - maxR);
+            
+            animateResults('rev-result-container');
+        }
+
+        function initExpTable() {
+            const container = document.getElementById('fullExpTable');
+            container.innerHTML = `<div class="table-row" style="position: sticky; top:0; background: var(--inner-card); z-index:1; padding: 12px 0;"><strong>레벨</strong><strong>필요 경험치</strong></div>`;
+            for(let lv = 1; lv <= 145; lv++) {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `<span>Lv.${lv}</span> <span>${(EXP_TABLE[lv] || 0).toLocaleString()}</span>`;
+                container.appendChild(row);
+            }
+        }
+
+        window.onload = () => {
+            updateSelectColor('calcMode');
+            updateSelectColor('huntingGround');
+            
+            updateSelectColor('petElement');
+            updateSelectColor('petGrade');
+            updateSelectColor('petPassive');
+            updateSelectColor('petEncyBuff');
+
+            toggleMode();
+            initExpTable();
+            
+            renderPets(PET_DATABASE);
+        };
+    </script>
+</body>
+</html>
