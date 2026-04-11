@@ -104,7 +104,6 @@
 
         label { display: block; font-size: 13px; margin-bottom: 8px; color: #8b949e; font-weight: 500; }
 
-        /* 입력창 디자인 부드럽게 개선 (글로벌 폼 요소 일괄 라운드 처리) */
         input, select {
             width: 100%; 
             padding: 12px 20px; 
@@ -181,7 +180,6 @@
         .res-label { font-size: 12px; color: #8b949e; margin-bottom: 8px; font-weight: 500; }
         .res-val { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); letter-spacing: 0.5px; }
 
-        /* 클릭해서 열리는 창(details, summary) 디자인 세련되게 수정 */
         details { 
             border: 1px solid #3d4550; 
             border-radius: 24px; 
@@ -206,7 +204,6 @@
 
         .footer { width: 100%; max-width: 1100px; text-align: center; padding: 30px 0; border-top: 1px solid var(--border); font-size: 13px; margin-top: auto; color: #768390; }
         
-        /* 도감 전용 CSS 추가 */
         .notice-banner {
             font-size: 12px;
             color: var(--accent-orange);
@@ -238,26 +235,60 @@
         }
         
         .tag { font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
-        .tag-top { background: rgba(252, 163, 17, 0.15); color: #fca311; border: 1px solid rgba(252,163,17,0.3); } /* 최상급 */
-        .tag-high { background: rgba(83, 155, 245, 0.15); color: #539bf5; border: 1px solid rgba(83,155,245,0.3); } /* 상급 */
-        .tag-normal { background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.3); } /* 일반 */
-        .tag-passive { background: rgba(46, 160, 67, 0.15); color: #2ea043; border: 1px solid rgba(46,160,67,0.3); } /* 패시브 */
+        .tag-top { background: rgba(252, 163, 17, 0.15); color: #fca311; border: 1px solid rgba(252,163,17,0.3); }
+        .tag-high { background: rgba(83, 155, 245, 0.15); color: #539bf5; border: 1px solid rgba(83,155,245,0.3); }
+        .tag-normal { background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.3); }
         .tag-element { font-size: 0.9rem; color: #d2a8ff; font-weight: bold; }
 
-        /* 도감 카테고리(두리류 등) 탭 디자인 둥글게 적용 */
+        /* 패시브 태그 툴팁 구현부 */
+        .tag-passive { 
+            background: rgba(46, 160, 67, 0.15); 
+            color: #2ea043; 
+            border: 1px solid rgba(46,160,67,0.3); 
+            position: relative; 
+            cursor: help; 
+        }
+        .tag-passive::after {
+            content: attr(data-desc);
+            position: absolute;
+            bottom: 100%; /* 태그 위에 위치 */
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background-color: #232a32;
+            color: #ffffff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 1px solid #3d4550;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 100;
+            font-weight: 500;
+            pointer-events: none; /* 마우스 이벤트 간섭 방지 */
+        }
+        .tag-passive:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-4px); /* 호버 시 살짝 내려오는 애니메이션 */
+        }
+
         .ency-group { 
             border: none; 
             background: transparent; 
             margin-top: 0; 
             margin-bottom: 25px; 
             box-shadow: none; 
+            overflow: visible; /* 툴팁이 잘리지 않도록 visible 설정 */
         }
         .ency-group > summary { 
             background: #1e242b; 
             border: 1px solid #3d4550; 
             font-size: 1.1rem; 
             padding: 16px 24px; 
-            border-radius: 30px; /* 완전한 알약(Pill) 형태 */
+            border-radius: 30px;
             margin-bottom: 20px; 
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
@@ -435,7 +466,6 @@
                     <option value="all" style="color:#fff">모든 패시브</option>
                     <option value="치유" style="color:#fff">치유</option>
                     <option value="질주" style="color:#fff">질주</option>
-                    <option value="없음" style="color:#fff">없음</option>
                 </select>
                 
                 <select id="petEncyBuff" onchange="filterPets()">
@@ -446,12 +476,13 @@
                     <option value="캐릭터 방어력" style="color:#fff">캐릭터 방어력</option>
                     <option value="캐릭터 공격력" style="color:#fff">캐릭터 공격력</option>
                     <option value="캐릭터 순발력" style="color:#fff">캐릭터 순발력</option>
-                    <option value="HP" style="color:#fff">HP 회복</option>
+                    <option value="캐릭터 HP" style="color:#fff">캐릭HP회복</option>
+                    <option value="펫 HP" style="color:#fff">펫 HP회복</option>
                 </select>
             </div>
 
             <div id="ency-list">
-                </div>
+            </div>
         </div>
     </div>
 
@@ -507,7 +538,6 @@
             if(menuId) document.getElementById(menuId).classList.add('active');
         }
 
-        // 도감 렌더링 함수
         function renderPets(data) {
             const container = document.getElementById('ency-list');
             container.innerHTML = '';
@@ -546,21 +576,24 @@
                     if(pet.grade === '상급') gradeClass = 'tag-high';
 
                     let coloredElements = pet.elements.split(' ').map(el => {
-                        let color = '#d2a8ff'; // 기본 보라색
-                        if (el.includes('지')) color = '#3fb950'; // 초록색
-                        else if (el.includes('수')) color = '#539bf5'; // 파란색
-                        else if (el.includes('화')) color = '#ff7b72'; // 빨간색
-                        else if (el.includes('풍')) color = '#e3b341'; // 노란색
+                        let color = '#d2a8ff'; 
+                        if (el.includes('지')) color = '#3fb950'; 
+                        else if (el.includes('수')) color = '#539bf5'; 
+                        else if (el.includes('화')) color = '#ff7b72'; 
+                        else if (el.includes('풍')) color = '#e3b341'; 
                         return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
                     }).join(' ');
 
+                    // 툴팁에 띄워줄 패시브 설명 세팅
+                    let passiveDesc = "";
+                    if (pet.passive === "치유") passiveDesc = "본인과 펫, 3턴 동안 HP 회복 (LV 별 수치: 100/150/200/250/350)";
+                    else if (pet.passive === "질주") passiveDesc = "본인과 펫, 3턴 동안 회피율 증가 + 명중률 고정 증가 (LV 별 수치: 회피 3/4/5/6/8% + 명중 3%)";
+
                     card.innerHTML = `
                         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                            
                             <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;">
                                 <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                             </div>
-
                             <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <div style="display:flex; align-items:center; gap:8px;">
@@ -569,12 +602,11 @@
                                     <span class="tag ${gradeClass}">${pet.grade}</span>
                                 </div>
                                 <div style="display: flex; gap: 5px; align-items: center;">
-                                    ${pet.passive !== "없음" ? `<span class="tag tag-passive">${pet.passive}</span>` : ''}
+                                    ${pet.passive !== "없음" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
                                     <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
                                 </div>
                             </div>
                         </div>
-                        
                         <div style="font-size: 13px; color: #adbac7;">
                             <div style="display:flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 6px;">
                                 <span style="color:#8b949e">초기치 (체/공/방/순)</span>
@@ -597,20 +629,18 @@
             }
         }
 
-        // 도감 필터링 함수
         function filterPets() {
             const searchText = document.getElementById('petSearch').value.toLowerCase();
             const element = document.getElementById('petElement').value;
             const grade = document.getElementById('petGrade').value;
             const passive = document.getElementById('petPassive').value;
-            const encyBuff = document.getElementById('petEncyBuff').value; // 도감능력 필터 값
+            const encyBuff = document.getElementById('petEncyBuff').value; 
 
             const filtered = PET_DATABASE.filter(pet => {
                 const matchName = pet.name.toLowerCase().includes(searchText);
                 const matchElement = element === 'all' || pet.elements.includes(element);
                 const matchGrade = grade === 'all' || pet.grade === grade;
                 const matchPassive = passive === 'all' || pet.passive.includes(passive);
-                // 도감능력(레이드버프)에 해당 단어가 포함되어 있으면 매치
                 const matchEncyBuff = encyBuff === 'all' || pet.encyBuff.includes(encyBuff); 
                 
                 return matchName && matchElement && matchGrade && matchPassive && matchEncyBuff;
@@ -619,7 +649,7 @@
             updateSelectColor('petElement');
             updateSelectColor('petGrade');
             updateSelectColor('petPassive');
-            updateSelectColor('petEncyBuff'); // 도감능력 선택창 색상 업데이트
+            updateSelectColor('petEncyBuff'); 
 
             renderPets(filtered);
         }
