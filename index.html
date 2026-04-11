@@ -483,6 +483,36 @@
                     if(pet.grade === '최상급') gradeClass = 'tag-top';
                     if(pet.grade === '상급') gradeClass = 'tag-high';
 
+                    let coloredElements = pet.elements.split(' ').map(el => {
+                        let color = '#d2a8ff'; // 기본 보라색
+                        if (el.includes('지')) color = '#3fb950'; // 초록색
+                        else if (el.includes('수')) color = '#539bf5'; // 파란색
+                        else if (el.includes('화')) color = '#ff7b72'; // 빨간색
+                        else if (el.includes('풍')) color = '#e3b341'; // 노란색
+                        return `<span style="color: ${color};">${el}</span>`;
+                    }).join(' ');
+
+                    card.innerHTML = `
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                            
+                            <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;">
+                                <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                            </div>
+
+                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-weight: bold; font-size: 1.2rem; color: var(--text-highlight);">${pet.name}</span>
+                                    </div>
+                                    <span class="tag ${gradeClass}">${pet.grade}</span>
+                                </div>
+                                <div style="display: flex; gap: 5px; align-items: center;">
+                                    ${pet.passive !== "없음" ? `<span class="tag tag-passive">${pet.passive}</span>` : ''}
+                                    
+                                    <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
+                                </div>
+                            </div>
+                        </div>
                     card.innerHTML = `
                         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
                             
