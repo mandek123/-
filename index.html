@@ -33,6 +33,20 @@
             min-height: 100vh;
         }
 
+        /* 데스크탑 최적화 안내 배너 */
+        .desktop-notice {
+            width: 100%;
+            background-color: var(--inner-card);
+            color: #8b949e;
+            text-align: center;
+            padding: 8px 10px;
+            font-size: 11px;
+            border-bottom: 1px solid var(--border);
+            box-sizing: border-box;
+            letter-spacing: 0.5px;
+            z-index: 102;
+        }
+
         .navbar {
             width: 100%;
             background-color: var(--card-bg);
@@ -231,6 +245,41 @@
             color: var(--text-highlight);
         }
 
+        /* 패시브 목록 전용 다단(Grid) 드롭다운 스타일 */
+        .custom-select-wrapper.grid-wrapper .custom-select-options {
+            right: auto;
+            width: 380px; /* 3칸을 위한 충분한 너비 */
+            padding: 10px;
+            max-height: 350px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .custom-select-wrapper.grid-wrapper:hover .custom-select-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+        .custom-select-wrapper.grid-wrapper .custom-select-option {
+            padding: 10px 5px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 768px) {
+            .custom-select-wrapper.grid-wrapper .custom-select-options {
+                width: 280px;
+                left: 50%;
+                transform: translateX(-50%); /* 모바일에서 짤림 방지 중앙정렬 */
+            }
+            .custom-select-wrapper.grid-wrapper:hover .custom-select-options {
+                grid-template-columns: repeat(2, 1fr); /* 모바일은 2칸 */
+            }
+        }
+
         select {
             appearance: none;
             -webkit-appearance: none;
@@ -360,6 +409,10 @@
     </style>
 </head>
 <body>
+
+    <div class="desktop-notice">
+        <i class="fa-solid fa-desktop"></i> 본 페이지는 데스크탑 환경에 최적화 되어 있습니다.
+    </div>
 
     <nav class="navbar">
         <div class="nav-container">
@@ -591,7 +644,7 @@
             </div>
             
             <div style="background: var(--inner-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 600px; width: 100%;">
-                <img src="./images/yyy.png" alt="만득봇" style="width: 100%; max-width: 250px; border-radius: 16px; margin-bottom: 30px; object-fit: contain; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <img src="여기에_만득봇_사진_주소_입력.png" alt="만득봇" style="width: 100%; max-width: 250px; border-radius: 16px; margin-bottom: 30px; object-fit: contain; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
                 <h3 style="color: var(--text-highlight); font-size: 1.2rem; margin-bottom: 15px; line-height: 1.5;">
                     해당 홈페이지에 있는 기능들을<br>디스코드에서도 사용할 수 있게 만득봇도 만들었습니다.
                 </h3>
@@ -627,7 +680,7 @@
     <div class="footer">
         <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
             만든이 만득 
-            <img src="./images/zzz.png" alt="만득 로고" style="height: 16px; width: auto; object-fit: contain; border-radius: 4px;">
+            <img src="여기에_이미지_주소_입력.png" alt="만득 로고" style="height: 16px; width: auto; object-fit: contain; border-radius: 4px;">
         </span>
     </div>
 
@@ -773,7 +826,7 @@
                         return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
                     }).join(' ');
 
-                    // 수정: 올바른 레이드 패시브 설명을 RAID_PASSIVE_DATABASE에서 찾아 연동합니다.
+                    // RAID_PASSIVE_DATABASE에서 툴팁 설명을 동적으로 매칭합니다.
                     let passiveDesc = "";
                     const passiveData = RAID_PASSIVE_DATABASE.find(p => p.name === pet.passive);
                     if (passiveData) {
@@ -989,11 +1042,16 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = 'custom-select-wrapper';
                 
-                if (sel.parentElement.classList.contains('filter-row')) {
+                // 패시브 전용 아이디일 경우 grid-wrapper 클래스를 추가합니다.
+                if (sel.id === 'petPassive') {
+                    wrapper.classList.add('grid-wrapper');
+                }
+                
+                if (sel.parentElement.classList.contains('filter-row') && sel.id !== 'petPassive') {
                     wrapper.style.flex = '1';
                     wrapper.style.minWidth = '140px';
                     wrapper.style.maxWidth = '180px';
-                } else {
+                } else if (sel.id !== 'petPassive') {
                     wrapper.style.width = '100%';
                     wrapper.style.marginBottom = '18px';
                 }
@@ -1009,6 +1067,7 @@
                     const item = document.createElement('div');
                     item.className = 'custom-select-option';
                     item.innerText = opt.text;
+                    item.title = opt.text; // 그리드 모드에서 텍스트가 잘릴 때 마우스를 올리면 전체 텍스트가 보이게 추가
                     
                     if (opt.disabled) {
                         item.style.opacity = '0.4';
