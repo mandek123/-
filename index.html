@@ -826,7 +826,7 @@
             for (const [category, pets] of Object.entries(grouped)) {
                 const details = document.createElement('details');
                 details.className = 'ency-group';
-                details.open = true;
+                // details.open = true; 코드를 제거하여 기본적으로 닫힌 상태를 유지
                 
                 details.innerHTML = `
                     <summary>${category} <span style="font-size:0.9rem; color:#8b949e; font-weight:normal;">(${pets.length}종)</span></summary>
