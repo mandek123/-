@@ -248,7 +248,7 @@
         /* 패시브 목록 전용 다단(Grid) 드롭다운 스타일 */
         .custom-select-wrapper.grid-wrapper .custom-select-options {
             right: auto;
-            width: 380px; /* 3칸을 위한 충분한 너비 */
+            width: 380px;
             padding: 10px;
             max-height: 350px;
             overflow-y: auto;
@@ -273,10 +273,10 @@
             .custom-select-wrapper.grid-wrapper .custom-select-options {
                 width: 280px;
                 left: 50%;
-                transform: translateX(-50%); /* 모바일에서 짤림 방지 중앙정렬 */
+                transform: translateX(-50%);
             }
             .custom-select-wrapper.grid-wrapper:hover .custom-select-options {
-                grid-template-columns: repeat(2, 1fr); /* 모바일은 2칸 */
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -717,10 +717,23 @@
             { category: "두리류", name: "우리[還]", img: "./images/11.gif", elements: "지8 수2", hp: 21.75, atk: 3.22, def: 3.15, spd: 3.16, ghp: 10.42, gatk: 1.54, gdef: 1.51, gspd: 1.51, passive: "치유", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
             { category: "두리류", name: "킹우리", img: "./images/12.gif", elements: "화2 풍8", hp: 49.19, atk: 11.13, def: 6.75, spd: 6.62, ghp: 10.19, gatk: 2.30, gdef: 1.40, gspd: 1.37, passive: "질주", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
             { category: "두리류", name: "푸우리", img: "./images/13.gif", elements: "수8 화2", hp: 42.73, atk: 8.94, def: 5.38, spd: 6.96, ghp: 10.00, gatk: 2.09, gdef: 1.26, gspd: 1.63, passive: "치유", grade: "일반", encyBuff: "매턴 캐릭터 HP 5 회복" },
-            { category: "두리류", name: "환생얼룩우리", img: "./images/14.gif", elements: "지5 풍5", hp: 56.63, atk: 9.13, def: 9.81, spd: 7.13, ghp: 10.31, gatk: 1.66, gdef: 1.78, gspd: 1.30, passive: "치유", grade: "최상급", encyBuff: "레이드 캐릭터 순발력 1% 증가" }
+            { category: "두리류", name: "환생얼룩우리", img: "./images/14.gif", elements: "지5 풍5", hp: 56.63, atk: 9.13, def: 9.81, spd: 7.13, ghp: 10.31, gatk: 1.66, gdef: 1.78, gspd: 1.30, passive: "치유", grade: "최상급", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
+            
+            { category: "부비류", name: "골드부비", img: "./images/15.gif", elements: "화3 풍7", hp: 54.88, atk: 8.13, def: 10.83, spd: 4.13, ghp: 10.87, gatk: 1.61, gdef: 2.14, gspd: 0.82, passive: "강철", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "부비류", name: "골드부비[還]", img: "./images/16.gif", elements: "화3 풍7", hp: 56.72, atk: 8.45, def: 11.27, spd: 4.29, ghp: 11.23, gatk: 1.67, gdef: 2.23, gspd: 0.85, passive: "강철", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "부비류", name: "깡우비", img: "./images/17.gif", elements: "화6 풍4", hp: 51.39, atk: 10.38, def: 7.00, spd: 5.93, ghp: 10.60, gatk: 2.14, gdef: 1.44, gspd: 1.22, passive: "강철", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "부비류", name: "부비", img: "./images/18.gif", elements: "지8 수2", hp: 38.63, atk: 4.99, def: 4.32, spd: 2.63, ghp: 13.26, gatk: 1.71, gdef: 1.48, gspd: 0.90, passive: "강철", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "부비류", name: "부비[還]", img: "./images/19.gif", elements: "지8 수2", hp: 41.46, atk: 5.35, def: 4.72, spd: 2.80, ghp: 13.35, gatk: 1.72, gdef: 1.52, gspd: 0.90, passive: "강철", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "부비류", name: "부이", img: "./images/20.gif", elements: "지6 수4", hp: 56.65, atk: 7.32, def: 6.33, spd: 3.85, ghp: 13.26, gatk: 1.71, gdef: 1.48, gspd: 0.90, passive: "강철", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "부비류", name: "부이[還]", img: "./images/21.gif", elements: "지6 수4", hp: 58.92, atk: 7.52, def: 7.03, spd: 3.93, ghp: 13.49, gatk: 1.72, gdef: 1.61, gspd: 0.90, passive: "강철", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "부비류", name: "부이비", img: "./images/22.gif", elements: "수4 화6", hp: 34.96, atk: 5.96, def: 4.37, spd: 3.60, ghp: 11.25, gatk: 1.92, gdef: 1.41, gspd: 1.16, passive: "강철", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "부비류", name: "부이비[還]", img: "./images/23.gif", elements: "수4 화6", hp: 37.28, atk: 6.51, def: 4.72, spd: 3.92, ghp: 11.53, gatk: 2.01, gdef: 1.46, gspd: 1.21, passive: "강철", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "부비류", name: "빅부이", img: "./images/24.gif", elements: "지10", hp: 57.49, atk: 10.62, def: 11.03, spd: 3.19, ghp: 11.37, gatk: 2.10, gdef: 2.18, gspd: 0.63, passive: "충성", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "부비류", name: "얼룩부이비", img: "./images/25.gif", elements: "지10", hp: 49.11, atk: 8.98, def: 6.08, spd: 5.64, ghp: 11.00, gatk: 2.01, gdef: 1.36, gspd: 1.26, passive: "미정", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "부비류", name: "푸비", img: "./images/26.gif", elements: "지3 수7", hp: 51.76, atk: 9.985, def: 8.11, spd: 5.13, ghp: 10.67, gatk: 2.05, gdef: 1.67, gspd: 1.06, passive: "강철", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+            { category: "부비류", name: "푸이", img: "./images/27.gif", elements: "수10", hp: 53.53, atk: 10.45, def: 7.62, spd: 4.92, ghp: 11.04, gatk: 2.16, gdef: 1.57, gspd: 1.01, passive: "강철", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" }
         ];
 
-        // 사용자가 제공한 실제 레이드 전투 패시브 39종 데이터
         const RAID_PASSIVE_DATABASE = [
             { name: "격노", effect: "본인과 펫, 3턴 동안 공격력 증가", values: ["8%", "9%", "10%", "12%", "15%"] },
             { name: "전투 집중", effect: "본인과 펫, 3턴 동안\n명중률 증가 + 공격력 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
@@ -826,7 +839,6 @@
                         return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
                     }).join(' ');
 
-                    // RAID_PASSIVE_DATABASE에서 툴팁 설명을 동적으로 매칭합니다.
                     let passiveDesc = "";
                     const passiveData = RAID_PASSIVE_DATABASE.find(p => p.name === pet.passive);
                     if (passiveData) {
@@ -846,7 +858,8 @@
                                     <span class="tag ${gradeClass}">${pet.grade}</span>
                                 </div>
                                 <div style="display: flex; gap: 5px; align-items: center;">
-                                    ${pet.passive && pet.passive !== "없음" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
+                                    ${pet.passive && pet.passive !== "없음" && pet.passive !== "미정" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
+                                    ${pet.passive === "미정" ? `<span class="tag tag-normal">패시브 미정</span>` : ''}
                                     <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
                                 </div>
                             </div>
@@ -1042,7 +1055,6 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = 'custom-select-wrapper';
                 
-                // 패시브 전용 아이디일 경우 grid-wrapper 클래스를 추가합니다.
                 if (sel.id === 'petPassive') {
                     wrapper.classList.add('grid-wrapper');
                 }
@@ -1067,7 +1079,7 @@
                     const item = document.createElement('div');
                     item.className = 'custom-select-option';
                     item.innerText = opt.text;
-                    item.title = opt.text; // 그리드 모드에서 텍스트가 잘릴 때 마우스를 올리면 전체 텍스트가 보이게 추가
+                    item.title = opt.text; 
                     
                     if (opt.disabled) {
                         item.style.opacity = '0.4';
