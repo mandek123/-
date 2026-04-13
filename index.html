@@ -655,8 +655,17 @@
                     <div class="buff-toggle" id="buffTribe" onclick="toggleBuff(this)">
                         <i class="fa-solid fa-users" style="color:#2ea043;"></i> 부족경험치 (+30%)
                     </div>
+                    <div class="buff-toggle" id="buffWorldExp" onclick="toggleBuff(this)">
+                        <i class="fa-solid fa-earth-americas" style="color:#539bf5;"></i> 월드경험치 (+100%)
+                    </div>
                 </div>
-
+                <div id="worldExpDurationContainer" style="display: none; margin-top: -10px; margin-bottom: 20px;">
+                    <label style="color: #539bf5;"><i class="fa-solid fa-clock"></i> 월드경험치 적용 시간 (분)</label>
+                    <input type="number" id="worldExpMins" value="0" placeholder="0 입력 시 무제한 적용">
+                    <div style="font-size: 11.5px; color: #8b949e; margin-top: -12px; line-height: 1.4;">
+                        * 입력한 시간(분)까지만 +100%가 적용되고, 그 이후부터는 원래 배율로 누적 계산됩니다. (0 입력 시 종료 시까지 계속 적용)
+                    </div>
+                </div>
                 <label>파티 경험치 보너스</label>
                 <select id="partyExp" onchange="updateSelectColor('partyExp')">
                     <option value="0">파티 없음 (1인)</option>
@@ -1368,6 +1377,14 @@
 
         function toggleBuff(element) {
             element.classList.toggle('active');
+            
+            // 월드경험치 토글 시 시간 입력창 표시/숨김 처리
+            if(element.id === 'buffWorldExp') {
+                const durationContainer = document.getElementById('worldExpDurationContainer');
+                if(durationContainer) {
+                    durationContainer.style.display = element.classList.contains('active') ? 'block' : 'none';
+                }
+            }
         }
 
         function toggleMode() {
@@ -1436,43 +1453,98 @@
                 needed += (EXP_TABLE[i] || 0);
             }
 
-            let charMult = 1;
-            let petMult = 0.6;
+            let charHours = 0;
+            let petHours = 0;
+            let finalHourlyChar = 0;
 
             if(mode === 'auto') {
                 const hasExpBead = document.getElementById('buffExpBead').classList.contains('active');
                 const hasDiscord = document.getElementById('buffDiscord').classList.contains('active');
                 const hasTribe = document.getElementById('buffTribe').classList.contains('active');
+                const hasWorldExp = document.getElementById('buffWorldExp').classList.contains('active');
+                const worldExpMins = parseInt(document.getElementById('worldExpMins')?.value) || 0;
                 const partyBonus = parseFloat(document.getElementById('partyExp').value) || 0;
                 
-                let autoBuffSum = 0;
-                if(hasExpBead) autoBuffSum += 1.0;
-                if(hasDiscord) autoBuffSum += 0.1;
-                if(hasTribe) autoBuffSum += 0.3;
-                autoBuffSum += partyBonus;
+                let baseBuffSum = 0;
+                if(hasExpBead) baseBuffSum += 1.0;
+                if(hasDiscord) baseBuffSum += 0.1;
+                if(hasTribe) baseBuffSum += 0.3;
+                baseBuffSum += partyBonus;
 
-                charMult = 1.0 + autoBuffSum + (luck / 100);
-                petMult = (1.0 * 0.6) + (autoBuffSum * 0.6) + ((luck / 100) * 0.6) + (hasCiv ? 0.1 : 0);
+                // 1. 월드경험치가 없는 상태의 기본 배율
+                let normalCharMult = 1.0 + baseBuffSum + (luck / 100);
+                let normalPetMult = (1.0 * 0.6) + (baseBuffSum * 0.6) + ((luck / 100) * 0.6) + (hasCiv ? 0.1 : 0);
+
+                // 2. 월드경험치가 포함된 배율 (캐릭터 +100%, 펫은 그 60%인 +60% 적용)
+                let worldCharMult = normalCharMult + 1.0;
+                let worldPetMult = normalPetMult + 0.6; 
+
+                let normalHourlyChar = hourlyBase * normalCharMult;
+                let normalHourlyPet = hourlyBase * normalPetMult;
+                let worldHourlyChar = hourlyBase * worldCharMult;
+                let worldHourlyPet = hourlyBase * worldPetMult;
+
+                // 화면에 표시할 최종 시간당 경험치 (월경 시간이 유한하면 종료 후 시간당 경험치인 기본 시급을 표시)
+                finalHourlyChar = (hasWorldExp && worldExpMins === 0) ? worldHourlyChar : normalHourlyChar; 
+
+                if (hasWorldExp && worldExpMins > 0) {
+                    // 유한한 월드경험치 시간(시간 단위로 변환)
+                    let worldHours = worldExpMins / 60;
+                    
+                    // --- 캐릭터 계산 ---
+                    let expGainedDuringWorld = worldHourlyChar * worldHours;
+                    if (expGainedDuringWorld >= needed) {
+                        // 월드경험치 시간 안에 목표 달성
+                        charHours = needed / worldHourlyChar;
+                    } else {
+                        // 월드경험치 시간이 끝난 후 남은 경험치는 기본 배율로 계산
+                        charHours = worldHours + ((needed - expGainedDuringWorld) / normalHourlyChar);
+                    }
+
+                    // --- 펫 계산 ---
+                    let petExpGainedDuringWorld = worldHourlyPet * worldHours;
+                    if (petExpGainedDuringWorld >= needed) {
+                        petHours = needed / worldHourlyPet;
+                    } else {
+                        petHours = worldHours + ((needed - petExpGainedDuringWorld) / normalHourlyPet);
+                    }
+                } else {
+                    // 월드경험치를 사용하지 않거나 0(무제한)으로 설정한 경우 기존 계산
+                    let currentCharMult = hasWorldExp ? worldCharMult : normalCharMult;
+                    let currentPetMult = hasWorldExp ? worldPetMult : normalPetMult;
+                    
+                    let currentHourlyChar = hourlyBase * currentCharMult;
+                    let currentHourlyPet = hourlyBase * currentPetMult;
+
+                    charHours = currentHourlyChar > 0 ? needed / currentHourlyChar : 0;
+                    petHours = currentHourlyPet > 0 ? needed / currentHourlyPet : 0;
+                }
             } 
             else if(mode === 'manual') {
                 const mult = parseFloat(document.getElementById('multiplier').value) || 1;
-                charMult = mult;
-                petMult = (mult * 0.6) + (hasCiv ? 0.1 : 0);
+                let charMult = mult;
+                let petMult = (mult * 0.6) + (hasCiv ? 0.1 : 0);
+                
+                finalHourlyChar = hourlyBase * charMult;
+                let finalHourlyPet = hourlyBase * petMult;
+
+                charHours = finalHourlyChar > 0 ? needed / finalHourlyChar : 0;
+                petHours = finalHourlyPet > 0 ? needed / finalHourlyPet : 0;
             }
 
-            const finalHourlyChar = hourlyBase * charMult;
-            const finalHourlyPet = hourlyBase * petMult;
-
-            const charHours = finalHourlyChar > 0 ? needed / finalHourlyChar : 0;
             const charDays = charHours / 24;
-            
-            const petHours = finalHourlyPet > 0 ? needed / finalHourlyPet : 0;
             const petDays = petHours / 24;
             
             document.getElementById('resNeeded').innerText = formatNumber(needed);
             document.getElementById('resTime').innerText = charHours > 0 ? `${charHours.toFixed(1)}시간 (${charDays.toFixed(1)}일)` : "-";
             document.getElementById('resPetTime').innerText = petHours > 0 ? `${petHours.toFixed(1)}시간 (${petDays.toFixed(1)}일)` : "-";
-            document.getElementById('resFinalExp').innerText = formatNumber(Math.floor(finalHourlyChar));
+            
+            // 결과창 시간당 경험치 표시 (시간제한 월경 사용 시 안내 문구 추가)
+            if (mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0) {
+                 document.getElementById('resFinalExp').innerHTML = `${formatNumber(Math.floor(finalHourlyChar))} <span style="font-size:12px; color:#8b949e; font-weight:normal;">(월경포함X)</span>`;
+            } else {
+                 document.getElementById('resFinalExp').innerText = formatNumber(Math.floor(finalHourlyChar));
+            }
 
             animateResults('exp-result-container');
         }
