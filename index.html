@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>만득월드</title>
+    
+    <meta property="og:title" content="만득월드">
+    <meta property="og:description" content="만득월드 경험치 계산기 및 도감">
+    <meta property="og:image" content="./images/A.png">
+    <meta property="og:type" content="website">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -51,7 +57,7 @@
             width: 100%;
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border);
-            display: flex;
+            display: none; /* 초기에는 홈 화면이므로 숨김 처리 */
             justify-content: center;
             position: sticky;
             top: 0;
@@ -66,7 +72,7 @@
             align-items: center;
             padding: 12px 20px;
         }
-        .nav-logo { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); text-decoration: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .nav-menu { display: flex; gap: 5px; align-items: center; }
         .nav-item { 
             text-decoration: none; 
@@ -130,6 +136,16 @@
             box-sizing: border-box;
         }
         .main-container.active { display: grid; animation: fadeIn 0.3s ease; }
+        
+        /* 홈 화면 전용 레이아웃 */
+        #page-home.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 150px);
+            padding: 40px 20px;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -466,11 +482,11 @@
 
     <nav class="navbar">
         <div class="nav-container">
-            <a href="javascript:void(0);" class="nav-logo" onclick="showPage('page-exp')">
+            <div class="nav-logo" onclick="showPage('page-home')">
                 <i class="fa-solid fa-dog"></i> 만득월드
-            </a>
+            </div>
             <div class="nav-menu">
-                <a href="javascript:void(0);" class="nav-item active" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-ency" onclick="showPage('page-ency')">📚 도감</a>
@@ -486,16 +502,50 @@
         </div>
     </nav>
 
-    <div class="main-container active" id="page-exp">
+    <div class="main-container active" id="page-home">
+        <img src="./images/A.png" alt="만득월드 로고" style="max-width: 250px; margin-bottom: 40px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 600px;">
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-exp')">
+                <i class="fa-solid fa-chart-simple" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">경험치계산기</div>
+            </div>
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-acc')">
+                <i class="fa-solid fa-crosshairs" style="font-size: 2rem; color: #fca311; margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">명중/회피계산기</div>
+            </div>
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-rev')">
+                <i class="fa-solid fa-arrows-left-right" style="font-size: 2rem; color: #2ea043; margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">순발력범위계산기</div>
+            </div>
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-ency')">
+                <i class="fa-solid fa-book" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
+            </div>
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-bot')">
+                <i class="fa-brands fa-discord" style="font-size: 2rem; color: #5865F2; margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">만득봇 안내</div>
+            </div>
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
+                <i class="fa-solid fa-fire" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">레이드 패시브 안내</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-exp">
         <div class="card">
             <div class="card-header"><i class="fa-solid fa-sliders"></i> 설정</div>
             
             <label>계산 모드</label>
             <select id="calcMode" onchange="toggleMode()">
-                <option value="none" disabled selected hidden>계산 모드를 선택하세요</option>
+                <option value="none" disabled selected hidden>-</option>
                 <option value="auto">자동 계산 (사냥터 선택)</option>
                 <option value="manual">수동 계산 (시간당 경험치 직접입력)</option>
             </select>
+            <div style="font-size: 11px; color: var(--accent-orange); margin-top: -10px; margin-bottom: 18px; line-height: 1.4; word-break: keep-all;">
+                <i class="fa-solid fa-triangle-exclamation"></i> 주의사항 : 온라인 기준으로 계산을 하였으며 경험치 획득량을 보수적으로 잡았습니다. 이 점 참고하셔서 억울한 일이 생기지 않게 이용해주세요. 보통 오프라인이 경험치를 더 많이 획득합니다.
+            </div>
 
             <label>레벨 구간</label>
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -521,9 +571,6 @@
             <label>시간당 경험치 (1배율)</label>
             <input type="number" id="hourlyExp" placeholder="시간당 경험치 입력">
 
-            <label>행운 스탯 (1당 +1%)</label>
-            <input type="number" id="luckStat" value="0" placeholder="예: 10">
-
             <label>공통 버프 (눌러서 켜기/끄기)</label>
             <div class="buff-grid" style="margin-bottom: 15px;">
                 <div class="buff-toggle" id="buffCiv" onclick="toggleBuff(this)">
@@ -532,6 +579,9 @@
             </div>
 
             <div id="autoBuffContainer" style="display: none;">
+                <label>행운 스탯 (1당 +1%)</label>
+                <input type="number" id="luckStat" value="0" placeholder="예: 10">
+
                 <label>추가 버프 (눌러서 켜기/끄기)</label>
                 <div class="buff-grid">
                     <div class="buff-toggle" id="buffExpBead" onclick="toggleBuff(this)">
@@ -553,6 +603,9 @@
                     <option value="0.3">4인 파티 (+30%)</option>
                     <option value="0.4">5인 파티 (+40%)</option>
                 </select>
+                <div style="font-size: 11px; color: var(--accent-orange); margin-top: -10px; margin-bottom: 18px; line-height: 1.4; word-break: keep-all;">
+                    <i class="fa-solid fa-circle-info"></i> 사람이 많아질수록 딜레이가 길어져 계산한 만큼 경험치를 획득하지 못합니다. 가장 확실한 계산은 2인(BOT과 함께 사냥)기준입니다.
+                </div>
             </div>
 
             <div id="manualBuffContainer" style="display: none;">
@@ -880,7 +933,17 @@
         function showPage(pageId) {
             document.querySelectorAll('.main-container').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            
+            const targetPage = document.getElementById(pageId);
+            if(targetPage) targetPage.classList.add('active');
+            
+            // 네비게이션 바는 홈화면(page-home)일 때 숨기고, 그 외 화면일 때 표시
+            const navbar = document.querySelector('.navbar');
+            if (pageId === 'page-home') {
+                navbar.style.display = 'none';
+            } else {
+                navbar.style.display = 'flex';
+            }
             
             let menuId;
             if (pageId === 'page-exp') menuId = 'menu-exp';
@@ -889,9 +952,14 @@
             else if (pageId === 'page-ency') menuId = 'menu-ency';
             else if (pageId === 'page-bot' || pageId === 'page-raid-guide') menuId = 'menu-etc';
             
-            if(menuId) document.getElementById(menuId).classList.add('active');
+            if(menuId) {
+                const menuEl = document.getElementById(menuId);
+                if(menuEl) menuEl.classList.add('active');
+            }
             
             if(pageId === 'page-raid-guide') renderRaidPassives(RAID_PASSIVE_DATABASE);
+            
+            window.scrollTo(0, 0); // 메뉴 이동 시 스크롤 최상단으로
         }
 
         function renderPets(data) {
@@ -1122,13 +1190,15 @@
 
         function runCalculation() {
             const mode = document.getElementById('calcMode').value;
-            if(mode === "none") { alert("계산 모드를 선택해주세요."); return; }
+            if(mode === "none" || mode === "-") { alert("계산 모드를 선택해주세요."); return; }
 
             const curLv = parseInt(document.getElementById('curLv').value);
             const curExp = parseInt(document.getElementById('curExp').value) || 0;
             const targetLv = parseInt(document.getElementById('targetLv').value);
             const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
-            const luck = parseInt(document.getElementById('luckStat').value) || 0;
+            
+            // 행운 스탯은 수동 모드일 때는 0으로 무시, 자동 모드일 때만 적용
+            const luck = mode === 'auto' ? (parseInt(document.getElementById('luckStat').value) || 0) : 0;
 
             // 공통 버프 확인
             const hasCiv = document.getElementById('buffCiv').classList.contains('active');
@@ -1161,8 +1231,8 @@
             else if(mode === 'manual') {
                 const mult = parseFloat(document.getElementById('multiplier').value) || 1;
                 
-                charMult = mult + (luck / 100);
-                petMult = (mult * 0.6) + ((luck / 100) * 0.6) + (hasCiv ? 0.1 : 0);
+                charMult = mult;
+                petMult = (mult * 0.6) + (hasCiv ? 0.1 : 0);
             }
 
             const finalHourlyChar = hourlyBase * charMult;
@@ -1275,7 +1345,7 @@
                     const icon = `<i class="fa-solid fa-chevron-down" style="font-size:12px; opacity:0.7;"></i>`;
                     trigger.innerHTML = `${textSpan} ${icon}`;
                     
-                    trigger.style.color = sel.style.color || (['none','0','','all'].includes(sel.value) ? '#8b949e' : '#fff');
+                    trigger.style.color = sel.style.color || (['none','0','','all','-'].includes(sel.value) ? '#8b949e' : '#fff');
                     
                     if (sel.disabled) trigger.classList.add('disabled');
                     else trigger.classList.remove('disabled');
@@ -1296,7 +1366,9 @@
 
             initCustomSelects();
 
-            toggleMode();
+            // 초기 실행 시 홈 화면 표시 (네비게이션 숨김)
+            showPage('page-home');
+            
             initExpTable();
             renderPets(PET_DATABASE);
         };
