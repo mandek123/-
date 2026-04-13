@@ -7,7 +7,7 @@
     
     <meta property="og:title" content="만득월드">
     <meta property="og:description" content="만득월드 경험치 계산기 및 도감">
-    <meta property="og:image" content="./images/A123.png">
+    <meta property="og:image" content="./images/A.png">
     <meta property="og:type" content="website">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
@@ -490,6 +490,7 @@
                 <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-ency" onclick="showPage('page-ency')">📚 도감</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
                 
                 <div class="dropdown">
                     <a href="javascript:void(0);" class="nav-item" id="menu-etc">⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
@@ -526,13 +527,34 @@
                 <i class="fa-solid fa-book" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
             </div>
-            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-bot')">
-                <i class="fa-brands fa-discord" style="font-size: 2rem; color: #5865F2; margin-bottom: 10px;"></i>
-                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">만득봇 안내</div>
+            
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-notice')">
+                <i class="fa-solid fa-bullhorn" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">공지사항</div>
             </div>
             <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
-                <i class="fa-solid fa-fire" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
-                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">레이드 패시브 안내</div>
+                <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 10px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container" id="page-notice">
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-header"><i class="fa-solid fa-bullhorn"></i> 공지사항</div>
+            
+            <div class="notice-list">
+                <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                    <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#1</span> 
+                        26년 4월 13일 공지사항입니다.
+                    </div>
+                    <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">
+                        1) 기존 해저사냥터에서의 시간당 경험치 획득량을 기존 약 160만에서 약 1,985,308 으로 수정하였습니다.<br>
+                        2) 경험치계산기의 UI를 수정 및 업데이트 하였습니다.<br>
+                        <span style="font-weight: bold; color: var(--text-highlight);">3) 사냥터 별 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [10,000다이아]</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -954,6 +976,7 @@
             else if (pageId === 'page-acc') menuId = 'menu-acc';
             else if (pageId === 'page-rev') menuId = 'menu-rev';
             else if (pageId === 'page-ency') menuId = 'menu-ency';
+            else if (pageId === 'page-notice') menuId = 'menu-notice';
             else if (pageId === 'page-bot' || pageId === 'page-raid-guide') menuId = 'menu-etc';
             
             if(menuId) {
