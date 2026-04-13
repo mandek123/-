@@ -39,7 +39,6 @@
             min-height: 100vh;
         }
 
-        /* 데스크탑 최적화 안내 배너 */
         .desktop-notice {
             width: 100%;
             background-color: var(--inner-card);
@@ -57,7 +56,7 @@
             width: 100%;
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border);
-            display: none; /* 초기에는 홈 화면이므로 숨김 처리 */
+            display: none; 
             justify-content: center;
             position: sticky;
             top: 0;
@@ -137,7 +136,6 @@
         }
         .main-container.active { display: grid; animation: fadeIn 0.3s ease; }
         
-        /* 홈 화면 전용 레이아웃 */
         #page-home.active {
             display: flex;
             flex-direction: column;
@@ -193,7 +191,6 @@
             background: #232a32;
         }
 
-        /* 커스텀 드롭다운 디자인 */
         .custom-select-wrapper {
             position: relative;
             display: inline-block;
@@ -261,7 +258,6 @@
             color: var(--text-highlight);
         }
 
-        /* 패시브 목록 전용 다단(Grid) 드롭다운 스타일 */
         .custom-select-wrapper.grid-wrapper .custom-select-options {
             right: auto;
             width: 380px;
@@ -304,7 +300,6 @@
         input::placeholder { color: #8b949e; }
         input:disabled { opacity: 0.4; cursor: not-allowed; background: var(--input-bg); }
 
-        /* 토글 버튼 디자인 (새로운 버프 선택 스타일) */
         .buff-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
         .buff-toggle {
             background: var(--inner-card);
@@ -472,6 +467,44 @@
         .passive-lv-table { font-size: 11px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; text-align: center; }
         .lv-badge { background: var(--bg-color); border: 1px solid var(--border); border-radius: 4px; padding: 6px 2px; }
         .lv-badge.top { border-color: var(--accent-orange); color: var(--accent-orange); font-weight: bold; }
+
+        /* 다중 스탯 검색 그리드 디자인 */
+        .stat-grid-inputs {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr;
+            gap: 8px;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-main);
+        }
+        .stat-grid-inputs span { text-align: center; font-weight: bold; color: #8b949e; }
+        .stat-grid-inputs input { margin-bottom: 0; padding: 10px 12px; font-size: 13px; border-radius: 8px; text-align: center; }
+        
+        .pagination-container {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            padding: 8px 14px;
+            background: var(--inner-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .page-btn:hover { background: rgba(83, 155, 245, 0.1); border-color: #539bf5; color: #fff; }
+        .page-btn.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+        @media (max-width: 650px) {
+            .stat-wrapper-grid { grid-template-columns: 1fr !important; }
+        }
     </style>
 </head>
 <body>
@@ -548,11 +581,14 @@
                     <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
                         <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#1</span> 
                         26년 4월 13일 공지사항입니다.
+                        <span style="background-color: #ff7b72; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(255,123,114,0.3);">NEW</span>
                     </div>
                     <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">
                         1) 기존 해저사냥터에서의 시간당 경험치 획득량을 기존 약 160만에서 약 1,985,308 으로 수정하였습니다.<br>
-                        2) 경험치계산기의 UI를 수정 및 업데이트 하였습니다.<br>
-                        <span style="font-weight: bold; color: var(--text-highlight);">3) 사냥터 별 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [10,000다이아]</span>
+                        2) 도감탭의 초기스탯 및 성장스탯에 따른 검색기능을 추가하였습니다.<br>
+                        3) 웹페이지의 전체적인 UI를 수정 및 업데이트 하였습니다.<br>
+                        <span style="font-weight: bold; color: var(--text-highlight);">4) 사냥터 별 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [사냥터당 10,000다이아]</span><br>
+                        <span style="font-weight: bold; color: var(--text-highlight);">5) 페트 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [DM문의주세요.]</span>
                     </div>
                 </div>
             </div>
@@ -723,7 +759,7 @@
                 <i class="fa-solid fa-circle-info"></i> 도감 데이터는 지속적으로 업데이트 중입니다.
             </div>
 
-            <div class="filter-row">
+            <div class="filter-row" style="margin-bottom: 10px;">
                 <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()">
                 
                 <select id="petElement" onchange="filterPets()">
@@ -796,6 +832,32 @@
                     <option value="펫 HP">펫 HP회복</option>
                 </select>
             </div>
+
+            <details style="margin-bottom: 25px;">
+                <summary style="color: var(--accent-blue); font-size: 14px;"><i class="fa-solid fa-sliders"></i> 스탯 세부 검색 (이상/이하 복수 입력 가능)</summary>
+                <div style="padding: 10px 20px 25px 20px;">
+                    <div class="stat-wrapper-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="background: rgba(83, 155, 245, 0.05); border: 1px solid rgba(83, 155, 245, 0.15); border-radius: 12px; padding: 16px;">
+                            <div style="color: #539bf5; font-size: 13px; margin-bottom: 15px; text-align: center; font-weight: bold; background: rgba(83, 155, 245, 0.1); padding: 8px; border-radius: 6px;">[ 초기스탯 ]</div>
+                            <div class="stat-grid-inputs">
+                                <span>체력</span><input type="number" id="min_hp" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_hp" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                                <span>공격력</span><input type="number" id="min_atk" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_atk" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                                <span>방어력</span><input type="number" id="min_def" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_def" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                                <span>순발력</span><input type="number" id="min_spd" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_spd" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                            </div>
+                        </div>
+                        <div style="background: rgba(46, 160, 67, 0.05); border: 1px solid rgba(46, 160, 67, 0.15); border-radius: 12px; padding: 16px;">
+                            <div style="color: #2ea043; font-size: 13px; margin-bottom: 15px; text-align: center; font-weight: bold; background: rgba(46, 160, 67, 0.1); padding: 8px; border-radius: 6px;">[ 성장스탯 ]</div>
+                            <div class="stat-grid-inputs">
+                                <span>체력</span><input type="number" id="min_ghp" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_ghp" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                                <span>공격력</span><input type="number" id="min_gatk" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_gatk" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                                <span>방어력</span><input type="number" id="min_gdef" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_gdef" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                                <span>순발력</span><input type="number" id="min_gspd" placeholder="이상 (≥)" onkeyup="filterPets()" step="0.01"><input type="number" id="max_gspd" placeholder="이하 (≤)" onkeyup="filterPets()" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
 
             <div id="ency-list">
             </div>
@@ -971,6 +1033,9 @@
             { name: "황혼의 날개", effect: "팀원 전체, 5턴 동안\n회피율, 명중률, 치명타 확률 증가", values: ["3%", "4%", "5%", "6%", "8%"] }
         ];
 
+        let currentPage = 1;
+        const itemsPerPage = 12;
+
         function showPage(pageId) {
             document.querySelectorAll('.main-container').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
@@ -978,7 +1043,6 @@
             const targetPage = document.getElementById(pageId);
             if(targetPage) targetPage.classList.add('active');
             
-            // 네비게이션 바는 홈화면(page-home)일 때 숨기고, 그 외 화면일 때 표시
             const navbar = document.querySelector('.navbar');
             if (pageId === 'page-home') {
                 navbar.style.display = 'none';
@@ -1001,10 +1065,74 @@
             
             if(pageId === 'page-raid-guide') renderRaidPassives(RAID_PASSIVE_DATABASE);
             
-            window.scrollTo(0, 0); // 메뉴 이동 시 스크롤 최상단으로
+            window.scrollTo(0, 0); 
         }
 
-        function renderPets(data) {
+        // 공통 카드 생성 로직
+        function createPetCard(pet) {
+            const card = document.createElement('div');
+            card.className = 'res-box';
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            
+            let gradeClass = 'tag-normal';
+            if(pet.grade === '최상급') gradeClass = 'tag-top';
+            if(pet.grade === '상급') gradeClass = 'tag-high';
+
+            let coloredElements = pet.elements.split(' ').map(el => {
+                let color = '#d2a8ff'; 
+                if (el.includes('지')) color = '#3fb950'; 
+                else if (el.includes('수')) color = '#539bf5'; 
+                else if (el.includes('화')) color = '#ff7b72'; 
+                else if (el.includes('풍')) color = '#e3b341'; 
+                return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
+            }).join(' ');
+
+            let passiveDesc = "";
+            const passiveData = RAID_PASSIVE_DATABASE.find(p => p.name === pet.passive);
+            if (passiveData) {
+                passiveDesc = passiveData.effect;
+            }
+
+            card.innerHTML = `
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                    <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;">
+                        <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                    </div>
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-weight: bold; font-size: 1.2rem; color: var(--text-highlight);">${pet.name}</span>
+                            </div>
+                            <span class="tag ${gradeClass}">${pet.grade}</span>
+                        </div>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            ${pet.passive && pet.passive !== "없음" && pet.passive !== "미정" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
+                            ${pet.passive === "미정" ? `<span class="tag tag-normal">패시브 미정</span>` : ''}
+                            <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 13px; color: #adbac7;">
+                    <div style="display:flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 6px;">
+                        <span style="color:#8b949e">초기치 (체/공/방/순)</span>
+                        <span>${pet.hp} / ${pet.atk} / ${pet.def} / ${pet.spd}</span>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; padding-bottom: 6px; margin-bottom: 4px;">
+                        <span style="color:#8b949e">성장률 (체/공/방/순)</span>
+                        <span>${pet.ghp} / ${pet.gatk} / ${pet.gdef} / ${pet.gspd}</span>
+                    </div>
+                    <div class="raid-buff-box">
+                        <span style="color:#539bf5; font-weight:bold; font-size: 11px;"><i class="fa-solid fa-book-open"></i> 도감능력 (140Lv)</span>
+                        <span style="color:#ffffff;">${pet.encyBuff}</span>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // 검색조건이 없을때 보여주는 그룹화 렌더링
+        function renderPetsGrouped(data) {
             const container = document.getElementById('ency-list');
             container.innerHTML = '';
             
@@ -1031,65 +1159,7 @@
                 const grid = details.querySelector('.ency-grid');
 
                 pets.forEach(pet => {
-                    const card = document.createElement('div');
-                    card.className = 'res-box';
-                    card.style.display = 'flex';
-                    card.style.flexDirection = 'column';
-                    
-                    let gradeClass = 'tag-normal';
-                    if(pet.grade === '최상급') gradeClass = 'tag-top';
-                    if(pet.grade === '상급') gradeClass = 'tag-high';
-
-                    let coloredElements = pet.elements.split(' ').map(el => {
-                        let color = '#d2a8ff'; 
-                        if (el.includes('지')) color = '#3fb950'; 
-                        else if (el.includes('수')) color = '#539bf5'; 
-                        else if (el.includes('화')) color = '#ff7b72'; 
-                        else if (el.includes('풍')) color = '#e3b341'; 
-                        return `<span style="color: ${color}; font-weight: bold;">${el}</span>`;
-                    }).join(' ');
-
-                    let passiveDesc = "";
-                    const passiveData = RAID_PASSIVE_DATABASE.find(p => p.name === pet.passive);
-                    if (passiveData) {
-                        passiveDesc = passiveData.effect;
-                    }
-
-                    card.innerHTML = `
-                        <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                            <div style="width: 60px; height: 60px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;">
-                                <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
-                            </div>
-                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span style="font-weight: bold; font-size: 1.2rem; color: var(--text-highlight);">${pet.name}</span>
-                                    </div>
-                                    <span class="tag ${gradeClass}">${pet.grade}</span>
-                                </div>
-                                <div style="display: flex; gap: 5px; align-items: center;">
-                                    ${pet.passive && pet.passive !== "없음" && pet.passive !== "미정" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
-                                    ${pet.passive === "미정" ? `<span class="tag tag-normal">패시브 미정</span>` : ''}
-                                    <span class="tag-element" style="font-size: 0.8rem;">${coloredElements}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="font-size: 13px; color: #adbac7;">
-                            <div style="display:flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 6px;">
-                                <span style="color:#8b949e">초기치 (체/공/방/순)</span>
-                                <span>${pet.hp} / ${pet.atk} / ${pet.def} / ${pet.spd}</span>
-                            </div>
-                            <div style="display:flex; justify-content: space-between; padding-bottom: 6px; margin-bottom: 4px;">
-                                <span style="color:#8b949e">성장률 (체/공/방/순)</span>
-                                <span>${pet.ghp} / ${pet.gatk} / ${pet.gdef} / ${pet.gspd}</span>
-                            </div>
-                            <div class="raid-buff-box">
-                                <span style="color:#539bf5; font-weight:bold; font-size: 11px;"><i class="fa-solid fa-book-open"></i> 도감능력 (140Lv)</span>
-                                <span style="color:#ffffff;">${pet.encyBuff}</span>
-                            </div>
-                        </div>
-                    `;
-                    grid.appendChild(card);
+                    grid.appendChild(createPetCard(pet));
                 });
 
                 details.addEventListener('toggle', function() {
@@ -1112,12 +1182,77 @@
             }
         }
 
+        // 검색조건이 있을때 보여주는 평면 및 페이징 렌더링
+        function renderPetsPaginated(data) {
+            const container = document.getElementById('ency-list');
+            container.innerHTML = '';
+            
+            const totalPages = Math.ceil(data.length / itemsPerPage) || 1;
+            const start = (currentPage - 1) * itemsPerPage;
+            const pagedData = data.slice(start, start + itemsPerPage);
+
+            const grid = document.createElement('div');
+            grid.className = 'ency-grid';
+            grid.style.gridColumn = '1 / -1'; 
+
+            if (pagedData.length === 0) {
+                grid.innerHTML = `<div style="text-align: center; padding: 40px; color: #8b949e; grid-column: 1 / -1;"><i class="fa-solid fa-magnifying-glass" style="font-size:2rem; margin-bottom:10px;"></i><br>검색 조건에 맞는 결과가 없습니다.</div>`;
+            } else {
+                pagedData.forEach(pet => {
+                    grid.appendChild(createPetCard(pet));
+                });
+            }
+            container.appendChild(grid);
+
+            if (totalPages > 1) {
+                const pagination = document.createElement('div');
+                pagination.className = 'pagination-container';
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.innerText = i;
+                    btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+                    btn.onclick = () => {
+                        currentPage = i;
+                        renderPetsPaginated(data);
+                        document.getElementById('ency-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    };
+                    pagination.appendChild(btn);
+                }
+                container.appendChild(pagination);
+            }
+        }
+
         function filterPets() {
             const searchText = document.getElementById('petSearch').value.toLowerCase();
             const element = document.getElementById('petElement').value;
             const grade = document.getElementById('petGrade').value;
             const passive = document.getElementById('petPassive').value;
             const encyBuff = document.getElementById('petEncyBuff').value; 
+
+            // 초기/성장스탯 복수 검색 필터 수집
+            const statFilters = {
+                hp: { min: parseFloat(document.getElementById('min_hp').value), max: parseFloat(document.getElementById('max_hp').value) },
+                atk: { min: parseFloat(document.getElementById('min_atk').value), max: parseFloat(document.getElementById('max_atk').value) },
+                def: { min: parseFloat(document.getElementById('min_def').value), max: parseFloat(document.getElementById('max_def').value) },
+                spd: { min: parseFloat(document.getElementById('min_spd').value), max: parseFloat(document.getElementById('max_spd').value) },
+                ghp: { min: parseFloat(document.getElementById('min_ghp').value), max: parseFloat(document.getElementById('max_ghp').value) },
+                gatk: { min: parseFloat(document.getElementById('min_gatk').value), max: parseFloat(document.getElementById('max_gatk').value) },
+                gdef: { min: parseFloat(document.getElementById('min_gdef').value), max: parseFloat(document.getElementById('max_gdef').value) },
+                gspd: { min: parseFloat(document.getElementById('min_gspd').value), max: parseFloat(document.getElementById('max_gspd').value) }
+            };
+
+            // 검색 활성화 여부 확인 (하나라도 값이 있으면 리스트 평면화 페이징 처리)
+            let isFiltering = false;
+            if (searchText !== '' || element !== 'all' || grade !== 'all' || passive !== 'all' || encyBuff !== 'all') {
+                isFiltering = true;
+            }
+            for (const key in statFilters) {
+                if (!isNaN(statFilters[key].min) || !isNaN(statFilters[key].max)) {
+                    isFiltering = true;
+                    break;
+                }
+            }
 
             const filtered = PET_DATABASE.filter(pet => {
                 const matchName = pet.name.toLowerCase().includes(searchText);
@@ -1126,7 +1261,19 @@
                 const matchPassive = passive === 'all' || pet.passive.includes(passive);
                 const matchEncyBuff = encyBuff === 'all' || pet.encyBuff.includes(encyBuff); 
                 
-                return matchName && matchElement && matchGrade && matchPassive && matchEncyBuff;
+                if (!matchName || !matchElement || !matchGrade || !matchPassive || !matchEncyBuff) return false;
+
+                // 스탯 검사 로직
+                for (const key in statFilters) {
+                    const val = pet[key];
+                    const min = statFilters[key].min;
+                    const max = statFilters[key].max;
+                    
+                    if (!isNaN(min) && val < min) return false;
+                    if (!isNaN(max) && val > max) return false;
+                }
+
+                return true;
             });
 
             updateSelectColor('petElement');
@@ -1134,7 +1281,14 @@
             updateSelectColor('petPassive');
             updateSelectColor('petEncyBuff'); 
 
-            renderPets(filtered);
+            currentPage = 1; // 검색 조건이 바뀌면 무조건 1페이지로
+            
+            // 검색 조건이 있을경우 평면화/페이지네이션 뷰, 아닐경우 기존 그룹뷰 
+            if (isFiltering) {
+                renderPetsPaginated(filtered);
+            } else {
+                renderPetsGrouped(PET_DATABASE);
+            }
         }
 
         function renderRaidPassives(data) {
@@ -1178,7 +1332,6 @@
             if (el.customUpdate) el.customUpdate(); 
         }
 
-        /* 토글 버튼 클릭 처리 */
         function toggleBuff(element) {
             element.classList.toggle('active');
         }
@@ -1239,10 +1392,7 @@
             const targetLv = parseInt(document.getElementById('targetLv').value);
             const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
             
-            // 행운 스탯은 수동 모드일 때는 0으로 무시, 자동 모드일 때만 적용
             const luck = mode === 'auto' ? (parseInt(document.getElementById('luckStat').value) || 0) : 0;
-
-            // 공통 버프 확인
             const hasCiv = document.getElementById('buffCiv').classList.contains('active');
 
             if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
@@ -1272,7 +1422,6 @@
             } 
             else if(mode === 'manual') {
                 const mult = parseFloat(document.getElementById('multiplier').value) || 1;
-                
                 charMult = mult;
                 petMult = (mult * 0.6) + (hasCiv ? 0.1 : 0);
             }
@@ -1408,11 +1557,11 @@
 
             initCustomSelects();
 
-            // 초기 실행 시 홈 화면 표시 (네비게이션 숨김)
-            showPage('page-home');
+            // 최초 로딩 시 데이터 렌더링을 위해 수동 호출
+            filterPets();
             
+            showPage('page-home');
             initExpTable();
-            renderPets(PET_DATABASE);
         };
     </script>
 </body>
