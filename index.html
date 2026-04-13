@@ -288,6 +288,38 @@
         input::placeholder { color: #8b949e; }
         input:disabled { opacity: 0.4; cursor: not-allowed; background: var(--input-bg); }
 
+        /* 토글 버튼 디자인 (새로운 버프 선택 스타일) */
+        .buff-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+        .buff-toggle {
+            background: var(--inner-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #8b949e;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            flex-grow: 1;
+            justify-content: center;
+        }
+        .buff-toggle:hover {
+            border-color: #539bf5;
+            background: rgba(83, 155, 245, 0.05);
+            color: var(--text-main);
+        }
+        .buff-toggle.active {
+            background: rgba(83, 155, 245, 0.15);
+            border-color: #539bf5;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(83, 155, 245, 0.3), inset 0 0 8px rgba(83, 155, 245, 0.15);
+            font-weight: bold;
+        }
+
         .btn-calc { 
             width: 100%; 
             padding: 15px; 
@@ -355,7 +387,6 @@
         .tag-normal { background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.3); }
         .tag-element { font-size: 0.9rem; color: #d2a8ff; font-weight: bold; }
 
-        /* 패시브 툴팁 */
         .tag-passive { 
             background: rgba(46, 160, 67, 0.15); 
             color: #2ea043; 
@@ -389,7 +420,6 @@
         }
         .tag-passive:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-4px); }
 
-        /* 도감 그리드 레이아웃 설정 */
         #ency-list {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -416,7 +446,6 @@
         
         .raid-buff-box { display: flex; flex-direction: column; gap: 4px; background: rgba(83, 155, 245, 0.05); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.15); margin-top: 4px; }
 
-        /* 레이드 패시브 안내 스타일 */
         .raid-info-card { background: rgba(83, 155, 245, 0.05); border: 1px solid rgba(83, 155, 245, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 25px; }
         .raid-info-title { color: var(--accent-blue); font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
         .passive-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; width: 100%; }
@@ -492,8 +521,44 @@
             <label>시간당 경험치 (1배율)</label>
             <input type="number" id="hourlyExp" placeholder="시간당 경험치 입력">
 
-            <label>적용 배율</label>
-            <input type="number" id="multiplier" value="1.00" step="0.01">
+            <label>행운 스탯 (1당 +1%)</label>
+            <input type="number" id="luckStat" value="0" placeholder="예: 10">
+
+            <label>공통 버프 (눌러서 켜기/끄기)</label>
+            <div class="buff-grid" style="margin-bottom: 15px;">
+                <div class="buff-toggle" id="buffCiv" onclick="toggleBuff(this)">
+                    <i class="fa-solid fa-scroll" style="color:#d2a8ff;"></i> 문명의 기록 (탑펫 +10%)
+                </div>
+            </div>
+
+            <div id="autoBuffContainer" style="display: none;">
+                <label>추가 버프 (눌러서 켜기/끄기)</label>
+                <div class="buff-grid">
+                    <div class="buff-toggle" id="buffExpBead" onclick="toggleBuff(this)">
+                        <i class="fa-solid fa-gem" style="color:#e3b341;"></i> 경험치구슬 (+100%)
+                    </div>
+                    <div class="buff-toggle" id="buffDiscord" onclick="toggleBuff(this)">
+                        <i class="fa-brands fa-discord" style="color:#5865F2;"></i> 디스코드인증 (+10%)
+                    </div>
+                    <div class="buff-toggle" id="buffTribe" onclick="toggleBuff(this)">
+                        <i class="fa-solid fa-users" style="color:#2ea043;"></i> 부족경험치 (+30%)
+                    </div>
+                </div>
+
+                <label>파티 경험치 보너스</label>
+                <select id="partyExp" onchange="updateSelectColor('partyExp')">
+                    <option value="0">파티 없음 (1인)</option>
+                    <option value="0.1">2인 파티 (+10%)</option>
+                    <option value="0.2">3인 파티 (+20%)</option>
+                    <option value="0.3">4인 파티 (+30%)</option>
+                    <option value="0.4">5인 파티 (+40%)</option>
+                </select>
+            </div>
+
+            <div id="manualBuffContainer" style="display: none;">
+                <label>적용 배율 (직접입력)</label>
+                <input type="number" id="multiplier" value="1.00" step="0.01">
+            </div>
 
             <button class="btn-calc" onclick="runCalculation()" style="background: var(--accent);">계산하기</button>
         </div>
@@ -917,22 +982,14 @@
                     grid.appendChild(card);
                 });
 
-                // ==========================================
-                // 클릭한 탭이 맨 위로 올라가고 나머지는 닫히는 로직
-                // ==========================================
                 details.addEventListener('toggle', function() {
                     if (this.open) {
-                        // 1. 다른 그룹 닫기 (아코디언 효과)
                         container.querySelectorAll('.ency-group').forEach(group => {
                             if (group !== this && group.open) {
                                 group.open = false;
                             }
                         });
-                        
-                        // 2. 현재 열린 그룹을 목록의 가장 상단으로 이동
                         container.prepend(this);
-                        
-                        // 3. 상단으로 부드럽게 스크롤 (네비게이션 바에 가리지 않도록 오프셋 적용)
                         setTimeout(() => {
                             const navHeight = document.querySelector('.navbar').offsetHeight || 60;
                             const topPos = this.getBoundingClientRect().top + window.scrollY - navHeight - 20;
@@ -1011,19 +1068,34 @@
             if (el.customUpdate) el.customUpdate(); 
         }
 
+        /* 토글 버튼 클릭 처리 */
+        function toggleBuff(element) {
+            element.classList.toggle('active');
+        }
+
         function toggleMode() {
             const mode = document.getElementById('calcMode').value;
             const hg = document.getElementById('huntingGround');
             const he = document.getElementById('hourlyExp');
+            
+            const autoCont = document.getElementById('autoBuffContainer');
+            const manualCont = document.getElementById('manualBuffContainer');
+
             if(mode === 'auto') {
                 hg.disabled = false;
                 he.readOnly = true;
+                autoCont.style.display = 'block';
+                manualCont.style.display = 'none';
             } else if(mode === 'manual') {
                 hg.disabled = true;
                 he.readOnly = false;
+                autoCont.style.display = 'none';
+                manualCont.style.display = 'block';
             } else {
                 hg.disabled = true;
                 he.readOnly = true;
+                autoCont.style.display = 'none';
+                manualCont.style.display = 'none';
             }
             updateSelectColor('calcMode');
             if (hg.customUpdate) hg.customUpdate(); 
@@ -1056,7 +1128,10 @@
             const curExp = parseInt(document.getElementById('curExp').value) || 0;
             const targetLv = parseInt(document.getElementById('targetLv').value);
             const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
-            const mult = parseFloat(document.getElementById('multiplier').value) || 1;
+            const luck = parseInt(document.getElementById('luckStat').value) || 0;
+
+            // 공통 버프 확인
+            const hasCiv = document.getElementById('buffCiv').classList.contains('active');
 
             if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
 
@@ -1065,14 +1140,44 @@
                 needed += (EXP_TABLE[i] || 0);
             }
 
-            const finalHourly = hourlyBase * mult;
-            const hours = finalHourly > 0 ? needed / finalHourly : 0;
-            const days = hours / 24;
+            let charMult = 1;
+            let petMult = 0.6;
+
+            if(mode === 'auto') {
+                const hasExpBead = document.getElementById('buffExpBead').classList.contains('active');
+                const hasDiscord = document.getElementById('buffDiscord').classList.contains('active');
+                const hasTribe = document.getElementById('buffTribe').classList.contains('active');
+                const partyBonus = parseFloat(document.getElementById('partyExp').value) || 0;
+                
+                let autoBuffSum = 0;
+                if(hasExpBead) autoBuffSum += 1.0;
+                if(hasDiscord) autoBuffSum += 0.1;
+                if(hasTribe) autoBuffSum += 0.3;
+                autoBuffSum += partyBonus;
+
+                charMult = 1.0 + autoBuffSum + (luck / 100);
+                petMult = (1.0 * 0.6) + (autoBuffSum * 0.6) + ((luck / 100) * 0.6) + (hasCiv ? 0.1 : 0);
+            } 
+            else if(mode === 'manual') {
+                const mult = parseFloat(document.getElementById('multiplier').value) || 1;
+                
+                charMult = mult + (luck / 100);
+                petMult = (mult * 0.6) + ((luck / 100) * 0.6) + (hasCiv ? 0.1 : 0);
+            }
+
+            const finalHourlyChar = hourlyBase * charMult;
+            const finalHourlyPet = hourlyBase * petMult;
+
+            const charHours = finalHourlyChar > 0 ? needed / finalHourlyChar : 0;
+            const charDays = charHours / 24;
+            
+            const petHours = finalHourlyPet > 0 ? needed / finalHourlyPet : 0;
+            const petDays = petHours / 24;
             
             document.getElementById('resNeeded').innerText = formatNumber(needed);
-            document.getElementById('resTime').innerText = `${hours.toFixed(1)}시간 (${days.toFixed(1)}일)`;
-            document.getElementById('resPetTime').innerText = `${(hours / 0.6).toFixed(1)}시간 (${(days / 0.6).toFixed(1)}일)`;
-            document.getElementById('resFinalExp').innerText = formatNumber(finalHourly);
+            document.getElementById('resTime').innerText = charHours > 0 ? `${charHours.toFixed(1)}시간 (${charDays.toFixed(1)}일)` : "-";
+            document.getElementById('resPetTime').innerText = petHours > 0 ? `${petHours.toFixed(1)}시간 (${petDays.toFixed(1)}일)` : "-";
+            document.getElementById('resFinalExp').innerText = formatNumber(Math.floor(finalHourlyChar));
 
             animateResults('exp-result-container');
         }
@@ -1111,6 +1216,10 @@
 
         function initCustomSelects() {
             document.querySelectorAll('select').forEach(sel => {
+                if (sel.nextSibling && sel.nextSibling.className === 'custom-select-wrapper') {
+                    return; 
+                }
+
                 const wrapper = document.createElement('div');
                 wrapper.className = 'custom-select-wrapper';
                 
@@ -1183,6 +1292,7 @@
             updateSelectColor('petGrade');
             updateSelectColor('petPassive');
             updateSelectColor('petEncyBuff');
+            updateSelectColor('partyExp');
 
             initCustomSelects();
 
