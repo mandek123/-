@@ -579,16 +579,29 @@
             <div class="notice-list">
                 <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
                     <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#2</span> 
+                        26년 4월 14일 공지사항입니다.
+                        <span style="background-color: #ff7b72; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(255,123,114,0.3);">NEW</span>
+                    </div>
+                    <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">
+                        1) 월드경험치 적용 선택칸을 만들었습니다.<br>
+                        <span style="color:#8b949e; margin-left: 10px;">- 입력한 시간(분)까지만 +100%가 적용되고, 그 이후부터는 원래 배율로 누적 계산됩니다.</span><br>
+                        2) 도감정보를 새로 업데이트 하였습니다.<br>
+                        <span style="color:#8b949e; margin-left: 10px;">- 우푸류, 얀기로류</span><br>
+                        3) 문명의기록 체크시 기존 70%적용이었던 배율을 66%로 수정하였습니다.<br>
+                    </div>
+                </div>
+                <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                    <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
                         <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#1</span> 
                         26년 4월 13일 공지사항입니다.
-                        <span style="background-color: #ff7b72; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(255,123,114,0.3);">NEW</span>
                     </div>
                     <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">
                         1) 기존 해저사냥터에서의 시간당 경험치 획득량을 기존 약 160만에서 약 1,985,308 으로 수정하였습니다.<br>
                         2) 도감탭의 초기스탯 및 성장스탯에 따른 검색기능을 추가하였습니다.<br>
                         3) 웹페이지의 전체적인 UI를 수정 및 업데이트 하였습니다.<br>
                         <span style="font-weight: bold; color: var(--text-highlight);">4) 사냥터 별 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [사냥터당 10,000다이아]</span><br>
-                        <span style="font-weight: bold; color: var(--text-highlight);">5) 페트 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [DM문의주세요.]</span>
+                        <span style="font-weight: bold; color: var(--text-highlight);">5) 페트 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [마감]</span>
                     </div>
                 </div>
             </div>
@@ -636,7 +649,7 @@
             <label>공통 버프 (눌러서 켜기/끄기)</label>
             <div class="buff-grid" style="margin-bottom: 15px;">
                 <div class="buff-toggle" id="buffCiv" onclick="toggleBuff(this)">
-                    <i class="fa-solid fa-scroll" style="color:#d2a8ff;"></i> 문명의 기록 (탑펫 +10%)
+                    <i class="fa-solid fa-scroll" style="color:#d2a8ff;"></i> 문명의 기록 (탑펫 +6%)
                 </div>
             </div>
 
@@ -1446,6 +1459,9 @@
             const luck = mode === 'auto' ? (parseInt(document.getElementById('luckStat').value) || 0) : 0;
             const hasCiv = document.getElementById('buffCiv').classList.contains('active');
 
+            // 탑펫(문명의 기록) 비율: 기본 60%(0.6), 문명 기록 적용 시 66%(0.66)
+            const petRatio = hasCiv ? 0.66 : 0.60;
+
             if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
 
             let needed = (EXP_TABLE[curLv + 1] || 0) - curExp;
@@ -1473,18 +1489,18 @@
 
                 // 1. 월드경험치가 없는 상태의 기본 배율
                 let normalCharMult = 1.0 + baseBuffSum + (luck / 100);
-                let normalPetMult = (1.0 * 0.6) + (baseBuffSum * 0.6) + ((luck / 100) * 0.6) + (hasCiv ? 0.1 : 0);
+                let normalPetMult = normalCharMult * petRatio;
 
-                // 2. 월드경험치가 포함된 배율 (캐릭터 +100%, 펫은 그 60%인 +60% 적용)
+                // 2. 월드경험치가 포함된 배율 (캐릭터 +100%, 펫은 그 비율만큼 추가)
                 let worldCharMult = normalCharMult + 1.0;
-                let worldPetMult = normalPetMult + 0.6; 
+                let worldPetMult = worldCharMult * petRatio; 
 
                 let normalHourlyChar = hourlyBase * normalCharMult;
                 let normalHourlyPet = hourlyBase * normalPetMult;
                 let worldHourlyChar = hourlyBase * worldCharMult;
                 let worldHourlyPet = hourlyBase * worldPetMult;
 
-                // 화면에 표시할 최종 시간당 경험치 (월경 시간이 유한하면 종료 후 시간당 경험치인 기본 시급을 표시)
+                // 화면에 표시할 최종 시간당 경험치 (월경 시간이 유한하면 종료 후 시급인 기본 시급을 표시)
                 finalHourlyChar = (hasWorldExp && worldExpMins === 0) ? worldHourlyChar : normalHourlyChar; 
 
                 if (hasWorldExp && worldExpMins > 0) {
@@ -1494,10 +1510,8 @@
                     // --- 캐릭터 계산 ---
                     let expGainedDuringWorld = worldHourlyChar * worldHours;
                     if (expGainedDuringWorld >= needed) {
-                        // 월드경험치 시간 안에 목표 달성
                         charHours = needed / worldHourlyChar;
                     } else {
-                        // 월드경험치 시간이 끝난 후 남은 경험치는 기본 배율로 계산
                         charHours = worldHours + ((needed - expGainedDuringWorld) / normalHourlyChar);
                     }
 
@@ -1523,7 +1537,7 @@
             else if(mode === 'manual') {
                 const mult = parseFloat(document.getElementById('multiplier').value) || 1;
                 let charMult = mult;
-                let petMult = (mult * 0.6) + (hasCiv ? 0.1 : 0);
+                let petMult = mult * petRatio; // 수동 계산시에도 정상적으로 66% 반영
                 
                 finalHourlyChar = hourlyBase * charMult;
                 let finalHourlyPet = hourlyBase * petMult;
@@ -1541,7 +1555,7 @@
             
             // 결과창 시간당 경험치 표시 (시간제한 월경 사용 시 안내 문구 추가)
             if (mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0) {
-                 document.getElementById('resFinalExp').innerHTML = `${formatNumber(Math.floor(finalHourlyChar))} <span style="font-size:12px; color:#8b949e; font-weight:normal;">(월경포함X)</span>`;
+                 document.getElementById('resFinalExp').innerHTML = `${formatNumber(Math.floor(finalHourlyChar))} <span style="font-size:12px; color:#8b949e; font-weight:normal;">(월경적용X)</span>`;
             } else {
                  document.getElementById('resFinalExp').innerText = formatNumber(Math.floor(finalHourlyChar));
             }
