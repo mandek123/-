@@ -503,7 +503,11 @@
     </nav>
 
     <div class="main-container active" id="page-home">
-        <img src="./images/A.png" alt="만득월드 로고" style="max-width: 250px; margin-bottom: 40px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+        <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 25px; cursor: pointer; display: flex; align-items: center; gap: 12px;" onclick="showPage('page-home')">
+            <i class="fa-solid fa-dog"></i> 만득월드
+        </div>
+        
+        <img src="./images/A.png" alt="만득월드 배너" style="width: 100%; max-width: 500px; margin-bottom: 40px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
         
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 600px;">
             <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-exp')">
@@ -543,7 +547,7 @@
                 <option value="auto">자동 계산 (사냥터 선택)</option>
                 <option value="manual">수동 계산 (시간당 경험치 직접입력)</option>
             </select>
-            <div style="font-size: 11px; color: var(--accent-orange); margin-top: -10px; margin-bottom: 18px; line-height: 1.4; word-break: keep-all;">
+            <div style="font-size: 12.5px; color: var(--accent-orange); margin-top: -8px; margin-bottom: 18px; line-height: 1.5; word-break: keep-all;">
                 <i class="fa-solid fa-triangle-exclamation"></i> 주의사항 : 온라인 기준으로 계산을 하였으며 경험치 획득량을 보수적으로 잡았습니다. 이 점 참고하셔서 억울한 일이 생기지 않게 이용해주세요. 보통 오프라인이 경험치를 더 많이 획득합니다.
             </div>
 
@@ -603,7 +607,7 @@
                     <option value="0.3">4인 파티 (+30%)</option>
                     <option value="0.4">5인 파티 (+40%)</option>
                 </select>
-                <div style="font-size: 11px; color: var(--accent-orange); margin-top: -10px; margin-bottom: 18px; line-height: 1.4; word-break: keep-all;">
+                <div style="font-size: 12.5px; color: var(--accent-orange); margin-top: -8px; margin-bottom: 18px; line-height: 1.5; word-break: keep-all;">
                     <i class="fa-solid fa-circle-info"></i> 사람이 많아질수록 딜레이가 길어져 계산한 만큼 경험치를 획득하지 못합니다. 가장 확실한 계산은 2인(BOT과 함께 사냥)기준입니다.
                 </div>
             </div>
@@ -631,12 +635,12 @@
                 <summary>📍 사냥터별 상세 데이터 (1배율 기준)</summary>
                 <div class="table-content">
                     <div class="table-row"><strong>사냥터</strong><strong>상세 정보</strong></div>
-                    <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 191,442 EXP</span></div>
+                    <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 약 191,442 EXP</span></div>
                     <div class="table-row"><span>지하 (LV65~80)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
                     <div class="table-row"><span>폐허 (LV80~100)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
                     <div class="table-row"><span>눈동/피피아 (LV100~110)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
                     <div class="table-row"><span>어동 (LV110~120)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
-                    <div class="table-row"><span>해저 (LV120~)</span><span>마리당: 4,892 / 시간당: 약 1,670,052 EXP</span></div>
+                    <div class="table-row"><span>해저 (LV120~)</span><span>마리당: 4,892 / 시간당: 약 1,985,308 EXP</span></div>
                 </div>
             </details>
 
