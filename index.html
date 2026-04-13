@@ -646,7 +646,12 @@
             <label>시간당 경험치 (1배율)</label>
             <input type="number" id="hourlyExp" placeholder="시간당 경험치 입력">
 
-            <label>공통 버프 (눌러서 켜기/끄기)</label>
+            <div id="luckContainer" style="display: none;">
+                <label>행운 스탯 (1당 +1%)</label>
+                <input type="number" id="luckStat" value="0" placeholder="예: 10">
+            </div>
+
+            <label>탑펫 버프 (기존 60%의 10% = 6% 적용) (눌러서 켜기/끄기)</label>
             <div class="buff-grid" style="margin-bottom: 15px;">
                 <div class="buff-toggle" id="buffCiv" onclick="toggleBuff(this)">
                     <i class="fa-solid fa-scroll" style="color:#d2a8ff;"></i> 문명의 기록 (탑펫 +6%)
@@ -654,9 +659,6 @@
             </div>
 
             <div id="autoBuffContainer" style="display: none;">
-                <label>행운 스탯 (1당 +1%)</label>
-                <input type="number" id="luckStat" value="0" placeholder="예: 10">
-
                 <label>추가 버프 (눌러서 켜기/끄기)</label>
                 <div class="buff-grid">
                     <div class="buff-toggle" id="buffExpBead" onclick="toggleBuff(this)">
@@ -1400,29 +1402,33 @@
             }
         }
 
-        function toggleMode() {
+            function toggleMode() {
             const mode = document.getElementById('calcMode').value;
             const hg = document.getElementById('huntingGround');
             const he = document.getElementById('hourlyExp');
             
             const autoCont = document.getElementById('autoBuffContainer');
             const manualCont = document.getElementById('manualBuffContainer');
+            const luckCont = document.getElementById('luckContainer'); // 추가된 행운스탯 컨테이너
 
             if(mode === 'auto') {
                 hg.disabled = false;
                 he.readOnly = true;
                 autoCont.style.display = 'block';
                 manualCont.style.display = 'none';
+                if(luckCont) luckCont.style.display = 'block'; // 자동계산 시 행운스탯 표시
             } else if(mode === 'manual') {
                 hg.disabled = true;
                 he.readOnly = false;
                 autoCont.style.display = 'none';
                 manualCont.style.display = 'block';
+                if(luckCont) luckCont.style.display = 'none'; // 수동계산 시 행운스탯 숨김
             } else {
                 hg.disabled = true;
                 he.readOnly = true;
                 autoCont.style.display = 'none';
                 manualCont.style.display = 'none';
+                if(luckCont) luckCont.style.display = 'none';
             }
             updateSelectColor('calcMode');
             if (hg.customUpdate) hg.customUpdate(); 
