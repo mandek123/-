@@ -611,8 +611,13 @@
                 <a href="javascript:void(0);" class="nav-item" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
-                <a href="javascript:void(0);" class="nav-item" id="menu-ency" onclick="showPage('page-ency')">📚 도감</a>
-                <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
+                    <div class="dropdown">
+                    <a href="javascript:void(0);" class="nav-item" id="menu-ency">📚 도감 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="javascript:void(0);" onclick="showPage('page-ency'); closeDropdown();"><i class="fa-solid fa-book-open" style="color: #d2a8ff; width: 18px;"></i> 펫 도감</a>
+                        <a href="javascript:void(0);" onclick="showPage('page-ency-status'); closeDropdown();"><i class="fa-solid fa-square-check" style="color: #539bf5; width: 18px;"></i> 나의 도감 현황</a>
+                    </div>
+                </div>                <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
                 
                 <div class="dropdown">
                     <a href="javascript:void(0);" class="nav-item" id="menu-etc">⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
@@ -985,7 +990,21 @@
             </div>
         </div>
     </div>
+    <div class="main-container" id="page-ency-status">
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-header" style="justify-content: space-between;">
+                <span><i class="fa-solid fa-square-check"></i> 나의 도감 현황</span>
+                <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="showPage('page-ency')"><i class="fa-solid fa-arrow-left"></i> 도감으로 돌아가기</button>
+            </div>
+            
+            <div class="notice-banner" style="background: rgba(83, 155, 245, 0.1); border-color: rgba(83, 155, 245, 0.2); color: #539bf5; text-align: left;">
+                <i class="fa-solid fa-circle-info"></i> 펫 도감에서 [등록] 체크한 목록을 바탕으로, 현재 활성화된 도감 능력치 현황을 보여줍니다.
+            </div>
 
+            <div id="encyStatusGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
+                </div>
+        </div>
+    </div>
     <div class="main-container" id="page-bot">
         <div class="card" style="grid-column: span 2; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 50px 20px;">
             <div class="card-header" style="justify-content: center; font-size: 1.5rem; margin-bottom: 30px;">
@@ -1305,7 +1324,7 @@
             if (pageId === 'page-exp') menuId = 'menu-exp';
             else if (pageId === 'page-acc') menuId = 'menu-acc';
             else if (pageId === 'page-rev') menuId = 'menu-rev';
-            else if (pageId === 'page-ency') menuId = 'menu-ency';
+            else if (pageId === 'page-ency' || pageId === 'page-ency-status') menuId = 'menu-ency';
             else if (pageId === 'page-notice') menuId = 'menu-notice';
             else if (pageId === 'page-bot' || pageId === 'page-raid-guide') menuId = 'menu-etc';
             
@@ -1315,7 +1334,7 @@
             }
             
             if(pageId === 'page-raid-guide') renderRaidPassives(RAID_PASSIVE_DATABASE);
-            
+            if(pageId === 'page-ency-status') renderEncyStatusPage();
             window.scrollTo(0, 0); 
         }
 
@@ -1504,6 +1523,66 @@
             }
             localStorage.setItem('manduk_ency_registered', JSON.stringify(data));
             updateEncyProgress();
+            renderEncyStatusPage(); // 체크할 때 현황판도 실시간으로 업데이트 되도록 추가
+        }
+        function renderEncyStatusPage() {
+            const regData = getRegisteredPets();
+            const statusMap = {};
+
+            // 데이터 분석 및 카운트
+            PET_DATABASE.forEach(pet => {
+                const buff = pet.encyBuff;
+                if (!statusMap[buff]) {
+                    statusMap[buff] = { total: 0, current: 0 };
+                }
+                statusMap[buff].total++;
+                if (regData[pet.name]) {
+                    statusMap[buff].current++;
+                }
+            });
+
+            const grid = document.getElementById('encyStatusGrid');
+            if (!grid) return;
+            
+            let html = '';
+            // 능력 이름순 정렬 후 화면 생성
+            Object.keys(statusMap).sort().forEach(buff => {
+                const stat = statusMap[buff];
+                const isAllDone = stat.current === stat.total;
+                const hasProgress = stat.current > 0;
+                
+                let textColor = "#8b949e";
+                let borderColor = "var(--border)";
+                let iconHtml = '';
+                let barColor = "#3d4550";
+
+                if (hasProgress && !isAllDone) {
+                    textColor = "#539bf5";
+                    borderColor = "rgba(83, 155, 245, 0.3)";
+                    barColor = "#539bf5";
+                } else if (isAllDone) {
+                    textColor = "#2ea043";
+                    borderColor = "rgba(46, 160, 67, 0.4)";
+                    barColor = "#2ea043";
+                    iconHtml = '<i class="fa-solid fa-circle-check" style="color:#2ea043; font-size:16px;"></i>';
+                }
+
+                const percent = (stat.current / stat.total) * 100;
+
+                html += `
+                    <div style="background: var(--inner-card); border: 1px solid ${borderColor}; padding: 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <span style="font-size: 13.5px; color: var(--text-main); font-weight: 500; word-break: keep-all;">${buff}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <span style="font-size: 18px; font-weight: bold; color: ${textColor};">${stat.current} <span style="font-size: 13px; color: #8b949e; font-weight: normal;">/ ${stat.total}</span></span>
+                            ${iconHtml}
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.2); border-radius: 3px; margin-top: 5px; overflow: hidden;">
+                            <div style="width: ${percent}%; height: 100%; background: ${barColor}; border-radius: 3px; transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
         }
 
         function updateEncyProgress() {
