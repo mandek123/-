@@ -1814,8 +1814,14 @@
                             sel.selectedIndex = idx;
                             sel.dispatchEvent(new Event('change')); 
                             
-                            optionsDiv.style.display = 'none';
-                            setTimeout(() => optionsDiv.style.display = '', 100); 
+                            // 모바일 선택 후 창 닫기 로직
+                            optionsDiv.style.display = 'none'; // 목록 숨김
+                            wrapper.style.pointerEvents = 'none'; // 호버 상태 강제 해제용
+                            
+                            setTimeout(() => {
+                                optionsDiv.style.display = ''; // 스타일 복구
+                                wrapper.style.pointerEvents = ''; // 클릭 활성화 복구
+                            }, 100); 
                         };
                     }
                     optionsDiv.appendChild(item);
