@@ -1809,19 +1809,28 @@
                         item.style.opacity = '0.4';
                         item.style.cursor = 'not-allowed';
                     } else {
-                        item.onclick = () => {
+                        item.onclick = (e) => {
                             if (sel.disabled) return;
                             sel.selectedIndex = idx;
                             sel.dispatchEvent(new Event('change')); 
                             
-                            // 모바일 선택 후 창 닫기 로직
-                            optionsDiv.style.display = 'none'; // 목록 숨김
-                            wrapper.style.pointerEvents = 'none'; // 호버 상태 강제 해제용
+                            // 모바일(터치) 환경인지 확인
+                            const isMobile = window.matchMedia("(max-width: 768px)").matches;
                             
-                            setTimeout(() => {
-                                optionsDiv.style.display = ''; // 스타일 복구
-                                wrapper.style.pointerEvents = ''; // 클릭 활성화 복구
-                            }, 100); 
+                            if (isMobile) {
+                                // 모바일: 선택 즉시 창을 닫고 호버 상태 해제
+                                optionsDiv.style.display = 'none';
+                                wrapper.style.pointerEvents = 'none';
+                                
+                                setTimeout(() => {
+                                    optionsDiv.style.display = '';
+                                    wrapper.style.pointerEvents = '';
+                                }, 300); // 모바일은 처리 속도를 고려해 0.3초 여유 부여
+                            } else {
+                                // 데스크탑: 기존 로직 유지 (부드러운 전환)
+                                optionsDiv.style.display = 'none';
+                                setTimeout(() => optionsDiv.style.display = '', 100);
+                            }
                         };
                     }
                     optionsDiv.appendChild(item);
