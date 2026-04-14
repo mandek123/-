@@ -587,7 +587,7 @@
                         1) 월드경험치 적용 선택칸을 만들었습니다.<br>
                         <span style="color:#8b949e; margin-left: 10px;">- 입력한 시간(분)까지만 +100%가 적용되고, 그 이후부터는 원래 배율로 누적 계산됩니다.</span><br>
                         2) 도감정보를 새로 업데이트 하였습니다.<br>
-                        <span style="color:#8b949e; margin-left: 10px;">- 우푸류, 얀기로류</span><br>
+                        <span style="color:#8b949e; margin-left: 10px;">- 우푸류, 얀기로류, 베르가류</span><br>
                         3) 문명의기록 체크시 기존 70%적용이었던 배율을 66%로 수정하였습니다.<br>
                     </div>
                 </div>
@@ -1013,6 +1013,7 @@
             { category: "우푸류", name: "푸포", img: "./images/53.gif", elements: "수10", hp: 42.57, atk: 8.22, def: 4.74, spd: 7.83, ghp: 9.84, gatk: 1.90, gdef: 1.10, gspd: 1.81, passive: "신속", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
             { category: "우푸류", name: "푸푸", img: "./images/54.gif", elements: "지3 풍7", hp: 21.30, atk: 3.88, def: 2.48, spd: 4.86, ghp: 9.46, gatk: 1.72, gdef: 1.10, gspd: 2.16, passive: "신속", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
             { category: "우푸류", name: "푸푸[進]", img: "./images/55.gif", elements: "지3 풍7", hp: 23.37, atk: 4.33, def: 2.70, spd: 5.35, ghp: 9.62, gatk: 1.78, gdef: 1.11, gspd: 2.20, passive: "신속", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
+            
             { category: "얀기로류", name: "기노", img: "./images/56.gif", elements: "화8 풍2", hp: 59.22, atk: 14.08, def: 8.05, spd: 7.05, ghp: 10.30, gatk: 2.45, gdef: 1.40, gspd: 1.23, passive: "투혼", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
             { category: "얀기로류", name: "기노[還]", img: "./images/57.gif", elements: "화8 풍2", hp: 59.63, atk: 14.24, def: 8.25, spd: 7.13, ghp: 10.37, gatk: 2.48, gdef: 1.44, gspd: 1.24, passive: "투혼", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
             { category: "얀기로류", name: "기라노", img: "./images/58.gif", elements: "수5 화5", hp: 53.57, atk: 11.85, def: 7.30, spd: 6.05, ghp: 10.59, gatk: 2.34, gdef: 1.44, gspd: 1.20, passive: "전투 집중", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
@@ -1046,7 +1047,33 @@
             { category: "얀기로류", name: "파이어보로", img: "./images/86.gif", elements: "화5 풍5", hp: 51.01, atk: 11.61, def: 6.75, spd: 6.92, ghp: 10.10, gatk: 2.30, gdef: 1.34, gspd: 1.37, passive: "전투 집중", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
             { category: "얀기로류", name: "파이어비노", img: "./images/87.gif", elements: "지8 풍2", hp: 51.37, atk: 11.61, def: 6.97, spd: 6.82, ghp: 10.18, gatk: 2.30, gdef: 1.38, gspd: 1.35, passive: "전투 집중", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
             { category: "얀기로류", name: "프로돈", img: "./images/88.gif", elements: "수10", hp: 59.00, atk: 11.77, def: 7.22, spd: 6.79, ghp: 11.16, gatk: 2.23, gdef: 1.36, gspd: 1.28, passive: "전투 집중", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
-            { category: "얀기로류", name: "흑기로", img: "./images/89.gif", elements: "지5 풍5", hp: 51.50, atk: 11.46, def: 7.95, spd: 5.72, ghp: 10.18, gatk: 2.27, gdef: 1.57, gspd: 1.13, passive: "전투 집중", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" }
+            { category: "얀기로류", name: "흑기로", img: "./images/89.gif", elements: "지5 풍5", hp: 51.50, atk: 11.46, def: 7.95, spd: 5.72, ghp: 10.18, gatk: 2.27, gdef: 1.57, gspd: 1.13, passive: "전투 집중", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            
+            { category: "베르가류", name: "검호", img: "./images/90.gif", elements: "수2 화8", hp: 49.80, atk: 10.67, def: 6.28, spd: 8.39, ghp: 9.86, gatk: 2.11, gdef: 1.24, gspd: 1.66, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "베르가류", name: "고루루", img: "./images/91.gif", elements: "수5 화5", hp: 50.20, atk: 10.54, def: 6.41, spd: 8.31, ghp: 9.93, gatk: 2.09, gdef: 1.27, gspd: 1.64, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "베르가류", name: "고르고르", img: "./images/92.gif", elements: "화8 풍2", hp: 38.33, atk: 8.47, def: 5.26, spd: 6.83, ghp: 9.40, gatk: 2.08, gdef: 1.29, gspd: 1.67, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "베르가류", name: "고르고르[進]", img: "./images/93.gif", elements: "화8 풍2", hp: 43.59, atk: 9.51, def: 5.81, spd: 7.46, ghp: 9.76, gatk: 2.13, gdef: 1.30, gspd: 1.67, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "베르가류", name: "노르노르", img: "./images/94.gif", elements: "지3 풍7", hp: 50.18, atk: 10.28, def: 7.20, spd: 8.39, ghp: 9.94, gatk: 2.04, gdef: 1.43, gspd: 1.66, passive: "심장 관통", grade: "최상급", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
+            { category: "베르가류", name: "노르노르[進]", img: "./images/95.gif", elements: "지3 풍7", hp: 50.44, atk: 10.58, def: 7.33, spd: 8.41, ghp: 9.97, gatk: 2.09, gdef: 1.45, gspd: 1.66, passive: "심장 관통", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
+            { category: "베르가류", name: "도르도르", img: "./images/96.gif", elements: "지3 수7", hp: 51.72, atk: 10.37, def: 6.49, spd: 8.28, ghp: 10.24, gatk: 2.05, gdef: 1.28, gspd: 1.64, passive: "심장 관통", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+            { category: "베르가류", name: "도르도르[進]", img: "./images/97.gif", elements: "지3 수7", hp: 56.91, atk: 11.68, def: 7.23, spd: 9.21, ghp: 10.32, gatk: 2.12, gdef: 1.31, gspd: 1.67, passive: "심장 관통", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+            { category: "베르가류", name: "메르메르", img: "./images/98.gif", elements: "지7 풍3", hp: 50.04, atk: 10.28, def: 7.00, spd: 8.10, ghp: 9.90, gatk: 2.03, gdef: 1.38, gspd: 1.60, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "베르가류", name: "베라라", img: "./images/99.gif", elements: "화4 풍6", hp: 48.89, atk: 10.38, def: 6.14, spd: 8.79, ghp: 9.68, gatk: 2.05, gdef: 1.22, gspd: 1.74, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "베르가류", name: "베루루", img: "./images/100.gif", elements: "화3 풍7", hp: 42.90, atk: 9.30, def: 5.78, spd: 7.48, ghp: 9.60, gatk: 2.08, gdef: 1.29, gspd: 1.67, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "베르가류", name: "베루루[進]", img: "./images/101.gif", elements: "화3 풍7", hp: 44.13, atk: 9.48, def: 5.80, spd: 7.50, ghp: 9.88, gatk: 2.12, gdef: 1.30, gspd: 1.68, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "베르가류", name: "베르가", img: "./images/102.gif", elements: "지6 수4", hp: 46.20, atk: 9.31, def: 6.71, spd: 7.08, ghp: 9.91, gatk: 2.00, gdef: 1.44, gspd: 1.52, passive: "심장 관통", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "베르가류", name: "베르가[進]", img: "./images/103.gif", elements: "지6 수4", hp: 49.00, atk: 10.21, def: 7.04, spd: 7.60, ghp: 10.11, gatk: 2.11, gdef: 1.45, gspd: 1.57, passive: "심장 관통", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "베르가류", name: "산타베르가", img: "./images/104.gif", elements: "지5 수5", hp: 53.71, atk: 11.47, def: 7.30, spd: 8.42, ghp: 10.16, gatk: 2.17, gdef: 1.38, gspd: 1.59, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "베르가류", name: "설표", img: "./images/105.gif", elements: "지8 풍2", hp: 48.95, atk: 10.23, def: 5.88, spd: 8.28, ghp: 10.12, gatk: 2.12, gdef: 1.22, gspd: 1.71, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "베르가류", name: "성호", img: "./images/106.gif", elements: "수10", hp: 53.14, atk: 10.30, def: 6.53, spd: 8.09, ghp: 10.52, gatk: 2.04, gdef: 1.29, gspd: 1.60, passive: "심장 관통", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
+            { category: "베르가류", name: "주르가", img: "./images/107.gif", elements: "화3 풍7", hp: 49.87, atk: 10.42, def: 7.08, spd: 7.81, ghp: 9.87, gatk: 2.06, gdef: 1.40, gspd: 1.55, passive: "심장 관통", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
+            { category: "베르가류", name: "천호", img: "./images/108.gif", elements: "지2 수8", hp: 60.79, atk: 13.40, def: 7.37, spd: 9.92, ghp: 10.17, gatk: 2.24, gdef: 1.23, gspd: 1.66, passive: "암살", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+            { category: "베르가류", name: "테르가", img: "./images/109.gif", elements: "화5 풍5", hp: 57.20, atk: 12.62, def: 6.52, spd: 10.01, ghp: 10.01, gatk: 2.21, gdef: 1.14, gspd: 1.75, passive: "투혼", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "베르가류", name: "테르가[暗]", img: "./images/110.gif", elements: "화8 풍2", hp: 59.76, atk: 13.47, def: 7.04, spd: 10.05, ghp: 10.00, gatk: 2.25, gdef: 1.18, gspd: 1.68, passive: "투혼", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
+            { category: "베르가류", name: "테르가[進]", img: "./images/111.gif", elements: "화5 풍5", hp: 60.25, atk: 13.41, def: 6.93, spd: 10.58, ghp: 10.08, gatk: 2.24, gdef: 1.16, gspd: 1.77, passive: "투혼", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "베르가류", name: "테르가[還]", img: "./images/112.gif", elements: "화5 풍5", hp: 60.25, atk: 13.41, def: 6.93, spd: 10.58, ghp: 10.08, gatk: 2.24, gdef: 1.16, gspd: 1.77, passive: "투혼", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "베르가류", name: "페루루", img: "./images/113.gif", elements: "화5 풍5", hp: 49.05, atk: 10.66, def: 6.19, spd: 8.39, ghp: 9.71, gatk: 2.11, gdef: 1.22, gspd: 1.66, passive: "심장 관통", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "베르가류", name: "하라라", img: "./images/114.gif", elements: "지1 수9", hp: 51.08, atk: 10.24, def: 6.25, spd: 8.60, ghp: 10.11, gatk: 2.03, gdef: 1.24, gspd: 1.70, passive: "심장 관통", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" }
         ];
 
         const RAID_PASSIVE_DATABASE = [
