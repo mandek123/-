@@ -875,11 +875,8 @@
                 <span><i class="fa-solid fa-book"></i> 펫 도감</span>
             </div>
             
-            <div class="notice-banner">
+            <div class="notice-banner" style="margin-bottom: 20px;">
                 <i class="fa-solid fa-circle-info"></i> 도감 데이터는 지속적으로 업데이트 중입니다.
-            </div>
-            <div id="encyProgress" style="font-size: 14px; font-weight: bold; color: var(--accent-blue); margin-bottom: 15px; background: rgba(83, 155, 245, 0.1); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.2); display: inline-block;">
-                나의 도감 달성률 불러오는 중...
             </div>
             <div class="filter-row" style="margin-bottom: 10px;">
                 <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()">
@@ -990,7 +987,7 @@
             </div>
         </div>
     </div>
-    <div class="main-container" id="page-ency-status">
+<div class="main-container" id="page-ency-status">
         <div class="card" style="grid-column: span 2;">
             <div class="card-header" style="justify-content: space-between;">
                 <span><i class="fa-solid fa-square-check"></i> 나의 도감 현황</span>
@@ -1001,8 +998,12 @@
                 <i class="fa-solid fa-circle-info"></i> 펫 도감에서 [등록] 체크한 목록을 바탕으로, 현재 활성화된 도감 능력치 현황을 보여줍니다.
             </div>
 
+            <div id="encyProgress" style="font-size: 14px; font-weight: bold; color: var(--accent-blue); margin-bottom: 15px; background: rgba(83, 155, 245, 0.1); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.2); display: inline-block;">
+                나의 도감 달성률 불러오는 중...
+            </div>
+
             <div id="encyStatusGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
-                </div>
+            </div>
         </div>
     </div>
     <div class="main-container" id="page-bot">
