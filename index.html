@@ -281,51 +281,6 @@
             text-overflow: ellipsis;
         }
 
-        /* 모바일 최적화 스타일 (너비 768px 이하) */
-        @media (max-width: 768px) {
-            /* 1. 상단 네비바 수정: 로고 아이콘 제거 및 메뉴 간격 재조절 */
-            .nav-logo i {
-                display: none; /* 강아지 아이콘 숨김 */
-            }
-
-            .nav-container {
-                padding: 10px 10px; /* 좌우 여백 미세 조정 */
-            }
-
-            .nav-menu {
-                gap: 6px; /* 아이콘이 빠진 만큼 메뉴 간격을 기존보다 넓게 조절 */
-            }
-
-            .nav-item {
-                padding: 6px 5px;
-                font-size: 11px; /* 폰트 크기를 10px에서 11px로 소폭 상향 */
-                font-weight: 500;
-            }
-
-            /* 2. 메인 홈 화면 메뉴 버튼 크기 상향 조정 */
-            #page-home .res-box {
-                padding: 20px 15px !important; /* 세로 여백을 늘려 버튼 볼륨감 추가 */
-                min-height: 100px; /* 버튼의 최소 높이 확보 */
-            }
-
-            #page-home .res-box i {
-                font-size: 1.6rem !important; /* 아이콘 크기를 더 크게 조정 */
-                margin-bottom: 10px !important;
-                color: var(--text-highlight);
-            }
-
-            #page-home .res-box div {
-                font-size: 14px !important; /* 텍스트 크기를 12px에서 14px로 키워 가독성 향상 */
-                font-weight: bold;
-            }
-
-            /* 그리드 간격 유지 */
-            .main-container {
-                gap: 12px;
-                padding: 15px 12px;
-            }
-        }
-
         select {
             appearance: none;
             -webkit-appearance: none;
@@ -539,52 +494,71 @@
         @media (max-width: 650px) {
             .stat-wrapper-grid { grid-template-columns: 1fr !important; }
         }
+
         /* 모바일 최적화 스타일 추가 */
         @media (max-width: 768px) {
             .navbar { display: flex !important; } /* 모바일에서 네비바 강제 활성화 */
             
+            /* 1. 상단 네비바 수정: 로고 아이콘 제거 및 메뉴 간격 재조절 */
+            .nav-logo i { display: none; /* 강아지 아이콘 숨김 */ }
+            .nav-container { padding: 10px 10px; /* 좌우 여백 미세 조정 */ }
+            .nav-menu { gap: 6px; /* 아이콘이 빠진 만큼 메뉴 간격을 기존보다 넓게 조절 */ }
+            .nav-item { padding: 6px 5px; font-size: 11px; font-weight: 500; }
+            .nav-logo { font-size: 0.9rem; }
+            
+            /* 2. 메인 컨테이너 레이아웃 및 폼 요소 최적화 */
             .main-container {
                 grid-template-columns: 1fr; /* 2단 배열을 1단으로 변경 */
                 padding: 20px 15px;
                 gap: 15px;
             }
 
-            .card {
-                padding: 15px;
-            }
+            .card { padding: 15px; }
 
             input, select, .custom-select-trigger {
                 padding: 10px 15px;
                 font-size: 16px; /* 모바일 입력 시 자동 줌 방지를 위해 16px 권장 */
             }
 
-            .nav-container {
-                padding: 10px 15px;
+            /* 3. 메인 홈 화면 메뉴 버튼 최적화 및 정중앙 정렬 */
+            #page-home {
+                min-height: auto;
+                padding-top: 40px;
             }
 
-            .nav-menu {
-                gap: 2px;
+            #page-home > div:first-child {
+                font-size: 1.8rem !important;
+                margin-bottom: 20px !important;
             }
 
-            .nav-item {
-                padding: 6px 8px;
-                font-size: 11px;
+            #page-home .res-box {
+                padding: 20px 10px !important; /* 세로 여백 늘려 버튼 볼륨감 추가 */
+                min-height: 110px; /* 버튼의 최소 높이 확보 */
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important; /* 세로 정중앙 */
+                align-items: center !important;     /* 가로 정중앙 */
+                text-align: center !important;
             }
 
-            .nav-logo {
-                font-size: 1rem;
+            #page-home .res-box i {
+                font-size: 1.8rem !important; /* 아이콘 크기를 더 크게 조정 */
+                margin-bottom: 8px !important;
+                display: block !important;
+                color: var(--text-highlight);
             }
 
-            /* 경험치 계산기 결과창 조절 */
-            .result-grid {
-                grid-template-columns: 1fr; /* 결과 박스 1단으로 */
+            #page-home .res-box div {
+                font-size: 14px !important; /* 텍스트 크기 키워 가독성 향상 */
+                font-weight: bold;
+                line-height: 1.2;
+                margin: 0 !important;
             }
 
-            .res-val {
-                font-size: 1.1rem;
-            }
+            /* 4. 도감, 계산기 결과창 등 세부 조정 */
+            .result-grid { grid-template-columns: 1fr; }
+            .res-val { font-size: 1.1rem; }
 
-            /* 도감 필터 영역 조절 */
             .filter-row {
                 flex-direction: column;
                 align-items: stretch;
@@ -596,23 +570,11 @@
                 width: 100% !important;
             }
 
-            /* 펫 도감 카드 텍스트 크기 조절 */
-            .res-box span {
-                font-size: 12px;
-            }
-
-            #page-home {
-                min-height: auto;
-                padding-top: 60px;
-            }
-
-            #page-home h1, #page-home div {
-                font-size: 1.8rem !important;
-            }
+            .res-box span { font-size: 12px; }
             
-            .desktop-notice {
-                display: none; /* 모바일에서는 데스크탑 안내 문구 숨김 */
-            }
+            .dropdown-content { right: -10px; /* 모바일에서 화면 밖으로 나가는 것 방지 */ }
+            
+            .desktop-notice { display: none; /* 모바일에서는 데스크탑 안내 문구 숨김 */ }
         }
     </style>
 </head>
@@ -637,8 +599,8 @@
                 <div class="dropdown">
                     <a href="javascript:void(0);" class="nav-item" id="menu-etc">⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
                     <div class="dropdown-content">
-                        <a href="javascript:void(0);" onclick="showPage('page-bot')"><i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 만득봇 안내</a>
-                        <a href="javascript:void(0);" onclick="showPage('page-raid-guide')"><i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 레이드 패시브 안내</a>
+                        <a href="javascript:void(0);" onclick="showPage('page-bot'); closeDropdown();"><i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 만득봇 안내</a>
+                        <a href="javascript:void(0);" onclick="showPage('page-raid-guide'); closeDropdown();"><i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 레이드 패시브 안내</a>
                     </div>
                 </div>
             </div>
@@ -1328,6 +1290,17 @@
             window.scrollTo(0, 0); 
         }
 
+        // 기타 드롭다운 메뉴 터치 시 창 닫히도록 로직 추가
+        function closeDropdown() {
+            const dropdownContent = document.querySelector('.dropdown-content');
+            if (window.matchMedia("(max-width: 768px)").matches) {
+                dropdownContent.style.display = 'none';
+                setTimeout(() => {
+                    dropdownContent.style.display = '';
+                }, 300);
+            }
+        }
+
         // 공통 카드 생성 로직
         function createPetCard(pet) {
             const card = document.createElement('div');
@@ -1390,7 +1363,6 @@
             `;
             return card;
         }
-
 
         // 검색조건이 없을때 보여주는 그룹화 렌더링
         function renderPetsGrouped(data) {
@@ -1503,7 +1475,7 @@
                 gspd: { min: parseFloat(document.getElementById('min_gspd').value), max: parseFloat(document.getElementById('max_gspd').value) }
             };
 
-            // 검색 활성화 여부 확인 (하나라도 값이 있으면 리스트 평면화 페이징 처리)
+            // 검색 활성화 여부 확인
             let isFiltering = false;
             if (searchText !== '' || element !== 'all' || grade !== 'all' || passive !== 'all' || encyBuff !== 'all') {
                 isFiltering = true;
@@ -1542,9 +1514,8 @@
             updateSelectColor('petPassive');
             updateSelectColor('petEncyBuff'); 
 
-            currentPage = 1; // 검색 조건이 바뀌면 무조건 1페이지로
+            currentPage = 1; 
             
-            // 검색 조건이 있을경우 평면화/페이지네이션 뷰, 아닐경우 기존 그룹뷰 
             if (isFiltering) {
                 renderPetsPaginated(filtered);
             } else {
@@ -1596,7 +1567,6 @@
         function toggleBuff(element) {
             element.classList.toggle('active');
             
-            // 월드경험치 토글 시 시간 입력창 표시/숨김 처리
             if(element.id === 'buffWorldExp') {
                 const durationContainer = document.getElementById('worldExpDurationContainer');
                 if(durationContainer) {
@@ -1605,27 +1575,27 @@
             }
         }
 
-            function toggleMode() {
+        function toggleMode() {
             const mode = document.getElementById('calcMode').value;
             const hg = document.getElementById('huntingGround');
             const he = document.getElementById('hourlyExp');
             
             const autoCont = document.getElementById('autoBuffContainer');
             const manualCont = document.getElementById('manualBuffContainer');
-            const luckCont = document.getElementById('luckContainer'); // 추가된 행운스탯 컨테이너
+            const luckCont = document.getElementById('luckContainer'); 
 
             if(mode === 'auto') {
                 hg.disabled = false;
                 he.readOnly = true;
                 autoCont.style.display = 'block';
                 manualCont.style.display = 'none';
-                if(luckCont) luckCont.style.display = 'block'; // 자동계산 시 행운스탯 표시
+                if(luckCont) luckCont.style.display = 'block'; 
             } else if(mode === 'manual') {
                 hg.disabled = true;
                 he.readOnly = false;
                 autoCont.style.display = 'none';
                 manualCont.style.display = 'block';
-                if(luckCont) luckCont.style.display = 'none'; // 수동계산 시 행운스탯 숨김
+                if(luckCont) luckCont.style.display = 'none'; 
             } else {
                 hg.disabled = true;
                 he.readOnly = true;
@@ -1668,7 +1638,6 @@
             const luck = mode === 'auto' ? (parseInt(document.getElementById('luckStat').value) || 0) : 0;
             const hasCiv = document.getElementById('buffCiv').classList.contains('active');
 
-            // 탑펫(문명의 기록) 비율: 기본 60%(0.6), 문명 기록 적용 시 66%(0.66)
             const petRatio = hasCiv ? 0.66 : 0.60;
 
             if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
@@ -1696,11 +1665,9 @@
                 if(hasTribe) baseBuffSum += 0.3;
                 baseBuffSum += partyBonus;
 
-                // 1. 월드경험치가 없는 상태의 기본 배율
                 let normalCharMult = 1.0 + baseBuffSum + (luck / 100);
                 let normalPetMult = normalCharMult * petRatio;
 
-                // 2. 월드경험치가 포함된 배율 (캐릭터 +100%, 펫은 그 비율만큼 추가)
                 let worldCharMult = normalCharMult + 1.0;
                 let worldPetMult = worldCharMult * petRatio; 
 
@@ -1709,14 +1676,11 @@
                 let worldHourlyChar = hourlyBase * worldCharMult;
                 let worldHourlyPet = hourlyBase * worldPetMult;
 
-                // 화면에 표시할 최종 시간당 경험치 (월경 시간이 유한하면 종료 후 시급인 기본 시급을 표시)
                 finalHourlyChar = (hasWorldExp && worldExpMins === 0) ? worldHourlyChar : normalHourlyChar; 
 
                 if (hasWorldExp && worldExpMins > 0) {
-                    // 유한한 월드경험치 시간(시간 단위로 변환)
                     let worldHours = worldExpMins / 60;
                     
-                    // --- 캐릭터 계산 ---
                     let expGainedDuringWorld = worldHourlyChar * worldHours;
                     if (expGainedDuringWorld >= needed) {
                         charHours = needed / worldHourlyChar;
@@ -1724,7 +1688,6 @@
                         charHours = worldHours + ((needed - expGainedDuringWorld) / normalHourlyChar);
                     }
 
-                    // --- 펫 계산 ---
                     let petExpGainedDuringWorld = worldHourlyPet * worldHours;
                     if (petExpGainedDuringWorld >= needed) {
                         petHours = needed / worldHourlyPet;
@@ -1732,7 +1695,6 @@
                         petHours = worldHours + ((needed - petExpGainedDuringWorld) / normalHourlyPet);
                     }
                 } else {
-                    // 월드경험치를 사용하지 않거나 0(무제한)으로 설정한 경우 기존 계산
                     let currentCharMult = hasWorldExp ? worldCharMult : normalCharMult;
                     let currentPetMult = hasWorldExp ? worldPetMult : normalPetMult;
                     
@@ -1746,7 +1708,7 @@
             else if(mode === 'manual') {
                 const mult = parseFloat(document.getElementById('multiplier').value) || 1;
                 let charMult = mult;
-                let petMult = mult * petRatio; // 수동 계산시에도 정상적으로 66% 반영
+                let petMult = mult * petRatio; 
                 
                 finalHourlyChar = hourlyBase * charMult;
                 let finalHourlyPet = hourlyBase * petMult;
@@ -1762,7 +1724,6 @@
             document.getElementById('resTime').innerText = charHours > 0 ? `${charHours.toFixed(1)}시간 (${charDays.toFixed(1)}일)` : "-";
             document.getElementById('resPetTime').innerText = petHours > 0 ? `${petHours.toFixed(1)}시간 (${petDays.toFixed(1)}일)` : "-";
             
-            // 결과창 시간당 경험치 표시 (시간제한 월경 사용 시 안내 문구 추가)
             if (mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0) {
                  document.getElementById('resFinalExp').innerHTML = `${formatNumber(Math.floor(finalHourlyChar))} <span style="font-size:12px; color:#8b949e; font-weight:normal;">(월경적용X)</span>`;
             } else {
@@ -1848,20 +1809,15 @@
                             sel.selectedIndex = idx;
                             sel.dispatchEvent(new Event('change')); 
                             
-                            // 모바일(터치) 환경인지 확인
                             const isMobile = window.matchMedia("(max-width: 768px)").matches;
-                            
                             if (isMobile) {
-                                // 모바일: 선택 즉시 창을 닫고 호버 상태 해제
                                 optionsDiv.style.display = 'none';
                                 wrapper.style.pointerEvents = 'none';
-                                
                                 setTimeout(() => {
                                     optionsDiv.style.display = '';
                                     wrapper.style.pointerEvents = '';
-                                }, 300); // 모바일은 처리 속도를 고려해 0.3초 여유 부여
+                                }, 300); 
                             } else {
-                                // 데스크탑: 기존 로직 유지 (부드러운 전환)
                                 optionsDiv.style.display = 'none';
                                 setTimeout(() => optionsDiv.style.display = '', 100);
                             }
@@ -1901,7 +1857,6 @@
 
             initCustomSelects();
 
-            // 최초 로딩 시 데이터 렌더링을 위해 수동 호출
             filterPets();
             
             showPage('page-home');
