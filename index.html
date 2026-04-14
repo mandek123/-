@@ -611,13 +611,8 @@
                 <a href="javascript:void(0);" class="nav-item" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
-                    <div class="dropdown">
-                    <a href="javascript:void(0);" class="nav-item" id="menu-ency">📚 도감 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
-                    <div class="dropdown-content">
-                        <a href="javascript:void(0);" onclick="showPage('page-ency'); closeDropdown();"><i class="fa-solid fa-book-open" style="color: #d2a8ff; width: 18px;"></i> 펫 도감</a>
-                        <a href="javascript:void(0);" onclick="showPage('page-ency-status'); closeDropdown();"><i class="fa-solid fa-square-check" style="color: #539bf5; width: 18px;"></i> 나의 도감 현황</a>
-                    </div>
-                </div>                <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-ency" onclick="showPage('page-ency')">📚 도감</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
                 
                 <div class="dropdown">
                     <a href="javascript:void(0);" class="nav-item" id="menu-etc">⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
@@ -878,9 +873,7 @@
             <div class="notice-banner">
                 <i class="fa-solid fa-circle-info"></i> 도감 데이터는 지속적으로 업데이트 중입니다.
             </div>
-            <div id="encyProgress" style="font-size: 14px; font-weight: bold; color: var(--accent-blue); margin-bottom: 15px; background: rgba(83, 155, 245, 0.1); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.2); display: inline-block;">
-                나의 도감 달성률 불러오는 중...
-            </div>
+
             <div class="filter-row" style="margin-bottom: 10px;">
                 <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()">
                 
@@ -953,11 +946,6 @@
                     <option value="캐릭터 HP">캐릭HP회복</option>
                     <option value="펫 HP">펫 HP회복</option>
                 </select>
-                <select id="petRegStatus" onchange="filterPets()">
-                    <option value="all">모든 등록 상태</option>
-                    <option value="registered">도감 등록 완료</option>
-                    <option value="unregistered">도감 미등록</option>
-                </select>
             </div>
 
             <details style="margin-bottom: 25px;">
@@ -990,21 +978,7 @@
             </div>
         </div>
     </div>
-    <div class="main-container" id="page-ency-status">
-        <div class="card" style="grid-column: span 2;">
-            <div class="card-header" style="justify-content: space-between;">
-                <span><i class="fa-solid fa-square-check"></i> 나의 도감 현황</span>
-                <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="showPage('page-ency')"><i class="fa-solid fa-arrow-left"></i> 도감으로 돌아가기</button>
-            </div>
-            
-            <div class="notice-banner" style="background: rgba(83, 155, 245, 0.1); border-color: rgba(83, 155, 245, 0.2); color: #539bf5; text-align: left;">
-                <i class="fa-solid fa-circle-info"></i> 펫 도감에서 [등록] 체크한 목록을 바탕으로, 현재 활성화된 도감 능력치 현황을 보여줍니다.
-            </div>
 
-            <div id="encyStatusGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
-                </div>
-        </div>
-    </div>
     <div class="main-container" id="page-bot">
         <div class="card" style="grid-column: span 2; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 50px 20px;">
             <div class="card-header" style="justify-content: center; font-size: 1.5rem; margin-bottom: 30px;">
@@ -1254,7 +1228,15 @@
             { category: "갈푸스류", name: "사이록스", img: "./images/171.gif", elements: "화3 풍7", hp: 52.51, atk: 10.74, def: 6.37, spd: 9.29, ghp: 9.95, gatk: 2.04, gdef: 1.21, gspd: 1.76, passive: "투혼", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
             { category: "갈푸스류", name: "울푸스", img: "./images/172.gif", elements: "수10", hp: 53.90, atk: 10.83, def: 6.17, spd: 8.33, ghp: 10.66, gatk: 2.14, gdef: 1.22, gspd: 1.65, passive: "투혼", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
             { category: "갈푸스류", name: "울푸스[還]", img: "./images/173.gif", elements: "수10", hp: 54.14, atk: 11.02, def: 6.32, spd: 8.39, ghp: 10.70, gatk: 2.18, gdef: 1.25, gspd: 1.66, passive: "투혼", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
-            { category: "갈푸스류", name: "흑갈푸스", img: "./images/174.gif", elements: "화4 풍6", hp: 54.91, atk: 11.93, def: 6.67, spd: 9.16, ghp: 9.95, gatk: 2.16, gdef: 1.21, gspd: 1.66, passive: "투혼", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" }
+            { category: "갈푸스류", name: "흑갈푸스", img: "./images/174.gif", elements: "화4 풍6", hp: 54.91, atk: 11.93, def: 6.67, spd: 9.16, ghp: 9.95, gatk: 2.16, gdef: 1.21, gspd: 1.66, passive: "투혼", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
+
+            { category: "카우거류", name: "볼케", img: "./images/175.gif", elements: "화10", hp: 44.36, atk: 9.89, def: 5.33, spd: 7.38, ghp: 9.89, gatk: 2.20, gdef: 1.19, gspd: 1.64, passive: "투혼", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
+            { category: "카우거류", name: "이구로스", img: "./images/176.gif", elements: "지5 풍5", hp: 56.18, atk: 12.52, def: 7.10, spd: 8.29, ghp: 10.18, gatk: 2.27, gdef: 1.29, gspd: 1.50, passive: "투혼", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "카우거류", name: "카우거", img: "./images/177.gif", elements: "지7 풍3", hp: 54.62, atk: 12.30, def: 7.05, spd: 8.50, ghp: 9.90, gatk: 2.23, gdef: 1.28, gspd: 1.54, passive: "티아트의 축복", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "카우거류", name: "카우거[進]", img: "./images/178.gif", elements: "지7 풍3", hp: 55.79, atk: 12.33, def: 7.08, spd: 8.83, ghp: 10.11, gatk: 2.24, gdef: 1.28, gspd: 1.60, passive: "티아트의 축복", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "카우거류", name: "카우거[還]", img: "./images/179.gif", elements: "지7 풍3", hp: 55.79, atk: 12.33, def: 7.08, spd: 8.83, ghp: 10.11, gatk: 2.24, gdef: 1.28, gspd: 1.60, passive: "티아트의 축복", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "카우거류", name: "크루거", img: "./images/180.gif", elements: "지5 수5", hp: 52.03, atk: 10.33, def: 6.77, spd: 8.25, ghp: 10.29, gatk: 2.04, gdef: 1.34, gspd: 1.63, passive: "투혼", grade: "최상급", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+            { category: "카우거류", name: "크루거[還]", img: "./images/181.gif", elements: "지5 수5", hp: 52.51, atk: 10.63, def: 7.05, spd: 8.25, ghp: 10.38, gatk: 2.10, gdef: 1.39, gspd: 1.63, passive: "투혼", grade: "최상급", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" }
         ];
 
         const RAID_PASSIVE_DATABASE = [
@@ -1324,7 +1306,7 @@
             if (pageId === 'page-exp') menuId = 'menu-exp';
             else if (pageId === 'page-acc') menuId = 'menu-acc';
             else if (pageId === 'page-rev') menuId = 'menu-rev';
-            else if (pageId === 'page-ency' || pageId === 'page-ency-status') menuId = 'menu-ency';
+            else if (pageId === 'page-ency') menuId = 'menu-ency';
             else if (pageId === 'page-notice') menuId = 'menu-notice';
             else if (pageId === 'page-bot' || pageId === 'page-raid-guide') menuId = 'menu-etc';
             
@@ -1334,7 +1316,7 @@
             }
             
             if(pageId === 'page-raid-guide') renderRaidPassives(RAID_PASSIVE_DATABASE);
-            if(pageId === 'page-ency-status') renderEncyStatusPage();
+            
             window.scrollTo(0, 0); 
         }
 
@@ -1375,24 +1357,18 @@
                 passiveDesc = passiveData.effect;
             }
 
-            const isRegistered = getRegisteredPets()[pet.name] ? 'checked' : '';
-
             card.innerHTML = `
-            <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                <div style="width: 60px; height: 60px; background: var(--inner-card); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                </div>
-                <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
-                            <span style="font-weight: bold; font-size: 1.2rem; color: var(--text-highlight);">${pet.name}</span>
-                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; background: rgba(139, 148, 158, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(139, 148, 158, 0.2);">
-                                <input type="checkbox" ${isRegistered} onchange="togglePetRegistration('${pet.name}')" style="width: 14px; height: 14px; margin: 0; padding: 0; cursor: pointer; display: inline-block; -webkit-appearance: auto; appearance: auto;">
-                                <span style="font-size: 11px; color: #8b949e; font-weight: bold;">등록</span>
-                            </label>
-                        </div>
-                        <span class="tag ${gradeClass}">${pet.grade}</span>
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                    <div style="width: 60px; height: 60px; background: var(--inner-card); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                        <img src="${pet.img ? pet.img : 'https://via.placeholder.com/60?text=No+Img'}" alt="${pet.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                     </div>
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-weight: bold; font-size: 1.2rem; color: var(--text-highlight);">${pet.name}</span>
+                            </div>
+                            <span class="tag ${gradeClass}">${pet.grade}</span>
+                        </div>
                         <div style="display: flex; gap: 5px; align-items: center;">
                             ${pet.passive && pet.passive !== "없음" && pet.passive !== "미정" ? `<span class="tag tag-passive" data-desc="${passiveDesc}">${pet.passive}</span>` : ''}
                             ${pet.passive === "미정" ? `<span class="tag tag-normal">패시브 미정</span>` : ''}
@@ -1509,99 +1485,14 @@
                 container.appendChild(pagination);
             }
         }
-        function getRegisteredPets() {
-            const data = localStorage.getItem('manduk_ency_registered');
-            return data ? JSON.parse(data) : {};
-        }
 
-        function togglePetRegistration(petName) {
-            const data = getRegisteredPets();
-            if (data[petName]) {
-                delete data[petName];
-            } else {
-                data[petName] = true;
-            }
-            localStorage.setItem('manduk_ency_registered', JSON.stringify(data));
-            updateEncyProgress();
-            renderEncyStatusPage(); // 체크할 때 현황판도 실시간으로 업데이트 되도록 추가
-        }
-        function renderEncyStatusPage() {
-            const regData = getRegisteredPets();
-            const statusMap = {};
-
-            // 데이터 분석 및 카운트
-            PET_DATABASE.forEach(pet => {
-                const buff = pet.encyBuff;
-                if (!statusMap[buff]) {
-                    statusMap[buff] = { total: 0, current: 0 };
-                }
-                statusMap[buff].total++;
-                if (regData[pet.name]) {
-                    statusMap[buff].current++;
-                }
-            });
-
-            const grid = document.getElementById('encyStatusGrid');
-            if (!grid) return;
-            
-            let html = '';
-            // 능력 이름순 정렬 후 화면 생성
-            Object.keys(statusMap).sort().forEach(buff => {
-                const stat = statusMap[buff];
-                const isAllDone = stat.current === stat.total;
-                const hasProgress = stat.current > 0;
-                
-                let textColor = "#8b949e";
-                let borderColor = "var(--border)";
-                let iconHtml = '';
-                let barColor = "#3d4550";
-
-                if (hasProgress && !isAllDone) {
-                    textColor = "#539bf5";
-                    borderColor = "rgba(83, 155, 245, 0.3)";
-                    barColor = "#539bf5";
-                } else if (isAllDone) {
-                    textColor = "#2ea043";
-                    borderColor = "rgba(46, 160, 67, 0.4)";
-                    barColor = "#2ea043";
-                    iconHtml = '<i class="fa-solid fa-circle-check" style="color:#2ea043; font-size:16px;"></i>';
-                }
-
-                const percent = (stat.current / stat.total) * 100;
-
-                html += `
-                    <div style="background: var(--inner-card); border: 1px solid ${borderColor}; padding: 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <span style="font-size: 13.5px; color: var(--text-main); font-weight: 500; word-break: keep-all;">${buff}</span>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-                            <span style="font-size: 18px; font-weight: bold; color: ${textColor};">${stat.current} <span style="font-size: 13px; color: #8b949e; font-weight: normal;">/ ${stat.total}</span></span>
-                            ${iconHtml}
-                        </div>
-                        <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.2); border-radius: 3px; margin-top: 5px; overflow: hidden;">
-                            <div style="width: ${percent}%; height: 100%; background: ${barColor}; border-radius: 3px; transition: width 0.3s ease;"></div>
-                        </div>
-                    </div>
-                `;
-            });
-            grid.innerHTML = html;
-        }
-
-        function updateEncyProgress() {
-            const data = getRegisteredPets();
-            const count = Object.keys(data).length;
-            const total = PET_DATABASE.length;
-            const progressEl = document.getElementById('encyProgress');
-            if(progressEl) {
-                progressEl.innerHTML = `<i class="fa-solid fa-bookmark"></i> 나의 도감 달성률: ${count} / ${total} <span style="color:#8b949e; font-size:12px; margin-left: 5px;">(${(count/total*100).toFixed(1)}%)</span>`;
-            }
-        }
         function filterPets() {
             const searchText = document.getElementById('petSearch').value.toLowerCase();
             const element = document.getElementById('petElement').value;
             const grade = document.getElementById('petGrade').value;
             const passive = document.getElementById('petPassive').value;
             const encyBuff = document.getElementById('petEncyBuff').value; 
-            const regStatus = document.getElementById('petRegStatus').value; 
-            const registeredData = getRegisteredPets(); 
+
             // 초기/성장스탯 복수 검색 필터 수집
             const statFilters = {
                 hp: { min: parseFloat(document.getElementById('min_hp').value), max: parseFloat(document.getElementById('max_hp').value) },
@@ -1618,9 +1509,6 @@
             let isFiltering = false;
             if (searchText !== '' || element !== 'all' || grade !== 'all' || passive !== 'all' || encyBuff !== 'all') {
                 isFiltering = true;
-            if (searchText !== '' || element !== 'all' || grade !== 'all' || passive !== 'all' || encyBuff !== 'all' || regStatus !== 'all') {
-                isFiltering = true;
-            }
             }
             for (const key in statFilters) {
                 if (!isNaN(statFilters[key].min) || !isNaN(statFilters[key].max)) {
@@ -1636,11 +1524,6 @@
                 const matchPassive = passive === 'all' || pet.passive.includes(passive);
                 const matchEncyBuff = encyBuff === 'all' || pet.encyBuff.includes(encyBuff); 
                 
-                // 등록 상태 필터 검사 추가
-                const isReg = !!registeredData[pet.name];
-                if (regStatus === 'registered' && !isReg) return false;
-                if (regStatus === 'unregistered' && isReg) return false;
-
                 if (!matchName || !matchElement || !matchGrade || !matchPassive || !matchEncyBuff) return false;
 
                 // 스탯 검사 로직
@@ -1660,7 +1543,6 @@
             updateSelectColor('petGrade');
             updateSelectColor('petPassive');
             updateSelectColor('petEncyBuff'); 
-            updateSelectColor('petRegStatus');
 
             currentPage = 1; 
             
@@ -2001,11 +1883,9 @@
             updateSelectColor('petGrade');
             updateSelectColor('petPassive');
             updateSelectColor('petEncyBuff');
-            updateSelectColor('petRegStatus');
             updateSelectColor('partyExp');
 
             initCustomSelects();
-            updateEncyProgress();
 
             filterPets();
             
