@@ -505,6 +505,81 @@
         @media (max-width: 650px) {
             .stat-wrapper-grid { grid-template-columns: 1fr !important; }
         }
+        /* 모바일 최적화 스타일 추가 */
+        @media (max-width: 768px) {
+            .navbar { display: flex !important; } /* 모바일에서 네비바 강제 활성화 */
+            
+            .main-container {
+                grid-template-columns: 1fr; /* 2단 배열을 1단으로 변경 */
+                padding: 20px 15px;
+                gap: 15px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            input, select, .custom-select-trigger {
+                padding: 10px 15px;
+                font-size: 16px; /* 모바일 입력 시 자동 줌 방지를 위해 16px 권장 */
+            }
+
+            .nav-container {
+                padding: 10px 15px;
+            }
+
+            .nav-menu {
+                gap: 2px;
+            }
+
+            .nav-item {
+                padding: 6px 8px;
+                font-size: 11px;
+            }
+
+            .nav-logo {
+                font-size: 1rem;
+            }
+
+            /* 경험치 계산기 결과창 조절 */
+            .result-grid {
+                grid-template-columns: 1fr; /* 결과 박스 1단으로 */
+            }
+
+            .res-val {
+                font-size: 1.1rem;
+            }
+
+            /* 도감 필터 영역 조절 */
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-row input, 
+            .filter-row .custom-select-wrapper {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            /* 펫 도감 카드 텍스트 크기 조절 */
+            .res-box span {
+                font-size: 12px;
+            }
+
+            #page-home {
+                min-height: auto;
+                padding-top: 60px;
+            }
+
+            #page-home h1, #page-home div {
+                font-size: 1.8rem !important;
+            }
+            
+            .desktop-notice {
+                display: none; /* 모바일에서는 데스크탑 안내 문구 숨김 */
+            }
+        }
     </style>
 </head>
 <body>
