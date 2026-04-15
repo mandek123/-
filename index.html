@@ -589,30 +589,51 @@
             
             .dropdown-content { right: -10px; /* 모바일에서 화면 밖으로 나가는 것 방지 */ }
         
-        /* 그룹 내부 페이지 버튼 스타일 */
-        .group-pagination {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-top: 15px;
-            padding: 10px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-        }
-        .group-page-btn {
-            padding: 5px 12px;
-            font-size: 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .group-page-btn.active {
-            background: var(--accent-blue);
-            color: white;
-            border-color: var(--accent-blue);
-        }
+        /* 그룹 내부 페이지 버튼 컨테이너 */
+.group-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 25px;
+    padding: 15px 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    border: 1px solid var(--border);
+}
+
+/* 그룹 내부 페이지 버튼 개별 스타일 */
+.group-page-btn {
+    padding: 6px 14px;
+    background: var(--inner-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 35px;
+}
+
+/* 마우스를 올렸을 때 (Hover) */
+.group-page-btn:hover {
+    background: rgba(83, 155, 245, 0.1);
+    border-color: var(--accent-blue);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 활성화된 페이지 (Active) */
+.group-page-btn.active {
+    background: var(--accent-blue);
+    color: #fff;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 12px rgba(83, 155, 245, 0.4);
+}
         }
     </style>
 </head>
@@ -1397,7 +1418,22 @@
             { category: "램가스류", name: "쿠카스", img: "./images/260.gif", elements: "지8 수2", hp: 45.21, atk: 7.38, def: 10.94, spd: 2.31, ghp: 10.58, gatk: 1.73, gdef: 2.56, gspd: 0.54, passive: "강철", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
             { category: "램가스류", name: "쿠카스[還]", img: "./images/261.gif", elements: "지8 수2", hp: 45.55, atk: 7.50, def: 11.20, spd: 2.31, ghp: 10.66, gatk: 1.76, gdef: 2.62, gspd: 0.54, passive: "강철", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
             { category: "램가스류", name: "쿠타스", img: "./images/262.gif", elements: "수6 화4", hp: 48.07, atk: 8.20, def: 9.78, spd: 2.09, ghp: 11.25, gatk: 1.92, gdef: 2.29, gspd: 0.49, passive: "강철", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
-            { category: "램가스류", name: "쿠타스[還]", img: "./images/263.gif", elements: "수6 화4", hp: 49.68, atk: 8.53, def: 10.38, spd: 2.15, ghp: 11.37, gatk: 1.95, gdef: 2.38, gspd: 0.49, passive: "강철", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" }
+            { category: "램가스류", name: "쿠타스[還]", img: "./images/263.gif", elements: "수6 화4", hp: 49.68, atk: 8.53, def: 10.38, spd: 2.15, ghp: 11.37, gatk: 1.95, gdef: 2.38, gspd: 0.49, passive: "강철", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+
+            { category: "쿠쿠르류", name: "노스키", img: "./images/264.gif", elements: "지2 풍8", hp: 41.78, atk: 7.32, def: 7.06, spd: 7.22, ghp: 9.85, gatk: 1.72, gdef: 1.66, gspd: 1.70, passive: "난무", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+            { category: "쿠쿠르류", name: "라스키", img: "./images/265.gif", elements: "화6 풍4", hp: 40.86, atk: 7.94, def: 5.97, spd: 6.56, ghp: 10.02, gatk: 1.95, gdef: 1.46, gspd: 1.61, passive: "난무", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
+            { category: "쿠쿠르류", name: "리스키", img: "./images/266.gif", elements: "지2 수8", hp: 33.75, atk: 5.02, def: 5.48, spd: 4.85, ghp: 10.62, gatk: 1.58, gdef: 1.72, gspd: 1.52, passive: "난무", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+            { category: "쿠쿠르류", name: "리스키[還]", img: "./images/267.gif", elements: "지2 수8", hp: 42.28, atk: 6.33, def: 6.79, spd: 6.25, ghp: 10.82, gatk: 1.62, gdef: 1.74, gspd: 1.60, passive: "난무", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+            { category: "쿠쿠르류", name: "링코링", img: "./images/268.gif", elements: "지5 수5", hp: 53.78, atk: 9.73, def: 8.88, spd: 8.20, ghp: 10.17, gatk: 1.84, gdef: 1.68, gspd: 1.55, passive: "난무", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
+            { category: "쿠쿠르류", name: "범링", img: "./images/269.gif", elements: "지6 풍4", hp: 41.54, atk: 7.71, def: 6.47, spd: 6.23, ghp: 10.04, gatk: 1.86, gdef: 1.56, gspd: 1.51, passive: "난무", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "쿠쿠르류", name: "쿠링", img: "./images/270.gif", elements: "지6 수4", hp: 36.01, atk: 5.95, def: 6.29, spd: 5.42, ghp: 10.14, gatk: 1.68, gdef: 1.77, gspd: 1.52, passive: "난무", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "쿠쿠르류", name: "쿠링[還]", img: "./images/271.gif", elements: "지6 수4", hp: 41.13, atk: 6.81, def: 7.25, spd: 6.20, ghp: 10.28, gatk: 1.70, gdef: 1.81, gspd: 1.55, passive: "난무", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
+            { category: "쿠쿠르류", name: "쿠쿠르", img: "./images/272.gif", elements: "수7 화3", hp: 38.50, atk: 6.25, def: 6.07, spd: 6.10, ghp: 10.30, gatk: 1.67, gdef: 1.62, gspd: 1.63, passive: "난무", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
+            { category: "쿠쿠르류", name: "쿠쿠르[還]", img: "./images/273.gif", elements: "수7 화3", hp: 44.34, atk: 7.26, def: 6.94, spd: 6.86, ghp: 10.53, gatk: 1.72, gdef: 1.65, gspd: 1.63, passive: "난무", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
+            { category: "쿠쿠르류", name: "토끼", img: "./images/274.gif", elements: "수10", hp: 42.61, atk: 7.73, def: 6.43, spd: 6.63, ghp: 10.30, gatk: 1.87, gdef: 1.55, gspd: 1.60, passive: "난무", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
+            { category: "쿠쿠르류", name: "포링", img: "./images/275.gif", elements: "수4 화6", hp: 32.67, atk: 5.55, def: 5.22, spd: 5.13, ghp: 10.07, gatk: 1.71, gdef: 1.61, gspd: 1.58, passive: "난무", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
+            { category: "쿠쿠르류", name: "포링[還]", img: "./images/276.gif", elements: "수4 화6", hp: 39.54, atk: 6.72, def: 6.32, spd: 6.22, ghp: 10.23, gatk: 1.74, gdef: 1.63, gspd: 1.61, passive: "난무", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
+            { category: "쿠쿠르류", name: "프로링", img: "./images/277.gif", elements: "지2 수8", hp: 56.87, atk: 10.79, def: 8.77, spd: 8.80, ghp: 10.31, gatk: 1.95, gdef: 1.59, gspd: 1.59, passive: "난무", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" }
         ];
 
         const RAID_PASSIVE_DATABASE = [
@@ -1445,11 +1481,10 @@
         let currentPage = 1;
         const itemsPerPage = 12; // 검색 시 15마리씩 보려면 15로 수정 가능
         
-        // --- 여기부터 추가 ---
         let categoryCurrentPage = 1; 
         const categoriesPerPage = 15; // 한 페이지에 노출할 종류(카테고리) 개수
         let groupPageStatus = {}; // 각 종류 내부의 페이지 상태 저장
-        // --- 여기까지 추가 ---
+        let currentOpenCategory = null; // 현재 열려있는 카테고리 저장
 
         function showPage(pageId) {
             document.querySelectorAll('.main-container').forEach(p => p.classList.remove('active'));
@@ -1602,14 +1637,22 @@
                 const details = document.createElement('details');
                 details.className = 'ency-group';
                 
+                // [수정 사항 2] 현재 열려있던 카테고리라면 open 속성 유지
+                if (category === currentOpenCategory) {
+                    details.open = true;
+                }
+                
                 // 그룹 내 페이징 처리
                 const petStart = (currentGroupPage - 1) * 15;
                 const pagedPets = pets.slice(petStart, petStart + 15);
 
+                // renderPetsGrouped 함수 내 details.innerHTML 부분 수정
                 details.innerHTML = `
-                    <summary>${category} <span style="font-size:0.8rem; color:#8b949e; font-weight:normal;">(총 ${pets.length}종)</span></summary>
-                    <div class="ency-grid"></div>
-                    <div class="group-pagination" style="display: ${totalGroupPages > 1 ? 'flex' : 'none'};"></div>
+                <summary style="display: flex; justify-content: space-between; align-items: center;">
+                <span>${category} <span style="font-size:0.8rem; color:#8b949e; font-weight:normal; margin-left:5px;">(총 ${pets.length}종)</span></span>
+                </summary>
+                <div class="ency-grid" style="margin-top: 10px;"></div>
+                <div class="group-pagination" style="display: ${totalGroupPages > 1 ? 'flex' : 'none'}; margin-bottom: 20px;"></div>
                 `;
                 
                 const grid = details.querySelector('.ency-grid');
@@ -1627,17 +1670,24 @@
                             e.preventDefault();
                             e.stopPropagation();
                             groupPageStatus[category] = i;
-                            renderPetsGrouped(data);
+                            renderPetsGrouped(data); // 다시 그릴 때 currentOpenCategory 덕분에 닫히지 않음
                         };
                         groupPaginate.appendChild(btn);
                     }
                 }
 
+                // [수정 사항 3] 토글 시 현재 어떤 카테고리가 열렸는지 저장
                 details.addEventListener('toggle', function() {
                     if (this.open) {
+                        currentOpenCategory = category; // 열린 카테고리 이름 저장
                         container.querySelectorAll('.ency-group').forEach(group => {
                             if (group !== this && group.open) group.open = false;
                         });
+                    } else {
+                        // 방금 닫은게 현재 저장된 카테고리라면 초기화
+                        if (currentOpenCategory === category) {
+                            currentOpenCategory = null;
+                        }
                     }
                 });
                 container.appendChild(details);
@@ -1649,7 +1699,6 @@
                 nav.className = 'pagination-container';
                 nav.style.gridColumn = '1 / -1';
                 nav.style.marginTop = '30px';
-                nav.innerHTML = ``;
 
                 for (let i = 1; i <= totalCategoryPages; i++) {
                     const btn = document.createElement('button');
@@ -1657,6 +1706,7 @@
                     btn.innerText = i;
                     btn.onclick = () => {
                         categoryCurrentPage = i;
+                        currentOpenCategory = null; // 페이지 넘길 땐 열린 창 초기화
                         renderPetsGrouped(data);
                         document.getElementById('ency-list').scrollIntoView({ behavior: 'smooth' });
                     };
