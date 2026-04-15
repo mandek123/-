@@ -429,6 +429,43 @@
             gap: 15px;
             align-items: start;
         }
+        /* --- 이 부분을 @media 바깥으로 옮기거나 아래 코드로 교체하세요 --- */
+        .group-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 20px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        }
+
+        .group-page-btn {
+        padding: 5px 12px;
+        background: var(--inner-card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: bold;
+        font-size: 12px;
+        min-width: 32px;
+        }
+
+        .group-page-btn:hover {
+        background: rgba(83, 155, 245, 0.1);
+        border-color: var(--accent-blue);
+        color: #fff;
+        }
+
+        .group-page-btn.active {
+        background: var(--accent-blue);
+        color: #fff;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 8px rgba(83, 155, 245, 0.4);
+        }
         
         @media (max-width: 768px) {
             #ency-list {
@@ -589,7 +626,7 @@
             
             .dropdown-content { right: -10px; /* 모바일에서 화면 밖으로 나가는 것 방지 */ }
         
-        /* 그룹 내부 페이지 버튼 컨테이너 */
+/* 그룹 내부 페이지 버튼 컨테이너 */
 .group-pagination {
     display: flex;
     justify-content: center;
@@ -1612,7 +1649,6 @@
                 return;
             }
 
-            // 1. 카테고리별 그룹화
             const grouped = {};
             data.forEach(pet => {
                 if(!grouped[pet.category]) grouped[pet.category] = [];
@@ -1621,94 +1657,80 @@
 
             const categoryKeys = Object.keys(grouped);
             const totalCategoryPages = Math.ceil(categoryKeys.length / categoriesPerPage);
-            
-            // 2. 현재 페이지에 해당하는 카테고리만 추출
             const startIdx = (categoryCurrentPage - 1) * categoriesPerPage;
             const pagedCategoryKeys = categoryKeys.slice(startIdx, startIdx + categoriesPerPage);
 
-            // 3. 카테고리별로 details 생성
             pagedCategoryKeys.forEach(category => {
                 const pets = grouped[category];
                 if (!groupPageStatus[category]) groupPageStatus[category] = 1;
                 
-                const currentGroupPage = groupPageStatus[category];
-                const totalGroupPages = Math.ceil(pets.length / 15);
-                
                 const details = document.createElement('details');
                 details.className = 'ency-group';
-                
-                // [수정 사항 2] 현재 열려있던 카테고리라면 open 속성 유지
-                if (category === currentOpenCategory) {
-                    details.open = true;
-                }
-                
-                // 그룹 내 페이징 처리
-                const petStart = (currentGroupPage - 1) * 15;
-                const pagedPets = pets.slice(petStart, petStart + 15);
+                if (category === currentOpenCategory) details.open = true;
 
-                // renderPetsGrouped 함수 내 details.innerHTML 부분 수정
-                details.innerHTML = `
-                <summary style="display: flex; justify-content: space-between; align-items: center;">
-                <span>${category} <span style="font-size:0.8rem; color:#8b949e; font-weight:normal; margin-left:5px;">(총 ${pets.length}종)</span></span>
-                </summary>
-                <div class="ency-grid" style="margin-top: 10px;"></div>
-                <div class="group-pagination" style="display: ${totalGroupPages > 1 ? 'flex' : 'none'}; margin-bottom: 20px;"></div>
-                `;
-                
-                const grid = details.querySelector('.ency-grid');
-                const groupPaginate = details.querySelector('.group-pagination');
-
-                pagedPets.forEach(pet => grid.appendChild(createPetCard(pet)));
-
-                // 그룹 내부 페이지 버튼 생성
-                if (totalGroupPages > 1) {
-                    for (let i = 1; i <= totalGroupPages; i++) {
-                        const btn = document.createElement('button');
-                        btn.className = `group-page-btn ${i === currentGroupPage ? 'active' : ''}`;
-                        btn.innerText = i;
-                        btn.onclick = (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            groupPageStatus[category] = i;
-                            renderPetsGrouped(data); // 다시 그릴 때 currentOpenCategory 덕분에 닫히지 않음
-                        };
-                        groupPaginate.appendChild(btn);
+                // 내부 렌더링용 함수 (창을 닫지 않고 내용만 교체)
+                const updateInternalContent = (page) => {
+                    const totalPages = Math.ceil(pets.length / 15);
+                    const start = (page - 1) * 15;
+                    const pagedPets = pets.slice(start, start + 15);
+                    
+                    const grid = details.querySelector('.ency-grid');
+                    const paginate = details.querySelector('.group-pagination');
+                    
+                    grid.innerHTML = '';
+                    pagedPets.forEach(pet => grid.appendChild(createPetCard(pet)));
+                    
+                    paginate.innerHTML = '';
+                    if (totalPages > 1) {
+                        for (let i = 1; i <= totalPages; i++) {
+                            const btn = document.createElement('button');
+                            btn.className = `group-page-btn ${i === page ? 'active' : ''}`;
+                            btn.innerText = i;
+                            btn.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                groupPageStatus[category] = i;
+                                updateInternalContent(i); // 이 부분에서 창 닫힘 없이 내용만 업데이트
+                            };
+                            paginate.appendChild(btn);
+                        }
                     }
-                }
+                };
 
-                // [수정 사항 3] 토글 시 현재 어떤 카테고리가 열렸는지 저장
+                details.innerHTML = `
+                    <summary><span>${category} <span style="font-size:0.8rem; color:#8b949e; font-weight:normal;">(총 ${pets.length}종)</span></span></summary>
+                    <div class="ency-grid" style="margin-top:10px;"></div>
+                    <div class="group-pagination" style="display: ${Math.ceil(pets.length / 15) > 1 ? 'flex' : 'none'};"></div>
+                `;
+
+                container.appendChild(details);
+                updateInternalContent(groupPageStatus[category]);
+
                 details.addEventListener('toggle', function() {
                     if (this.open) {
-                        currentOpenCategory = category; // 열린 카테고리 이름 저장
+                        currentOpenCategory = category;
                         container.querySelectorAll('.ency-group').forEach(group => {
                             if (group !== this && group.open) group.open = false;
                         });
-                    } else {
-                        // 방금 닫은게 현재 저장된 카테고리라면 초기화
-                        if (currentOpenCategory === category) {
-                            currentOpenCategory = null;
-                        }
+                    } else if (currentOpenCategory === category) {
+                        currentOpenCategory = null;
                     }
                 });
-                container.appendChild(details);
             });
 
-            // 4. 하단 종류(카테고리) 이동 버튼
+            // 카테고리 페이징 (하단)
             if (totalCategoryPages > 1) {
                 const nav = document.createElement('div');
                 nav.className = 'pagination-container';
-                nav.style.gridColumn = '1 / -1';
-                nav.style.marginTop = '30px';
-
                 for (let i = 1; i <= totalCategoryPages; i++) {
                     const btn = document.createElement('button');
                     btn.className = 'page-btn' + (i === categoryCurrentPage ? ' active' : '');
                     btn.innerText = i;
                     btn.onclick = () => {
                         categoryCurrentPage = i;
-                        currentOpenCategory = null; // 페이지 넘길 땐 열린 창 초기화
+                        currentOpenCategory = null;
                         renderPetsGrouped(data);
-                        document.getElementById('ency-list').scrollIntoView({ behavior: 'smooth' });
+                        window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
                     };
                     nav.appendChild(btn);
                 }
@@ -1861,18 +1883,17 @@
                 gspd: { min: parseFloat(document.getElementById('min_gspd').value), max: parseFloat(document.getElementById('max_gspd').value) }
             };
 
-            // 검색 활성화 여부 확인
+            // 검색 활성화 여부 확인 
             let isFiltering = false;
-            if (searchText !== '' || element !== 'all' || grade !== 'all' || passive !== 'all' || encyBuff !== 'all') {
-                isFiltering = true;
             if (searchText !== '' || element !== 'all' || grade !== 'all' || passive !== 'all' || encyBuff !== 'all' || regStatus !== 'all') {
                 isFiltering = true;
             }
-            }
-            for (const key in statFilters) {
-                if (!isNaN(statFilters[key].min) || !isNaN(statFilters[key].max)) {
-                    isFiltering = true;
-                    break;
+            if (!isFiltering) {
+                for (const key in statFilters) {
+                    if (!isNaN(statFilters[key].min) || !isNaN(statFilters[key].max)) {
+                        isFiltering = true;
+                        break;
+                    }
                 }
             }
 
