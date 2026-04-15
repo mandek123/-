@@ -588,7 +588,31 @@
             .res-box span { font-size: 12px; }
             
             .dropdown-content { right: -10px; /* 모바일에서 화면 밖으로 나가는 것 방지 */ }
-            
+        
+        /* 그룹 내부 페이지 버튼 스타일 */
+        .group-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+        .group-page-btn {
+            padding: 5px 12px;
+            font-size: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .group-page-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
         }
     </style>
 </head>
@@ -1385,7 +1409,13 @@
         ];
 
         let currentPage = 1;
-        const itemsPerPage = 12;
+        const itemsPerPage = 12; // 검색 시 15마리씩 보려면 15로 수정 가능
+        
+        // --- 여기부터 추가 ---
+        let categoryCurrentPage = 1; 
+        const categoriesPerPage = 15; // 한 페이지에 노출할 종류(카테고리) 개수
+        let groupPageStatus = {}; // 각 종류 내부의 페이지 상태 저장
+        // --- 여기까지 추가 ---
 
         function showPage(pageId) {
             document.querySelectorAll('.main-container').forEach(p => p.classList.remove('active'));
@@ -1508,49 +1538,97 @@
             const container = document.getElementById('ency-list');
             container.innerHTML = '';
             
-            if (data.length === 0) {
-                container.innerHTML = `<div style="text-align: center; padding: 40px; color: #8b949e; grid-column: 1 / -1;"><i class="fa-solid fa-magnifying-glass" style="font-size:2rem; margin-bottom:10px;"></i><br>검색 결과가 없습니다.</div>`;
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: #8b949e; grid-column: 1 / -1;"><i class="fa-solid fa-magnifying-glass" style="font-size:2rem; margin-bottom:10px;"></i><br>데이터가 없습니다.</div>`;
                 return;
             }
 
+            // 1. 카테고리별 그룹화
             const grouped = {};
             data.forEach(pet => {
                 if(!grouped[pet.category]) grouped[pet.category] = [];
                 grouped[pet.category].push(pet);
             });
 
-            for (const [category, pets] of Object.entries(grouped)) {
+            const categoryKeys = Object.keys(grouped);
+            const totalCategoryPages = Math.ceil(categoryKeys.length / categoriesPerPage);
+            
+            // 2. 현재 페이지에 해당하는 카테고리만 추출
+            const startIdx = (categoryCurrentPage - 1) * categoriesPerPage;
+            const pagedCategoryKeys = categoryKeys.slice(startIdx, startIdx + categoriesPerPage);
+
+            // 3. 카테고리별로 details 생성
+            pagedCategoryKeys.forEach(category => {
+                const pets = grouped[category];
+                if (!groupPageStatus[category]) groupPageStatus[category] = 1;
+                
+                const currentGroupPage = groupPageStatus[category];
+                const totalGroupPages = Math.ceil(pets.length / 15);
+                
                 const details = document.createElement('details');
                 details.className = 'ency-group';
                 
+                // 그룹 내 페이징 처리
+                const petStart = (currentGroupPage - 1) * 15;
+                const pagedPets = pets.slice(petStart, petStart + 15);
+
                 details.innerHTML = `
-                    <summary>${category} <span style="font-size:0.9rem; color:#8b949e; font-weight:normal;">(${pets.length}종)</span></summary>
+                    <summary>${category} <span style="font-size:0.8rem; color:#8b949e; font-weight:normal;">(총 ${pets.length}종)</span></summary>
                     <div class="ency-grid"></div>
+                    <div class="group-pagination" style="display: ${totalGroupPages > 1 ? 'flex' : 'none'};"></div>
                 `;
                 
                 const grid = details.querySelector('.ency-grid');
+                const groupPaginate = details.querySelector('.group-pagination');
 
-                pets.forEach(pet => {
-                    grid.appendChild(createPetCard(pet));
-                });
+                pagedPets.forEach(pet => grid.appendChild(createPetCard(pet)));
+
+                // 그룹 내부 페이지 버튼 생성
+                if (totalGroupPages > 1) {
+                    for (let i = 1; i <= totalGroupPages; i++) {
+                        const btn = document.createElement('button');
+                        btn.className = `group-page-btn ${i === currentGroupPage ? 'active' : ''}`;
+                        btn.innerText = i;
+                        btn.onclick = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            groupPageStatus[category] = i;
+                            renderPetsGrouped(data);
+                        };
+                        groupPaginate.appendChild(btn);
+                    }
+                }
 
                 details.addEventListener('toggle', function() {
                     if (this.open) {
                         container.querySelectorAll('.ency-group').forEach(group => {
-                            if (group !== this && group.open) {
-                                group.open = false;
-                            }
+                            if (group !== this && group.open) group.open = false;
                         });
-                        container.prepend(this);
-                        setTimeout(() => {
-                            const navHeight = document.querySelector('.navbar').offsetHeight || 60;
-                            const topPos = this.getBoundingClientRect().top + window.scrollY - navHeight - 20;
-                            window.scrollTo({ top: topPos, behavior: 'smooth' });
-                        }, 50);
                     }
                 });
-
                 container.appendChild(details);
+            });
+
+            // 4. 하단 종류(카테고리) 이동 버튼
+            if (totalCategoryPages > 1) {
+                const nav = document.createElement('div');
+                nav.className = 'pagination-container';
+                nav.style.gridColumn = '1 / -1';
+                nav.style.marginTop = '30px';
+                nav.innerHTML = ``;
+
+                for (let i = 1; i <= totalCategoryPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'page-btn' + (i === categoryCurrentPage ? ' active' : '');
+                    btn.innerText = i;
+                    btn.onclick = () => {
+                        categoryCurrentPage = i;
+                        renderPetsGrouped(data);
+                        document.getElementById('ency-list').scrollIntoView({ behavior: 'smooth' });
+                    };
+                    nav.appendChild(btn);
+                }
+                container.appendChild(nav);
             }
         }
 
