@@ -672,17 +672,161 @@
     box-shadow: 0 0 12px rgba(83, 155, 245, 0.4);
 }
         }
+
+/* ==========================================================
+   페트 초기화 시뮬레이션 전용 CSS (메인 테마 연동 & 크기 확대)
+   ========================================================== */
+.sim-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 15px;
+    padding: 25px; /* 전체 패딩 확대 */
+}
+
+.sim-panel {
+    background: var(--inner-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px; /* 패널 내부 여백 확대 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    transition: box-shadow 0.3s ease;
+}
+
+.sim-panel:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.sim-left { flex: 1.2; min-width: 280px; display: flex; flex-direction: column; align-items: center; }
+.sim-middle { flex: 2; min-width: 350px; }
+.sim-right { flex: 1.2; min-width: 280px; max-height: 480px; overflow-y: auto; }
+
+#sim-pet-search {
+    width: 100%;
+    margin-bottom: 0;
+    padding: 15px; /* 검색창 크기 확대 */
+    font-size: 15px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.sim-pet-display {
+    min-height: 220px; /* 이미지 영역 확대 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 25px;
+    background: rgba(0,0,0,0.2);
+    width: 100%;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+}
+
+.sim-pet-display img {
+    max-width: 120%; /* 이미지도 조금 더 크게 */
+    max-height: 200px;
+    object-fit: contain;
+}
+
+.sim-search-results {
+    position: absolute;
+    top: 100%; left: 0; width: 100%;
+    background-color: var(--inner-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 5px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.sim-search-item {
+    padding: 15px; cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px; transition: background 0.2s;
+}
+.sim-search-item:hover { background-color: rgba(83, 155, 245, 0.1); color: var(--accent-blue); font-weight: bold; }
+
+.sim-stat-table {
+    width: 100%; text-align: center;
+    border-collapse: collapse; margin-bottom: 25px;
+    font-size: 15px; /* 표 글씨 크기 확대 */
+}
+.sim-stat-table th, .sim-stat-table td {
+    padding: 14px; border: 1px solid var(--border); /* 셀 여백 확대 */
+}
+.sim-stat-table th { background-color: rgba(0,0,0,0.2); color: #8b949e; font-weight: 600; }
+.sim-stat-table td:nth-child(2) { color: #5cb85c; font-weight: bold; }
+
+.sim-warning {
+    font-size: 14px; line-height: 1.6; /* 경고문 크기 확대 */
+    background: rgba(83, 155, 245, 0.05);
+    padding: 18px; border-radius: 8px;
+    border: 1px solid rgba(83, 155, 245, 0.15);
+    margin-bottom: 25px; color: #8b949e;
+}
+
+.sim-actions { display: flex; gap: 15px; justify-content: center; }
+.sim-actions button { padding: 12px 25px; font-size: 15px; } /* 버튼 크기 확대 */
+.sim-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.sim-history-title {
+    text-align: center; font-weight: bold; font-size: 15px;
+    padding: 12px; margin-bottom: 15px;
+    background: rgba(0,0,0,0.2); border-radius: 8px;
+}
+#sim-history-list { list-style: none; padding: 0; margin: 0; font-size: 14px; }
+#sim-history-list li { padding: 12px 8px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;}
+/* ==========================================================
+   👆👆👆 페트 초기화 시뮬레이션 관련 CSS 끝 👆👆👆
+   ========================================================== */
+
+   #sim-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #1e242b;
+    border: 1px solid #3d4550;
+    border-radius: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 5px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.sim-search-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #2a313b;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.sim-search-item:hover {
+    background-color: rgba(83, 155, 245, 0.2);
+    color: #539bf5;
+    font-weight: bold;
+}
+
     </style>
 </head>
 <body>
 
-    <div class="desktop-notice">
-        <span style="color: #ff7b72; font-weight: bold; margin-right: 15px;">
-            <i class="fa-solid fa-bullhorn"></i> [최신 공지] 26년 4월 15일 업데이트
-        </span>
-        1) 도감 등록 체크 및 도감현황 기능 추가 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 2) 모바일 UI 최적화 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 3) 페트 도감 업데이트
+    <body>
+    <div class="desktop-notice" id="top-notice-banner">
+        불러오는 중...
     </div>
+
+    <nav class="navbar">
+        ...
+    </nav>
+
+    <div class="main-container active" id="page-home">
+        ...
     </div>
+</body>
 
     <nav class="navbar">
         <div class="nav-container">
@@ -704,10 +848,11 @@
                 <div class="dropdown">
                     <a href="javascript:void(0);" class="nav-item" id="menu-etc">⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
                     <div class="dropdown-content">
-                        <a href="javascript:void(0);" onclick="showPage('page-bot'); closeDropdown();"><i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 만득봇 안내</a>
-                        <a href="javascript:void(0);" onclick="showPage('page-raid-guide'); closeDropdown();"><i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 레이드 패시브 안내</a>
-                    </div>
+                    <a href="javascript:void(0);" onclick="showPage('page-bot'); closeDropdown();"><i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 만득봇 안내</a>
+                    <a href="javascript:void(0);" onclick="showPage('page-raid-guide'); closeDropdown();"><i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 레이드 패시브 안내</a>
+                    <a href="javascript:void(0);" onclick="showPage('page-init-sim'); closeDropdown();"><i class="fa-solid fa-rotate" style="color: #a5d6ff; width: 18px;"></i> 초기화 시뮬레이션</a>
                 </div>
+            </div>
             </div>
         </div>
     </nav>
@@ -737,7 +882,7 @@
                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
             </div>
             
-            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-init-sim')">
                 <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 10px;"></i>
                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
             </div>
@@ -751,7 +896,12 @@
     <div class="main-container" id="page-notice">
         <div class="card" style="grid-column: span 2;">
             <div class="card-header"><i class="fa-solid fa-bullhorn"></i> 공지사항</div>
-            
+        
+            <div id="notice-list-container"></div>
+
+            <div id="notice-pagination" class="pagination-container" style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;"></div>
+        </div>
+    </div>
             <div class="notice-list">
                 <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
                     <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
@@ -1127,6 +1277,68 @@
         </div>
     </div>
 
+    <div class="main-container" id="page-init-sim">
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-header"><i class="fa-solid fa-rotate" style="color: #a5d6ff;"></i> 페트 초기화 시뮬레이션</div>
+            
+            <div class="sim-container">
+<div class="sim-panel sim-left">
+    <div class="sim-pet-selector" style="position: relative; width: 100%;">
+        <input type="text" id="sim-pet-search" placeholder="🔍 페트 이름 검색..." autocomplete="off">
+        <div id="sim-search-results" class="sim-search-results" style="display: none;"></div>
+    </div>
+    <div class="sim-pet-display">
+        <img id="sim-pet-img" src="" alt="페트 이미지" style="display:none; max-width: 100%;">
+    </div>
+    <div class="sim-prob-desc" style="font-size: 15px; color: #8b949e; text-align: center; margin-top: 15px; line-height: 1.5; word-break: keep-all;">
+        <br>
+        <br>
+        ※ <b>S베이스 확률 (1/625)</b><br>
+        각 스탯(체/공/방/순)마다 최대치가 뜰 확률(1/5)이<br>
+        모두 적중해야 S베이스로 판정됩니다.
+    </div>
+</div>
+
+    <div class="sim-panel sim-middle">
+        <table class="sim-stat-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>현재</th>
+                    <th>초기</th>
+                    <th>수치</th>
+                </tr>
+            </thead>
+            <tbody id="sim-stat-body">
+                <tr><td>레벨</td><td>1</td><td>1</td><td class="stat-diff">-</td></tr>
+                <tr><td>체력</td><td id="curr-hp">-</td><td id="base-hp">-</td><td id="diff-hp" class="stat-diff">+0</td></tr>
+                <tr><td>공격력</td><td id="curr-atk">-</td><td id="base-atk">-</td><td id="diff-atk" class="stat-diff">+0</td></tr>
+                <tr><td>방어력</td><td id="curr-def">-</td><td id="base-def">-</td><td id="diff-def" class="stat-diff">+0</td></tr>
+                <tr><td>순발력</td><td id="curr-spd">-</td><td id="base-spd">-</td><td id="diff-spd" class="stat-diff">+0</td></tr>
+            </tbody>
+        </table>
+
+        <div class="sim-warning">
+            <div style="margin-bottom: 5px;">1. 모든 능력치를 Lv.1 무작위로 초기화합니다.</div>
+            <div style="margin-bottom: 5px;">2. 초기화 이후 이전 능력치로 절대 되돌릴 수 없습니다.</div>
+            <div style="color: var(--accent-orange); font-weight: bold;">3. 확정 S베이스 천장: <span id="sim-pity-count">0</span> / 200</div>
+        </div>
+
+        <div class="sim-actions">
+            <button class="page-btn" id="sim-btn-1" onclick="runSimReset(1)">확인 (1회)</button>
+            <button class="page-btn active" id="sim-btn-10" onclick="runSimReset(10)">확인 (10회)</button>
+        </div>
+    </div>
+
+    <div class="sim-panel sim-right">
+        <div class="sim-history-title">초기화 기록</div>
+        <ul id="sim-history-list">
+            <li class="sim-empty-history" style="text-align: center; color: #888; padding: 20px 0;">기록이 존재하지 않습니다.</li>
+        </ul>
+    </div>
+</div>
+        </div>
+    </div>
     <div class="main-container" id="page-raid-guide">
         <div class="card" style="grid-column: span 2;">
             <div class="card-header"><i class="fa-solid fa-fire"></i> 레이드 전투 패시브 가이드</div>
@@ -1736,6 +1948,7 @@
             
             if(pageId === 'page-raid-guide') renderRaidPassives(RAID_PASSIVE_DATABASE);
             if(pageId === 'page-ency-status') renderEncyStatusPage();
+            if(pageId === 'page-notice') renderNoticeList(1); 
             window.scrollTo(0, 0); 
         }
 
@@ -2441,7 +2654,98 @@
                 sel.customUpdate(); 
             });
         }
+/* ==========================================================
+   공지사항 데이터 관리 및 페이징 로직
+   ========================================================== */
 
+const MANDEK_NOTICES = [
+    {
+        date: "26년 4월 16일",
+        title: "26년 4월 16일 공지사항입니다.",
+        content: "<strong>1) 페트 도감 업데이트</strong><br>- 라고고류, 베론류, 북이류, 네고스류, 램가스류, 쿠쿠르류, 큐이류, 고르돈류, 쿠보류, 카쿠류, 펜타스류, 쟈그류, 기가로스류, 무이류, 프라키토스류, 만모류, 도라비스류, 카키류",
+        summary: "1) 페트 도감 업데이트 (라고고류 외 17종)" 
+    },
+    {
+        date: "26년 4월 15일",
+        title: "26년 4월 15일 공지사항입니다.",
+        content: "<strong>1) 페트 도감 업데이트</strong><br>- 도감 등록 체크 및 현황 기능 추가<br><strong>2) 모바일 최적화</strong><br>- UI/폰트 조절<br><strong>3) 도감 정보 업데이트</strong><br>- 카우거류, 바우트류, 샤크론류 추가",
+        summary: "1) 도감 체크 기능 추가 | 2) 모바일 UI 최적화 | 3) 도감 업데이트"
+    },
+    {
+        date: "26년 4월 14일",
+        title: "26년 4월 14일 공지사항입니다.",
+        content: "1) 월드경험치 적용 선택칸 추가<br>2) 도감정보 신규 업데이트<br>3) 문명의기록 배율 66% 수정",
+        summary: "1) 월드경험치 추가 | 2) 도감 신규 업데이트 | 3) 문명 배율 수정"
+    },
+    {
+        date: "26년 4월 13일",
+        title: "26년 4월 13일 공지사항입니다.",
+        content: "1) 해저사냥터 경험치 수정<br>2) 스탯 검색 기능 추가<br>3) UI 업데이트",
+        summary: "1) 해저 경험치 수정 | 2) 스탯 검색 추가 | 3) UI 업데이트"
+    }
+];
+
+let noticeCurrentPage = 1;
+const noticeItemsPerPage = 3;
+
+// 상단 배너 업데이트 (첫 번째 공지만 NEW 마크)
+function updateTopNoticeBanner() {
+    const banner = document.getElementById('top-notice-banner');
+    if (!banner || MANDEK_NOTICES.length === 0) return;
+    const latest = MANDEK_NOTICES[0];
+    banner.innerHTML = `
+        <span style="color: #ff7b72; font-weight: bold; margin-right: 15px;">
+            <i class="fa-solid fa-bullhorn"></i> [최신 공지] ${latest.date} 업데이트
+        </span>
+        ${latest.summary}
+    `;
+}
+
+// 공지사항 리스트 렌더링
+function renderNoticeList(page) {
+    const container = document.getElementById('notice-list-container');
+    if (!container) return;
+    container.innerHTML = "";
+    
+    const start = (page - 1) * noticeItemsPerPage;
+    const pagedData = MANDEK_NOTICES.slice(start, start + noticeItemsPerPage);
+
+    pagedData.forEach((notice, index) => {
+        const absoluteIndex = MANDEK_NOTICES.length - (start + index);
+        const isLatest = (page === 1 && index === 0); // 전체 중 가장 최신글 하나만 NEW
+
+        const item = document.createElement('div');
+        item.style.cssText = "background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;";
+        item.innerHTML = `
+            <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#${absoluteIndex}</span>
+                ${notice.title}
+                ${isLatest ? '<span style="background-color: #ff7b72; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold;">NEW</span>' : ''}
+            </div>
+            <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">${notice.content}</div>
+        `;
+        container.appendChild(item);
+    });
+    renderNoticePagination();
+}
+
+// 공지사항 페이징 버튼 생성
+function renderNoticePagination() {
+    const pagination = document.getElementById('notice-pagination');
+    const totalPages = Math.ceil(MANDEK_NOTICES.length / noticeItemsPerPage);
+    pagination.innerHTML = "";
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn ${i === noticeCurrentPage ? 'active' : ''}`;
+        btn.innerText = i;
+        btn.onclick = () => {
+            noticeCurrentPage = i;
+            renderNoticeList(i);
+            window.scrollTo(0, 0);
+        };
+        pagination.appendChild(btn);
+    }
+}
         window.onload = () => {
             updateSelectColor('calcMode');
             updateSelectColor('huntingGround');
@@ -2459,7 +2763,335 @@
             
             showPage('page-home');
             initExpTable();
+            updateTopNoticeBanner(); 
         };
+
+/* ==========================================================
+   👇👇👇 페트 초기화 시뮬레이션 관련 JavaScript 👇👇👇
+   ========================================================== */
+let simTotalCount = 0;
+let currentSimPet = null;
+let isSimLocked = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('sim-pet-search');
+    const resultsDiv = document.getElementById('sim-search-results');
+
+    if(searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const val = e.target.value.trim().toLowerCase();
+            resultsDiv.innerHTML = '';
+            
+            if (!val || typeof PET_DATABASE === 'undefined') {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            const filtered = PET_DATABASE.filter(pet => pet.name.toLowerCase().includes(val));
+            
+            if (filtered.length > 0) {
+                resultsDiv.style.display = 'block';
+                filtered.forEach(pet => {
+                    const div = document.createElement('div');
+                    div.className = 'sim-search-item';
+                    div.innerText = pet.name; 
+                    div.onclick = function() {
+                        searchInput.value = pet.name;
+                        resultsDiv.style.display = 'none';
+                        currentSimPet = pet;
+                        updateSimPetInfo();
+                    };
+                    resultsDiv.appendChild(div);
+                });
+            } else {
+                resultsDiv.style.display = 'none';
+            }
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if(resultsDiv && !e.target.closest('.sim-pet-selector')) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+});
+
+function updateSimPetInfo() {
+    const petImg = document.getElementById('sim-pet-img');
+    if (!currentSimPet) return;
+
+    if (currentSimPet.image) {
+        petImg.src = `./images/${currentSimPet.image}.png`;
+        petImg.style.display = "block";
+    } else {
+        petImg.style.display = "none";
+    }
+
+    document.getElementById('base-hp').innerText = Number(currentSimPet.hp || 0).toFixed(2);
+    document.getElementById('base-atk').innerText = Number(currentSimPet.atk || 0).toFixed(2);
+    document.getElementById('base-def').innerText = Number(currentSimPet.def || 0).toFixed(2);
+    document.getElementById('base-spd').innerText = Number(currentSimPet.spd || 0).toFixed(2);
+
+    resetSimUIStats();
+}
+
+function resetSimUIStats() {
+    const ids = ['curr-hp', 'curr-atk', 'curr-def', 'curr-spd'];
+    ids.forEach(id => document.getElementById(id).innerText = "-");
+    
+    document.querySelectorAll('.stat-diff').forEach(el => { 
+        el.innerText = "-"; 
+        el.style.color = "#8b949e"; 
+    });
+    
+    simTotalCount = 0;
+    isSimLocked = false;
+    document.getElementById('sim-btn-1').disabled = false;
+    document.getElementById('sim-btn-10').disabled = false;
+    
+    document.getElementById('sim-pity-count').innerText = "0";
+    document.getElementById('sim-history-list').innerHTML = '<li class="sim-empty-history" style="text-align: center; color: #888; padding: 20px 0;">기록이 존재하지 않습니다.</li>';
+}
+
+/* ==========================================================
+              개선된 페트 초기화 시뮬레이션 로직
+   ========================================================== */
+
+function runSimReset(times) {
+    if (!currentSimPet) {
+        alert("시뮬레이션을 돌릴 페트를 먼저 검색해서 선택해주세요!");
+        return;
+    }
+    
+    if (isSimLocked) {
+        alert("최고 등급에 도달했거나 천장에 도달하여 초기화가 완료되었습니다.\n새로운 페트를 검색하여 다시 시작해주세요.");
+        return;
+    }
+
+    const historyList = document.getElementById('sim-history-list');
+    const emptyMsg = historyList.querySelector('.sim-empty-history');
+    if (emptyMsg) emptyMsg.remove();
+
+    let lastResultObj = null;
+
+    for (let i = 0; i < times; i++) {
+        simTotalCount++;
+        let isPity = (simTotalCount % 200 === 0);
+        
+        // 1. 랭크 확률 먼저 결정
+        let targetRank = "";
+        let isSBaseHit = isPity || (Math.floor(Math.random() * 625) === 0);
+
+        if (isSBaseHit) {
+            targetRank = (Math.random() < 0.3) ? 'S+' : 'S';
+        } else {
+            const rand = Math.random() * 100;
+            if (rand < 5) targetRank = 'A';
+            else if (rand < 20) targetRank = 'B';
+            else if (rand < 50) targetRank = 'C';
+            else if (rand < 80) targetRank = 'D';
+            else targetRank = 'F';
+        }
+
+        // 2. 결정된 랭크에 따라 '총합 하락치 -10 이내'를 준수하며 스탯 생성
+        let mockStats = generateMockStatsByRank(currentSimPet, targetRank);
+        
+        lastResultObj = { rank: targetRank, stats: mockStats, pity: isPity };
+
+        const li = document.createElement('li');
+        let rankColor = getRankColor(targetRank);
+        
+        li.innerHTML = `<span>[${simTotalCount}회차]</span> <span style="color:${rankColor}; font-weight:bold;">${targetRank}급 ${isPity ? '<span style="color:#fca311; font-size:11px;">(천장)</span>' : ''}</span>`;
+        historyList.prepend(li);
+
+        if (historyList.children.length > 30) historyList.removeChild(historyList.lastChild);
+
+        if (['S', 'S+'].includes(targetRank) || isPity) {
+            isSimLocked = true;
+            document.getElementById('sim-btn-1').disabled = true;
+            document.getElementById('sim-btn-10').disabled = true;
+            break; 
+        }
+    }
+
+    document.getElementById('sim-pity-count').innerText = simTotalCount % 200;
+    if(lastResultObj) renderMockStats(currentSimPet, lastResultObj.stats);
+}
+
+// 랭크별로 하락폭을 제어하는 스탯 생성기
+function generateMockStatsByRank(basePet, rank) {
+    const base = {
+        hp: Number(basePet.hp || 0),
+        atk: Number(basePet.atk || 0),
+        def: Number(basePet.def || 0),
+        spd: Number(basePet.spd || 0)
+    };
+
+    let result = { ...base };
+    let targetTotalDiff = 0;
+
+    // 1. 요청하신 등급별 총합 하락/상승 범위 설정
+    if (rank === 'S+') {
+        // S+ 기준: 총합 점수 +1.0 이상 (기존 S+ 공식용으로 높은 수치 생성)
+        targetTotalDiff = 1.5 + (Math.random() * 2.5); // +1.5 ~ +4.0
+    } else if (rank === 'S') {
+        targetTotalDiff = -2.0 + (Math.random() * 4.0); // -2.0 ~ +2.0
+    } else if (rank === 'A') {
+        targetTotalDiff = -5.0 + (Math.random() * 3.0); // -5.0 ~ -2.0
+    } else if (rank === 'B') {
+        targetTotalDiff = -8.0 + (Math.random() * 3.0); // -8.0 ~ -5.0
+    } else if (rank === 'C') {
+        targetTotalDiff = -9.0 + (Math.random() * 1.0); // -9.0 ~ -8.0
+    } else if (rank === 'D') {
+        targetTotalDiff = -10.0; // 딱 -10.0
+    } else {
+        // F급: -10.0 미만
+        targetTotalDiff = -10.1 - (Math.random() * 10.0); // -10.1 ~ -20.1
+    }
+
+    // 2. 결정된 targetTotalDiff를 4개 능력치에 분배
+    // 가중치를 주어 한 능력치만 너무 많이 깎이지 않게 조절
+    let weights = [0.4, 0.2, 0.2, 0.2]; // 체력에 가중치를 조금 더 둠
+    if (targetTotalDiff < 0) {
+        // 하락할 때는 랜덤하게 분배
+        let rWeights = [Math.random() + 0.5, Math.random(), Math.random(), Math.random()];
+        let sum = rWeights.reduce((a, b) => a + b, 0);
+        
+        result.hp += (rWeights[0] / sum) * targetTotalDiff;
+        result.atk += (rWeights[1] / sum) * targetTotalDiff;
+        result.def += (rWeights[2] / sum) * targetTotalDiff;
+        result.spd += (rWeights[3] / sum) * targetTotalDiff;
+    } else {
+        // 상승할 때는 균등하게 분배
+        result.hp += (targetTotalDiff * 0.4);
+        result.atk += (targetTotalDiff * 0.2);
+        result.def += (targetTotalDiff * 0.2);
+        result.spd += (targetTotalDiff * 0.2);
+    }
+
+    return result;
+}
+
+// 스탯 생성 함수 (S베이스 적중 여부에 따라 가중치 변경)
+function generateMockStats(basePet, isPity) {
+    const baseHp = Number(basePet.hp || 0);
+    const baseAtk = Number(basePet.atk || 0);
+    const baseDef = Number(basePet.def || 0);
+    const baseSpd = Number(basePet.spd || 0);
+
+    let isSBaseHit = isPity || (Math.floor(Math.random() * 625) === 0);
+    
+    let stats = { hp: 0, atk: 0, def: 0, spd: 0 };
+
+    if (isSBaseHit) {
+        // S베이스 적중 시 기본적으로 MAX(초기치). 
+        // 30% 확률로 잉여 스탯이 랜덤하게 추가 분배되어 오버능(S+) 발생
+        stats.hp = baseHp; stats.atk = baseAtk; stats.def = baseDef; stats.spd = baseSpd;
+        
+        if (Math.random() < 0.3) {
+            // 체력은 오버치 * 3 효과를 내기 위해 좀 더 큰 숫자로 붙음
+            stats.hp += Math.random() * 6;  
+            stats.atk += Math.random() * 2;
+            stats.def += Math.random() * 2;
+            stats.spd += Math.random() * 2;
+        }
+    } else {
+        // 실패 시 스탯 랜덤 깎임
+        let modifier = 0.6 + (Math.random() * 0.38); // 0.6 ~ 0.98 사이
+        stats.hp = baseHp * (modifier + Math.random() * 0.02);
+        stats.atk = baseAtk * (modifier + Math.random() * 0.02);
+        stats.def = baseDef * (modifier + Math.random() * 0.02);
+        stats.spd = baseSpd * (modifier + Math.random() * 0.02);
+    }
+
+    return stats;
+}
+
+// 랭크 판정 로직 수정 (사용자 지정 범위 기준)
+function calculateRankFromStats(basePet, curStats) {
+    const baseHp = Number(basePet.hp || 0);
+    const baseAtk = Number(basePet.atk || 0);
+    const baseDef = Number(basePet.def || 0);
+    const baseSpd = Number(basePet.spd || 0);
+
+    // 실제 수치 차이 총합 계산
+    let diffHp = curStats.hp - baseHp;
+    let diffAtk = curStats.atk - baseAtk;
+    let diffDef = curStats.def - baseDef;
+    let diffSpd = curStats.spd - baseSpd;
+    
+    let totalDiff = diffHp + diffAtk + diffDef + diffSpd;
+
+    // S+ 판정용 특수 점수 (체력 1/3 반영)
+    let overHp = Math.max(0, diffHp);
+    let overAtk = Math.max(0, diffAtk);
+    let overDef = Math.max(0, diffDef);
+    let overSpd = Math.max(0, diffSpd);
+    let sPlusScore = (overHp / 3) + overAtk + overDef + overSpd;
+
+    // 판정 우선순위
+    if (sPlusScore >= 1.0) return 'S+';
+    if (totalDiff >= -2.0) return 'S';
+    if (totalDiff >= -5.0) return 'A';
+    if (totalDiff >= -8.0) return 'B';
+    if (totalDiff >= -9.0) return 'C';
+    if (totalDiff >= -10.0) return 'D';
+    return 'F';
+}
+
+function getRankColor(rank) {
+    switch(rank) {
+        case 'S+': return '#ff7b72'; // 붉은색
+        case 'S': return '#ffcc00';  // 골드
+        case 'A': return '#fca311';  // 오렌지
+        case 'B': return '#539bf5';  // 블루
+        case 'C': return '#8b949e';  // 그레이
+        default: return '#555555';
+    }
+}
+
+// 화면에 스탯 텍스트 렌더링
+function renderMockStats(basePet, stats) {
+    const baseHp = Number(basePet.hp || 0);
+    const baseAtk = Number(basePet.atk || 0);
+    const baseDef = Number(basePet.def || 0);
+    const baseSpd = Number(basePet.spd || 0);
+
+    document.getElementById('curr-hp').innerText = stats.hp.toFixed(2);
+    document.getElementById('curr-atk').innerText = stats.atk.toFixed(2);
+    document.getElementById('curr-def').innerText = stats.def.toFixed(2);
+    document.getElementById('curr-spd').innerText = stats.spd.toFixed(2);
+
+    updateDiff('diff-hp', stats.hp, baseHp);
+    updateDiff('diff-atk', stats.atk, baseAtk);
+    updateDiff('diff-def', stats.def, baseDef);
+    updateDiff('diff-spd', stats.spd, baseSpd);
+}
+
+// updateDiff 함수 보정 (색상 로직 유지)
+function updateDiff(elementId, curVal, baseVal) {
+    const el = document.getElementById(elementId);
+    let diff = (curVal - baseVal).toFixed(2);
+    let diffNum = parseFloat(diff);
+
+    if (diffNum >= 1.0) {
+        el.innerText = "+" + diff;
+        el.style.color = "#ffcc00"; // 노란색
+    } else if (diffNum > 0) {
+        el.innerText = "+" + diff;
+        el.style.color = "#539bf5"; // 파란색
+    } else if (diffNum === 0) {
+        el.innerText = "+0.00"; 
+        el.style.color = "#ffcc00"; // 노란색
+    } else {
+        el.innerText = diff; // 음수
+        el.style.color = "#ff7b72"; // 빨간색
+    }
+}
+/* ==========================================================
+   👆👆👆 페트 초기화 시뮬레이션 관련 JavaScript 끝 👆👆👆
+   ========================================================== */
+    
     </script>
 </body>
 </html>
