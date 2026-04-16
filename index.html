@@ -1257,17 +1257,24 @@
 <div class="sim-panel sim-left">
     <div class="sim-pet-selector" style="position: relative; width: 100%;">
         <input type="text" id="sim-pet-search" placeholder="🔍 페트 이름 검색..." autocomplete="off">
-        <div id="sim-pet-image-area" style="text-align: center; margin: 20px 0;">
-    <img id="sim-pet-img" src="" style="max-height: 120px; display: none; margin: 0 auto; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)); transition: all 0.3s;">
-</div>
         <div id="sim-search-results" class="sim-search-results" style="display: none;"></div>
     </div>
-    <div class="sim-pet-display">
-        <img id="sim-pet-img" src="" alt="페트 이미지" style="display:none; max-width: 100%;">
+
+    <div id="sim-pet-image-container" style="
+        border: 2px dashed #444; 
+        border-radius: 12px; 
+        height: 200px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        margin: 20px 0; 
+        background: rgba(0,0,0,0.2);
+    ">
+        <div id="sim-placeholder" style="color: #555; font-size: 14px;">페트를 검색해 주세요</div>
+        <img id="sim-pet-img" src="" style="display: none; max-height: 160px; max-width: 160px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
     </div>
+
     <div class="sim-prob-desc" style="font-size: 15px; color: #8b949e; text-align: center; margin-top: 15px; line-height: 1.5; word-break: keep-all;">
-        <br>
-        <br>
         ※ <b>S베이스 확률 (1/625)</b><br>
         각 스탯(체/공/방/순)마다 최대치가 뜰 확률(1/5)이<br>
         모두 적중해야 S베이스로 판정됩니다.
@@ -2755,20 +2762,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function updateSimPetInfo() {
     const petImg = document.getElementById('sim-pet-img');
+    const placeholder = document.getElementById('sim-placeholder');
     if (!currentSimPet || !petImg) return;
 
-    // 데이터베이스의 img 속성("./images/1.gif")을 그대로 연동
     if (currentSimPet.img) {
         petImg.src = currentSimPet.img; 
-        petImg.style.display = "block";
+        petImg.style.display = "block"; // 이미지 보임
+        if (placeholder) placeholder.style.display = "none"; // 문구 숨김
         
-        // 이미지 로드 실패 시 처리
-        petImg.onerror = () => { petImg.style.display = "none"; };
+        petImg.onerror = () => { 
+            petImg.style.display = "none";
+            if (placeholder) { placeholder.style.display = "block"; placeholder.innerText = "이미지 없음"; }
+        };
     } else {
         petImg.style.display = "none";
+        if (placeholder) placeholder.style.display = "block";
     }
 
-    // 기본 능력치 업데이트 (기존 로직 유지)
+    // 기본 스탯 업데이트
     document.getElementById('base-hp').innerText = Number(currentSimPet.hp || 0).toFixed(2);
     document.getElementById('base-atk').innerText = Number(currentSimPet.atk || 0).toFixed(2);
     document.getElementById('base-def').innerText = Number(currentSimPet.def || 0).toFixed(2);
