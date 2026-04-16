@@ -846,6 +846,50 @@
     font-weight: bold;
 }
 
+/* S베이스 획득 팝업 스타일 */
+#sRankPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    z-index: 9999;
+    background: rgba(20, 20, 25, 0.95);
+    border: 3px solid #ffcc00;
+    border-radius: 20px;
+    padding: 40px 60px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 204, 0, 0.5);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+}
+#sRankPopup.show {
+    display: block;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+.popup-title {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #ffcc00;
+    text-shadow: 0 0 20px rgba(255, 204, 0, 0.8);
+    margin-bottom: 10px;
+}
+.popup-msg {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+}
+.popup-close-btn {
+    background: #ffcc00;
+    color: #000;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
     </style>
 </head>
 <body>
@@ -2880,11 +2924,18 @@ function runSimReset(times) {
         if (historyList.children.length > 30) historyList.removeChild(historyList.lastChild);
 
         if (['S', 'S+'].includes(targetRank) || isPity) {
-            isSimLocked = true;
-            document.getElementById('sim-btn-1').disabled = true;
-            document.getElementById('sim-btn-10').disabled = true;
-            break; 
-        }
+    isSimLocked = true;
+    document.getElementById('sim-btn-1').disabled = true;
+    document.getElementById('sim-btn-10').disabled = true;
+
+    // --- 추가된 코드: S등급 팝업 및 폭죽 실행 ---
+    setTimeout(() => {
+        triggerSRankEffect();
+    }, 500); 
+    // ---------------------------------------
+
+    break; 
+}
     }
 
     document.getElementById('sim-pity-count').innerText = simTotalCount % 200;
@@ -3131,7 +3182,59 @@ function updateTopNoticeBanner() {
         </span>
     `;
 }
-// --- 여기까지 ---
+
+function triggerSRankEffect() {
+    const popup = document.getElementById('sRankPopup');
+    popup.style.display = 'block';
+    setTimeout(() => popup.classList.add('show'), 10);
+
+    // 양옆에서 터지는 폭죽 효과
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+    function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+            return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        // 왼쪽 폭죽
+        confetti(Object.assign({}, defaults, { 
+            particleCount, 
+            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } 
+        }));
+        // 오른쪽 폭죽
+        confetti(Object.assign({}, defaults, { 
+            particleCount, 
+            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } 
+        }));
+    }, 250);
+}
+
+// 팝업 닫기
+function closeSRankPopup() {
+    const popup = document.getElementById('sRankPopup');
+    popup.classList.remove('show');
+    setTimeout(() => popup.style.display = 'none', 300);
+}
     </script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<div id="sRankPopup">
+    <div class="popup-title">S베이스 "득"!</div>
+    <div class="popup-msg">축하합니다! 최상위 등급 페트를 획득했습니다.</div>
+    <button class="popup-close-btn" onclick="closeSRankPopup()">확인</button>
+</div>
+
+
+
 </body>
 </html>
