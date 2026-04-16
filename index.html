@@ -5,7 +5,7 @@ function updateSimPetInfo() {
     // 이미지 경로 설정: 이미지 데이터가 있을 경우 노출
     if (currentSimPet.image) {
         // 경로 예시: ./images/페트파일명.png
-        petImg.src = `./images/${currentSimPet.image}.png`;
+        petImg.src = `./images/${currentSimPet.image}.gif`;
         petImg.style.display = "block";
         
         // 이미지 로드 실패 시 숨김 처리 (예외처리)
