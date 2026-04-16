@@ -814,19 +814,13 @@
 </head>
 <body>
 
-    <body>
-    <div class="desktop-notice" id="top-notice-banner">
-        불러오는 중...
+    <div class="desktop-notice">
+        <span style="color: #ff7b72; font-weight: bold; margin-right: 15px;">
+            <i class="fa-solid fa-bullhorn"></i> [최신 공지] 26년 4월 15일 업데이트
+        </span>
+        1) 도감 등록 체크 및 도감현황 기능 추가 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 2) 모바일 UI 최적화 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 3) 페트 도감 업데이트
     </div>
-
-    <nav class="navbar">
-        ...
-    </nav>
-
-    <div class="main-container active" id="page-home">
-        ...
     </div>
-</body>
 
     <nav class="navbar">
         <div class="nav-container">
@@ -896,12 +890,7 @@
     <div class="main-container" id="page-notice">
         <div class="card" style="grid-column: span 2;">
             <div class="card-header"><i class="fa-solid fa-bullhorn"></i> 공지사항</div>
-        
-            <div id="notice-list-container"></div>
-
-            <div id="notice-pagination" class="pagination-container" style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;"></div>
-        </div>
-    </div>
+            
             <div class="notice-list">
                 <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
                     <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
@@ -1948,7 +1937,6 @@
             
             if(pageId === 'page-raid-guide') renderRaidPassives(RAID_PASSIVE_DATABASE);
             if(pageId === 'page-ency-status') renderEncyStatusPage();
-            if(pageId === 'page-notice') renderNoticeList(1); 
             window.scrollTo(0, 0); 
         }
 
@@ -2654,98 +2642,7 @@
                 sel.customUpdate(); 
             });
         }
-/* ==========================================================
-   공지사항 데이터 관리 및 페이징 로직
-   ========================================================== */
 
-const MANDEK_NOTICES = [
-    {
-        date: "26년 4월 16일",
-        title: "26년 4월 16일 공지사항입니다.",
-        content: "<strong>1) 페트 도감 업데이트</strong><br>- 라고고류, 베론류, 북이류, 네고스류, 램가스류, 쿠쿠르류, 큐이류, 고르돈류, 쿠보류, 카쿠류, 펜타스류, 쟈그류, 기가로스류, 무이류, 프라키토스류, 만모류, 도라비스류, 카키류",
-        summary: "1) 페트 도감 업데이트 (라고고류 외 17종)" 
-    },
-    {
-        date: "26년 4월 15일",
-        title: "26년 4월 15일 공지사항입니다.",
-        content: "<strong>1) 페트 도감 업데이트</strong><br>- 도감 등록 체크 및 현황 기능 추가<br><strong>2) 모바일 최적화</strong><br>- UI/폰트 조절<br><strong>3) 도감 정보 업데이트</strong><br>- 카우거류, 바우트류, 샤크론류 추가",
-        summary: "1) 도감 체크 기능 추가 | 2) 모바일 UI 최적화 | 3) 도감 업데이트"
-    },
-    {
-        date: "26년 4월 14일",
-        title: "26년 4월 14일 공지사항입니다.",
-        content: "1) 월드경험치 적용 선택칸 추가<br>2) 도감정보 신규 업데이트<br>3) 문명의기록 배율 66% 수정",
-        summary: "1) 월드경험치 추가 | 2) 도감 신규 업데이트 | 3) 문명 배율 수정"
-    },
-    {
-        date: "26년 4월 13일",
-        title: "26년 4월 13일 공지사항입니다.",
-        content: "1) 해저사냥터 경험치 수정<br>2) 스탯 검색 기능 추가<br>3) UI 업데이트",
-        summary: "1) 해저 경험치 수정 | 2) 스탯 검색 추가 | 3) UI 업데이트"
-    }
-];
-
-let noticeCurrentPage = 1;
-const noticeItemsPerPage = 3;
-
-// 상단 배너 업데이트 (첫 번째 공지만 NEW 마크)
-function updateTopNoticeBanner() {
-    const banner = document.getElementById('top-notice-banner');
-    if (!banner || MANDEK_NOTICES.length === 0) return;
-    const latest = MANDEK_NOTICES[0];
-    banner.innerHTML = `
-        <span style="color: #ff7b72; font-weight: bold; margin-right: 15px;">
-            <i class="fa-solid fa-bullhorn"></i> [최신 공지] ${latest.date} 업데이트
-        </span>
-        ${latest.summary}
-    `;
-}
-
-// 공지사항 리스트 렌더링
-function renderNoticeList(page) {
-    const container = document.getElementById('notice-list-container');
-    if (!container) return;
-    container.innerHTML = "";
-    
-    const start = (page - 1) * noticeItemsPerPage;
-    const pagedData = MANDEK_NOTICES.slice(start, start + noticeItemsPerPage);
-
-    pagedData.forEach((notice, index) => {
-        const absoluteIndex = MANDEK_NOTICES.length - (start + index);
-        const isLatest = (page === 1 && index === 0); // 전체 중 가장 최신글 하나만 NEW
-
-        const item = document.createElement('div');
-        item.style.cssText = "background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;";
-        item.innerHTML = `
-            <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-                <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#${absoluteIndex}</span>
-                ${notice.title}
-                ${isLatest ? '<span style="background-color: #ff7b72; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold;">NEW</span>' : ''}
-            </div>
-            <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">${notice.content}</div>
-        `;
-        container.appendChild(item);
-    });
-    renderNoticePagination();
-}
-
-// 공지사항 페이징 버튼 생성
-function renderNoticePagination() {
-    const pagination = document.getElementById('notice-pagination');
-    const totalPages = Math.ceil(MANDEK_NOTICES.length / noticeItemsPerPage);
-    pagination.innerHTML = "";
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn ${i === noticeCurrentPage ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = () => {
-            noticeCurrentPage = i;
-            renderNoticeList(i);
-            window.scrollTo(0, 0);
-        };
-        pagination.appendChild(btn);
-    }
-}
         window.onload = () => {
             updateSelectColor('calcMode');
             updateSelectColor('huntingGround');
@@ -2763,7 +2660,6 @@ function renderNoticePagination() {
             
             showPage('page-home');
             initExpTable();
-            updateTopNoticeBanner(); 
         };
 
 /* ==========================================================
