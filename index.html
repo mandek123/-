@@ -38,7 +38,43 @@
             align-items: center;
             min-height: 100vh;
         }
+/* 공지사항 내부 줄바꿈 및 간격 최적화 */
+.notice-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-main);
+}
+.notice-body strong {
+    color: var(--text-highlight);
+    font-size: 1.05rem;
+    display: block;
+    margin-top: 12px;
+}
+.notice-body span {
+    color: #8b949e;
+    margin-left: 10px;
+    display: block;
+}
 
+/* NEW 배지 스타일 */
+.new-badge {
+    background-color: #ff7b72;
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-left: 8px;
+    box-shadow: 0 2px 4px rgba(255,123,114,0.3);
+}
+
+/* 페이징 버튼 컨테이너 */
+.notice-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
         /* 기존 .desktop-notice 교체 및 스크롤 애니메이션 삭제 */
         .desktop-notice {
             width: 100%;
@@ -813,15 +849,9 @@
     </style>
 </head>
 <body>
-
-    <div class="desktop-notice">
-        <span style="color: #ff7b72; font-weight: bold; margin-right: 15px;">
-            <i class="fa-solid fa-bullhorn"></i> [최신 공지] 26년 4월 15일 업데이트
-        </span>
-        1) 도감 등록 체크 및 도감현황 기능 추가 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 2) 모바일 UI 최적화 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 3) 페트 도감 업데이트
+<div class="desktop-notice" id="top-notice-banner">
     </div>
-    </div>
-
+    
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo" onclick="showPage('page-home')">
@@ -887,62 +917,15 @@
         </div>
     </div>
 
-    <div class="main-container" id="page-notice">
-        <div class="card" style="grid-column: span 2;">
-            <div class="card-header"><i class="fa-solid fa-bullhorn"></i> 공지사항</div>
-            
-            <div class="notice-list">
-                <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
-                    <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#3</span> 
-                        26년 4월 15일 공지사항입니다.
-                        <span style="background-color: #ff7b72; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(255,123,114,0.3);">NEW</span>
-                    </div>
-                    <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">
-                        <strong style="color: var(--text-highlight); font-size: 1.05rem;">1) 페트 도감 업데이트</strong><br>
-                        <span style="color:#8b949e; margin-left: 10px;">- 페트 도감에서 도감 등록을 마친 것을 직접 체크할 수 있도록 수정하였습니다.</span><br>
-                        <span style="color:#8b949e; margin-left: 10px;">- 페트 검색 시 도감 등록 유무에 따른 검색 기능을 추가 하였습니다.</span><br>
-                        <span style="color:#8b949e; margin-left: 10px;">- [나의 도감 현황] 메뉴에서 완료한 도감을 한눈에 파악할 수 있습니다.</span><br>
-                        
-                        <strong>2) 모바일 최적화 작업을 진행하였습니다.</strong><br>
-                        <span style="color:#8b949e; margin-left: 10px;">- 선택창(드롭다운)이 자동으로 닫히지 않던 현상 수정 및 UI/폰트 조절</span><br>
-                        
-                        <strong>3) 도감정보를 새로 업데이트 하였습니다.</strong><br>
-                        <span style="color:#8b949e; margin-left: 10px;">- 카우거류, 바우트류, 샤크론류 추가</span><br>
-                        
-                        <strong>4) 기타 코멘트</strong><br>
-                        <span style="color:#768390; font-size: 12px; margin-left: 10px;">* 아직 틀을 잡아가고 있기 때문에 불편한 점이나 수정사항 있으시면 말씀 주시면 감사하겠습니다..</span>
-                    </div>
-                </div>
+<div class="main-container" id="page-notice">
+    <div class="card" style="grid-column: span 2;">
+        <div class="card-header"><i class="fa-solid fa-bullhorn"></i> 공지사항</div>
+        
+        <div id="notice-list-container"></div>
 
-                <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
-                    <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#2</span> 
-                        26년 4월 14일 공지사항입니다.
-                    </div>
-                    <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">
-                        1) 월드경험치 적용 선택칸 추가<br>
-                        2) 도감정보 신규 업데이트<br>
-                        3) 문명의기록 체크 시 배율 66%로 수정
-                    </div>
-                </div>
-
-                <div class="notice-item" style="background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
-                    <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#1</span> 
-                        26년 4월 13일 공지사항입니다.
-                    </div>
-                    <div style="font-size: 14px; line-height: 1.8; color: var(--text-main);">
-                        1) 기존 해저사냥터에서의 시간당 경험치 획득량을 기존 약 160만에서 약 1,985,308 으로 수정하였습니다.<br>
-                        2) 도감탭의 초기스탯 및 성장스탯에 따른 검색기능을 추가하였습니다.<br>
-                        3) 웹페이지의 전체적인 UI를 수정 및 업데이트 하였습니다.<br>
-                        4) 페트 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [마감]<br>
-                        <span style="font-weight: bold; color: var(--text-highlight);">5) 사냥터 별 정보를 제공해주시는분께 소정의 수고비를 지급할 예정입니다. [사냥터당 10,000다이아]</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="notice-pagination" class="notice-pagination"></div>
     </div>
+</div>
 
     <div class="main-container" id="page-exp">
         <div class="card">
@@ -1895,7 +1878,58 @@
             { name: "왜곡", effect: "본인과 펫, 5턴 동안\n명중률 증가 + 치명타 확률 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
             { name: "황혼의 날개", effect: "팀원 전체, 5턴 동안\n회피율, 명중률, 치명타 확률 증가", values: ["3%", "4%", "5%", "6%", "8%"] }
         ];
+// --- 여기서부터 복사 ---
+let noticeCurrentPage = 1;
+const noticesPerPage = 3;
 
+const NOTICE_DATABASE = [
+    {
+        id: 4,
+        date: "26년 4월 16일",
+        title: "26년 4월 16일 공지사항입니다.",
+        summary: "1. 페트 도감 업데이트 ㅣ 2. 초기화시뮬레이터 메뉴 신설", // 요약 내용 추가
+        content: `
+            <strong>1) 페트 도감 업데이트</strong>
+            <span>- 라고고류, 베론류, 북이류, 네고스류, 램가스류, 쿠쿠르류, 큐이류, 고르돈류, 쿠보류, 카쿠류, 펜타스류, 쟈그류, 기가로스류, 무이류, 프라키토스류, 만모류, 도라비스류, 카키류</span>
+            <strong>2) 페트초기화 시뮬레이션 메뉴 신설(기타탭)</strong>
+            <span>- 기타탭에 위치하고 있으며 기본 스톤 공식 (S등급확률) 대입하여 제작했습니다.</span>
+        `
+    },
+    {
+        id: 3,
+        date: "26년 4월 15일",
+        title: "26년 4월 15일 공지사항입니다.",
+        content: `
+            <strong>1) 페트 도감 업데이트</strong>
+            <span>- 도감 등록 체크 기능 및 현황판 메뉴 추가</span>
+            <strong>2) 모바일 최적화 작업</strong>
+            <span>- 드롭다운 UI 수정 및 폰트 조절</span>
+            <strong>3) 도감 정보 업데이트</strong>
+            <span>- 카우거류, 바우트류, 샤크론류 추가</span>
+        `
+    },
+    {
+        id: 2,
+        date: "26년 4월 14일",
+        title: "26년 4월 14일 공지사항입니다.",
+        content: `
+            <span>1) 월드경험치 적용 선택칸 추가</span>
+            <span>2) 도감정보 신규 업데이트</span>
+            <span>3) 문명의기록 체크 시 배율 66%로 수정</span>
+        `
+    },
+    {
+        id: 1,
+        date: "26년 4월 13일",
+        title: "26년 4월 13일 공지사항입니다.",
+        content: `
+            <span>1) 해저사냥터 경험치 데이터 수정</span>
+            <span>2) 도감 검색 기능 추가</span>
+            <span>3) 웹페이지 UI 업데이트</span>
+        `
+    }
+];
+// --- 여기까지 ---
         let currentPage = 1;
         const itemsPerPage = 12; // 검색 시 15마리씩 보려면 15로 수정 가능
         
@@ -2660,7 +2694,9 @@
             
             showPage('page-home');
             initExpTable();
-        };
+            renderNoticePage();
+            updateTopNoticeBanner();
+            };
 
 /* ==========================================================
    👇👇👇 페트 초기화 시뮬레이션 관련 JavaScript 👇👇👇
@@ -2987,7 +3023,74 @@ function updateDiff(elementId, curVal, baseVal) {
 /* ==========================================================
    👆👆👆 페트 초기화 시뮬레이션 관련 JavaScript 끝 👆👆👆
    ========================================================== */
+    // --- 여기서부터 복사 ---
+// 공지사항 리스트 및 페이징 렌더링
+function renderNoticePage() {
+    const container = document.getElementById('notice-list-container');
+    const pagination = document.getElementById('notice-pagination');
+    if (!container) return;
+
+    container.innerHTML = '';
     
+    // 페이징 계산
+    const startIndex = (noticeCurrentPage - 1) * noticesPerPage;
+    const pagedNotices = NOTICE_DATABASE.slice(startIndex, startIndex + noticesPerPage);
+
+    pagedNotices.forEach((notice, index) => {
+        // 첫 페이지의 첫 번째 글만 NEW 마크 표시
+        const isLatest = (noticeCurrentPage === 1 && index === 0); 
+        const noticeEl = document.createElement('div');
+        noticeEl.className = 'notice-item';
+        noticeEl.style.cssText = "background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px;";
+        
+        noticeEl.innerHTML = `
+            <div style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                <span style="background: var(--accent-blue); color: var(--bg-color); padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">#${notice.id}</span> 
+                ${notice.title}
+                ${isLatest ? '<span class="new-badge">NEW</span>' : ''}
+            </div>
+            <div class="notice-body">
+                ${notice.content}
+            </div>
+        `;
+        container.appendChild(noticeEl);
+    });
+
+    // 페이지네이션 버튼 생성
+    if (pagination) {
+        pagination.innerHTML = '';
+        const totalPages = Math.ceil(NOTICE_DATABASE.length / noticesPerPage);
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.className = `page-btn ${i === noticeCurrentPage ? 'active' : ''}`;
+            btn.onclick = () => {
+                noticeCurrentPage = i;
+                renderNoticePage();
+                // 클릭 시 공지사항 상단으로 스크롤
+                document.getElementById('page-notice').scrollIntoView({ behavior: 'smooth' });
+            };
+            pagination.appendChild(btn);
+        }
+    }
+}
+
+// 상단 배너 요약 업데이트
+function updateTopNoticeBanner() {
+    const banner = document.getElementById('top-notice-banner');
+    if (!banner) return;
+
+    const latest = NOTICE_DATABASE[0];
+    banner.innerHTML = `
+        <span style="color: #ff7b72; font-weight: bold; margin-right: 15px;">
+            <i class="fa-solid fa-bullhorn"></i> [최신 공지] ${latest.date} 업데이트
+        </span>
+        <span style="cursor:pointer" onclick="showPage('page-notice')">
+            ${latest.summary}
+        </span>
+    `;
+}
+// --- 여기까지 ---
     </script>
 </body>
 </html>
