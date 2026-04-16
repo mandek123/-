@@ -1273,7 +1273,9 @@
         모두 적중해야 S베이스로 판정됩니다.
     </div>
 </div>
-
+<div id="sim-pet-image-area" style="text-align: center; margin: 15px 0;">
+    <img id="sim-pet-img" src="" style="max-height: 100px; display: none; margin: 0 auto; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">
+</div>
     <div class="sim-panel sim-middle">
         <table class="sim-stat-table">
             <thead>
@@ -2755,19 +2757,18 @@ function updateSimPetInfo() {
     const petImg = document.getElementById('sim-pet-img');
     if (!currentSimPet || !petImg) return;
 
-    // 이미지 경로 설정: 이미지 데이터가 있을 경우 노출
-    if (currentSimPet.image) {
-        // 경로 예시: ./images/페트파일명.png
-        petImg.src = `./images/${currentSimPet.image}.png`;
+    // 데이터베이스의 img 속성("./images/1.gif")을 그대로 연동
+    if (currentSimPet.img) {
+        petImg.src = currentSimPet.img; 
         petImg.style.display = "block";
         
-        // 이미지 로드 실패 시 숨김 처리 (예외처리)
+        // 이미지 로드 실패 시 처리
         petImg.onerror = () => { petImg.style.display = "none"; };
     } else {
         petImg.style.display = "none";
     }
 
-    // 기본 스탯 업데이트
+    // 기본 능력치 업데이트 (기존 로직 유지)
     document.getElementById('base-hp').innerText = Number(currentSimPet.hp || 0).toFixed(2);
     document.getElementById('base-atk').innerText = Number(currentSimPet.atk || 0).toFixed(2);
     document.getElementById('base-def').innerText = Number(currentSimPet.def || 0).toFixed(2);
