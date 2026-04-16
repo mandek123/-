@@ -649,7 +649,20 @@
 
 .sim-left { flex: 1.2; min-width: 280px; display: flex; flex-direction: column; align-items: center; }
 .sim-middle { flex: 2; min-width: 350px; }
-.sim-right { flex: 1.2; min-width: 280px; max-height: 480px; overflow-y: auto; }
+.sim-right {
+    flex: 1.5; /* 너비 비중을 조금 더 늘림 */
+    min-width: 320px;
+    max-height: 600px; /* 높이도 조금 더 넉넉하게 */
+    overflow-y: auto;
+}
+
+#sim-history-list li {
+    transition: all 0.2s ease;
+}
+
+#sim-history-list li:hover {
+    background: rgba(83, 155, 245, 0.05); /* 마우스 올리면 살짝 강조 */
+}
 
 #sim-pet-search {
     width: 100%;
@@ -1288,8 +1301,8 @@
         </div>
 
         <div class="sim-actions">
-            <button class="page-btn" id="sim-btn-1" onclick="runSimReset(1)">확인 (1회)</button>
-            <button class="page-btn active" id="sim-btn-10" onclick="runSimReset(10)">확인 (10회)</button>
+            <button class="page-btn" id="sim-btn-1" onclick="runSimReset(1)">💎1,000Diamond (1회)</button>
+            <button class="page-btn active" id="sim-btn-10" onclick="runSimReset(10)">💎10,000Diamond (10회)</button>
         </div>
     </div>
 
@@ -1836,6 +1849,11 @@
             { category: "모나시프류", name: "파라프", img: "./images/452.gif", elements: "화3 풍7", hp: 50.04, atk: 9.05, def: 8.36, spd: 8.95, ghp: 9.89, gatk: 1.79, gdef: 1.65, gspd: 1.77, passive: "불굴의 의지", grade: "상급", encyBuff: "레이드 펫 순발력 1% 증가" },
             { category: "모나시프류", name: "프이토", img: "./images/453.gif", elements: "지2 풍8", hp: 47.71, atk: 8.70, def: 9.41, spd: 8.71, ghp: 9.08, gatk: 1.66, gdef: 1.79, gspd: 1.66, passive: "미정", grade: "상급", encyBuff: "레이드 캐릭터 순발력 1% 증가" }
         ];
+
+    // --- 시뮬레이션 상태 변수 (추가) ---
+    let simSelectedPet = null;    // 현재 선택된 페트 정보
+    let simPityCount = 0;         // 천장 카운트 (0~200)
+    const SIM_PITY_MAX = 200;     // 최대 천장 횟수
 
         const RAID_PASSIVE_DATABASE = [
             { name: "격노", effect: "본인과 펫, 3턴 동안 공격력 증가", values: ["8%", "9%", "10%", "12%", "15%"] },
@@ -2804,7 +2822,7 @@ function runSimReset(times) {
     }
     
     if (isSimLocked) {
-        alert("최고 등급에 도달했거나 천장에 도달하여 초기화가 완료되었습니다.\n새로운 페트를 검색하여 다시 시작해주세요.");
+        alert("이미 최고 등급을 획득했습니다. 새로운 페트를 검색해 주세요.");
         return;
     }
 
@@ -2818,10 +2836,18 @@ function runSimReset(times) {
         simTotalCount++;
         let isPity = (simTotalCount % 200 === 0);
         
-        // 1. 랭크 확률 먼저 결정
-        let targetRank = "";
-        let isSBaseHit = isPity || (Math.floor(Math.random() * 625) === 0);
+        // 1. 각 스탯별로 1~5등급(Tier) 독립 결정 (각 1/5 확률)
+        const rolls = {
+            hp: isPity ? 5 : Math.floor(Math.random() * 5) + 1,
+            atk: isPity ? 5 : Math.floor(Math.random() * 5) + 1,
+            def: isPity ? 5 : Math.floor(Math.random() * 5) + 1,
+            spd: isPity ? 5 : Math.floor(Math.random() * 5) + 1
+        };
 
+        // 2. 전체 랭크 및 개별 스탯 수치 생성
+        const isSBaseHit = (rolls.hp === 5 && rolls.atk === 5 && rolls.def === 5 && rolls.spd === 5);
+        let targetRank = "";
+        
         if (isSBaseHit) {
             targetRank = (Math.random() < 0.3) ? 'S+' : 'S';
         } else {
@@ -2833,36 +2859,106 @@ function runSimReset(times) {
             else targetRank = 'F';
         }
 
-        // 2. 결정된 랭크에 따라 '총합 하락치 -10 이내'를 준수하며 스탯 생성
+        // 독립 스탯 생성 (S급 안에서도 각자 보너스 확률 적용)
         let mockStats = generateMockStatsByRank(currentSimPet, targetRank);
-        
         lastResultObj = { rank: targetRank, stats: mockStats, pity: isPity };
 
+        // 3. [기록 표기] 가독성이 개선된 기록 리스트 추가
         const li = document.createElement('li');
-        let rankColor = getRankColor(targetRank);
+        li.style.padding = "15px 10px";
+        li.style.borderBottom = "1px solid var(--border)";
+        li.style.display = "flex";
+        li.style.flexDirection = "column"; // 모바일에서도 보기 편하게 줄바꿈 허용
+        li.style.gap = "8px";
         
-        li.innerHTML = `<span>[${simTotalCount}회차]</span> <span style="color:${rankColor}; font-weight:bold;">${targetRank}급 ${isPity ? '<span style="color:#fca311; font-size:11px;">(천장)</span>' : ''}</span>`;
+        const isSpecial = ['S', 'S+'].includes(targetRank);
+        const rankColor = getRankColor(targetRank);
+        
+        // S/S+급은 더 크게, 일반 급은 적당히 크게 설정
+        const titleSize = isSpecial ? "1.3rem" : "1.05rem";
+        const statsSize = isSpecial ? "1.1rem" : "0.95rem";
+        const statsColor = isSpecial ? "#ffffff" : "#adbac7";
+
+        li.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: ${titleSize}; font-weight: bold;">
+                    [${simTotalCount}회차] <span style="color:${rankColor}; text-shadow: ${isSpecial ? '0 0 10px ' + rankColor + '44' : 'none'};">${targetRank}급</span>
+                </span>
+                ${isPity ? '<span style="color:#fca311; font-size:0.9rem; font-weight:bold;">(천장확정)</span>' : ''}
+            </div>
+            <div style="font-size: ${statsSize}; color: ${statsColor}; letter-spacing: 0.3px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                체: <span style="color:#539bf5">${mockStats.hp.toFixed(2)}</span> / 
+                공: <span style="color:#ff7b72">${mockStats.atk.toFixed(2)}</span> / 
+                방: <span style="color:#2ea043">${mockStats.def.toFixed(2)}</span> / 
+                순: <span style="color:#fca311">${mockStats.spd.toFixed(2)}</span>
+            </div>
+        `;
+        
         historyList.prepend(li);
 
+        // 최근 30개만 유지
         if (historyList.children.length > 30) historyList.removeChild(historyList.lastChild);
 
-        if (['S', 'S+'].includes(targetRank) || isPity) {
-    isSimLocked = true;
-    document.getElementById('sim-btn-1').disabled = true;
-    document.getElementById('sim-btn-10').disabled = true;
-
-    // --- 추가된 코드: S등급 팝업 및 폭죽 실행 ---
-    setTimeout(() => {
-        triggerSRankEffect();
-    }, 500); 
-    // ---------------------------------------
-
-    break; 
-}
+        // S급 이상 획득 시 종료
+        if (['S', 'S+'].includes(targetRank)) {
+            isSimLocked = true;
+            document.getElementById('sim-btn-1').disabled = true;
+            document.getElementById('sim-btn-10').disabled = true;
+            setTimeout(() => { triggerSRankEffect(); }, 500);
+            break; 
+        }
     }
 
     document.getElementById('sim-pity-count').innerText = simTotalCount % 200;
     if(lastResultObj) renderMockStats(currentSimPet, lastResultObj.stats);
+}
+
+// 랭크별 스탯 생성기 (공방순 개별 변동 로직 포함)
+function generateMockStatsByRank(basePet, rank) {
+    const base = {
+        hp: Number(basePet.hp || 0),
+        atk: Number(basePet.atk || 0),
+        def: Number(basePet.def || 0),
+        spd: Number(basePet.spd || 0)
+    };
+    let result = { ...base };
+
+    if (['S', 'S+'].includes(rank)) {
+        // 공, 방, 순 각각 25% 확률로 S+급 보너스 독립 산출
+        ['atk', 'def', 'spd'].forEach(stat => {
+            if (Math.random() < 0.25 || rank === 'S+') {
+                result[stat] += (0.1 + Math.random() * 1.5); // 독립적인 +수치
+            }
+        });
+        if (Math.random() < 0.25 || rank === 'S+') {
+            result.hp += (1.0 + Math.random() * 5.0);
+        }
+    } else {
+        // 하락폭 랜덤 분배
+        let minus = (rank === 'A' ? 3 : rank === 'B' ? 6 : rank === 'C' ? 8 : 10) * Math.random();
+        let r = [Math.random(), Math.random(), Math.random(), Math.random()];
+        let s = r.reduce((a, b) => a + b, 0);
+        result.hp -= (r[0]/s) * minus;
+        result.atk -= (r[1]/s) * minus;
+        result.def -= (r[2]/s) * minus;
+        result.spd -= (r[3]/s) * minus;
+    }
+    return result;
+}
+
+// 필수 보조 함수 (이 함수들이 없으면 에러가 나서 기록이 안 뜹니다)
+function getRankColor(rank) {
+    if (rank === 'S+') return '#ff7b72';
+    if (rank === 'S') return '#ffcc00';
+    if (rank === 'A') return '#fca311';
+    if (rank === 'B') return '#539bf5';
+    return '#8b949e';
+}
+
+function triggerSRankEffect() {
+    const popup = document.getElementById('sRankPopup');
+    if (popup) popup.classList.add('show');
+    else alert("축하합니다! S급 베이스를 획득했습니다!");
 }
 
 // 랭크별로 하락폭을 제어하는 스탯 생성기
