@@ -817,6 +817,14 @@
     cursor: pointer;
 }
 
+/* 종합 전투 시뮬레이터 전용 그리드 */
+@media (min-width: 769px) {
+    .battle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+}
+@media (max-width: 768px) {
+    .battle-grid { display: flex; flex-direction: column; gap: 15px; }
+}
+
     </style>
 </head>
 <body>
@@ -832,6 +840,8 @@
                 <a href="javascript:void(0);" class="nav-item" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
                 <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-battle" onclick="showPage('page-battle')">⚔️ 종합전투시뮬</a>
+
                     <div class="dropdown">
                     <a href="javascript:void(0);" class="nav-item" id="menu-ency">📚 도감 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
                     <div class="dropdown-content">
@@ -864,9 +874,14 @@
                 <i class="fa-solid fa-chart-simple" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 10px;"></i>
                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">경험치계산기</div>
             </div>
+
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-battle')">
+            <i class="fa-solid fa-khanda" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
+            <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">종합전투시뮬</div>
+            </div>
             <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-acc')">
-                <i class="fa-solid fa-crosshairs" style="font-size: 2rem; color: #fca311; margin-bottom: 10px;"></i>
-                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">명중/회피계산기</div>
+            <i class="fa-solid fa-crosshairs" style="font-size: 2rem; color: var(--accent-orange); margin-bottom: 10px;"></i>
+            <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">명중/회피계산기</div>
             </div>
             <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-rev')">
                 <i class="fa-solid fa-arrows-left-right" style="font-size: 2rem; color: #2ea043; margin-bottom: 10px;"></i>
@@ -877,9 +892,13 @@
                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
             </div>
             
-            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-init-sim')">
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
                 <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 10px;"></i>
                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
+            </div>
+            <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-init-sim')">
+            <i class="fa-solid fa-arrows-rotate" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
+            <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">초기화시뮬</div>
             </div>
             <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-notice')">
                 <i class="fa-solid fa-bullhorn" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
@@ -1065,6 +1084,96 @@
         </div>
     </div>
 
+
+    
+    <div class="main-container" id="page-battle">
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-header"><i class="fa-solid fa-swords"></i> 종합 전투 시뮬레이터</div>
+            
+            <div class="battle-grid" style="margin-bottom: 20px;">
+                <div style="background: rgba(255, 123, 114, 0.05); border: 1px solid rgba(255, 123, 114, 0.2); padding: 18px; border-radius: 12px;">
+                    <div id="simAtkTitle_v2" style="color: #ff7b72; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem;"><i class="fa-solid fa-crosshairs"></i> 공격자 (플레이어)</div>
+                    <label>타입</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                        <button type="button" id="btnAtk_player" onclick="changeType('atk', 'player')" style="flex:1; padding:10px; background:#ff7b72; color:#1a1a1a; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">플레이어</button>
+                        <button type="button" id="btnAtk_pet" onclick="changeType('atk', 'pet')" style="flex:1; padding:10px; background:rgba(255,255,255,0.1); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:normal;">펫</button>
+                        <button type="button" id="btnAtk_monster" onclick="changeType('atk', 'monster')" style="flex:1; padding:10px; background:rgba(255,255,255,0.1); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:normal;">몬스터</button>
+                    </div>
+                    <input type="hidden" id="simAtkType_v2" value="player">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><label>레벨</label><input type="number" id="simAtkLv_v2" value="140"></div>
+                        <div><label>순발력</label><input type="number" id="simAtkSpd_v2" value="450"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div><label>치명타 스탯(%)</label><input type="number" id="simAtkCrit_v2" value="10"></div>
+                        <div><label>기본 데미지 (예상)</label><input type="number" id="simAtkBaseDmg_v2" value="1000"></div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(83, 155, 245, 0.05); border: 1px solid rgba(83, 155, 245, 0.2); padding: 18px; border-radius: 12px;">
+                    <div id="simDefTitle_v2" style="color: #539bf5; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem;"><i class="fa-solid fa-shield-halved"></i> 방어자 (플레이어)</div>
+                    <label>타입</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                        <button type="button" id="btnDef_player" onclick="changeType('def', 'player')" style="flex:1; padding:10px; background:#539bf5; color:#1a1a1a; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">플레이어</button>
+                        <button type="button" id="btnDef_pet" onclick="changeType('def', 'pet')" style="flex:1; padding:10px; background:rgba(255,255,255,0.1); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:normal;">펫</button>
+                        <button type="button" id="btnDef_monster" onclick="changeType('def', 'monster')" style="flex:1; padding:10px; background:rgba(255,255,255,0.1); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:normal;">몬스터</button>
+                    </div>
+                    <input type="hidden" id="simDefType_v2" value="player">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><label>레벨</label><input type="number" id="simDefLv_v2" value="140"></div>
+                        <div><label>순발력</label><input type="number" id="simDefSpd_v2" value="300"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div><label>방어력</label><input type="number" id="simDefDef_v2" value="300"></div>
+                        <div><label>행운 스탯(%)</label><input type="number" id="simDefLuck_v2" value="0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-calc" onclick="calcComprehensiveBattle()" style="background: var(--accent-blue);">전투 확률 및 데미지 산출하기</button>
+        </div> 
+        
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-header"><i class="fa-solid fa-square-poll-vertical"></i> 시뮬레이션 결과</div>
+            <div class="result-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                <div class="res-box" style="text-align: center;">
+                    <div class="res-label">명중률 🎯</div>
+                    <div id="resAccRate_v2" class="res-val" style="color: #2ea043; font-size: 1.5rem; margin-top: 8px;">-</div>
+                </div>
+                <div class="res-box" style="text-align: center;">
+                    <div class="res-label">치명타 확률 💥</div>
+                    <div id="resCritRate_v2" class="res-val" style="color: #ff7b72; font-size: 1.5rem; margin-top: 8px;">-</div>
+                </div>
+                <div class="res-box" style="text-align: center;">
+                    <div class="res-label">반격 확률 🔄</div>
+                    <div id="resCounterRate_v2" class="res-val" style="color: #539bf5; font-size: 1.5rem; margin-top: 8px;">-</div>
+                </div>
+                <div class="res-box" style="text-align: center;">
+                    <div class="res-label">치명 추가 데미지 🩸</div>
+                    <div id="resCritDmg_v2" class="res-val" style="color: #d2a8ff; font-size: 1.5rem; margin-top: 8px;">-</div>
+                </div>
+                <div class="res-box" style="text-align: center; grid-column: span 2; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="res-label">공격자 전투 순발력 범위 ⚡</div>
+                    <div id="resSpeedRange_v2" class="res-val" style="color: var(--accent-orange); font-size: 1.5rem; margin-top: 8px;">-</div>
+                </div>
+
+                <div class="res-box" style="grid-column: span 2; padding: 15px; border: 1px dashed rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.05); display: flex; flex-direction: column; justify-content: center;">
+                    <div style="color: #ff7b72; font-weight: bold; font-size: 0.95rem; margin-bottom: 6px;">
+                        <i class="fa-solid fa-circle-info"></i> 데이터 제보 안내
+                    </div>
+                    <div style="font-size: 0.85rem; color: #8b949e; line-height: 1.5; word-break: keep-all;">
+                        평타(기본데미지)에 대한 데이터가 필요합니다. 정보를 주시면 반영해보겠습니다.<br>
+                        <strong>필요한 데이터 예시:</strong><br>
+                        "내 레벨 140, 공격력 500이고 상대 레벨 140, 방어력 300일 때 평타가 450 쯤 뜬다."<br>
+                        <span style="font-size: 0.8rem; opacity: 0.8;">(이런 데이터가 방어력을 바꿔가며 3~4개 정도 있으면 공식을 유추할 수 있습니다.)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
     <div class="main-container" id="page-ency">
         <div class="card" style="grid-column: span 2;">
             <div class="card-header" style="justify-content: space-between;">
@@ -2366,6 +2475,19 @@ const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
     {
+        id: 7,
+        date: "26년 4월 19일",
+        title: "26년 4월 19일 공지사항입니다.",
+        summary: "1. 종합 전투 시뮬레이터 메뉴 신설 및 데이터 제보 안내", 
+        content: `
+            <strong>1) 종합 전투 시뮬레이터 메뉴 신설</strong>
+            <span>- 기존에 확인된 전투 기본 공식을 최대한 활용하여 시뮬레이터를 제작하였습니다.</span>
+            <span>- 보다 정확한 연산을 위해 기본 데미지(평타) 산출 데이터를 수집하고 있습니다.</span>
+            <span>- "내 레벨 140, 공격력 500 / 상대 레벨 140, 방어력 300 일 때 평타가 450쯤 뜬다"와 같은 형식으로 많은 제보 바랍니다.</span>
+        `
+    },
+
+    {
         id: 6,
         date: "26년 4월 18일",
         title: "26년 4월 18일 공지사항입니다.",
@@ -2470,6 +2592,7 @@ const NOTICE_DATABASE = [
             if (pageId === 'page-exp') menuId = 'menu-exp';
             else if (pageId === 'page-acc') menuId = 'menu-acc';
             else if (pageId === 'page-rev') menuId = 'menu-rev';
+            else if (pageId === 'page-battle') menuId = 'menu-battle';
             else if (pageId === 'page-ency' || pageId === 'page-ency-status') menuId = 'menu-ency';
             else if (pageId === 'page-notice') menuId = 'menu-notice';
             else if (pageId === 'page-bot' || pageId === 'page-raid-guide') menuId = 'menu-etc';
@@ -3074,25 +3197,41 @@ const NOTICE_DATABASE = [
             animateResults('exp-result-container');
         }
 
-        function calcAccuracy() {
-            const A = parseInt(document.getElementById('attSpd').value);
-            const B = parseInt(document.getElementById('defSpd').value);
-            if(!A || !B) return;
-            let base = Math.sqrt(Math.abs(B - A) / 200) * (B / A) * 100;
-            let softCap = Math.min(Math.max(base, 10), 80);
-            document.getElementById('accResult').innerText = `회피 ${softCap.toFixed(1)}% / 명중 ${(100-softCap).toFixed(1)}%`;
-            
-            animateResults('acc-result-container');
-        }
+        /* ==========================================================
+        1. 명중률 계산기 (디스코드 봇 파이썬 로직 적용)
+        ========================================================== */
+    function calcAccuracy() {
+    const A = parseFloat(document.getElementById('attSpd').value) || 0;
+    const B = parseFloat(document.getElementById('defSpd').value) || 0;
+    
+    let base = 0;
+    if (B >= A) {
+        base = Math.sqrt((B - A) / 0.02) * 1.0;
+    } else {
+        base = Math.sqrt((A - B) / 0.02) * (B / A);
+    }
+    
+    let bonus = Math.max(Math.min((A - B) / 25, 4), -4);
+    let finalHit = 100 - (base + bonus);
+    
+    // 회피율은 100 - 명중률로 역산
+    let finalEvasion = 100 - finalHit;
 
+    document.getElementById('accResult').innerText = 
+        `${finalEvasion.toFixed(2)}% / ${finalHit.toFixed(2)}%`;
+    }
+        /* ==========================================================
+        2. 역순 순발력 범위 (디스코드 봇 파이썬 로직 적용)
+        ========================================================== */
         function calcReverse() {
-            const baseSpd = parseInt(document.getElementById('statSpd').value);
-            if(!baseSpd) return;
-            const maxR = (baseSpd * 0.15) + 20;
-            document.getElementById('revMax').innerText = Math.floor(baseSpd + 20);
-            document.getElementById('revMin').innerText = Math.floor(baseSpd + 20 - maxR);
-            
-            animateResults('rev-result-container');
+        const stat = parseFloat(document.getElementById('statSpd').value) || 0;
+    
+        let r_max = stat * 0.15 + 20;
+        let minSpd = stat + 20 - r_max;
+        let maxSpd = stat + 20;
+
+        document.getElementById('revMax').innerText = maxSpd.toFixed(2);
+        document.getElementById('revMin').innerText = minSpd.toFixed(2);
         }
 
         function initExpTable() {
@@ -3626,7 +3765,6 @@ function updateDiff(elementId, curVal, baseVal) {
 /* ==========================================================
    👆👆👆 페트 초기화 시뮬레이션 관련 JavaScript 끝 👆👆👆
    ========================================================== */
-    // --- 여기서부터 복사 ---
 // 공지사항 리스트 및 페이징 렌더링
 function renderNoticePage() {
     const container = document.getElementById('notice-list-container');
@@ -3735,6 +3873,139 @@ function closeSRankPopup() {
     popup.classList.remove('show');
     setTimeout(() => popup.style.display = 'none', 300);
 }
+
+/* ==========================================================
+   종합 전투 시뮬레이터 (v2업데이트)
+========================================================== */
+function calcComprehensiveBattle() {
+    // 1. 숨겨진 input에서 영문 값(player, pet, monster) 가져오기
+    const atkType = document.getElementById('simAtkType_v2').value;
+    const defType = document.getElementById('simDefType_v2').value;
+
+    // 영문 값을 화면에 띄울 한글 이름표로 자동 변환
+    const typeNames = { 'player': '플레이어', 'pet': '펫', 'monster': '몬스터' };
+    const atkLabel = typeNames[atkType];
+    const defLabel = typeNames[defType];
+
+    // 제목 업데이트
+    document.getElementById('simAtkTitle_v2').innerHTML = `<i class="fa-solid fa-crosshairs"></i> 공격자 (${atkLabel})`;
+    document.getElementById('simDefTitle_v2').innerHTML = `<i class="fa-solid fa-shield-halved"></i> 방어자 (${defLabel})`;
+
+    // 2. 수치 가져오기 (v2 ID 사용)
+    const atkLv = parseFloat(document.getElementById('simAtkLv_v2').value) || 1;
+    const defLv = parseFloat(document.getElementById('simDefLv_v2').value) || 1;
+    const atkSpd = parseFloat(document.getElementById('simAtkSpd_v2').value) || 0;
+    const defSpd = parseFloat(document.getElementById('simDefSpd_v2').value) || 0;
+    const defDef = parseFloat(document.getElementById('simDefDef_v2').value) || 0;
+    const atkCrit = parseFloat(document.getElementById('simAtkCrit_v2').value) || 0;
+    const defLuck = parseFloat(document.getElementById('simDefLuck_v2').value) || 0;
+    const baseDmg = parseFloat(document.getElementById('simAtkBaseDmg_v2').value) || 0;
+
+    // 3. 타입에 따른 보정 계수 설정
+    let defSpdMod = 1.0; 
+    let atkSpdMod = 1.0; 
+    let critDiv = 0.09, counterDiv = 0.08, hitDiv = 0.02; 
+    let useSqrt = true; 
+
+    if (atkType === 'player' && (defType === 'pet' || defType === 'monster')) {
+        defSpdMod = 0.6; 
+        atkSpdMod = 0.6;
+    } else if (atkType === 'pet' && defType === 'monster') {
+        defSpdMod = 0.8;
+        atkSpdMod = 0.8;
+    } else if ((atkType === 'monster' || atkType === 'pet') && defType === 'player') {
+        defSpdMod = 1.0;
+        atkSpdMod = 1.0;
+        critDiv = 10.0;     
+        counterDiv = 10.0;  
+        hitDiv = 10.0;      
+        useSqrt = false;    
+    }
+
+    let adjDefSpd = defSpd * defSpdMod; 
+    let adjAtkSpd = atkSpd * atkSpdMod; 
+
+    // 4. 명중률/회피율 산출
+    let hitBase = 0;
+    if (useSqrt) {
+        if (adjDefSpd >= atkSpd) {
+            hitBase = Math.sqrt((adjDefSpd - atkSpd) / hitDiv) * 1.0;
+        } else {
+            hitBase = Math.sqrt((atkSpd - adjDefSpd) / hitDiv) * (adjDefSpd / atkSpd);
+        }
+    } else {
+        hitBase = Math.abs(atkSpd - adjDefSpd) / hitDiv;
+        if (adjDefSpd < atkSpd) hitBase *= (adjDefSpd / atkSpd);
+    }
+    
+    let hitBonus = Math.max(Math.min((atkSpd - adjDefSpd) / 25, 4), -4);
+    let finalHitRate = 100 - (hitBase + hitBonus);
+    finalHitRate = Math.max(0.01, Math.min(100, finalHitRate));
+
+    // 5. 치명타 산출
+    let critBase = Math.abs(atkSpd - adjDefSpd) / critDiv;
+    if (useSqrt) critBase = Math.sqrt(critBase);
+    let critRatio = (atkSpd < adjDefSpd) ? (atkSpd / adjDefSpd) : 1.0;
+    let finalCrit = (critBase * critRatio) + atkCrit - defLuck;
+    finalCrit = Math.max(0.01, Math.min(100, finalCrit));
+
+    // 6. 반격 산출
+    let counterBase = Math.abs(defSpd - adjAtkSpd) / counterDiv;
+    if (useSqrt) counterBase = Math.sqrt(counterBase);
+    let counterRatio = (defSpd < adjAtkSpd) ? (defSpd / adjAtkSpd) : 1.0;
+    let finalCounter = counterBase * counterRatio;
+    finalCounter = Math.max(0.01, Math.min(100, finalCounter));
+
+    // 7. 데미지 산출
+    let baseCritDmg = defDef * (atkLv / defLv) * 0.4;
+    let critBonus = (baseDmg + baseCritDmg) * (atkCrit / 100);
+    let luckReduc = (baseDmg * 0.5 + baseCritDmg) * (defLuck / 100);
+    let finalAddDmg = Math.max(0, Math.floor(baseCritDmg + critBonus - luckReduc));
+
+    // 8. 순발력 범위 산출
+    let simRMax = atkSpd * 0.15 + 20;
+    let simMinSpd = atkSpd + 20 - simRMax;
+    let simMaxSpd = atkSpd + 20;
+
+    // 9. 화면에 결과 출력 (v2 ID 사용)
+    document.getElementById('resCritRate_v2').innerText = finalCrit.toFixed(1) + '%';
+    document.getElementById('resCounterRate_v2').innerText = finalCounter.toFixed(1) + '%';
+    document.getElementById('resCritDmg_v2').innerText = '+' + finalAddDmg;
+    document.getElementById('resAccRate_v2').innerText = finalHitRate.toFixed(2) + '%';
+    document.getElementById('resSpeedRange_v2').innerText = `${simMinSpd.toFixed(1)} ~ ${simMaxSpd.toFixed(1)}`;
+}
+
+/* ==========================================================
+   버튼 클릭 시 색상 변경 및 타입 적용 로직
+========================================================== */
+function changeType(target, type) {
+    // 1. 숨겨진 select 태그의 값을 변경
+    if(target === 'atk') document.getElementById('simAtkType_v2').value = type;
+    if(target === 'def') document.getElementById('simDefType_v2').value = type;
+
+    // 2. 버튼 색상 디자인 업데이트 (선택된 것만 불 들어오게)
+    const btns = ['player', 'pet', 'monster'];
+    const activeBg = target === 'atk' ? '#ff7b72' : '#539bf5'; // 공격자는 빨강, 방어자는 파랑
+
+    btns.forEach(t => {
+        const btn = document.getElementById(`btn${target === 'atk' ? 'Atk' : 'Def'}_${t}`);
+        if (btn) {
+            if (t === type) {
+                btn.style.background = activeBg;
+                btn.style.color = '#1a1a1a';
+                btn.style.fontWeight = 'bold';
+            } else {
+                btn.style.background = 'rgba(255,255,255,0.1)';
+                btn.style.color = 'white';
+                btn.style.fontWeight = 'normal';
+            }
+        }
+    });
+
+    // 3. 값 변경 즉시 시뮬레이터 자동 재계산!
+    calcComprehensiveBattle();
+}
+
     </script>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
