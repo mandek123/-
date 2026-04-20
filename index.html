@@ -2557,7 +2557,7 @@
 
 
 
-            { category: "미정", name: "만득", img: "./images/MAN1.gif", elements: "미정", hp: 99.99, atk: 99.99, def: 99.99, spd: 99.99, ghp: 99.99, gatk: 99.99, gdef: 99.99, gspd: 99.99, passive: "미정", grade: "미정", encyBuff: "이스터에그" }
+            { category: "미정", name: "만득", img: "./images/MAN1.gif", elements: "미정", hp: 99.99, atk: 99.99, def: 99.99, spd: 99.99, ghp: 99.99, gatk: 99.99, gdef: 99.99, gspd: 99.99, passive: "미정", grade: "미정", encyBuff: "???" }
 
         ];
 
@@ -2863,7 +2863,7 @@ const NOTICE_DATABASE = [
 
             const grouped = {};
             data.forEach(pet => {
-                // ▼ 이스터에그 숨기기: 이름이 '만득'인 페트는 카테고리 그룹화에서 제외
+
                 if (pet.name === "만득") return; 
 
                 if(!grouped[pet.category]) grouped[pet.category] = [];
