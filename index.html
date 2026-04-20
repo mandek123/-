@@ -924,9 +924,9 @@
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
     </div>
 
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-notice')">
-        <i class="fa-solid fa-bullhorn" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">공지사항</div>
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
+        <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 10px;"></i>
+        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
     </div>
 </div>
     </div>
@@ -2612,6 +2612,19 @@
 
 const NOTICE_DATABASE = [
     {
+        id: 8,
+        date: "26년 4월 20일",
+        title: "26년 4월 20일 공지사항입니다.",
+        summary: "1. 페트 레벨업 시뮬레이션 메뉴 신설 | 2. 홈페이지 메뉴 정리 및 최적화", 
+        content: `
+            <strong>1) 페트 레벨업 시뮬레이션 메뉴 신설</strong>
+            <span>- 기본 공식을 활용하여 제작하였습니다.</span>
+            <strong>2) 홈페이지 메뉴 정리 및 최적화</strong>
+            <span>- 홈페이지 화면 메뉴 배치 및 UI 최적화 작업을 진행하였습니다.</span>
+        `
+    },
+
+    {
         id: 7,
         date: "26년 4월 19일",
         title: "26년 4월 19일 공지사항입니다.",
@@ -3970,8 +3983,11 @@ function updateTopNoticeBanner() {
         <span style="color: #ff7b72; font-weight: bold; margin-right: 15px;">
             <i class="fa-solid fa-bullhorn"></i> [최신 공지] ${latest.date} 업데이트
         </span>
-        <span style="cursor:pointer" onclick="showPage('page-notice')">
+        <span>
             ${latest.summary}
+        </span>
+        <span style="cursor:pointer; color: #539bf5; font-weight: bold; margin-left: 10px; text-decoration: underline;" onclick="showPage('page-notice')">
+            [더보기]
         </span>
     `;
 }
