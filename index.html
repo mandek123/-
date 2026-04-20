@@ -1192,32 +1192,33 @@
         </div>
     </div>
         
-    <div class="main-container" id="page-ency">
-        <div class="card" style="grid-column: span 2;">
-            <div class="card-header" style="justify-content: space-between;">
-                <span><i class="fa-solid fa-book"></i> 펫 도감</span>
-            </div>
+    <div class="main-container" id="page-ency"> 
+    <div class="card" style="grid-column: span 2;">
+        <div class="card-header" style="justify-content: space-between;">
+            <span><i class="fa-solid fa-book"></i> 펫 도감</span>
+        </div>
+        
+        <div class="notice-banner" style="margin-bottom: 20px;">
+            <i class="fa-solid fa-circle-info"></i> 도감 데이터는 지속적으로 업데이트 중입니다.
+        </div>
+
+        <div class="filter-row" style="margin-bottom: 10px;">
+            <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()">
             
-            <div class="notice-banner" style="margin-bottom: 20px;">
-                <i class="fa-solid fa-circle-info"></i> 도감 데이터는 지속적으로 업데이트 중입니다.
-            </div>
-            <div class="filter-row" style="margin-bottom: 10px;">
-                <input type="text" id="petSearch" placeholder="페트 이름 검색..." onkeyup="filterPets()">
-                
-                <select id="petElement" onchange="filterPets()">
-                    <option value="all">모든 속성</option>
-                    <option value="지">지속성</option>
-                    <option value="수">수속성</option>
-                    <option value="화">화속성</option>
-                    <option value="풍">풍속성</option>
-                </select>
-                
-                <select id="petGrade" onchange="filterPets()">
-                    <option value="all">모든 등급</option>
-                    <option value="일반">일반</option>
-                    <option value="상급">상급</option>
-                    <option value="최상급">최상급</option>
-                </select>
+            <select id="petElement" onchange="filterPets()">
+                <option value="all">모든 속성</option>
+                <option value="지">지속성</option>
+                <option value="수">수속성</option>
+                <option value="화">화속성</option>
+                <option value="풍">풍속성</option>
+            </select>
+            
+            <select id="petGrade" onchange="filterPets()">
+                <option value="all">모든 등급</option>
+                <option value="일반">일반</option>
+                <option value="상급">상급</option>
+                <option value="최상급">최상급</option>
+            </select>
                 
                 <select id="petPassive" onchange="filterPets()">
                     <option value="all">모든 패시브</option>
@@ -1310,7 +1311,10 @@
             </div>
         </div>
     </div>
-<div class="main-container" id="page-ency-status">
+<div class="main-container" id="page-ency">
+        </div>
+
+    <div class="main-container" id="page-ency-status">
         <div class="card" style="grid-column: span 2;">
             <div class="card-header" style="justify-content: space-between;">
                 <span><i class="fa-solid fa-square-check"></i> 나의 도감 현황</span>
@@ -1324,11 +1328,10 @@
             <div id="encyProgress" style="font-size: 14px; font-weight: bold; color: var(--accent-blue); margin-bottom: 15px; background: rgba(83, 155, 245, 0.1); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.2); display: inline-block;">
                 나의 도감 달성률 불러오는 중...
             </div>
-
-            <div id="encyStatusGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
-            </div>
-        </div>
+        <div id="ency-status-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;"></div>
     </div>
+</div>
+
     <div class="main-container" id="page-bot">
         <div class="card" style="grid-column: span 2; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 50px 20px;">
             <div class="card-header" style="justify-content: center; font-size: 1.5rem; margin-bottom: 30px;">
@@ -1465,78 +1468,112 @@
     </div>
 
 <div class="main-container" id="page-levelup-sim">
-    <div class="card" style="grid-column: span 2; max-width: 800px; margin: 0 auto; width: 100%; border: 1px solid rgba(83, 155, 245, 0.3); background: linear-gradient(145deg, #161b22, #0d1117);">
-        <div class="card-header" style="justify-content: center; padding: 20px;">
+    <div class="card" style="grid-column: span 2; max-width: 800px; margin: 0 auto; width: 100%; border: 1px solid rgba(83, 155, 245, 0.3); background: linear-gradient(145deg, #161b22, #0d1117); border-radius: 12px; overflow: hidden;">
+        
+        <div class="card-header" style="justify-content: center; padding: 20px 20px 10px 20px; border-bottom: 1px solid #30363d;">
             <div style="text-align: center;">
-                <h2 style="color: #539bf5; margin: 0; font-size: 1.5rem; letter-spacing: 1px;"><i class="fa-solid fa-jet-fighter-up"></i> 레벨업 시뮬레이션</h2>
-                <div style="font-size: 0.8rem; color: #8b949e; margin-top: 5px;">페트의 잠재력을 레벨별, 등급별로 정밀하게 측정합니다.</div>
+                <h2 style="color: #539bf5; margin: 0; font-size: 1.5rem; letter-spacing: 1px; font-weight: 800;"><i class="fa-solid fa-jet-fighter-up" style="margin-right: 8px;"></i>레벨업 시뮬레이션</h2>
+                <div style="font-size: 0.85rem; color: #8b949e; margin-top: 5px;">페트의 잠재력을 레벨별, 등급별로 정밀하게 측정합니다.</div>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 15px; margin-bottom: 25px;">
-            <div style="position: relative;">
+        <div style="padding: 20px;">
+            <div style="margin-bottom: 25px;">
                 <label style="font-size: 0.85rem; color: #539bf5; font-weight: bold; display: block; margin-bottom: 8px;">🔍 페트 검색</label>
-                <input type="text" id="lv-pet-search" placeholder="페트 이름을 입력하세요..." autocomplete="off" style="width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #fff;">
-                <div id="lv-search-results" class="sim-search-results" style="display: none;"></div>
-            </div>
-            <div>
-    <label style="font-size: 0.85rem; color: #ff7b72; font-weight: bold; display: block; margin-bottom: 8px;">💎 시작 등급 선택</label>
-    <select id="sim-rank-select" onchange="updateSelectColor('sim-rank-select')" style="width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #8b949e; cursor: pointer;">
-        <option value="none" disabled selected hidden>-</option> <option value="S+">S+ </option>
-        <option value="S">S </option>
-        <option value="A">A </option>
-        <option value="B">B </option>
-        <option value="C">C </option>
-        <option value="D">D </option>
-        <option value="F">F </option>
-    </select>
-</div>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-bottom: 30px;">
-            <button class="btn-calc" onclick="runLevelUpStep(1)" style="flex: 1; background: #30363d; border: 1px solid #484f58; color: #fff; padding: 12px;"><i class="fa-solid fa-plus"></i> Lv.1</button>
-            <button class="btn-calc" onclick="runLevelUpStep(5)" style="flex: 1; background: #30363d; border: 1px solid #484f58; color: #fff; padding: 12px;"><i class="fa-solid fa-angles-up"></i> Lv.5</button>
-            <button class="btn-calc" onclick="runLevelUpStep(10)" style="flex: 1; background: #30363d; border: 1px solid #484f58; color: #fff; padding: 12px;"><i class="fa-solid fa-bolt"></i> Lv.10</button>
-            <button class="btn-calc" onclick="runLevelUpMax()" style="flex: 2; background: #21262d; border: 1px solid #539bf5; color: #539bf5; padding: 12px; font-weight: bold;"><i class="fa-solid fa-star"></i> Max Lv.140</button>
-            <button class="btn-calc" onclick="resetSim()" style="flex: 0.5; background: #da3633; color: #fff; padding: 12px;"><i class="fa-solid fa-rotate"></i></button>
-        </div>
-
-        <div id="lv-sim-result" style="display: none; animation: fadeIn 0.5s ease;">
-            <div style="background: rgba(83, 155, 245, 0.05); border: 1px solid rgba(83, 155, 245, 0.2); border-radius: 12px; padding: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 15px;">
-                    <div>
-                        <span id="sim-pet-rank-badge" style="padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; margin-right: 10px;">A RANK</span>
-                        <span id="sim-pet-name-label" style="font-size: 1.4rem; font-weight: bold; color: #adbac7;">페트 이름</span>
+                <div style="display: flex; gap: 10px; align-items: stretch;"> 
+                    <div style="flex: 1; position: relative;">
+                        <input type="text" id="lv-pet-search" placeholder="페트 이름을 입력하세요..." autocomplete="off" 
+                               style="width: 100%; height: 50px; padding: 0 15px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; font-size: 1rem; font-family: inherit;">
+                        <div id="lv-search-results" class="sim-search-results" style="display: none;"></div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 0.8rem; color: #8b949e;">현재 레벨</div>
-                        <div id="sim-current-lv" style="font-size: 1.8rem; font-weight: 900; color: #539bf5;">Lv.1</div>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="res-box" style="background: transparent; border: none; padding: 0;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
-                            <tr style="border-bottom: 1px solid #21262d; color: #8b949e;"><th style="text-align: left; padding-bottom: 10px;">항목</th><th style="text-align: right; padding-bottom: 10px;">현재 수치</th></tr>
-                            <tr><td style="padding: 12px 0; color: #8b949e;">내구력(HP)</td><td id="stat-hp" style="text-align: right; color: #fff; font-weight: bold;">-</td></tr>
-                            <tr><td style="padding: 12px 0; color: #8b949e;">공격력</td><td id="stat-atk" style="text-align: right; color: #fff; font-weight: bold;">-</td></tr>
-                            <tr><td style="padding: 12px 0; color: #8b949e;">방어력</td><td id="stat-def" style="text-align: right; color: #fff; font-weight: bold;">-</td></tr>
-                            <tr><td style="padding: 12px 0; color: #8b949e;">순발력</td><td id="stat-spd" style="text-align: right; color: #fff; font-weight: bold;">-</td></tr>
-                        </table>
-                    </div>
-                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px;">
-                        <div style="font-size: 0.85rem; color: #8b949e; margin-bottom: 10px;">적용 성장률</div>
-                        <div id="final-growth-rate" style="font-size: 2.2rem; font-weight: 900; color: #3fb950; text-shadow: 0 0 10px rgba(63, 185, 80, 0.3);">0.00</div>
-                        <div style="font-size: 0.75rem; color: #484f58; margin-top: 10px; text-align: center;">등급 보정치가 적용된<br>실시간 성장 효율입니다.</div>
-                    </div>
+                    <button onclick="resetSim()" 
+                            style="width: 70px; height: 50px; background: #da3633; color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; font-weight: bold; transition: 0.2s; white-space: nowrap; flex-shrink: 0;">
+                        <i class="fa-solid fa-rotate" style="font-size: 1.3rem;"></i>
+                        <span style="font-size: 0.75rem;">초기화</span>
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <div style="margin-top: 30px; padding: 15px; border-left: 4px solid #30363d; background: rgba(48, 54, 61, 0.2); font-size: 0.8rem; color: #8b949e; line-height: 1.6;">
-            • <strong>등급별 보정:</strong> 등급(S+~F)에 따라 기본 성장률의 <span style="color:#539bf5">90% ~ 110%</span> 범위 내에서 랜덤 보정이 적용됩니다.<br>
-            • <strong>초기치 규칙:</strong> 베이스 스탯 기준 <span style="color:#ff7b72">±2 범위</span> 내에서 생성됩니다.<br>
-            • <strong>실시간 계산:</strong> 레벨업 버튼 클릭 시마다 해당 성장률만큼 스탯이 누적 합산됩니다.
+            <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                <button class="btn-calc" onclick="runLevelUpStep(1)" style="flex: 1; height: 45px; background: #30363d; border: 1px solid #484f58; color: #fff; border-radius: 8px; cursor: pointer; font-family: inherit;">+ Lv.1</button>
+                <button class="btn-calc" onclick="runLevelUpStep(5)" style="flex: 1; height: 45px; background: #30363d; border: 1px solid #484f58; color: #fff; border-radius: 8px; cursor: pointer; font-family: inherit;">+ Lv.5</button>
+                <button class="btn-calc" onclick="runLevelUpStep(10)" style="flex: 1; height: 45px; background: #30363d; border: 1px solid #484f58; color: #fff; border-radius: 8px; cursor: pointer; font-family: inherit;">+ Lv.10</button>
+                <button class="btn-calc" onclick="runLevelUpMax()" style="flex: 2; height: 45px; background: #21262d; border: 1px solid #539bf5; color: #539bf5; font-weight: 900; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.95rem;"><i class="fa-solid fa-star" style="margin-right: 5px;"></i>Max Lv.140</button>
+            </div>
+
+            <div id="lv-sim-result" style="display: none; animation: fadeIn 0.5s ease;">
+                <div style="background: rgba(83, 155, 245, 0.05); border: 1px solid rgba(83, 155, 245, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 15px;">
+                        <div>
+                            <span id="sim-pet-name-label" style="font-size: 1.8rem; font-weight: bold; color: #adbac7;">-</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; color: #8b949e; margin-bottom: 2px;">현재 레벨</div>
+                            <div id="sim-current-lv" style="font-size: 2.2rem; font-weight: 900; color: #539bf5; line-height: 1;">Lv.1</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px;">
+                        <div class="res-box" style="background: transparent; border: none; padding: 0;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 1rem; table-layout: fixed;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid #30363d; color: #8b949e;">
+                                        <th style="text-align: left; padding-bottom: 12px; font-weight: 500;">항목</th>
+                                        <th style="text-align: center; padding-bottom: 12px; font-weight: 500;">140(S기준)</th>
+                                        <th style="text-align: right; padding-bottom: 12px; font-weight: 500;">현재 수치</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="line-height: 3;">
+                                        <td style="color: #adbac7; font-weight: 500;">내구력</td>
+                                        <td id="goal-hp" style="text-align: center; color: #8b949e; font-family: monospace;">-</td>
+                                        <td id="stat-hp" style="text-align: right; color: #539bf5; font-weight: 700; font-family: monospace;">-</td>
+                                    </tr>
+                                    <tr style="line-height: 3;">
+                                        <td style="color: #adbac7; font-weight: 500;">공격력</td>
+                                        <td id="goal-atk" style="text-align: center; color: #8b949e; font-family: monospace;">-</td>
+                                        <td id="stat-atk" style="text-align: right; color: #539bf5; font-weight: 700; font-family: monospace;">-</td>
+                                    </tr>
+                                    <tr style="line-height: 3;">
+                                        <td style="color: #adbac7; font-weight: 500;">방어력</td>
+                                        <td id="goal-def" style="text-align: center; color: #8b949e; font-family: monospace;">-</td>
+                                        <td id="stat-def" style="text-align: right; color: #539bf5; font-weight: 700; font-family: monospace;">-</td>
+                                    </tr>
+                                    <tr style="line-height: 3;">
+                                        <td style="color: #adbac7; font-weight: 500;">순발력</td>
+                                        <td id="goal-spd" style="text-align: center; color: #8b949e; font-family: monospace;">-</td>
+                                        <td id="stat-spd" style="text-align: right; color: #539bf5; font-weight: 700; font-family: monospace;">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="rank-reveal-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; border: 1px solid #30363d; min-height: 200px; transition: 0.5s;">
+                            <div id="lottery-wait-msg" style="text-align: center; color: #484f58;">
+                                <i class="fa-solid fa-receipt" style="font-size: 2.2rem; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+                                <div style="font-size: 0.9rem; font-weight: bold; color: #8b949e;">잠재력 측정 중...</div>
+                                <div style="font-size: 0.75rem; margin-top: 8px;">Lv.140 달성 시<br>성장률과 랭크가 공개됩니다!</div>
+                            </div>
+                            <div id="lottery-result-content" style="display: none; text-align: center; animation: zoomIn 0.6s both;">
+                                <div style="font-size: 0.9rem; color: #8b949e; margin-bottom: 10px;">최종 적용 성장률</div>
+                                <div id="final-growth-rate" style="font-size: 3rem; font-weight: 900; color: #3fb950; text-shadow: 0 0 10px rgba(63, 185, 80, 0.3); line-height: 1; margin-bottom: 20px;">0.00</div>
+                                <div id="final-rank-badge" style="font-size: 1.4rem; font-weight: 900; padding: 10px 25px; border-radius: 8px; color: #fff; text-transform: uppercase; letter-spacing: 1px;">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 25px; padding-top: 15px; border-top: 1px dotted #30363d;">
+                        <div style="font-size: 0.9rem; color: #539bf5; margin-bottom: 12px; font-weight: bold;"><i class="fa-solid fa-list-ul" style="margin-right: 5px;"></i>레벨업 성장 기록 (최신순)</div>
+                        <div id="sim-log-list" style="max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid #30363d;"></div>
+                    </div>
+                </div>
+            </div> <div style="margin-top: 25px; padding: 18px; border-left: 4px solid #539bf5; background: rgba(83, 155, 245, 0.05); border-radius: 4px; font-size: 0.85rem; color: #adbac7; line-height: 1.7;">
+                • <strong>기준점 안내:</strong> 140(S기준)은 페트의 순수 베이스 스탯(초기치+성장률*139)을 의미합니다.<br>
+                • <strong>초기치 기록:</strong> 생성된 레벨 1 수치는 <strong>성장 기록의 최상단</strong>에 고정되어 상시 비교가 가능합니다.<br>
+                • <strong>S+ 승격 조건:</strong> 140레벨 도달 시 기준점 대비 <span style="color:#ff7b72">특정조건을 충족</span>할 경우 자동으로 <strong>S+ RANK</strong>로 표시됩니다.<br>
+                • <strong>최종 등급 판정:</strong> 레벨업 수치는 로그에 기록되나, 최종 등급은 Max 레벨(140)에서 이루어집니다.
+            </div>
         </div>
     </div>
 </div>
@@ -2564,9 +2601,9 @@
             { name: "왜곡", effect: "본인과 펫, 5턴 동안\n명중률 증가 + 치명타 확률 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
             { name: "황혼의 날개", effect: "팀원 전체, 5턴 동안\n회피율, 명중률, 치명타 확률 증가", values: ["3%", "4%", "5%", "6%", "8%"] }
         ];
-// --- 여기서부터 복사 ---
-let noticeCurrentPage = 1;
-const noticesPerPage = 3;
+
+        let noticeCurrentPage = 1;
+        const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
     {
@@ -2955,10 +2992,11 @@ const NOTICE_DATABASE = [
                 }
             });
 
-            const grid = document.getElementById('encyStatusGrid');
+            const grid = document.getElementById('ency-status-content');
             if (!grid) return;
-            
+    
             let html = '';
+
             // 능력 이름순 정렬 후 화면 생성
             Object.keys(statusMap).sort().forEach(buff => {
                 const stat = statusMap[buff];
@@ -3424,26 +3462,29 @@ const NOTICE_DATABASE = [
         }
 
         window.onload = () => {
-            updateSelectColor('calcMode');
-            updateSelectColor('huntingGround');
-            updateSelectColor('petElement');
-            updateSelectColor('petGrade');
-            updateSelectColor('petPassive');
-            updateSelectColor('petEncyBuff');
-            updateSelectColor('petRegStatus');
-            updateSelectColor('partyExp');
-            updateSelectColor('sim-rank-select');
+    updateSelectColor('calcMode');
+    updateSelectColor('huntingGround');
+    updateSelectColor('petElement');
+    updateSelectColor('petGrade');
+    updateSelectColor('petPassive');
+    updateSelectColor('petEncyBuff');
+    updateSelectColor('petRegStatus');
+    updateSelectColor('partyExp');
 
-            initCustomSelects();
-            updateEncyProgress();
+    initCustomSelects();
+    updateEncyProgress();
 
-            filterPets();
-            
-            showPage('page-home');
-            initExpTable();
-            renderNoticePage();
-            updateTopNoticeBanner();
-            };
+    filterPets();
+    
+    showPage('page-home');
+    initExpTable();
+    renderNoticePage();
+    updateTopNoticeBanner();
+    
+    // 계산기 초기 화면 렌더링용 추가
+    toggleMode();
+    applyGround();
+};
 
 /* ==========================================================
    👇👇👇 페트 초기화 시뮬레이션 관련 JavaScript 👇👇👇
@@ -4104,171 +4145,222 @@ function changeType(target, type) {
     calcComprehensiveBattle();
 }
 
-// 레벨업 시뮬레이션
-let simState = {
+/* ==========================================================
+   [최종 통합] 복권형 레벨업 시뮬레이션 시스템
+   (140Lv 도달 시 성장률 & 랭크 동시 공개)
+========================================================== */
+
+var simState = {
     pet: null,
     currentLv: 1,
+    rank: 'S',
     stats: { hp: 0, atk: 0, def: 0, spd: 0 },
+    initialStats: { hp: 0, atk: 0, def: 0, spd: 0 },
     growth: { hp: 0, atk: 0, def: 0, spd: 0 },
-    totalGrowthRate: 0,
-    rank: 'A'
+    totalGrowthRate: "0.00"
 };
 
-// 등급별 성장률 보정 계수
-const RANK_MULTIPLIERS = {
-    'S+': 1.10, 'S': 1.05, 'A': 1.00, 'B': 0.97, 'C': 0.94, 'D': 0.92, 'F': 0.90
-};
-
-// 펫 검색 및 초기화 (이전 답변의 검색 로직 활용)
-document.addEventListener('DOMContentLoaded', () => {
-    const searchIn = document.getElementById('lv-pet-search');
-    const resultsDiv = document.getElementById('lv-search-results');
-
-    searchIn.addEventListener('input', (e) => {
-        const val = e.target.value.trim().toLowerCase();
-        resultsDiv.innerHTML = '';
-        if (!val) { resultsDiv.style.display = 'none'; return; }
-
-        const filtered = PET_DATABASE.filter(p => p.name.toLowerCase().includes(val));
-        if (filtered.length > 0) {
-            resultsDiv.style.display = 'block';
-            filtered.forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'sim-search-item';
-                div.textContent = p.name;
-                div.onclick = () => {
-                    searchIn.value = p.name;
-                    initSim(p);
-                    resultsDiv.style.display = 'none';
-                };
-                resultsDiv.appendChild(div);
-            });
-        }
-    });
-});
-
-/* ==========================================================
-   레벨업 시뮬레이션 로직 (등급 선택 및 텍스트 동기화 적용)
-   ========================================================== */
-
-// 1. 시뮬레이션 초기화 (Lv.1 상태 생성)
+// 1. 시뮬레이션 초기화 (페트 검색 또는 리셋 시 실행)
 function initSim(pet) {
-    const rankSelect = document.getElementById('sim-rank-select');
-    
-    // 등급이 선택되지 않았을 경우 처리 (추가된 예외 처리)
-    if (!rankSelect || rankSelect.value === "none" || rankSelect.value === "-") {
-        alert("시작 등급을 먼저 선택해 주세요.");
-        return;
-    }
-
     simState.pet = pet;
     simState.currentLv = 1;
-    simState.rank = rankSelect.value;
-    
-    // 등급별 보정 계수 적용 (S+ ~ F)
-    const multiplier = RANK_MULTIPLIERS[simState.rank];
 
-    // 초기치 결정: 베이스 + (RAND 0,4 - 2)
-    simState.stats = {
-        hp: Number(pet.hp) + (Math.floor(Math.random() * 5) - 2),
-        atk: Number(pet.atk) + (Math.floor(Math.random() * 5) - 2),
-        def: Number(pet.def) + (Math.floor(Math.random() * 5) - 2),
-        spd: Number(pet.spd) + (Math.floor(Math.random() * 5) - 2)
+    // --- [확률형 오차 생성] ---
+    // S급 기준점에서 F~S+까지 다양하게 나올 수 있도록 넓은 랜덤값 부여
+    let bonus = {
+        hp: (Math.random() * 40) - 25,     // -25 ~ +15
+        atk: (Math.random() * 6) - 4,     // -4.0 ~ +2.0
+        def: (Math.random() * 5) - 3,     // -3.0 ~ +2.0
+        spd: (Math.random() * 5) - 3      // -3.0 ~ +2.0
     };
 
-    // 등급 보정 성장률 결정
+    // 초기치 설정 (1레벨 베이스)
+    simState.initialStats = {
+        hp: Number(pet.hp),
+        atk: Number(pet.atk),
+        def: Number(pet.def),
+        spd: Number(pet.spd)
+    };
+    simState.stats = JSON.parse(JSON.stringify(simState.initialStats));
+
+    // 성장률 역산 (결정된 운명 스탯에 도달하도록 계산)
     simState.growth = {
-        hp: Number(pet.ghp) * multiplier,
-        atk: Number(pet.gatk) * multiplier,
-        def: Number(pet.gdef) * multiplier,
-        spd: Number(pet.gspd) * multiplier
+        hp: (Number(pet.ghp) * 139 + bonus.hp) / 139,
+        atk: (Number(pet.gatk) * 139 + bonus.atk) / 139,
+        def: (Number(pet.gdef) * 139 + bonus.def) / 139,
+        spd: (Number(pet.gspd) * 139 + bonus.spd) / 139
     };
 
-    simState.totalGrowthRate = (simState.growth.hp + simState.growth.atk + simState.growth.def + simState.growth.spd).toFixed(2);
+    simState.totalGrowthRate = (simState.growth.atk + simState.growth.def + simState.growth.spd).toFixed(2);
     
+    // 기록창 초기화
+    const logList = document.getElementById('sim-log-list');
+    if (logList) logList.innerHTML = ''; 
+    addSimLog(1, simState.stats);
     updateSimUI();
 }
 
-// 2. 레벨업 실행 (Step 단위)
+// 2. 등급 판정 알고리즘
+function calculateRank() {
+    const p = simState.pet;
+    // 140레벨 도달 시 예상 최종 수치 계산
+    const finalHP = simState.stats.hp + (simState.growth.hp * (140 - simState.currentLv));
+    const finalAtk = simState.stats.atk + (simState.growth.atk * (140 - simState.currentLv));
+    const finalDef = simState.stats.def + (simState.growth.def * (140 - simState.currentLv));
+    const finalSpd = simState.stats.spd + (simState.growth.spd * (140 - simState.currentLv));
+
+    // S기준점(Base) 대비 차이 계산
+    const hpDiff = finalHP - (Number(p.hp) + (Number(p.ghp) * 139));
+    const totalDiff = (finalAtk + finalDef + finalSpd) - 
+                      ((Number(p.atk) + Number(p.gatk) * 139) + 
+                       (Number(p.def) + Number(p.gdef) * 139) + 
+                       (Number(p.spd) + Number(p.gspd) * 139));
+
+    if (hpDiff >= 8 && totalDiff >= 1) return 'S+';
+    if (hpDiff >= -2 && totalDiff >= -1.5) return 'S';
+    if (totalDiff >= -4) return 'A';
+    if (totalDiff >= -7) return 'B';
+    if (totalDiff >= -11) return 'C';
+    if (totalDiff >= -15) return 'D';
+    return 'F';
+}
+
+// 3. 레벨업 실행
 function runLevelUpStep(step) {
-    if (!simState.pet) return alert("먼저 페트를 검색하여 선택하세요.");
+    if (!simState.pet) return alert("먼저 페트를 검색하세요.");
+    let actualStep = step;
+    if (simState.currentLv + step > 140) actualStep = 140 - simState.currentLv;
+    if (actualStep <= 0) return alert("이미 최고 레벨입니다.");
+
+    simState.stats.hp += simState.growth.hp * actualStep;
+    simState.stats.atk += simState.growth.atk * actualStep;
+    simState.stats.def += simState.growth.def * actualStep;
+    simState.stats.spd += simState.growth.spd * actualStep;
     
-    const nextLv = simState.currentLv + step;
-    if (nextLv > 140) {
-        step = 140 - simState.currentLv;
+    simState.currentLv += actualStep;
+    addSimLog(simState.currentLv, simState.stats);
+    updateSimUI();
+}
+
+// 4. UI 업데이트 및 복권 시스템 (핵심 수정)
+function updateSimUI() {
+    const resArea = document.getElementById('lv-sim-result');
+    if (!resArea || !simState.pet) return;
+    resArea.style.display = 'block';
+    
+    document.getElementById('sim-pet-name-label').innerText = simState.pet.name;
+    document.getElementById('sim-current-lv').innerText = `Lv.${simState.currentLv}`;
+    
+    // --- [복권 시스템 제어 로직] ---
+    const waitMsg = document.getElementById('lottery-wait-msg'); // "잠재력 측정 중" 메시지 영역
+    const resultContent = document.getElementById('lottery-result-content'); // 결과(성장률+뱃지) 영역
+    const revealBox = document.getElementById('rank-reveal-box');
+
+    if (simState.currentLv >= 140) {
+        // 140레벨 달성: 복권 개봉!
+        const currentRank = calculateRank();
+        if (waitMsg) waitMsg.style.display = 'none';
+        if (resultContent) {
+            resultContent.style.display = 'block';
+            
+            // 데이터 삽입
+            const finalGrowthEl = document.getElementById('final-growth-rate');
+            const finalRankEl = document.getElementById('final-rank-badge');
+            
+            if (finalGrowthEl) finalGrowthEl.innerText = simState.totalGrowthRate;
+            if (finalRankEl) {
+                finalRankEl.innerText = `${currentRank} RANK`;
+                const rankColors = { 'S+': '#f85149', 'S': '#d29922', 'A': '#539bf5', 'B': '#3fb950', 'C': '#8b949e', 'D': '#484f58', 'F': '#21262d' };
+                finalRankEl.style.background = rankColors[currentRank] || '#30363d';
+            }
+
+            // 박스 스타일 강조 연출
+            if (revealBox) {
+                const rankColors = { 'S+': '#f85149', 'S': '#d29922', 'A': '#539bf5', 'B': '#3fb950', 'C': '#8b949e', 'D': '#484f58', 'F': '#21262d' };
+                revealBox.style.borderColor = rankColors[currentRank] || '#30363d';
+                revealBox.style.background = `linear-gradient(145deg, rgba(0,0,0,0.5), ${rankColors[currentRank]}33)`;
+            }
+        }
+    } else {
+        // 140레벨 전: 베일에 싸인 상태
+        if (waitMsg) waitMsg.style.display = 'block';
+        if (resultContent) resultContent.style.display = 'none';
+        if (revealBox) {
+            revealBox.style.background = 'rgba(0,0,0,0.3)';
+            revealBox.style.borderColor = '#30363d';
+        }
     }
 
-    if (step <= 0) return alert("이미 최고 레벨(140)입니다.");
+    // 140(S기준) 데이터 표시
+    document.getElementById('goal-hp').innerText = Math.round(Number(simState.pet.hp) + (Number(simState.pet.ghp) * 139)).toLocaleString();
+    document.getElementById('goal-atk').innerText = Math.round(Number(simState.pet.atk) + (Number(simState.pet.gatk) * 139)).toLocaleString();
+    document.getElementById('goal-def').innerText = Math.round(Number(simState.pet.def) + (Number(simState.pet.gdef) * 139)).toLocaleString();
+    document.getElementById('goal-spd').innerText = Math.round(Number(simState.pet.spd) + (Number(simState.pet.gspd) * 139)).toLocaleString();
 
-    // 스탯 누적 합산
-    simState.stats.hp += simState.growth.hp * step;
-    simState.stats.atk += simState.growth.atk * step;
-    simState.stats.def += simState.growth.def * step;
-    simState.stats.spd += simState.growth.spd * step;
-    
-    simState.currentLv += step;
-    updateSimUI();
+    // 현재 수치 표시
+    document.getElementById('stat-hp').innerText = simState.stats.hp.toFixed(2);
+    document.getElementById('stat-atk').innerText = simState.stats.atk.toFixed(2);
+    document.getElementById('stat-def').innerText = simState.stats.def.toFixed(2);
+    document.getElementById('stat-spd').innerText = simState.stats.spd.toFixed(2);
 }
 
-// 3. Lv.140 즉시 성장
+// 5. 로그 기록 (1레벨 상단 고정)
+function addSimLog(lv, stats) {
+    const logList = document.getElementById('sim-log-list');
+    if (!logList) return;
+    const li = document.createElement('div');
+    li.style.cssText = "display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #21262d; font-size: 0.85rem; animation: fadeIn 0.3s ease; font-family: inherit;";
+    if (lv === 1) {
+        li.style.background = "rgba(83, 155, 245, 0.08)";
+        li.style.borderLeft = "3px solid #539bf5";
+        li.id = "first-level-log";
+    }
+    li.innerHTML = `<span style="color: #539bf5; font-weight: bold;">Lv.${lv}</span><span style="color: #adbac7;">체: <span style="color:#fff">${stats.hp.toFixed(2)}</span> / 공: <span style="color:#fff">${stats.atk.toFixed(2)}</span> / 방: <span style="color:#fff">${stats.def.toFixed(2)}</span> / 순: <span style="color:#fff">${stats.spd.toFixed(2)}</span></span>`;
+    const firstLog = document.getElementById('first-level-log');
+    if (lv === 1) { logList.innerHTML = ''; logList.appendChild(li); } 
+    else if (firstLog) { firstLog.after(li); } 
+    else { logList.prepend(li); }
+}
+
+// 6. 기타 유틸리티
+function resetSim() {
+    if(simState.pet) initSim(simState.pet);
+    else location.reload();
+}
+
 function runLevelUpMax() {
     if (simState.currentLv >= 140) return alert("이미 최고 레벨입니다.");
     runLevelUpStep(140 - simState.currentLv);
 }
 
-// 4. UI 업데이트 및 등급 뱃지 색상 설정
-function updateSimUI() {
-    const resArea = document.getElementById('lv-sim-result');
-    if (resArea) resArea.style.display = 'block';
-    
-    document.getElementById('sim-pet-name-label').innerText = simState.pet.name;
-    document.getElementById('sim-current-lv').innerText = `Lv.${simState.currentLv}`;
-    
-    const badge = document.getElementById('sim-pet-rank-badge');
-    badge.innerText = `${simState.rank} RANK`;
-    
-    // 등급별 고유 색상
-    const rankColors = { 
-        'S+': '#f85149', 'S': '#d29922', 'A': '#539bf5', 
-        'B': '#3fb950', 'C': '#8b949e', 'D': '#484f58', 'F': '#21262d' 
-    };
-    badge.style.background = rankColors[simState.rank] || '#30363d';
-    badge.style.color = (simState.rank === 'F') ? '#8b949e' : '#fff';
-
-    // 수치 출력 (소수점 2자리)
-    document.getElementById('stat-hp').innerText = simState.stats.hp.toFixed(2);
-    document.getElementById('stat-atk').innerText = simState.stats.atk.toFixed(2);
-    document.getElementById('stat-def').innerText = simState.stats.def.toFixed(2);
-    document.getElementById('stat-spd').innerText = simState.stats.spd.toFixed(2);
-    document.getElementById('final-growth-rate').innerText = simState.totalGrowthRate;
-}
-
-// 5. 선택창 색상 및 커스텀 UI 동기화 (핵심 수정)
-function updateSelectColor(selectId) {
-    const el = document.getElementById(selectId);
-    if(!el) return;
-
-    // 초기값(-) 인 경우 회색, 선택된 경우 흰색
-    if(el.value === "none" || el.value === "0" || el.value === "" || el.value === "all" || el.value === "-") {
-        el.style.color = "#8b949e";
-    } else {
-        el.style.color = "#ffffff";
+// 7. 검색 리스너
+document.addEventListener('DOMContentLoaded', () => {
+    const searchIn = document.getElementById('lv-pet-search');
+    const resultsDiv = document.getElementById('lv-search-results');
+    if (searchIn && resultsDiv) {
+        searchIn.addEventListener('input', (e) => {
+            const val = e.target.value.trim().toLowerCase();
+            resultsDiv.innerHTML = '';
+            if (!val) { resultsDiv.style.display = 'none'; return; }
+            if (typeof PET_DATABASE === 'undefined') return;
+            const filtered = PET_DATABASE.filter(p => p.name.toLowerCase().includes(val));
+            if (filtered.length > 0) {
+                resultsDiv.style.display = 'block';
+                filtered.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'sim-search-item';
+                    div.textContent = p.name;
+                    div.onclick = () => {
+                        searchIn.value = p.name;
+                        initSim(p);
+                        resultsDiv.style.display = 'none';
+                    };
+                    resultsDiv.appendChild(div);
+                });
+            }
+        });
     }
-
-    // 커스텀 셀렉트(initCustomSelects)가 만든 화면상의 텍스트를 강제로 갱신
-    if (el.customUpdate) {
-        el.customUpdate();
-    }
-}
-
-// 6. 리셋 함수
-function resetSim() {
-    if(simState.pet) {
-        initSim(simState.pet);
-    } else {
-        location.reload(); // 선택된 펫이 없으면 초기화
-    }
-}
+});
     </script>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
