@@ -971,9 +971,9 @@
                 <select id="huntingGround" onchange="applyGround()">
                 <option value="0" disabled selected hidden>사냥터를 선택하세요</option>
                 <option value="191442">채석장 (LV30~65)</option>
-                <option value="0" disabled>지하 (정보없음)</option>
+                <option value="505000">지하 (LV65~80)</option>
                 <option value="875515">폐허 (LV80~100)</option>
-                <option value="1049089" disabled>눈동 (LV100~110)</option>
+                <option value="1049089">눈동 (LV100~110)</option>
                 <option value="1685000">어동 (LV110~120)</option>
                 <option value="2000000">해저 (LV120~)</option>
             </select>
@@ -1052,8 +1052,8 @@
     <summary>📍 사냥터별 상세 데이터 (1배율 기준)</summary>
     <div class="table-content">
         <div class="table-row"><strong>사냥터</strong><strong>상세 정보</strong></div>
-        <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 191,442 EXP</span></div>
-        <div class="table-row"><span>지하 (LV65~80)</span><span style="color:#768390">정보 없음 (측정 필요)</span></div>
+        <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 200,000 EXP</span></div>
+        <div class="table-row"><span>지하 (LV65~80)</span><span>마리당: - / 시간당: 약 505,000 EXP</span></div>
         <div class="table-row"><span>폐허 (LV80~100)</span><span>마리당: - / 시간당: 약 875,515 EXP</span></div>
         <div class="table-row"><span>눈동 (LV100~110)</span><span>마리당: - / 시간당: 약 1,049,089 EXP</span></div>
         <div class="table-row"><span>어동 (LV110~120)</span><span>마리당: - / 시간당: 약 1,685,000 EXP</span></div>
@@ -2612,6 +2612,17 @@
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+        id: 9,
+        date: "26년 4월 21일",
+        title: "26년 4월 21일 공지사항입니다.",
+        summary: "1. 경험치 계산기 사냥터 시간당 경험치 최신화", 
+        content: `
+            <strong>1) 경험치 계산기 업데이트</strong>
+            <span>- 사냥터의 시간당 경험치 데이터가 최신 정보로 업데이트되었습니다.</span>
+        `
+    },
+
     {
         id: 8,
         date: "26년 4월 20일",
