@@ -2553,10 +2553,11 @@
             { category: "젖소류", name: "젖소", img: "./images/820.gif", elements: "지5 풍5", hp: 58.11, atk: 11.93, def: 8.81, spd: 6.84, ghp: 10.53, gatk: 2.16, gdef: 1.60, gspd: 1.24, passive: "치유", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
             { category: "젖소류", name: "화우", img: "./images/821.gif", elements: "화8 풍2", hp: 57.46, atk: 12.61, def: 7.69, spd: 6.84, ghp: 10.42, gatk: 2.28, gdef: 1.39, gspd: 1.24, passive: "치유", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
             { category: "젖소류", name: "하누", img: "./images/822.gif", elements: "지8 수2", hp: 58.39, atk: 11.68, def: 9.49, spd: 6.36, ghp: 10.58, gatk: 2.12, gdef: 1.72, gspd: 1.15, passive: "치유", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
-            { category: "젖소류", name: "흑우", img: "./images/823.gif", elements: "수5 화5", hp: 57.88, atk: 12.18, def: 7.83, spd: 6.66, ghp: 10.49, gatk: 2.21, gdef: 1.42, gspd: 1.21, passive: "치유", grade: "일반", encyBuff: "매턴 캐릭터 HP 5 회복" }
+            { category: "젖소류", name: "흑우", img: "./images/823.gif", elements: "수5 화5", hp: 57.88, atk: 12.18, def: 7.83, spd: 6.66, ghp: 10.49, gatk: 2.21, gdef: 1.42, gspd: 1.21, passive: "치유", grade: "일반", encyBuff: "매턴 캐릭터 HP 5 회복" },
 
 
 
+            { category: "미정", name: "만득", img: "./images/MAN1.gif", elements: "미정", hp: 99.99, atk: 99.99, def: 99.99, spd: 99.99, ghp: 99.99, gatk: 99.99, gdef: 99.99, gspd: 99.99, passive: "미정", grade: "미정", encyBuff: "이스터에그" }
 
         ];
 
@@ -2851,6 +2852,9 @@ const NOTICE_DATABASE = [
 
             const grouped = {};
             data.forEach(pet => {
+                // ▼ 이스터에그 숨기기: 이름이 '만득'인 페트는 카테고리 그룹화에서 제외
+                if (pet.name === "만득") return; 
+
                 if(!grouped[pet.category]) grouped[pet.category] = [];
                 grouped[pet.category].push(pet);
             });
