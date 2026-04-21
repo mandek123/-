@@ -1620,9 +1620,11 @@
         <p style="font-size:0.85rem; color:#888;">* 전설 등급 장비 제작 시 7포인트의 능력치가 랜덤 분배됩니다.</p>
         
         <select id="itemSimEquip" onchange="updateEquipUI()">
-            <option value="ignos">이그노스의 활 (원거리 무기)</option>
-            <option value="spirit">봉인된 정령왕의 창 (근거리 무기)</option>
-        </select>
+                <option value="ignos">이그노스의 활 (원거리 무기)</option>
+                <option value="spirit">봉인된 정령왕의 창 (근거리 무기)</option>
+                <option value="hetia">헤티아의 머리장식 (투구 / 모자)</option>
+                <option value="hellhound">지옥견 털옷 (갑옷 / 옷)</option>
+            </select>
         
         <div id="equipInfoBox" class="res-box" style="margin-bottom:15px; text-align:center;">
         </div>
@@ -3599,6 +3601,20 @@ const NOTICE_DATABASE = [
                 specialBase: "공격 횟수 1~1", 
                 baseStats: { "공격력": 64, "순발력": -13, "치명타": 7 }, 
                 pool: ["공격력", "방어력", "순발력", "체력", "관통", "치명 (%)", "PVE 공격력 (%)"] 
+            },
+            "hetia": { 
+                name: "헤티아의 머리장식", img: "./images/item6.png", type: "투구 / 모자", 
+                baseStr: "공격력 5 / 방어력 15", 
+                specialBase: "", 
+                baseStats: { "공격력": 5, "방어력": 15 }, 
+                pool: ["공격력", "방어력", "순발력", "체력", "쉴드", "PVE 방어력 (%)"] 
+            },
+            "hellhound": { 
+                name: "지옥견 털옷", img: "./images/item7.png", type: "갑옷 / 옷", 
+                baseStr: "방어력 30 / 순발력 5 / 체력 10", 
+                specialBase: "", 
+                baseStats: { "방어력": 30, "순발력": 5, "체력": 10 }, 
+                pool: ["방어력", "순발력", "체력", "쉴드", "PVE 방어력 (%)"] 
             }
         };
 
@@ -3615,7 +3631,14 @@ const NOTICE_DATABASE = [
 
         // 1. 장비 감정 UI 업데이트
         function updateEquipUI() {
-            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+            const selectEl = document.getElementById('itemSimEquip');
+            const eq = EQUIP_DB[selectEl.value];
+
+            // [해결] 만득월드 커스텀 드롭다운 텍스트 강제 갱신
+            if (typeof selectEl.customUpdate === 'function') {
+                selectEl.customUpdate();
+            }
+
             document.getElementById('equipInfoBox').innerHTML = `
                 <img src="${eq.img}" alt="${eq.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
                 <strong style="color:#d2a8ff; font-size:1.1rem;">${eq.name}</strong><br>
@@ -3623,7 +3646,7 @@ const NOTICE_DATABASE = [
                 <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;">기본: ${eq.baseStr}</div>
             `;
             document.getElementById('equipResultBox').style.display = 'none';
-            currentIdentifyStats = {}; // 장비 변경 시 감정 기록 초기화
+            currentIdentifyStats = {}; 
             updateTotalStatsUI();
         }
 
@@ -3653,7 +3676,14 @@ const NOTICE_DATABASE = [
 
         // 3. 인챈트 UI 업데이트
         function updateEnchantUI() {
-            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
+            const selectEl = document.getElementById('itemSimEnchant');
+            const en = ENCHANT_DB[selectEl.value];
+
+            // [해결] 만득월드 커스텀 드롭다운 텍스트 강제 갱신
+            if (typeof selectEl.customUpdate === 'function') {
+                selectEl.customUpdate();
+            }
+
             document.getElementById('enchantInfoBox').innerHTML = `
                 <img src="${en.img}" alt="${en.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
                 <strong style="color:#ff7b72; font-size:1.1rem;">${en.name}</strong><br>
@@ -3661,7 +3691,7 @@ const NOTICE_DATABASE = [
                 <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px; color:#ffcc00;">고정 효과: ${en.fixedStr}</div>
             `;
             document.getElementById('enchantResultBox').style.display = 'none';
-            currentEnchantStats = {}; // 장비 변경 시 인챈트 기록 초기화
+            currentEnchantStats = {}; 
             currentEnchantFixed = {};
             updateTotalStatsUI();
         }
@@ -3715,7 +3745,10 @@ const NOTICE_DATABASE = [
 
             // 합산 결과 UI 그리기
             let html = `<div style="width:100%; text-align:center; margin-bottom:15px; color:#fff; font-weight:bold; font-size:1.2rem;">[ ${eq.name} 완성본 ]</div>`;
-            html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${eq.specialBase}</span>`;
+            
+            if (eq.specialBase !== "") {
+                html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${eq.specialBase}</span>`;
+            }
 
             for (let [stat, val] of Object.entries(total)) {
                 if (val === 0) continue; // 0이 된 옵션은 표기 안함
