@@ -826,6 +826,29 @@
     .battle-grid { display: flex; flex-direction: column; gap: 15px; }
 }
 
+/* 기타 탭 드롭다운 및 배지 스타일 */
+.nav-dropdown { position: relative; display: inline-block; }
+.nav-dropdown-content { 
+    display: none; position: absolute; background-color: var(--inner-card); 
+    min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5); 
+    z-index: 1000; border: 1px solid var(--border); border-radius: 8px; right: 0; top: 100%;
+}
+.nav-dropdown-content a { 
+    color: var(--text-main); padding: 15px 20px; text-decoration: none; 
+    display: block; border-bottom: 1px solid var(--border); font-size: 0.95rem;
+}
+.nav-dropdown-content a:hover { background-color: var(--hover-bg); color: var(--text-highlight); }
+.nav-dropdown:hover .nav-dropdown-content { display: block; animation: fadeIn 0.2s ease; }
+.nav-dropdown-content a:last-child { border-bottom: none; }
+
+.badge-new { 
+    background-color: #f85149; color: white; padding: 2px 6px; 
+    border-radius: 4px; font-size: 0.7rem; font-weight: bold; 
+    margin-left: 8px; vertical-align: middle; animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
+}
 
     </style>
 </head>
@@ -856,30 +879,37 @@
             <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
 
             <div class="dropdown">
-    <a href="javascript:void(0);" class="nav-item" id="menu-etc" onclick="showPage('page-init-sim')">
-        ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
-    </a>
-    <div class="dropdown-content">
-        <a href="javascript:void(0);" onclick="showPage('page-levelup-sim'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-arrow-up-right-dots" style="color: #539bf5; width: 18px;"></i> 
-            <span>레벨업 시뮬레이션</span>
-            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-        </a>
-        <a href="javascript:void(0);" onclick="showPage('page-init-sim'); closeDropdown();" style="display: flex; align-items: center;">
-    <i class="fa-solid fa-rotate" style="color: #a5d6ff; width: 18px;"></i> 
-    <span>초기화 시뮬레이션</span>
-    <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-</a>
-        <a href="javascript:void(0);" onclick="showPage('page-raid-guide'); closeDropdown();">
-            <i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 레이드 패시브 안내
-        </a>
-        <a href="javascript:void(0);" onclick="showPage('page-bot'); closeDropdown();">
-            <i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 만득봇 안내
-        </a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-etc">
+                    ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
+                </a>
+                <div class="dropdown-content">
+                    <a href="javascript:void(0);" onclick="showPage('page-item-sim'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-hammer" style="color: #ffcc00; width: 18px;"></i> 
+                        <span>아이템 시뮬레이터</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+                    </a>
 
+                    <a href="javascript:void(0);" onclick="showPage('page-levelup-sim'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-arrow-up-right-dots" style="color: #539bf5; width: 18px;"></i> 
+                        <span>레벨업 시뮬레이션</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+                    </a>
+                    <a href="javascript:void(0);" onclick="showPage('page-init-sim'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-rotate" style="color: #a5d6ff; width: 18px;"></i> 
+                        <span>초기화 시뮬레이션</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+                    </a>
+                    <a href="javascript:void(0);" onclick="showPage('page-raid-guide'); closeDropdown();">
+                        <i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 레이드 패시브 안내
+                    </a>
+                    <a href="javascript:void(0);" onclick="showPage('page-bot'); closeDropdown();">
+                        <i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 만득봇 안내
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-        </div> 
-        </nav>
+</nav>
 
     <div class="main-container active" id="page-home">
         <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 25px; cursor: pointer; display: flex; align-items: center; gap: 12px;" onclick="showPage('page-home')">
@@ -1582,6 +1612,60 @@
         </div>
     </div>
 </div>
+
+<div class="main-container" id="page-item-sim">
+        
+    <div class="card">
+        <h2 style="color:var(--accent-blue)"><i class="fa-solid fa-hammer"></i> 장비 감정 (랜덤 옵션 부여)</h2>
+        <p style="font-size:0.85rem; color:#888;">* 전설 등급 장비 제작 시 7포인트의 능력치가 랜덤 분배됩니다.</p>
+        
+        <select id="itemSimEquip" onchange="updateEquipUI()">
+            <option value="ignos">이그노스의 활 (원거리 무기)</option>
+            <option value="spirit">봉인된 정령왕의 창 (근거리 무기)</option>
+        </select>
+        
+        <div id="equipInfoBox" class="res-box" style="margin-bottom:15px; text-align:center;">
+        </div>
+
+<button class="btn-calc" style="background:#539bf5; color:#ffffff;" onclick="runEquipIdentify()">감정하기 (7포인트 분배)</button>
+
+        <div id="equipResultBox" class="res-box" style="margin-top:15px; display:none; border-color:var(--accent-blue);">
+            <div style="font-weight:bold; margin-bottom:10px; color:var(--text-highlight);">[감정 결과]</div>
+            <div id="equipResultText" style="line-height:1.8;"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="color:#ff7b72"><i class="fa-solid fa-gem"></i> 장비 인챈트</h2>
+        <p style="font-size:0.85rem; color:#888;">* 1~3포인트가 확률적으로 적용됩니다. (+1: 60%, +2: 30%, +3: 10%)</p>
+
+        <select id="itemSimEnchant" onchange="updateEnchantUI()">
+            <option value="fire">홍염석 (무기 전용)</option>
+            <option value="jade">비취석 (방어구 전용)</option>
+            <option value="deep">심해석 (악세서리 전용)</option>
+        </select>
+
+        <div id="enchantInfoBox" class="res-box" style="margin-bottom:15px; text-align:center;">
+        </div>
+
+        <button class="btn-calc" style="background:#ff7b72" onclick="runEnchant()">인챈트 실행</button>
+
+        <div id="enchantResultBox" class="res-box" style="margin-top:15px; display:none; border-color:#ff7b72;">
+            <div style="font-weight:bold; margin-bottom:10px; color:var(--text-highlight);">[인챈트 결과]</div>
+            <div id="enchantResultText" style="line-height:1.8;"></div>
+        </div>
+    </div>
+
+    <div class="card" style="grid-column: span 2;">
+        <h2 style="color:#2ea043"><i class="fa-solid fa-square-poll-horizontal"></i> 최종 능력치 합산</h2>
+        <p style="font-size:0.85rem; color:#888;">* 장비 기본 옵션 + 장비 감정 옵션 + 인챈트 옵션이 모두 계산된 수치입니다.</p>
+        
+        <div id="totalStatsBox" class="res-box" style="display:flex; flex-wrap:wrap; gap:15px; border-color:#2ea043; min-height:80px; align-items:center; justify-content:center; font-size:1.1rem;">
+            <span style="color:#888;">장비 감정 또는 인챈트를 실행해주세요.</span>
+        </div>
+    </div>
+
+</div> 
 
     <div class="footer">
         <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
@@ -2616,12 +2700,14 @@ const NOTICE_DATABASE = [
         id: 9,
         date: "26년 4월 21일",
         title: "26년 4월 21일 공지사항입니다.",
-        summary: "1. 경험치 계산기 업데이트 | 2. 레벨업 시뮬레이터 시스템 개선", 
+        summary: "1. 경험치 계산기 업데이트 | 2. 레벨업 시뮬레이터 시스템 개선 | 3. 아이템 시뮬레이터 메뉴 신설", 
         content: `
             <strong>1) 경험치 계산기 업데이트</strong>
             <span>- 사냥터의 시간당 경험치 데이터가 최신 정보로 업데이트되었습니다.</span>
             <strong>2) 레벨업 시뮬레이터 시스템 개선</strong>
             <span>- 140레벨 도달 시 산출되는 랭크 판정 및 스탯 성장 로직이 보다 현실적인 체감에 맞게 조정되었습니다. (높은 등급일수록 출현빈도가 낮아집니다.)</span>
+            <strong>3) 아이템 시뮬레이터 메뉴 신설</strong>
+            <span>- 장비 감정(랜덤 옵션 부여) 및 인챈트 결과를 미리 확인해 볼 수 있는 종합 아이템 시뮬레이터가 기타 메뉴에 추가되었습니다.</span>
         `
     },
 
@@ -3496,6 +3582,153 @@ const NOTICE_DATABASE = [
             });
         }
 
+        /* =======================================
+           [아이템 시뮬레이터 시스템]
+           ======================================= */
+        const EQUIP_DB = {
+            "ignos": { 
+                name: "이그노스의 활", img: "./images/item1.png", type: "원거리 무기", 
+                baseStr: "공격 횟수 6~6 / 공격력 30 / 방어력 -17", 
+                specialBase: "공격 횟수 6~6", 
+                baseStats: { "공격력": 30, "방어력": -17 }, 
+                pool: ["공격력", "방어력", "순발력", "체력", "관통", "명중 (%)", "PVE 공격력 (%)"] 
+            },
+            "spirit": { 
+                name: "봉인된 정령왕의 창", img: "./images/item2.png", type: "근거리 무기", 
+                baseStr: "공격 횟수 1~1 / 공격력 64 / 순발력 -13 / 치명타 7", 
+                specialBase: "공격 횟수 1~1", 
+                baseStats: { "공격력": 64, "순발력": -13, "치명타": 7 }, 
+                pool: ["공격력", "방어력", "순발력", "체력", "관통", "치명 (%)", "PVE 공격력 (%)"] 
+            }
+        };
+
+        const ENCHANT_DB = {
+            "fire": { name: "홍염석", img: "./images/item3.png", target: "무기", fixedStr: "공격력 +2", fixedStat: { "공격력": 2 }, pool: ["공격력", "방어력", "순발력", "명중 (%)", "치명 (%)", "회피 (%)"] },
+            "jade": { name: "비취석", img: "./images/item4.png", target: "방어구", fixedStr: "방어력 +2", fixedStat: { "방어력": 2 }, pool: ["공격력", "방어력", "순발력", "체력", "행운 (%)"] },
+            "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "내구력 +5", fixedStat: { "내구력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] }
+        };
+
+        // 합산을 위한 전역 변수
+        let currentIdentifyStats = {};
+        let currentEnchantStats = {};
+        let currentEnchantFixed = {};
+
+        // 1. 장비 감정 UI 업데이트
+        function updateEquipUI() {
+            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+            document.getElementById('equipInfoBox').innerHTML = `
+                <img src="${eq.img}" alt="${eq.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
+                <strong style="color:#d2a8ff; font-size:1.1rem;">${eq.name}</strong><br>
+                <span style="font-size:0.85rem; color:#888;">${eq.type} / 전설 등급 (랜덤능력치 7)</span><br>
+                <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;">기본: ${eq.baseStr}</div>
+            `;
+            document.getElementById('equipResultBox').style.display = 'none';
+            currentIdentifyStats = {}; // 장비 변경 시 감정 기록 초기화
+            updateTotalStatsUI();
+        }
+
+        // 2. 장비 감정 실행 로직 (7포인트 분배)
+        function runEquipIdentify() {
+            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+            let rawResults = {};
+            
+            for(let i = 0; i < 7; i++) {
+                let stat = eq.pool[Math.floor(Math.random() * eq.pool.length)];
+                rawResults[stat] = (rawResults[stat] || 0) + 1;
+            }
+
+            currentIdentifyStats = {};
+            let html = "";
+            for (let [stat, points] of Object.entries(rawResults)) {
+                let multiplier = stat === "체력" ? 3 : (stat === "관통" || stat === "쉴드" ? 2 : 1);
+                let finalVal = points * multiplier;
+                currentIdentifyStats[stat] = finalVal; // 합산용 데이터 저장
+                html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#539bf5">+${finalVal}</span></span>`;
+            }
+
+            document.getElementById('equipResultBox').style.display = 'block';
+            document.getElementById('equipResultText').innerHTML = html;
+            updateTotalStatsUI(); // 결과 합산 실행
+        }
+
+        // 3. 인챈트 UI 업데이트
+        function updateEnchantUI() {
+            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
+            document.getElementById('enchantInfoBox').innerHTML = `
+                <img src="${en.img}" alt="${en.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
+                <strong style="color:#ff7b72; font-size:1.1rem;">${en.name}</strong><br>
+                <span style="font-size:0.85rem; color:#888;">장착 부위: ${en.target}</span><br>
+                <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px; color:#ffcc00;">고정 효과: ${en.fixedStr}</div>
+            `;
+            document.getElementById('enchantResultBox').style.display = 'none';
+            currentEnchantStats = {}; // 장비 변경 시 인챈트 기록 초기화
+            currentEnchantFixed = {};
+            updateTotalStatsUI();
+        }
+
+        // 4. 인챈트 실행 로직 (확률 적용)
+        function runEnchant() {
+            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
+            const stat = en.pool[Math.floor(Math.random() * en.pool.length)];
+            
+            const roll = Math.random();
+            let points = roll < 0.6 ? 1 : (roll < 0.9 ? 2 : 3);
+            let finalVal = stat === "체력" ? points * 3 : points;
+            
+            // 합산용 데이터 저장
+            currentEnchantFixed = en.fixedStat;
+            currentEnchantStats = {};
+            currentEnchantStats[stat] = finalVal;
+            
+            let html = `
+                <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
+                <div style="color:#2ea043;">■ ${stat} +${finalVal} (랜덤)</div>
+                <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 당첨</div>
+            `;
+
+            document.getElementById('enchantResultBox').style.display = 'block';
+            document.getElementById('enchantResultText').innerHTML = html;
+            updateTotalStatsUI(); // 결과 합산 실행
+        }
+
+        // 5. 최종 능력치 합산 렌더링 함수
+        function updateTotalStatsUI() {
+            let total = {};
+            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+
+            // A. 장비 기본 스탯 더하기
+            for (let [k, v] of Object.entries(eq.baseStats)) total[k] = (total[k] || 0) + v;
+            // B. 감정(제작) 스탯 더하기
+            for (let [k, v] of Object.entries(currentIdentifyStats)) total[k] = (total[k] || 0) + v;
+            // C. 인챈트 고정 스탯 더하기
+            for (let [k, v] of Object.entries(currentEnchantFixed)) total[k] = (total[k] || 0) + v;
+            // D. 인챈트 랜덤 스탯 더하기
+            for (let [k, v] of Object.entries(currentEnchantStats)) total[k] = (total[k] || 0) + v;
+
+            const box = document.getElementById('totalStatsBox');
+            
+            // 아직 아무것도 실행 안했을 때
+            if (Object.keys(currentIdentifyStats).length === 0 && Object.keys(currentEnchantStats).length === 0) {
+                 box.innerHTML = `<span style="color:#888;">장비 감정 또는 인챈트를 실행해주세요.</span>`;
+                 return;
+            }
+
+            // 합산 결과 UI 그리기
+            let html = `<div style="width:100%; text-align:center; margin-bottom:15px; color:#fff; font-weight:bold; font-size:1.2rem;">[ ${eq.name} 완성본 ]</div>`;
+            html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${eq.specialBase}</span>`;
+
+            for (let [stat, val] of Object.entries(total)) {
+                if (val === 0) continue; // 0이 된 옵션은 표기 안함
+                
+                let valStr = val > 0 ? `+${val}` : val;
+                let color = val > 0 ? "#539bf5" : "#f85149"; // 양수는 파란색, 음수는 빨간색
+                
+                html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${stat} <span style="color:${color}; font-weight:bold;">${valStr}</span></span>`;
+            }
+
+            box.innerHTML = html;
+        }
+       
         window.onload = () => {
     updateSelectColor('calcMode');
     updateSelectColor('huntingGround');
@@ -3505,6 +3738,9 @@ const NOTICE_DATABASE = [
     updateSelectColor('petEncyBuff');
     updateSelectColor('petRegStatus');
     updateSelectColor('partyExp');
+    updateEquipUI();
+    updateEnchantUI();
+
 
     initCustomSelects();
     updateEncyProgress();
