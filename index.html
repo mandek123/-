@@ -3654,9 +3654,9 @@ const NOTICE_DATABASE = [
         }
 
         /* =======================================
-           [아이템 시뮬레이터 시스템]
-           ======================================= */
-        const EQUIP_DB = {
+    [아이템 시뮬레이터 시스템]
+    ======================================= */
+const EQUIP_DB = {
             "ignos": { 
                 name: "이그노스의 활", img: "./images/item1.png", type: "원거리 무기", 
                 baseStr: "공격 횟수 6~6 / 공격력 30 / 방어력 -17 / PVE 공격력 5%", 
@@ -3666,9 +3666,9 @@ const NOTICE_DATABASE = [
             },
             "spirit": { 
                 name: "봉인된 정령왕의 창", img: "./images/item2.png", type: "근거리 무기", 
-                baseStr: "공격 횟수 1~1 / 공격력 64 / 순발력 -13 / 치명타 7 / PVE 공격력 5%", 
+                baseStr: "공격 횟수 1~1 / 공격력 64 / 순발력 -13 / 치명 (%) 7 / PVE 공격력 5%", 
                 specialBase: "공격 횟수 1~1", 
-                baseStats: { "공격력": 64, "순발력": -13, "치명타": 7, "PVE 공격력 (%)": 5 }, 
+                baseStats: { "공격력": 64, "순발력": -13, "치명 (%)": 7, "PVE 공격력 (%)": 5 }, 
                 pool: ["공격력", "방어력", "순발력", "체력", "관통", "치명 (%)", "PVE 공격력 (%)"] 
             },
             "hetia": { 
@@ -3687,311 +3687,322 @@ const NOTICE_DATABASE = [
             },
             "rumexus": { 
                 name: "루메크스 귀걸이", img: "./images/item8.png", type: "악세서리 / 귀걸이", 
-                baseStr: "공격력 7 / 회피 7%", 
+                baseStr: "공격력 7 / 회피 (%) 7", 
                 specialBase: "", 
                 baseStats: { "공격력": 7, "회피 (%)": 7 }, 
                 pool: ["공격력", "방어력", "순발력", "체력", "회피 (%)"] 
             },
             "caston": { 
                 name: "카스톤 반지", img: "./images/item9.png", type: "악세서리 / 반지", 
-                baseStr: "공격력 7 / 치명 7%", 
+                baseStr: "공격력 7 / 치명 (%) 7", 
                 specialBase: "", 
                 baseStats: { "공격력": 7, "치명 (%)": 7 }, 
                 pool: ["공격력", "방어력", "순발력", "체력", "치명 (%)"] 
             }
         };
 
-        const ENCHANT_DB = {
-            "fire": { name: "홍염석", img: "./images/item3.png", target: "무기", fixedStr: "공격력 +2", fixedStat: { "공격력": 2 }, pool: ["공격력", "방어력", "순발력", "명중 (%)", "치명 (%)", "회피 (%)"] },
-            "jade": { name: "비취석", img: "./images/item4.png", target: "방어구", fixedStr: "방어력 +2", fixedStat: { "방어력": 2 }, pool: ["공격력", "방어력", "순발력", "체력", "행운 (%)"] },
-            "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "체력 +5", fixedStat: { "체력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] }
-        };
+const ENCHANT_DB = {
+    "fire": { name: "홍염석", img: "./images/item3.png", target: "무기", fixedStr: "공격력 +2", fixedStat: { "공격력": 2 }, pool: ["공격력", "방어력", "순발력", "명중 (%)", "치명 (%)", "회피 (%)"] },
+    "jade": { name: "비취석", img: "./images/item4.png", target: "방어구", fixedStr: "방어력 +2", fixedStat: { "방어력": 2 }, pool: ["공격력", "방어력", "순발력", "체력", "행운 (%)"] },
+    "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "체력 +5", fixedStat: { "체력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] }
+};
 
-        let currentIdentifyStats = {};
-        let currentEnchantStats = {};
-        let currentEnchantFixed = {};
+let currentIdentifyStats = {};
+let currentEnchantStats = {};
+let currentEnchantFixed = {};
 
-        let countIdentify = 0;
-        let countEnchant = 0;
-        let totalDiamonds = 0; 
+let countIdentify = 0;
+let countEnchant = 0;
+let totalDiamonds = 0; 
+
+const PRICE_IDENTIFY_EQUIP = 10000;  
+const PRICE_IDENTIFY_ACC = 130000;   
+
+const PRICE_ENCHANT = {
+    "fire": 7000,  
+    "jade": 7000,  
+    "deep": 10000  
+};
+
+function getWeightedStat(pool) {
+    const rareStats = ["PVE 공격력 (%)", "명중 (%)", "치명 (%)", "행운 (%)"];
+    const weights = pool.map(stat => rareStats.includes(stat) ? 2 : 10); 
+    const totalWeight = weights.reduce((acc, val) => acc + val, 0);
+    let random = Math.random() * totalWeight;
+    for (let i = 0; i < pool.length; i++) {
+        random -= weights[i];
+        if (random < 0) return pool[i];
+    }
+    return pool[pool.length - 1];
+}
+
+function updateEquipUI() {
+    const selectEl = document.getElementById('itemSimEquip');
+    const eq = EQUIP_DB[selectEl.value];
+
+    if (typeof selectEl.customUpdate === 'function') {
+        selectEl.customUpdate();
+    }
+
+    document.getElementById('equipInfoBox').innerHTML = `
+        <img src="${eq.img}" alt="${eq.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
+        <strong style="color:#d2a8ff; font-size:1.1rem;">${eq.name}</strong><br>
+        <span style="font-size:0.85rem; color:#888;">${eq.type} / 전설 등급 (랜덤능력치 7)</span><br>
+        <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;">기본: ${eq.baseStr}</div>
+    `;
+    document.getElementById('equipResultBox').style.display = 'none';
+    currentIdentifyStats = {}; 
+    updateTotalStatsUI();
+}
+
+function runEquipIdentify() {
+    const btn = document.querySelector('button[onclick="runEquipIdentify()"]');
+    const originalText = btn.innerText;
+    const infoBox = document.getElementById('equipInfoBox');
+    
+    btn.innerText = "🔨 깡! 깡! 감정 중...";
+    btn.classList.add('btn-loading');
+    infoBox.classList.add('effect-hammer');
+    document.getElementById('equipResultBox').style.display = 'none';
+
+    setTimeout(() => {
+        const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+        let rawResults = {};
         
-        // [수정] 감정 도구 시세 분리 적용
-        const PRICE_IDENTIFY_EQUIP = 10000;  // 황금망원경 (무기, 방어구)
-        const PRICE_IDENTIFY_ACC = 130000;   // 황금돋보기 (악세서리)
+        for(let i = 0; i < 7; i++) {
+            let stat = getWeightedStat(eq.pool);
+            rawResults[stat] = (rawResults[stat] || 0) + 1;
+        }
+
+        currentIdentifyStats = {};
+        for (let [stat, points] of Object.entries(rawResults)) {
+            let multiplier = stat === "체력" ? 3 : (stat === "관통" || stat === "쉴드" ? 2 : 1);
+            currentIdentifyStats[stat] = points * multiplier;
+        }
+
+        let isJackpot = false;
+        let highlightStats = {}; 
+        let pve = currentIdentifyStats["PVE 공격력 (%)"] || 0;
+
+        if (eq.type.includes("원거리 무기")) {
+            let hit = currentIdentifyStats["명중 (%)"] || 0;
+            if ((pve >= 2 && hit >= 2) || pve >= 3 || hit >= 3) {
+                isJackpot = true;
+                if (pve >= 2 && hit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["명중 (%)"] = true; }
+                if (pve >= 3) highlightStats["PVE 공격력 (%)"] = true;
+                if (hit >= 3) highlightStats["명중 (%)"] = true;
+            }
+        } else if (eq.type.includes("근거리 무기")) {
+            let crit = currentIdentifyStats["치명 (%)"] || 0;
+            if ((pve >= 2 && crit >= 2) || pve >= 3 || crit >= 3) {
+                isJackpot = true;
+                if (pve >= 2 && crit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["치명 (%)"] = true; }
+                if (pve >= 3) highlightStats["PVE 공격력 (%)"] = true;
+                if (crit >= 3) highlightStats["치명 (%)"] = true;
+            }
+        }
+
+        let html = "";
+        for (let [stat, finalVal] of Object.entries(currentIdentifyStats)) {
+            if (highlightStats[stat]) {
+                html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#f85149; font-weight:bold;">+${finalVal}</span></span>`;
+            } else {
+                html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#539bf5">+${finalVal}</span></span>`;
+            }
+        }
+
+        btn.innerText = originalText;
+        btn.classList.remove('btn-loading');
+        infoBox.classList.remove('effect-hammer'); 
         
-        const PRICE_ENCHANT = {
-            "fire": 7000,  // 홍염석
-            "jade": 7000,  // 비취석
-            "deep": 10000  // 심해석
-        };
+        const resBox = document.getElementById('equipResultBox');
+        resBox.style.display = 'block';
 
-        function getWeightedStat(pool) {
-            const rareStats = ["PVE 공격력 (%)", "명중 (%)", "치명 (%)", "행운 (%)"];
-            const weights = pool.map(stat => rareStats.includes(stat) ? 1 : 10); 
-            const totalWeight = weights.reduce((acc, val) => acc + val, 0);
-            let random = Math.random() * totalWeight;
-            for (let i = 0; i < pool.length; i++) {
-                random -= weights[i];
-                if (random < 0) return pool[i];
+        if (isJackpot) {
+            resBox.className = 'res-box effect-jackpot';
+            resBox.style.borderColor = "#ffcc00";
+            html = `<div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">✨ [유효 옵션 획득!] ✨</div>` + html;
+        } else {
+            resBox.className = 'res-box effect-pop';
+            resBox.style.borderColor = "var(--accent-blue)";
+        }
+
+        document.getElementById('equipResultText').innerHTML = html;
+        
+        countIdentify++;
+        if (eq.type.includes("악세서리")) {
+            totalDiamonds += PRICE_IDENTIFY_ACC;
+        } else {
+            totalDiamonds += PRICE_IDENTIFY_EQUIP;
+        }
+        updateCountUI();
+        
+        updateTotalStatsUI();
+    }, 1000);
+}
+
+function updateEnchantUI() {
+    const selectEl = document.getElementById('itemSimEnchant');
+    const en = ENCHANT_DB[selectEl.value];
+
+    if (typeof selectEl.customUpdate === 'function') {
+        selectEl.customUpdate();
+    }
+
+    document.getElementById('enchantInfoBox').innerHTML = `
+        <img src="${en.img}" alt="${en.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
+        <strong style="color:#ff7b72; font-size:1.1rem;">${en.name}</strong><br>
+        <span style="font-size:0.85rem; color:#888;">장착 부위: ${en.target}</span><br>
+        <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px; color:#ffcc00;">고정 효과: ${en.fixedStr}</div>
+    `;
+    document.getElementById('enchantResultBox').style.display = 'none';
+    currentEnchantStats = {}; 
+    currentEnchantFixed = {};
+    updateTotalStatsUI();
+}
+
+function runEnchant() {
+    const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+    const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
+
+    let isValidTarget = false;
+    if (en.target === "무기" && eq.type.includes("무기")) isValidTarget = true;
+    else if (en.target === "방어구" && (eq.type.includes("투구") || eq.type.includes("모자") || eq.type.includes("갑옷") || eq.type.includes("옷"))) isValidTarget = true;
+    else if (en.target === "악세서리" && (eq.type.includes("목걸이") || eq.type.includes("반지") || eq.type.includes("귀걸이") || eq.type.includes("팔찌") || eq.type.includes("부적") || eq.type.includes("토템") || eq.type.includes("악기"))) isValidTarget = true;
+
+    if (!isValidTarget) {
+        alert(`[인챈트 실패]\n${en.name}은(는) [${en.target}] 전용 인챈트석입니다.\n현재 선택된 장비(${eq.name})의 부위는 [${eq.type}]입니다.`);
+        return;
+    }
+
+    const btn = document.querySelector('button[onclick="runEnchant()"]');
+    const originalText = btn.innerText;
+    const infoBox = document.getElementById('enchantInfoBox');
+    
+    btn.innerText = "✨ 인챈트 주입 중...";
+    btn.classList.add('btn-loading');
+    infoBox.classList.add('effect-magic');
+    document.getElementById('enchantResultBox').style.display = 'none';
+
+    setTimeout(() => {
+        // [확률 수정] 3점 확률 10%로 상향 (1점: 68%, 2점: 22%, 3점: 10%)
+        const roll = Math.random();
+        let points = roll < 0.68 ? 1 : (roll < 0.90 ? 2 : 3);
+        
+        currentEnchantFixed = en.fixedStat;
+        currentEnchantStats = {}; // 초기화
+        
+        // [분산 로직] 포인트 개수만큼 반복 추첨
+        for(let i = 0; i < points; i++) {
+            let pickedStat = getWeightedStat(en.pool);
+            let incValue = pickedStat === "체력" ? 3 : 1; 
+            currentEnchantStats[pickedStat] = (currentEnchantStats[pickedStat] || 0) + incValue;
+        }
+        
+        let isHighlight = false;
+        let isJackpot = false;
+        const stoneKey = document.getElementById('itemSimEnchant').value;
+
+        // 잭팟/강조 판정 (분산된 결과 합산 수치로 체크)
+        if (stoneKey === 'fire') {
+            const hitVal = currentEnchantStats['명중 (%)'] || 0;
+            if (hitVal >= 2) isHighlight = true;
+            if (hitVal >= 3) isJackpot = true;
+        } else if (stoneKey === 'jade') {
+            const luckVal = currentEnchantStats['행운 (%)'] || 0;
+            if (luckVal >= 1) isHighlight = true;
+            if (luckVal >= 3) isJackpot = true;
+        }
+
+        // 결과 텍스트 생성
+        let statHtml = "";
+        for (let [sName, sVal] of Object.entries(currentEnchantStats)) {
+            let isTarget = (stoneKey === 'fire' && sName === '명중 (%)') || (stoneKey === 'jade' && sName === '행운 (%)');
+            if (isTarget && isHighlight) {
+                statHtml += `<div style="color:#f85149; font-weight:bold;">■ ${sName} +${sVal}</div>`;
+            } else {
+                statHtml += `<div style="color:#2ea043;">■ ${sName} +${sVal}</div>`;
             }
-            return pool[pool.length - 1];
         }
+        
+        let html = `
+            <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
+            ${statHtml}
+            <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 분산 적용</div>
+        `;
 
-        function updateEquipUI() {
-            const selectEl = document.getElementById('itemSimEquip');
-            const eq = EQUIP_DB[selectEl.value];
-
-            if (typeof selectEl.customUpdate === 'function') {
-                selectEl.customUpdate();
-            }
-
-            document.getElementById('equipInfoBox').innerHTML = `
-                <img src="${eq.img}" alt="${eq.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
-                <strong style="color:#d2a8ff; font-size:1.1rem;">${eq.name}</strong><br>
-                <span style="font-size:0.85rem; color:#888;">${eq.type} / 전설 등급 (랜덤능력치 7)</span><br>
-                <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;">기본: ${eq.baseStr}</div>
-            `;
-            document.getElementById('equipResultBox').style.display = 'none';
-            currentIdentifyStats = {}; 
-            updateTotalStatsUI();
+        btn.innerText = originalText;
+        btn.classList.remove('btn-loading');
+        infoBox.classList.remove('effect-magic');
+        
+        const resBox = document.getElementById('enchantResultBox');
+        resBox.style.display = 'block';
+        
+        if (isJackpot) {
+            resBox.className = 'res-box effect-jackpot';
+            resBox.style.borderColor = "#ffcc00";
+            html = `<div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">✨ [인챈트 대성공!] ✨</div>` + html;
+        } else {
+            resBox.className = 'res-box effect-pop';
+            resBox.style.borderColor = "#ff7b72";
         }
+        
+        document.getElementById('enchantResultText').innerHTML = html;
+        
+        countEnchant++;
+        totalDiamonds += PRICE_ENCHANT[stoneKey];
+        updateCountUI();
+        updateTotalStatsUI();
+    }, 1000); 
+}
 
-        function runEquipIdentify() {
-            const btn = document.querySelector('button[onclick="runEquipIdentify()"]');
-            const originalText = btn.innerText;
-            const infoBox = document.getElementById('equipInfoBox');
-            
-            btn.innerText = "🔨 깡! 깡! 감정 중...";
-            btn.classList.add('btn-loading');
-            infoBox.classList.add('effect-hammer');
-            document.getElementById('equipResultBox').style.display = 'none';
+function updateTotalStatsUI() {
+    let total = {};
+    const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
 
-            setTimeout(() => {
-                const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
-                let rawResults = {};
-                
-                for(let i = 0; i < 7; i++) {
-                    let stat = getWeightedStat(eq.pool);
-                    rawResults[stat] = (rawResults[stat] || 0) + 1;
-                }
+    for (let [k, v] of Object.entries(eq.baseStats)) total[k] = (total[k] || 0) + v;
+    for (let [k, v] of Object.entries(currentIdentifyStats)) total[k] = (total[k] || 0) + v;
+    for (let [k, v] of Object.entries(currentEnchantFixed)) total[k] = (total[k] || 0) + v;
+    for (let [k, v] of Object.entries(currentEnchantStats)) total[k] = (total[k] || 0) + v;
 
-                currentIdentifyStats = {};
-                for (let [stat, points] of Object.entries(rawResults)) {
-                    let multiplier = stat === "체력" ? 3 : (stat === "관통" || stat === "쉴드" ? 2 : 1);
-                    currentIdentifyStats[stat] = points * multiplier;
-                }
+    const box = document.getElementById('totalStatsBox');
+    
+    if (Object.keys(currentIdentifyStats).length === 0 && Object.keys(currentEnchantStats).length === 0) {
+            box.innerHTML = `<span style="color:#888;">장비 감정 또는 인챈트를 실행해주세요.</span>`;
+            return;
+    }
 
-                let isJackpot = false;
-                let highlightStats = {}; 
-                let pve = currentIdentifyStats["PVE 공격력 (%)"] || 0;
+    let html = `<div style="width:100%; text-align:center; margin-bottom:15px; color:#fff; font-weight:bold; font-size:1.2rem;">[ ${eq.name} 완성본 ]</div>`;
+    
+    if (eq.specialBase !== "") {
+        html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${eq.specialBase}</span>`;
+    }
 
-                if (eq.type.includes("원거리 무기")) {
-                    let hit = currentIdentifyStats["명중 (%)"] || 0;
-                    if ((pve >= 2 && hit >= 2) || pve >= 3 || hit >= 3) {
-                        isJackpot = true;
-                        if (pve >= 2 && hit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["명중 (%)"] = true; }
-                        if (pve >= 3) highlightStats["PVE 공격력 (%)"] = true;
-                        if (hit >= 3) highlightStats["명중 (%)"] = true;
-                    }
-                } else if (eq.type.includes("근거리 무기")) {
-                    let crit = currentIdentifyStats["치명 (%)"] || 0;
-                    if ((pve >= 2 && crit >= 2) || pve >= 3 || crit >= 3) {
-                        isJackpot = true;
-                        if (pve >= 2 && crit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["치명 (%)"] = true; }
-                        if (pve >= 3) highlightStats["PVE 공격력 (%)"] = true;
-                        if (crit >= 3) highlightStats["치명 (%)"] = true;
-                    }
-                }
+    for (let [stat, val] of Object.entries(total)) {
+        if (val === 0) continue; 
+        
+        let valStr = val > 0 ? `+${val}` : val;
+        let color = val > 0 ? "#539bf5" : "#f85149"; 
+        
+        html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${stat} <span style="color:${color}; font-weight:bold;">${valStr}</span></span>`;
+    }
 
-                let html = "";
-                for (let [stat, finalVal] of Object.entries(currentIdentifyStats)) {
-                    if (highlightStats[stat]) {
-                        html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#f85149; font-weight:bold;">+${finalVal}</span></span>`;
-                    } else {
-                        html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#539bf5">+${finalVal}</span></span>`;
-                    }
-                }
+    box.innerHTML = html;
+}
 
-                btn.innerText = originalText;
-                btn.classList.remove('btn-loading');
-                infoBox.classList.remove('effect-hammer'); 
-                
-                const resBox = document.getElementById('equipResultBox');
-                resBox.style.display = 'block';
+function updateCountUI() {
+    document.getElementById('valIdentifyCount').innerText = countIdentify;
+    document.getElementById('valEnchantCount').innerText = countEnchant;
+    document.getElementById('valTotalDiamonds').innerText = totalDiamonds.toLocaleString();
+}
 
-                if (isJackpot) {
-                    resBox.className = 'res-box effect-jackpot';
-                    resBox.style.borderColor = "#ffcc00";
-                    html = `<div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">✨ [유효 옵션 획득!] ✨</div>` + html;
-                } else {
-                    resBox.className = 'res-box effect-pop';
-                    resBox.style.borderColor = "var(--accent-blue)";
-                }
-
-                document.getElementById('equipResultText').innerHTML = html;
-                
-                // [수정] 악세서리 여부에 따른 비용 차등 누적
-                countIdentify++;
-                if (eq.type.includes("악세서리")) {
-                    totalDiamonds += PRICE_IDENTIFY_ACC; // 황금돋보기 가격
-                } else {
-                    totalDiamonds += PRICE_IDENTIFY_EQUIP; // 황금망원경 가격
-                }
-                updateCountUI();
-                
-                updateTotalStatsUI();
-            }, 1000);
-        }
-
-        function updateEnchantUI() {
-            const selectEl = document.getElementById('itemSimEnchant');
-            const en = ENCHANT_DB[selectEl.value];
-
-            if (typeof selectEl.customUpdate === 'function') {
-                selectEl.customUpdate();
-            }
-
-            document.getElementById('enchantInfoBox').innerHTML = `
-                <img src="${en.img}" alt="${en.name}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 10px; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 5px;"><br>
-                <strong style="color:#ff7b72; font-size:1.1rem;">${en.name}</strong><br>
-                <span style="font-size:0.85rem; color:#888;">장착 부위: ${en.target}</span><br>
-                <div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px; color:#ffcc00;">고정 효과: ${en.fixedStr}</div>
-            `;
-            document.getElementById('enchantResultBox').style.display = 'none';
-            currentEnchantStats = {}; 
-            currentEnchantFixed = {};
-            updateTotalStatsUI();
-        }
-
-        function runEnchant() {
-            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
-            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
-
-            let isValidTarget = false;
-            if (en.target === "무기" && eq.type.includes("무기")) isValidTarget = true;
-            else if (en.target === "방어구" && (eq.type.includes("투구") || eq.type.includes("모자") || eq.type.includes("갑옷") || eq.type.includes("옷"))) isValidTarget = true;
-            else if (en.target === "악세서리" && (eq.type.includes("목걸이") || eq.type.includes("반지") || eq.type.includes("귀걸이") || eq.type.includes("팔찌") || eq.type.includes("부적") || eq.type.includes("토템") || eq.type.includes("악기"))) isValidTarget = true;
-
-            if (!isValidTarget) {
-                alert(`[인챈트 실패]\n${en.name}은(는) [${en.target}] 전용 인챈트석입니다.\n현재 선택된 장비(${eq.name})의 부위는 [${eq.type}]입니다.`);
-                return;
-            }
-
-            const btn = document.querySelector('button[onclick="runEnchant()"]');
-            const originalText = btn.innerText;
-            const infoBox = document.getElementById('enchantInfoBox');
-            
-            btn.innerText = "✨ 인챈트 주입 중...";
-            btn.classList.add('btn-loading');
-            infoBox.classList.add('effect-magic');
-            document.getElementById('enchantResultBox').style.display = 'none';
-
-            setTimeout(() => {
-                const stat = getWeightedStat(en.pool);
-                
-                const roll = Math.random();
-                let points = roll < 0.75 ? 1 : (roll < 0.95 ? 2 : 3);
-                let finalVal = stat === "체력" ? points * 3 : points;
-                
-                currentEnchantFixed = en.fixedStat;
-                currentEnchantStats = {};
-                currentEnchantStats[stat] = finalVal;
-                
-                let isHighlight = false;
-                let isJackpot = false;
-                const stoneKey = document.getElementById('itemSimEnchant').value;
-
-                if (stoneKey === 'fire' && stat === '명중 (%)') {
-                    if (points >= 2) isHighlight = true;
-                    if (points === 3) isJackpot = true;
-                } else if (stoneKey === 'jade' && stat === '행운 (%)') {
-                    isHighlight = true;
-                    if (points === 3) isJackpot = true;
-                }
-
-                let statDisplay = isHighlight 
-                    ? `<span style="color:#f85149; font-weight:bold;">${stat} +${finalVal}</span>`
-                    : `<span>${stat} +${finalVal}</span>`;
-                
-                let html = `
-                    <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
-                    <div style="color:#2ea043;">■ ${statDisplay} (랜덤)</div>
-                    <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 당첨</div>
-                `;
-
-                btn.innerText = originalText;
-                btn.classList.remove('btn-loading');
-                infoBox.classList.remove('effect-magic');
-                
-                const resBox = document.getElementById('enchantResultBox');
-                resBox.style.display = 'block';
-                
-                if (isJackpot) {
-                    resBox.className = 'res-box effect-jackpot';
-                    resBox.style.borderColor = "#ffcc00";
-                    html = `<div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">✨ [인챈트 대성공!] ✨</div>` + html;
-                } else {
-                    resBox.className = 'res-box effect-pop';
-                    resBox.style.borderColor = "#ff7b72";
-                }
-                
-                document.getElementById('enchantResultText').innerHTML = html;
-                
-                countEnchant++;
-                totalDiamonds += PRICE_ENCHANT[stoneKey];
-                updateCountUI();
-                
-                updateTotalStatsUI();
-            }, 1000); 
-        }
-
-        function updateTotalStatsUI() {
-            let total = {};
-            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
-
-            for (let [k, v] of Object.entries(eq.baseStats)) total[k] = (total[k] || 0) + v;
-            for (let [k, v] of Object.entries(currentIdentifyStats)) total[k] = (total[k] || 0) + v;
-            for (let [k, v] of Object.entries(currentEnchantFixed)) total[k] = (total[k] || 0) + v;
-            for (let [k, v] of Object.entries(currentEnchantStats)) total[k] = (total[k] || 0) + v;
-
-            const box = document.getElementById('totalStatsBox');
-            
-            if (Object.keys(currentIdentifyStats).length === 0 && Object.keys(currentEnchantStats).length === 0) {
-                 box.innerHTML = `<span style="color:#888;">장비 감정 또는 인챈트를 실행해주세요.</span>`;
-                 return;
-            }
-
-            let html = `<div style="width:100%; text-align:center; margin-bottom:15px; color:#fff; font-weight:bold; font-size:1.2rem;">[ ${eq.name} 완성본 ]</div>`;
-            
-            if (eq.specialBase !== "") {
-                html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${eq.specialBase}</span>`;
-            }
-
-            for (let [stat, val] of Object.entries(total)) {
-                if (val === 0) continue; 
-                
-                let valStr = val > 0 ? `+${val}` : val;
-                let color = val > 0 ? "#539bf5" : "#f85149"; 
-                
-                html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${stat} <span style="color:${color}; font-weight:bold;">${valStr}</span></span>`;
-            }
-
-            box.innerHTML = html;
-        }
-
-        function updateCountUI() {
-            document.getElementById('valIdentifyCount').innerText = countIdentify;
-            document.getElementById('valEnchantCount').innerText = countEnchant;
-            document.getElementById('valTotalDiamonds').innerText = totalDiamonds.toLocaleString();
-        }
-
-        function resetCounts() {
-            countIdentify = 0;
-            countEnchant = 0;
-            totalDiamonds = 0;
-            updateCountUI();
-            alert("누적 횟수와 소모 다이아가 초기화되었습니다.");
-        }
+function resetCounts() {
+    countIdentify = 0;
+    countEnchant = 0;
+    totalDiamonds = 0;
+    updateCountUI();
+    alert("누적 횟수와 소모 다이아가 초기화되었습니다.");
+}
        
         window.onload = () => {
     updateSelectColor('calcMode');
