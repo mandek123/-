@@ -2616,10 +2616,12 @@ const NOTICE_DATABASE = [
         id: 9,
         date: "26년 4월 21일",
         title: "26년 4월 21일 공지사항입니다.",
-        summary: "1. 경험치 계산기 사냥터 시간당 경험치 최신화", 
+        summary: "1. 경험치 계산기 업데이트 | 2. 레벨업 시뮬레이터 시스템 개선", 
         content: `
             <strong>1) 경험치 계산기 업데이트</strong>
             <span>- 사냥터의 시간당 경험치 데이터가 최신 정보로 업데이트되었습니다.</span>
+            <strong>2) 레벨업 시뮬레이터 시스템 개선</strong>
+            <span>- 140레벨 도달 시 산출되는 랭크 판정 및 스탯 성장 로직이 보다 현실적인 체감에 맞게 조정되었습니다. (높은 등급일수록 출현빈도가 낮아집니다.)</span>
         `
     },
 
@@ -2863,7 +2865,7 @@ const NOTICE_DATABASE = [
 
             const grouped = {};
             data.forEach(pet => {
-
+                // ▼ 이스터에그 숨기기: 이름이 '만득'인 페트는 카테고리 그룹화에서 제외
                 if (pet.name === "만득") return; 
 
                 if(!grouped[pet.category]) grouped[pet.category] = [];
@@ -4196,18 +4198,55 @@ var simState = {
     totalGrowthRate: "0.00"
 };
 
-// 1. 시뮬레이션 초기화 (페트 검색 또는 리셋 시 실행)
+    // 1. 시뮬레이션 초기화 (페트 검색 또는 리셋 시 실행)
 function initSim(pet) {
     simState.pet = pet;
     simState.currentLv = 1;
 
-    // --- [확률형 오차 생성] ---
-    // S급 기준점에서 F~S+까지 다양하게 나올 수 있도록 넓은 랜덤값 부여
+    // --- [확률형 오차 생성 (피라미드형 확률 분포)] ---
+    let roll = Math.random();
+    let tDiff = 0; // 공+방+순 오차 합
+    let hDiff = 0; // 체력 오차
+
+    if (roll < 0.01) { 
+        // 1% 확률 (S+)
+        tDiff = 1 + Math.random() * 2; 
+        hDiff = 8 + Math.random() * 4; 
+    } else if (roll < 0.06) { 
+        // 5% 확률 (S)
+        tDiff = -1.5 + Math.random() * 2.4; 
+        hDiff = -2 + Math.random() * 9; 
+    } else if (roll < 0.16) { 
+        // 10% 확률 (A)
+        tDiff = -4 + Math.random() * 2.4; 
+        hDiff = -8 + Math.random() * 5; 
+    } else if (roll < 0.36) { 
+        // 20% 확률 (B)
+        tDiff = -7 + Math.random() * 2.9; 
+        hDiff = -12 + Math.random() * 5; 
+    } else if (roll < 0.61) { 
+        // 25% 확률 (C)
+        tDiff = -11 + Math.random() * 3.9; 
+        hDiff = -18 + Math.random() * 5; 
+    } else if (roll < 0.86) { 
+        // 25% 확률 (D)
+        tDiff = -15 + Math.random() * 3.9; 
+        hDiff = -22 + Math.random() * 5; 
+    } else { 
+        // 14% 확률 (F)
+        tDiff = -20 + Math.random() * 4.9; 
+        hDiff = -25 + Math.random() * 5; 
+    }
+
+    // 결정된 오차 합(tDiff)을 공/방/순에 무작위 분배
+    let r1 = Math.random(), r2 = Math.random(), r3 = Math.random();
+    let sum = r1 + r2 + r3;
+    
     let bonus = {
-        hp: (Math.random() * 40) - 25,     // -25 ~ +15
-        atk: (Math.random() * 6) - 4,     // -4.0 ~ +2.0
-        def: (Math.random() * 5) - 3,     // -3.0 ~ +2.0
-        spd: (Math.random() * 5) - 3      // -3.0 ~ +2.0
+        hp: hDiff,
+        atk: (r1 / sum) * tDiff,
+        def: (r2 / sum) * tDiff,
+        spd: (r3 / sum) * tDiff
     };
 
     // 초기치 설정 (1레벨 베이스)
