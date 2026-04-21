@@ -1673,6 +1673,8 @@
                 <option value="spirit">봉인된 정령왕의 창 (근거리 무기)</option>
                 <option value="hetia">헤티아의 머리장식 (투구 / 모자)</option>
                 <option value="hellhound">지옥견 털옷 (갑옷 / 옷)</option>
+                <option value="rumexus">루메크스 귀걸이 (악세서리 / 귀걸이)</option>
+                <option value="caston">카스톤 반지 (악세서리 / 반지)</option>
             </select>
         
         <div id="equipInfoBox" class="res-box" style="margin-bottom:15px; text-align:center;">
@@ -1716,6 +1718,24 @@
         </div>
     </div>
 
+<div class="card" style="grid-column: span 2; background: rgba(20, 20, 25, 0.6); border: 1px solid #d2a8ff; text-align: center;">
+            <h2 style="color:#d2a8ff; margin-bottom: 15px;"><i class="fa-solid fa-gem"></i> 누적 시도 횟수</h2>
+            
+            <div style="display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap: 15px;">
+                <div style="font-size:1.1rem; color:#adbac7;">
+                    감정한 횟수 = <span id="valIdentifyCount" style="color:#539bf5; font-weight:bold;">0</span>번
+                </div>
+                <div style="font-size:1.1rem; color:#adbac7;">
+                    인챈트한 횟수 = <span id="valEnchantCount" style="color:#2ea043; font-weight:bold;">0</span>번
+                </div>
+                <div style="font-size:1.2rem; color:#ff7b72; font-weight:bold;">
+                    💎 당신이 소모한 다이아는... <span id="valTotalDiamonds" style="color:#fff; font-size:1.5rem;">0</span> 다이아
+                </div>
+                
+                <button class="btn-calc" style="background:#444; width:auto; padding:8px 20px; margin:0;" onclick="resetCounts()">🔄 횟수 초기화</button>
+            </div>
+        </div>
+    
 </div> 
 
     <div class="footer">
@@ -3664,21 +3684,47 @@ const NOTICE_DATABASE = [
                 specialBase: "", 
                 baseStats: { "방어력": 30, "순발력": 5, "체력": 10 }, 
                 pool: ["방어력", "순발력", "체력", "쉴드", "PVE 방어력 (%)"] 
+            },
+            "rumexus": { 
+                name: "루메크스 귀걸이", img: "./images/item8.png", type: "악세서리 / 귀걸이", 
+                baseStr: "공격력 7 / 회피 7%", 
+                specialBase: "", 
+                baseStats: { "공격력": 7, "회피 (%)": 7 }, 
+                pool: ["공격력", "방어력", "순발력", "체력", "회피 (%)"] 
+            },
+            "caston": { 
+                name: "카스톤 반지", img: "./images/item9.png", type: "악세서리 / 반지", 
+                baseStr: "공격력 7 / 치명 7%", 
+                specialBase: "", 
+                baseStats: { "공격력": 7, "치명 (%)": 7 }, 
+                pool: ["공격력", "방어력", "순발력", "체력", "치명 (%)"] 
             }
         };
 
         const ENCHANT_DB = {
             "fire": { name: "홍염석", img: "./images/item3.png", target: "무기", fixedStr: "공격력 +2", fixedStat: { "공격력": 2 }, pool: ["공격력", "방어력", "순발력", "명중 (%)", "치명 (%)", "회피 (%)"] },
             "jade": { name: "비취석", img: "./images/item4.png", target: "방어구", fixedStr: "방어력 +2", fixedStat: { "방어력": 2 }, pool: ["공격력", "방어력", "순발력", "체력", "행운 (%)"] },
-            "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "내구력 +5", fixedStat: { "내구력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] }
+            "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "체력 +5", fixedStat: { "체력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] }
         };
 
-        // 합산을 위한 전역 변수
         let currentIdentifyStats = {};
         let currentEnchantStats = {};
         let currentEnchantFixed = {};
 
-        // [추가] 핵심 옵션 가중치 적용 랜덤 추출 함수 (일반 옵션 확률 10배)
+        let countIdentify = 0;
+        let countEnchant = 0;
+        let totalDiamonds = 0; 
+        
+        // [수정] 감정 도구 시세 분리 적용
+        const PRICE_IDENTIFY_EQUIP = 10000;  // 황금망원경 (무기, 방어구)
+        const PRICE_IDENTIFY_ACC = 130000;   // 황금돋보기 (악세서리)
+        
+        const PRICE_ENCHANT = {
+            "fire": 7000,  // 홍염석
+            "jade": 7000,  // 비취석
+            "deep": 10000  // 심해석
+        };
+
         function getWeightedStat(pool) {
             const rareStats = ["PVE 공격력 (%)", "명중 (%)", "치명 (%)", "행운 (%)"];
             const weights = pool.map(stat => rareStats.includes(stat) ? 1 : 10); 
@@ -3691,7 +3737,6 @@ const NOTICE_DATABASE = [
             return pool[pool.length - 1];
         }
 
-        // 1. 장비 감정 UI 업데이트
         function updateEquipUI() {
             const selectEl = document.getElementById('itemSimEquip');
             const eq = EQUIP_DB[selectEl.value];
@@ -3711,7 +3756,6 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 2. 장비 감정 실행 로직
         function runEquipIdentify() {
             const btn = document.querySelector('button[onclick="runEquipIdentify()"]');
             const originalText = btn.innerText;
@@ -3727,7 +3771,7 @@ const NOTICE_DATABASE = [
                 let rawResults = {};
                 
                 for(let i = 0; i < 7; i++) {
-                    let stat = getWeightedStat(eq.pool); // 가중치 적용
+                    let stat = getWeightedStat(eq.pool);
                     rawResults[stat] = (rawResults[stat] || 0) + 1;
                 }
 
@@ -3786,11 +3830,19 @@ const NOTICE_DATABASE = [
 
                 document.getElementById('equipResultText').innerHTML = html;
                 
+                // [수정] 악세서리 여부에 따른 비용 차등 누적
+                countIdentify++;
+                if (eq.type.includes("악세서리")) {
+                    totalDiamonds += PRICE_IDENTIFY_ACC; // 황금돋보기 가격
+                } else {
+                    totalDiamonds += PRICE_IDENTIFY_EQUIP; // 황금망원경 가격
+                }
+                updateCountUI();
+                
                 updateTotalStatsUI();
             }, 1000);
         }
 
-        // 3. 인챈트 UI 업데이트
         function updateEnchantUI() {
             const selectEl = document.getElementById('itemSimEnchant');
             const en = ENCHANT_DB[selectEl.value];
@@ -3811,7 +3863,6 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 4. 인챈트 실행 로직
         function runEnchant() {
             const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
             const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
@@ -3836,10 +3887,10 @@ const NOTICE_DATABASE = [
             document.getElementById('enchantResultBox').style.display = 'none';
 
             setTimeout(() => {
-                const stat = getWeightedStat(en.pool); // 가중치 적용
+                const stat = getWeightedStat(en.pool);
                 
                 const roll = Math.random();
-                let points = roll < 0.75 ? 1 : (roll < 0.95 ? 2 : 3); // 확률 조정 (1점: 75%, 2점: 20%, 3점: 5%)
+                let points = roll < 0.75 ? 1 : (roll < 0.95 ? 2 : 3);
                 let finalVal = stat === "체력" ? points * 3 : points;
                 
                 currentEnchantFixed = en.fixedStat;
@@ -3886,11 +3937,14 @@ const NOTICE_DATABASE = [
                 
                 document.getElementById('enchantResultText').innerHTML = html;
                 
+                countEnchant++;
+                totalDiamonds += PRICE_ENCHANT[stoneKey];
+                updateCountUI();
+                
                 updateTotalStatsUI();
             }, 1000); 
         }
 
-        // 5. 최종 능력치 합산 렌더링 함수
         function updateTotalStatsUI() {
             let total = {};
             const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
@@ -3923,6 +3977,20 @@ const NOTICE_DATABASE = [
             }
 
             box.innerHTML = html;
+        }
+
+        function updateCountUI() {
+            document.getElementById('valIdentifyCount').innerText = countIdentify;
+            document.getElementById('valEnchantCount').innerText = countEnchant;
+            document.getElementById('valTotalDiamonds').innerText = totalDiamonds.toLocaleString();
+        }
+
+        function resetCounts() {
+            countIdentify = 0;
+            countEnchant = 0;
+            totalDiamonds = 0;
+            updateCountUI();
+            alert("누적 횟수와 소모 다이아가 초기화되었습니다.");
         }
        
         window.onload = () => {
