@@ -3678,12 +3678,24 @@ const NOTICE_DATABASE = [
         let currentEnchantStats = {};
         let currentEnchantFixed = {};
 
+        // [추가] 핵심 옵션 가중치 적용 랜덤 추출 함수 (일반 옵션 확률 10배)
+        function getWeightedStat(pool) {
+            const rareStats = ["PVE 공격력 (%)", "명중 (%)", "치명 (%)", "행운 (%)"];
+            const weights = pool.map(stat => rareStats.includes(stat) ? 1 : 10); 
+            const totalWeight = weights.reduce((acc, val) => acc + val, 0);
+            let random = Math.random() * totalWeight;
+            for (let i = 0; i < pool.length; i++) {
+                random -= weights[i];
+                if (random < 0) return pool[i];
+            }
+            return pool[pool.length - 1];
+        }
+
         // 1. 장비 감정 UI 업데이트
         function updateEquipUI() {
             const selectEl = document.getElementById('itemSimEquip');
             const eq = EQUIP_DB[selectEl.value];
 
-            // [해결] 만득월드 커스텀 드롭다운 텍스트 강제 갱신
             if (typeof selectEl.customUpdate === 'function') {
                 selectEl.customUpdate();
             }
@@ -3699,7 +3711,7 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 2. 장비 감정 실행 로직 (판정 조건 확대 및 유효 옵션 붉은색 강조)
+        // 2. 장비 감정 실행 로직
         function runEquipIdentify() {
             const btn = document.querySelector('button[onclick="runEquipIdentify()"]');
             const originalText = btn.innerText;
@@ -3715,35 +3727,30 @@ const NOTICE_DATABASE = [
                 let rawResults = {};
                 
                 for(let i = 0; i < 7; i++) {
-                    let stat = eq.pool[Math.floor(Math.random() * eq.pool.length)];
+                    let stat = getWeightedStat(eq.pool); // 가중치 적용
                     rawResults[stat] = (rawResults[stat] || 0) + 1;
                 }
 
                 currentIdentifyStats = {};
-                // 먼저 스탯 배율을 곱해 최종 수치를 저장합니다.
                 for (let [stat, points] of Object.entries(rawResults)) {
                     let multiplier = stat === "체력" ? 3 : (stat === "관통" || stat === "쉴드" ? 2 : 1);
                     currentIdentifyStats[stat] = points * multiplier;
                 }
 
-                // [수정된 로직] 무기류 잭팟 판정 및 강조(Highlight) 옵션 추출
                 let isJackpot = false;
-                let highlightStats = {}; // 붉은색으로 강조할 스탯 목록
+                let highlightStats = {}; 
                 let pve = currentIdentifyStats["PVE 공격력 (%)"] || 0;
 
                 if (eq.type.includes("원거리 무기")) {
                     let hit = currentIdentifyStats["명중 (%)"] || 0;
-                    // 조건: (PVE 2 이상 AND 명중 2 이상) OR PVE 3 이상 OR 명중 3 이상
                     if ((pve >= 2 && hit >= 2) || pve >= 3 || hit >= 3) {
                         isJackpot = true;
-                        // 잭팟에 기여한 스탯들을 강조 목록에 추가
                         if (pve >= 2 && hit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["명중 (%)"] = true; }
                         if (pve >= 3) highlightStats["PVE 공격력 (%)"] = true;
                         if (hit >= 3) highlightStats["명중 (%)"] = true;
                     }
                 } else if (eq.type.includes("근거리 무기")) {
                     let crit = currentIdentifyStats["치명 (%)"] || 0;
-                    // 조건: (PVE 2 이상 AND 치명 2 이상) OR PVE 3 이상 OR 치명 3 이상
                     if ((pve >= 2 && crit >= 2) || pve >= 3 || crit >= 3) {
                         isJackpot = true;
                         if (pve >= 2 && crit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["치명 (%)"] = true; }
@@ -3752,7 +3759,6 @@ const NOTICE_DATABASE = [
                     }
                 }
 
-                // HTML 렌더링 (강조 대상이면 붉은색+볼드 처리)
                 let html = "";
                 for (let [stat, finalVal] of Object.entries(currentIdentifyStats)) {
                     if (highlightStats[stat]) {
@@ -3789,7 +3795,6 @@ const NOTICE_DATABASE = [
             const selectEl = document.getElementById('itemSimEnchant');
             const en = ENCHANT_DB[selectEl.value];
 
-            // [해결] 만득월드 커스텀 드롭다운 텍스트 강제 갱신
             if (typeof selectEl.customUpdate === 'function') {
                 selectEl.customUpdate();
             }
@@ -3831,10 +3836,10 @@ const NOTICE_DATABASE = [
             document.getElementById('enchantResultBox').style.display = 'none';
 
             setTimeout(() => {
-                const stat = en.pool[Math.floor(Math.random() * en.pool.length)];
+                const stat = getWeightedStat(en.pool); // 가중치 적용
                 
                 const roll = Math.random();
-                let points = roll < 0.6 ? 1 : (roll < 0.9 ? 2 : 3);
+                let points = roll < 0.75 ? 1 : (roll < 0.95 ? 2 : 3); // 확률 조정 (1점: 75%, 2점: 20%, 3점: 5%)
                 let finalVal = stat === "체력" ? points * 3 : points;
                 
                 currentEnchantFixed = en.fixedStat;
@@ -3890,24 +3895,18 @@ const NOTICE_DATABASE = [
             let total = {};
             const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
 
-            // A. 장비 기본 스탯 더하기
             for (let [k, v] of Object.entries(eq.baseStats)) total[k] = (total[k] || 0) + v;
-            // B. 감정(제작) 스탯 더하기
             for (let [k, v] of Object.entries(currentIdentifyStats)) total[k] = (total[k] || 0) + v;
-            // C. 인챈트 고정 스탯 더하기
             for (let [k, v] of Object.entries(currentEnchantFixed)) total[k] = (total[k] || 0) + v;
-            // D. 인챈트 랜덤 스탯 더하기
             for (let [k, v] of Object.entries(currentEnchantStats)) total[k] = (total[k] || 0) + v;
 
             const box = document.getElementById('totalStatsBox');
             
-            // 아직 아무것도 실행 안했을 때
             if (Object.keys(currentIdentifyStats).length === 0 && Object.keys(currentEnchantStats).length === 0) {
                  box.innerHTML = `<span style="color:#888;">장비 감정 또는 인챈트를 실행해주세요.</span>`;
                  return;
             }
 
-            // 합산 결과 UI 그리기
             let html = `<div style="width:100%; text-align:center; margin-bottom:15px; color:#fff; font-weight:bold; font-size:1.2rem;">[ ${eq.name} 완성본 ]</div>`;
             
             if (eq.specialBase !== "") {
@@ -3915,10 +3914,10 @@ const NOTICE_DATABASE = [
             }
 
             for (let [stat, val] of Object.entries(total)) {
-                if (val === 0) continue; // 0이 된 옵션은 표기 안함
+                if (val === 0) continue; 
                 
                 let valStr = val > 0 ? `+${val}` : val;
-                let color = val > 0 ? "#539bf5" : "#f85149"; // 양수는 파란색, 음수는 빨간색
+                let color = val > 0 ? "#539bf5" : "#f85149"; 
                 
                 html += `<span style="display:inline-block; margin:5px 15px; color:#adbac7;">🔹 ${stat} <span style="color:${color}; font-weight:bold;">${valStr}</span></span>`;
             }
