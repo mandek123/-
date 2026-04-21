@@ -3699,7 +3699,7 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 2. 장비 감정 실행 로직
+        // 2. 장비 감정 실행 로직 (판정 조건 확대 및 유효 옵션 붉은색 강조)
         function runEquipIdentify() {
             const btn = document.querySelector('button[onclick="runEquipIdentify()"]');
             const originalText = btn.innerText;
@@ -3710,7 +3710,6 @@ const NOTICE_DATABASE = [
             infoBox.classList.add('effect-hammer');
             document.getElementById('equipResultBox').style.display = 'none';
 
-            // 대기 시간 1초
             setTimeout(() => {
                 const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
                 let rawResults = {};
@@ -3721,12 +3720,46 @@ const NOTICE_DATABASE = [
                 }
 
                 currentIdentifyStats = {};
-                let html = "";
+                // 먼저 스탯 배율을 곱해 최종 수치를 저장합니다.
                 for (let [stat, points] of Object.entries(rawResults)) {
                     let multiplier = stat === "체력" ? 3 : (stat === "관통" || stat === "쉴드" ? 2 : 1);
-                    let finalVal = points * multiplier;
-                    currentIdentifyStats[stat] = finalVal;
-                    html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#539bf5">+${finalVal}</span></span>`;
+                    currentIdentifyStats[stat] = points * multiplier;
+                }
+
+                // [수정된 로직] 무기류 잭팟 판정 및 강조(Highlight) 옵션 추출
+                let isJackpot = false;
+                let highlightStats = {}; // 붉은색으로 강조할 스탯 목록
+                let pve = currentIdentifyStats["PVE 공격력 (%)"] || 0;
+
+                if (eq.type.includes("원거리 무기")) {
+                    let hit = currentIdentifyStats["명중 (%)"] || 0;
+                    // 조건: (PVE 2 이상 AND 명중 2 이상) OR PVE 3 이상 OR 명중 3 이상
+                    if ((pve >= 2 && hit >= 2) || pve >= 3 || hit >= 3) {
+                        isJackpot = true;
+                        // 잭팟에 기여한 스탯들을 강조 목록에 추가
+                        if (pve >= 2 && hit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["명중 (%)"] = true; }
+                        if (pve >= 3) highlightStats["PVE 공격력 (%)"] = true;
+                        if (hit >= 3) highlightStats["명중 (%)"] = true;
+                    }
+                } else if (eq.type.includes("근거리 무기")) {
+                    let crit = currentIdentifyStats["치명 (%)"] || 0;
+                    // 조건: (PVE 2 이상 AND 치명 2 이상) OR PVE 3 이상 OR 치명 3 이상
+                    if ((pve >= 2 && crit >= 2) || pve >= 3 || crit >= 3) {
+                        isJackpot = true;
+                        if (pve >= 2 && crit >= 2) { highlightStats["PVE 공격력 (%)"] = true; highlightStats["치명 (%)"] = true; }
+                        if (pve >= 3) highlightStats["PVE 공격력 (%)"] = true;
+                        if (crit >= 3) highlightStats["치명 (%)"] = true;
+                    }
+                }
+
+                // HTML 렌더링 (강조 대상이면 붉은색+볼드 처리)
+                let html = "";
+                for (let [stat, finalVal] of Object.entries(currentIdentifyStats)) {
+                    if (highlightStats[stat]) {
+                        html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#f85149; font-weight:bold;">+${finalVal}</span></span>`;
+                    } else {
+                        html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#539bf5">+${finalVal}</span></span>`;
+                    }
                 }
 
                 btn.innerText = originalText;
@@ -3735,14 +3768,6 @@ const NOTICE_DATABASE = [
                 
                 const resBox = document.getElementById('equipResultBox');
                 resBox.style.display = 'block';
-
-                // [추가] 무기류 유효옵션 잭팟 판정 로직
-                let isJackpot = false;
-                if (eq.type.includes("원거리 무기")) {
-                    if ((currentIdentifyStats["PVE 공격력 (%)"] >= 2) && (currentIdentifyStats["명중 (%)"] >= 2)) isJackpot = true;
-                } else if (eq.type.includes("근거리 무기")) {
-                    if ((currentIdentifyStats["PVE 공격력 (%)"] >= 2) && (currentIdentifyStats["치명 (%)"] >= 2)) isJackpot = true;
-                }
 
                 if (isJackpot) {
                     resBox.className = 'res-box effect-jackpot';
@@ -3781,7 +3806,7 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 4. 인챈트 실행 로직 
+        // 4. 인챈트 실행 로직
         function runEnchant() {
             const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
             const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
@@ -3802,10 +3827,9 @@ const NOTICE_DATABASE = [
             
             btn.innerText = "✨ 인챈트 주입 중...";
             btn.classList.add('btn-loading');
-            infoBox.classList.add('effect-magic'); // [추가] 마법 효과 적용
+            infoBox.classList.add('effect-magic');
             document.getElementById('enchantResultBox').style.display = 'none';
 
-            // [수정] 대기 시간 1초로 단축
             setTimeout(() => {
                 const stat = en.pool[Math.floor(Math.random() * en.pool.length)];
                 
@@ -3817,21 +3841,39 @@ const NOTICE_DATABASE = [
                 currentEnchantStats = {};
                 currentEnchantStats[stat] = finalVal;
                 
+                let isHighlight = false;
+                let isJackpot = false;
+                const stoneKey = document.getElementById('itemSimEnchant').value;
+
+                if (stoneKey === 'fire' && stat === '명중 (%)') {
+                    if (points >= 2) isHighlight = true;
+                    if (points === 3) isJackpot = true;
+                } else if (stoneKey === 'jade' && stat === '행운 (%)') {
+                    isHighlight = true;
+                    if (points === 3) isJackpot = true;
+                }
+
+                let statDisplay = isHighlight 
+                    ? `<span style="color:#f85149; font-weight:bold;">${stat} +${finalVal}</span>`
+                    : `<span>${stat} +${finalVal}</span>`;
+                
                 let html = `
                     <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
-                    <div style="color:#2ea043;">■ ${stat} +${finalVal} (랜덤)</div>
+                    <div style="color:#2ea043;">■ ${statDisplay} (랜덤)</div>
                     <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 당첨</div>
                 `;
 
                 btn.innerText = originalText;
                 btn.classList.remove('btn-loading');
-                infoBox.classList.remove('effect-magic'); // [추가] 마법 효과 해제
+                infoBox.classList.remove('effect-magic');
                 
                 const resBox = document.getElementById('enchantResultBox');
                 resBox.style.display = 'block';
                 
-                if (points === 3) {
+                if (isJackpot) {
                     resBox.className = 'res-box effect-jackpot';
+                    resBox.style.borderColor = "#ffcc00";
+                    html = `<div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">✨ [인챈트 대성공!] ✨</div>` + html;
                 } else {
                     resBox.className = 'res-box effect-pop';
                     resBox.style.borderColor = "#ff7b72";
