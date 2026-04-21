@@ -3696,13 +3696,36 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 4. 인챈트 실행 로직 (확률 적용)
+        // 4. 인챈트 실행 로직 (확률 적용 및 부위 검사)
         function runEnchant() {
-            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
+            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];     // 현재 착용(선택) 중인 장비
+            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value]; // 현재 선택한 인챈트석
+
+            // [추가된 로직] 장착 부위 일치 여부 검사
+            let isValidTarget = false;
+            
+            if (en.target === "무기" && eq.type.includes("무기")) {
+                isValidTarget = true; // 원거리 무기, 근거리 무기 모두 허용
+            } else if (en.target === "방어구" && (eq.type.includes("투구") || eq.type.includes("모자") || eq.type.includes("갑옷") || eq.type.includes("옷"))) {
+                isValidTarget = true; // 투구/모자, 갑옷/옷 모두 방어구로 취급
+            } else if (en.target === "악세서리" && (eq.type.includes("목걸이") || eq.type.includes("반지") || eq.type.includes("귀걸이") || eq.type.includes("팔찌") || eq.type.includes("부적") || eq.type.includes("토템") || eq.type.includes("악기"))) {
+                isValidTarget = true; // 각종 악세서리류 취급
+            }
+
+            // 조건에 맞지 않으면 경고창을 띄우고 인챈트를 중단합니다.
+            if (!isValidTarget) {
+                alert(`[인챈트 실패]\n${en.name}은(는) [${en.target}] 전용 인챈트석입니다.\n현재 선택된 장비(${eq.name})의 부위는 [${eq.type}]입니다.`);
+                return;
+            }
+
+            // 아래는 기존의 확률 적용 로직입니다.
             const stat = en.pool[Math.floor(Math.random() * en.pool.length)];
             
+            // 1~3 포인트 확률 (1: 60%, 2: 30%, 3: 10%)
             const roll = Math.random();
             let points = roll < 0.6 ? 1 : (roll < 0.9 ? 2 : 3);
+            
+            // 체력인 경우 x3
             let finalVal = stat === "체력" ? points * 3 : points;
             
             // 합산용 데이터 저장
