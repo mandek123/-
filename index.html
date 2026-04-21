@@ -850,6 +850,55 @@
     0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
 }
 
+/* 타이머 및 결과창 이펙트 애니메이션 */
+@keyframes popIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes jackpotGlow {
+    0% { box-shadow: 0 0 5px #ffcc00; }
+    50% { box-shadow: 0 0 20px #ffcc00, 0 0 30px #ff7b72; transform: scale(1.02); }
+    100% { box-shadow: 0 0 5px #ffcc00; }
+}
+.effect-pop { 
+    animation: popIn 0.4s ease-out forwards; 
+}
+.effect-jackpot { 
+    animation: popIn 0.4s ease-out forwards, jackpotGlow 1s infinite alternate; 
+    border-color: #ffcc00 !important; 
+}
+.btn-loading { 
+    opacity: 0.6; 
+    pointer-events: none; 
+}
+
+/* 1. 대장장이 망치질 이펙트 */
+@keyframes hammerSmash {
+    0% { transform: translate(0, 0); filter: brightness(1); }
+    15% { transform: translate(-2px, 2px) rotate(-1deg); filter: brightness(1.2) drop-shadow(0 0 10px #ff7b72); }
+    30% { transform: translate(2px, -2px) rotate(1deg); filter: brightness(1); }
+    45% { transform: translate(-2px, 2px) rotate(-1deg); filter: brightness(1.3) drop-shadow(0 0 15px #ffcc00); }
+    60% { transform: translate(2px, -2px) rotate(1deg); filter: brightness(1); }
+    75% { transform: translate(-2px, 2px) rotate(-1deg); filter: brightness(1.2) drop-shadow(0 0 10px #ff7b72); }
+    100% { transform: translate(0, 0); filter: brightness(1); }
+}
+.effect-hammer {
+    animation: hammerSmash 0.33s ease-in-out infinite; 
+}
+
+/* 2. 인챈트 마법 가루(별빛) 이펙트 */
+@keyframes magicDust {
+    0% { filter: drop-shadow(0 0 5px #d2a8ff) brightness(1); transform: scale(1); }
+    25% { filter: drop-shadow(0 0 15px #a5d6ff) drop-shadow(0 0 5px #fff) brightness(1.3); transform: scale(1.02); }
+    50% { filter: drop-shadow(0 0 25px #d2a8ff) drop-shadow(0 0 10px #fff) brightness(1.5); transform: scale(1); }
+    75% { filter: drop-shadow(0 0 15px #a5d6ff) drop-shadow(0 0 5px #fff) brightness(1.3); transform: scale(1.02); }
+    100% { filter: drop-shadow(0 0 5px #d2a8ff) brightness(1); transform: scale(1); }
+}
+.effect-magic {
+    animation: magicDust 0.5s ease-in-out infinite;
+}
+
     </style>
 </head>
 <body>
@@ -3650,28 +3699,64 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 2. 장비 감정 실행 로직 (7포인트 분배)
+        // 2. 장비 감정 실행 로직
         function runEquipIdentify() {
-            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
-            let rawResults = {};
+            const btn = document.querySelector('button[onclick="runEquipIdentify()"]');
+            const originalText = btn.innerText;
+            const infoBox = document.getElementById('equipInfoBox');
             
-            for(let i = 0; i < 7; i++) {
-                let stat = eq.pool[Math.floor(Math.random() * eq.pool.length)];
-                rawResults[stat] = (rawResults[stat] || 0) + 1;
-            }
+            btn.innerText = "🔨 깡! 깡! 감정 중...";
+            btn.classList.add('btn-loading');
+            infoBox.classList.add('effect-hammer');
+            document.getElementById('equipResultBox').style.display = 'none';
 
-            currentIdentifyStats = {};
-            let html = "";
-            for (let [stat, points] of Object.entries(rawResults)) {
-                let multiplier = stat === "체력" ? 3 : (stat === "관통" || stat === "쉴드" ? 2 : 1);
-                let finalVal = points * multiplier;
-                currentIdentifyStats[stat] = finalVal; // 합산용 데이터 저장
-                html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#539bf5">+${finalVal}</span></span>`;
-            }
+            // 대기 시간 1초
+            setTimeout(() => {
+                const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+                let rawResults = {};
+                
+                for(let i = 0; i < 7; i++) {
+                    let stat = eq.pool[Math.floor(Math.random() * eq.pool.length)];
+                    rawResults[stat] = (rawResults[stat] || 0) + 1;
+                }
 
-            document.getElementById('equipResultBox').style.display = 'block';
-            document.getElementById('equipResultText').innerHTML = html;
-            updateTotalStatsUI(); // 결과 합산 실행
+                currentIdentifyStats = {};
+                let html = "";
+                for (let [stat, points] of Object.entries(rawResults)) {
+                    let multiplier = stat === "체력" ? 3 : (stat === "관통" || stat === "쉴드" ? 2 : 1);
+                    let finalVal = points * multiplier;
+                    currentIdentifyStats[stat] = finalVal;
+                    html += `<span style="display:inline-block; width:45%;">🔹 ${stat} <span style="color:#539bf5">+${finalVal}</span></span>`;
+                }
+
+                btn.innerText = originalText;
+                btn.classList.remove('btn-loading');
+                infoBox.classList.remove('effect-hammer'); 
+                
+                const resBox = document.getElementById('equipResultBox');
+                resBox.style.display = 'block';
+
+                // [추가] 무기류 유효옵션 잭팟 판정 로직
+                let isJackpot = false;
+                if (eq.type.includes("원거리 무기")) {
+                    if ((currentIdentifyStats["PVE 공격력 (%)"] >= 2) && (currentIdentifyStats["명중 (%)"] >= 2)) isJackpot = true;
+                } else if (eq.type.includes("근거리 무기")) {
+                    if ((currentIdentifyStats["PVE 공격력 (%)"] >= 2) && (currentIdentifyStats["치명 (%)"] >= 2)) isJackpot = true;
+                }
+
+                if (isJackpot) {
+                    resBox.className = 'res-box effect-jackpot';
+                    resBox.style.borderColor = "#ffcc00";
+                    html = `<div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">✨ [유효 옵션 획득!] ✨</div>` + html;
+                } else {
+                    resBox.className = 'res-box effect-pop';
+                    resBox.style.borderColor = "var(--accent-blue)";
+                }
+
+                document.getElementById('equipResultText').innerHTML = html;
+                
+                updateTotalStatsUI();
+            }, 1000);
         }
 
         // 3. 인챈트 UI 업데이트
@@ -3696,52 +3781,66 @@ const NOTICE_DATABASE = [
             updateTotalStatsUI();
         }
 
-        // 4. 인챈트 실행 로직 (확률 적용 및 부위 검사)
+        // 4. 인챈트 실행 로직 
         function runEnchant() {
-            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];     // 현재 착용(선택) 중인 장비
-            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value]; // 현재 선택한 인챈트석
+            const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
+            const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
 
-            // [추가된 로직] 장착 부위 일치 여부 검사
             let isValidTarget = false;
-            
-            if (en.target === "무기" && eq.type.includes("무기")) {
-                isValidTarget = true; // 원거리 무기, 근거리 무기 모두 허용
-            } else if (en.target === "방어구" && (eq.type.includes("투구") || eq.type.includes("모자") || eq.type.includes("갑옷") || eq.type.includes("옷"))) {
-                isValidTarget = true; // 투구/모자, 갑옷/옷 모두 방어구로 취급
-            } else if (en.target === "악세서리" && (eq.type.includes("목걸이") || eq.type.includes("반지") || eq.type.includes("귀걸이") || eq.type.includes("팔찌") || eq.type.includes("부적") || eq.type.includes("토템") || eq.type.includes("악기"))) {
-                isValidTarget = true; // 각종 악세서리류 취급
-            }
+            if (en.target === "무기" && eq.type.includes("무기")) isValidTarget = true;
+            else if (en.target === "방어구" && (eq.type.includes("투구") || eq.type.includes("모자") || eq.type.includes("갑옷") || eq.type.includes("옷"))) isValidTarget = true;
+            else if (en.target === "악세서리" && (eq.type.includes("목걸이") || eq.type.includes("반지") || eq.type.includes("귀걸이") || eq.type.includes("팔찌") || eq.type.includes("부적") || eq.type.includes("토템") || eq.type.includes("악기"))) isValidTarget = true;
 
-            // 조건에 맞지 않으면 경고창을 띄우고 인챈트를 중단합니다.
             if (!isValidTarget) {
                 alert(`[인챈트 실패]\n${en.name}은(는) [${en.target}] 전용 인챈트석입니다.\n현재 선택된 장비(${eq.name})의 부위는 [${eq.type}]입니다.`);
                 return;
             }
 
-            // 아래는 기존의 확률 적용 로직입니다.
-            const stat = en.pool[Math.floor(Math.random() * en.pool.length)];
+            const btn = document.querySelector('button[onclick="runEnchant()"]');
+            const originalText = btn.innerText;
+            const infoBox = document.getElementById('enchantInfoBox');
             
-            // 1~3 포인트 확률 (1: 60%, 2: 30%, 3: 10%)
-            const roll = Math.random();
-            let points = roll < 0.6 ? 1 : (roll < 0.9 ? 2 : 3);
-            
-            // 체력인 경우 x3
-            let finalVal = stat === "체력" ? points * 3 : points;
-            
-            // 합산용 데이터 저장
-            currentEnchantFixed = en.fixedStat;
-            currentEnchantStats = {};
-            currentEnchantStats[stat] = finalVal;
-            
-            let html = `
-                <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
-                <div style="color:#2ea043;">■ ${stat} +${finalVal} (랜덤)</div>
-                <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 당첨</div>
-            `;
+            btn.innerText = "✨ 인챈트 주입 중...";
+            btn.classList.add('btn-loading');
+            infoBox.classList.add('effect-magic'); // [추가] 마법 효과 적용
+            document.getElementById('enchantResultBox').style.display = 'none';
 
-            document.getElementById('enchantResultBox').style.display = 'block';
-            document.getElementById('enchantResultText').innerHTML = html;
-            updateTotalStatsUI(); // 결과 합산 실행
+            // [수정] 대기 시간 1초로 단축
+            setTimeout(() => {
+                const stat = en.pool[Math.floor(Math.random() * en.pool.length)];
+                
+                const roll = Math.random();
+                let points = roll < 0.6 ? 1 : (roll < 0.9 ? 2 : 3);
+                let finalVal = stat === "체력" ? points * 3 : points;
+                
+                currentEnchantFixed = en.fixedStat;
+                currentEnchantStats = {};
+                currentEnchantStats[stat] = finalVal;
+                
+                let html = `
+                    <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
+                    <div style="color:#2ea043;">■ ${stat} +${finalVal} (랜덤)</div>
+                    <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 당첨</div>
+                `;
+
+                btn.innerText = originalText;
+                btn.classList.remove('btn-loading');
+                infoBox.classList.remove('effect-magic'); // [추가] 마법 효과 해제
+                
+                const resBox = document.getElementById('enchantResultBox');
+                resBox.style.display = 'block';
+                
+                if (points === 3) {
+                    resBox.className = 'res-box effect-jackpot';
+                } else {
+                    resBox.className = 'res-box effect-pop';
+                    resBox.style.borderColor = "#ff7b72";
+                }
+                
+                document.getElementById('enchantResultText').innerHTML = html;
+                
+                updateTotalStatsUI();
+            }, 1000); 
         }
 
         // 5. 최종 능력치 합산 렌더링 함수
