@@ -1688,37 +1688,46 @@
 </div>
 
 <div class="main-container" id="page-weekly-championship">
-    <div class="card" style="grid-column: span 2; max-width: 600px; margin: 0 auto; width: 100%; background: linear-gradient(145deg, #161b22, #0d1117); border: 1px solid rgba(255, 204, 0, 0.3);">
-        <div class="card-header" style="justify-content: center; font-size: 1.5rem; border-bottom: 1px solid #30363d; padding-bottom: 15px;">
-            <span style="background: linear-gradient(to right, #ffcc00, #ff7b72); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">
-                <i class="fa-solid fa-trophy" style="margin-right: 8px;"></i>주간 펫 육성 챔피언십
-        </span></div>
+    <div class="card" style="grid-column: span 2; max-width: 600px; margin: 0 auto; width: 100%; background: #0d1117; border: 1px solid #1f6feb; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
         
-        <div style="margin-top: 25px; padding: 30px 20px; background: rgba(0,0,0,0.4); border-radius: 16px; border: 1px solid #30363d; text-align: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
-            <div style="width: 120px; height: 120px; margin: 0 auto 20px auto; background: var(--inner-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #539bf5; box-shadow: 0 0 15px rgba(83, 155, 245, 0.3);">
-                <img id="weeklyPetImg" src="./images/A1.png" alt="페트" style="max-width: 80px; max-height: 80px; object-fit: contain;">
+        <div class="card-header" style="justify-content: center; font-size: 1.5rem; border-bottom: 1px solid #30363d; padding-bottom: 15px; background: rgba(31, 111, 235, 0.05);">
+            <span style="background: linear-gradient(to right, #539bf5, #d2a8ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; font-weight: 800;">
+                <i class="fa-solid fa-trophy" style="color: #ffcc00; -webkit-text-fill-color: initial;"></i> 주간 펫 육성 챔피언십
+            </span>
+        </div>
+        
+        <div style="margin-top: 25px; padding: 35px 20px; background: linear-gradient(180deg, rgba(31, 111, 235, 0.1) 0%, rgba(13, 17, 23, 1) 100%); border-radius: 20px; border: 1px solid #30363d; text-align: center; position: relative; overflow: hidden;">
+            <i class="fa-solid fa-paw" style="position: absolute; top: -10px; left: -10px; font-size: 5rem; color: rgba(255,255,255,0.02); transform: rotate(-15deg);"></i>
+            
+            <div style="width: 130px; height: 130px; margin: 0 auto 15px auto; background: #161b22; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #1f6feb; box-shadow: 0 0 20px rgba(31, 111, 235, 0.4); overflow: hidden;">
+                <img id="weeklyPetImg" src="./images/zzz.png" alt="페트" style="max-width: 90px; max-height: 90px; object-fit: contain;">
             </div>
-            <h3 id="weeklyPetName" style="color: #d2a8ff; margin: 0 0 10px 0; font-size: 1.4rem;">페트 대기 중</h3>
-            <div id="weeklyPetLevel" style="font-size: 3rem; font-weight: 900; color: #539bf5; margin-bottom: 10px; text-shadow: 0 0 10px rgba(83, 155, 245, 0.3);">Lv.1</div>
-            <div id="weeklyPetGrowth" style="color: #adbac7; font-size: 1.1rem; background: rgba(255,255,255,0.05); display: inline-block; padding: 5px 15px; border-radius: 20px;">성장률: -</div>
+            
+            <h3 id="weeklyPetName" style="color: #ffffff; margin: 10px 0; font-size: 1.6rem; letter-spacing: -0.5px;">페트 대기 중</h3>
+            <div id="weeklyPetLevel" style="font-size: 3.5rem; font-weight: 900; color: #539bf5; line-height: 1; margin: 5px 0; text-shadow: 0 0 15px rgba(83, 155, 245, 0.5);">Lv.1</div>
+            <div id="weeklyPetGrowth" style="color: #8b949e; font-size: 1rem; margin-top: 10px; background: rgba(0,0,0,0.3); display: inline-block; padding: 6px 18px; border-radius: 30px; border: 1px solid #30363d;">성장률: -</div>
         </div>
 
-        <div style="display: flex; gap: 12px; margin-top: 25px; justify-content: center;">
-            <button class="btn-calc" id="btnWeeklyStart" style="background: var(--accent-orange); flex: 1; font-size: 1.1rem; padding: 15px 0; border-radius: 12px;" onclick="startWeeklyChallenge()"><i class="fa-solid fa-egg"></i> 알 부화하기</button>
-            <button class="btn-calc" id="btnWeeklyHunt" style="background: var(--accent-blue); flex: 1; font-size: 1.1rem; padding: 15px 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;" onclick="doWeeklyHunt()">
-                <span><i class="fa-solid fa-khanda"></i> 사냥하기</span>
-                <span id="huntCooldownText" style="font-size: 0.8rem; font-weight: normal; margin-top: 3px;">(4시간 단축)</span>
+        <div style="display: flex; gap: 15px; margin-top: 25px;">
+            <button class="btn-calc" id="btnWeeklyStart" style="background: var(--accent-orange); flex: 1; height: 65px; border-radius: 15px; font-size: 1.2rem;" onclick="startWeeklyChallenge()">
+                <i class="fa-solid fa-egg" style="margin-right: 8px;"></i>부화시키기
+            </button>
+            <button class="btn-calc" id="btnWeeklyHunt" style="background: #1f6feb; flex: 1; height: 65px; border-radius: 15px; font-size: 1.1rem; display: flex; flex-direction: column; align-items: center; justify-content: center;" onclick="doWeeklyHunt()">
+                <span style="font-weight: 800;"><i class="fa-solid fa-bolt" style="margin-right: 5px;"></i> 사냥하기</span>
+                <span id="huntCooldownText" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9;">(4시간 단축)</span>
             </button>
         </div>
 
-        <div id="weeklyResetArea" style="display: none; margin-top: 25px; padding: 20px; background: rgba(248, 81, 73, 0.1); border-radius: 12px; border: 1px solid rgba(248, 81, 73, 0.3); text-align: center;">
-            <div style="color: #ff7b72; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem;"><i class="fa-solid fa-check-circle"></i> MAX 레벨 도달! 랭킹이 기록되었습니다.</div>
-            <button class="btn-calc" style="background: #21262d; border: 1px solid #484f58; color: #adbac7;" onclick="resetWeeklyChallenge()">포기하고 다시 키우기</button>
+        <div id="weeklyResetArea" style="display: none; margin-top: 25px; padding: 20px; background: rgba(248, 81, 73, 0.1); border-radius: 15px; border: 1px solid rgba(248, 81, 73, 0.3); text-align: center; animation: fadeIn 0.5s;">
+            <div style="color: #ff7b72; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem;"><i class="fa-solid fa-trophy-award"></i> 만렙 달성! 명예의 전당 등록 완료</div>
+            <button class="btn-calc" style="background: #30363d; height: 45px; font-size: 0.95rem;" onclick="resetWeeklyChallenge()">새로운 도전 시작하기</button>
         </div>
 
-        <div style="margin-top: 30px; padding: 25px; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid #30363d;">
-            <h4 style="color: #ffcc00; margin-top: 0; margin-bottom: 20px; font-size: 1.2rem; text-align: center;"><i class="fa-solid fa-crown"></i> 실시간 명예의 전당 (Top 3)</h4>
-            <div id="rankingBoard" style="text-align: left; color: #adbac7; line-height: 2;">
+        <div style="margin-top: 35px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 15px; border: 1px solid #30363d;">
+            <h4 style="color: #ffcc00; margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; text-align: center; letter-spacing: 1px;">
+                <i class="fa-solid fa-crown"></i> 주간 TOP 3 랭킹
+            </h4>
+            <div id="rankingBoard" style="color: #adbac7;">
                 데이터를 불러오는 중입니다...
             </div>
         </div>
@@ -4284,14 +4293,16 @@ function renderWeeklyUI() {
     let currentLv = Math.floor((timeProgress + data.huntBonus) * 140) + 1;
     if (currentLv > 140) currentLv = 140;
 
-    // 이미지 업데이트
-    if (imgEl.getAttribute('src') !== data.img) imgEl.src = data.img;
+    // 이미지 업데이트 (배너가 아닌 페트 이미지 정상 노출)
+    if (data.img && imgEl.getAttribute('src') !== data.img) {
+        imgEl.src = data.img;
+    }
     
     updateDOMText('weeklyPetName', data.name);
     updateDOMText('weeklyPetLevel', `Lv.${currentLv}`);
     updateDOMText('weeklyPetGrowth', `성장률: ${data.growth}`);
 
-    // 사냥버튼 쿨타임 UI 처리
+    // 사냥버튼 쿨타임 UI 처리 및 다크 테마 색상 적용
     if (btnHunt) {
         const huntTextId = 'huntCooldownText';
         const COOLDOWN_MS = 10 * 60 * 1000;
@@ -4301,11 +4312,15 @@ function renderWeeklyUI() {
             const m = Math.floor(remainSec / 60);
             const s = (remainSec % 60).toString().padStart(2, '0');
             
-            btnHunt.style.background = "#484f58";
+            btnHunt.style.background = "#21262d"; // 비활성화 색상
+            btnHunt.style.borderColor = "#30363d";
             btnHunt.style.cursor = "not-allowed";
-            updateDOMText(huntTextId, `(대기: ${m}분 ${s}초)`);
+            btnHunt.style.opacity = "0.6";
+            updateDOMText(huntTextId, `대기: ${m}:${s}`);
         } else {
-            btnHunt.style.background = "var(--accent-blue)";
+            btnHunt.style.background = "#1f6feb"; // 활성화 색상
+            btnHunt.style.borderColor = "transparent";
+            btnHunt.style.opacity = "1";
             btnHunt.style.cursor = "pointer";
             updateDOMText(huntTextId, "(4시간 단축)");
         }
@@ -4314,6 +4329,8 @@ function renderWeeklyUI() {
     if (currentLv >= 140) {
         if(resetArea.style.display !== 'block') resetArea.style.display = 'block';
         if (localStorage.getItem('weeklyPetSubmitted') === 'false' && typeof submitToFirebase === 'function') {
+            // 🚨 무한 팝업 에러 방지를 위해 상태를 'pending'으로 즉시 변경
+            localStorage.setItem('weeklyPetSubmitted', 'pending'); 
             submitToFirebase(data.name, data.growth);
         }
     } else {
@@ -4322,10 +4339,12 @@ function renderWeeklyUI() {
 }
 
 function resetWeeklyChallenge() {
-    if (confirm("기록을 포기하고 초기화하시겠습니까?")) {
+    if (confirm("현재 기록을 초기화하고 처음부터 다시 시작하시겠습니까?")) {
         localStorage.removeItem('weeklyPetData');
         localStorage.removeItem('weeklyPetSubmitted');
-        document.getElementById('weeklyPetImg').src = "./images/A1.png";
+        
+        // 초기화 시 이미지와 텍스트 리셋
+        document.getElementById('weeklyPetImg').src = "./images/zzz.png"; // 빈 이미지 경로
         updateDOMText('weeklyPetName', "페트 대기 중");
         updateDOMText('weeklyPetLevel', "Lv.1");
         updateDOMText('weeklyPetGrowth', "성장률: -");
@@ -4333,9 +4352,11 @@ function resetWeeklyChallenge() {
         
         const btnHunt = document.getElementById('btnWeeklyHunt');
         if (btnHunt) {
-            btnHunt.style.background = "var(--accent-blue)";
+            btnHunt.style.background = "#1f6feb";
+            btnHunt.style.borderColor = "transparent";
             btnHunt.style.cursor = "pointer";
-            updateDOMText('huntCooldownText', "(1시간 단축)");
+            btnHunt.style.opacity = "1";
+            updateDOMText('huntCooldownText', "(4시간 단축)");
         }
     }
 }
