@@ -1688,7 +1688,7 @@
 </div>
 
 <div class="main-container" id="page-weekly-championship">
-    <div class="card" style="grid-column: span 2; max-width: 600px; margin: 0 auto; width: 100%; background: #0d1117; border: 1px solid #1f6feb; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <div class="card" style="grid-column: span 2; max-width: 650px; margin: 0 auto; width: 100%; background: #0d1117; border: 1px solid #1f6feb; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
         
         <div class="card-header" style="justify-content: center; font-size: 1.5rem; border-bottom: 1px solid #30363d; padding-bottom: 15px; background: rgba(31, 111, 235, 0.05);">
             <span style="background: linear-gradient(to right, #539bf5, #d2a8ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; font-weight: 800;">
@@ -1696,39 +1696,64 @@
             </span>
         </div>
         
-        <div style="margin-top: 25px; padding: 35px 20px; background: linear-gradient(180deg, rgba(31, 111, 235, 0.1) 0%, rgba(13, 17, 23, 1) 100%); border-radius: 20px; border: 1px solid #30363d; text-align: center; position: relative; overflow: hidden;">
-            <i class="fa-solid fa-paw" style="position: absolute; top: -10px; left: -10px; font-size: 5rem; color: rgba(255,255,255,0.02); transform: rotate(-15deg);"></i>
+        <div style="margin-top: 25px; padding: 25px; background: linear-gradient(145deg, #0d1117, #161b22); border-radius: 20px; border: 1px solid #30363d; display: flex; align-items: center; gap: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
             
-            <div style="width: 130px; height: 130px; margin: 0 auto 15px auto; background: #161b22; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #1f6feb; box-shadow: 0 0 20px rgba(31, 111, 235, 0.4); overflow: hidden;">
-                <img id="weeklyPetImg" src="./images/zzz.png" alt="페트" style="max-width: 90px; max-height: 90px; object-fit: contain;">
+            <div style="flex: 0 0 160px; text-align: center;">
+                <div style="width: 150px; height: 150px; background: #0d1117; border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid #1f6feb; box-shadow: 0 0 20px rgba(31, 111, 235, 0.2); overflow: hidden; position: relative;">
+                    <img id="weeklyPetImg" src="./images/zzz.png" alt="페트" style="max-width: 110px; max-height: 110px; object-fit: contain; z-index: 2;">
+                    <i class="fa-solid fa-dna" style="position: absolute; font-size: 6rem; color: rgba(31, 111, 235, 0.05); transform: rotate(-15deg); z-index: 1;"></i>
+                </div>
+                <h3 id="weeklyPetName" style="color: #ffffff; margin: 15px 0 0 0; font-size: 1.3rem; letter-spacing: -0.5px;">페트 대기 중</h3>
             </div>
-            
-            <h3 id="weeklyPetName" style="color: #ffffff; margin: 10px 0; font-size: 1.6rem; letter-spacing: -0.5px;">페트 대기 중</h3>
-            <div id="weeklyPetLevel" style="font-size: 3.5rem; font-weight: 900; color: #539bf5; line-height: 1; margin: 5px 0; text-shadow: 0 0 15px rgba(83, 155, 245, 0.5);">Lv.1</div>
-            <div id="weeklyPetGrowth" style="color: #8b949e; font-size: 1rem; margin-top: 10px; background: rgba(0,0,0,0.3); display: inline-block; padding: 6px 18px; border-radius: 30px; border: 1px solid #30363d;">성장률: -</div>
+
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: flex; align-items: baseline; gap: 10px;">
+                    <span id="weeklyPetLevel" style="font-size: 3rem; font-weight: 900; color: #539bf5; text-shadow: 0 0 10px rgba(83, 155, 245, 0.4);">Lv.1</span>
+                    <span id="weeklyPetGrowth" style="color: #8b949e; font-size: 0.95rem; background: rgba(0,0,0,0.3); padding: 3px 12px; border-radius: 10px; border: 1px solid #30363d;">성장률: -</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #f85149;">
+                        <div style="font-size: 0.75rem; color: #8b949e; margin-bottom: 2px;">체력 (HP)</div>
+                        <div id="weeklyStatHP" style="color: #fff; font-weight: bold; font-family: monospace;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #ff7b72;">
+                        <div style="font-size: 0.75rem; color: #8b949e; margin-bottom: 2px;">공격력 (ATK)</div>
+                        <div id="weeklyStatAtk" style="color: #fff; font-weight: bold; font-family: monospace;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #539bf5;">
+                        <div style="font-size: 0.75rem; color: #8b949e; margin-bottom: 2px;">방어력 (DEF)</div>
+                        <div id="weeklyStatDef" style="color: #fff; font-weight: bold; font-family: monospace;">-</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #3fb950;">
+                        <div style="font-size: 0.75rem; color: #8b949e; margin-bottom: 2px;">순발력 (SPD)</div>
+                        <div id="weeklyStatSpd" style="color: #fff; font-weight: bold; font-family: monospace;">-</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div style="display: flex; gap: 15px; margin-top: 25px;">
-            <button class="btn-calc" id="btnWeeklyStart" style="background: var(--accent-orange); flex: 1; height: 65px; border-radius: 15px; font-size: 1.2rem;" onclick="startWeeklyChallenge()">
-                <i class="fa-solid fa-egg" style="margin-right: 8px;"></i>부화시키기
+            <button class="btn-calc" id="btnWeeklyStart" style="background: var(--accent-orange); flex: 1; height: 55px; border-radius: 12px; font-size: 1.1rem; transition: 0.3s;" onclick="startWeeklyChallenge()">
+                <i class="fa-solid fa-egg"></i> 알 부화시키기
             </button>
-            <button class="btn-calc" id="btnWeeklyHunt" style="background: #1f6feb; flex: 1; height: 65px; border-radius: 15px; font-size: 1.1rem; display: flex; flex-direction: column; align-items: center; justify-content: center;" onclick="doWeeklyHunt()">
-                <span style="font-weight: 800;"><i class="fa-solid fa-bolt" style="margin-right: 5px;"></i> 사냥하기</span>
-                <span id="huntCooldownText" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9;">(4시간 단축)</span>
+            <button class="btn-calc" id="btnWeeklyHunt" style="background: #1f6feb; flex: 1; height: 55px; border-radius: 12px; font-size: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center;" onclick="doWeeklyHunt()">
+                <span style="font-weight: 800;"><i class="fa-solid fa-bolt"></i> 사냥하기</span>
+                <span id="huntCooldownText" style="font-size: 0.75rem; opacity: 0.9;">(4시간 단축)</span>
             </button>
         </div>
 
-        <div id="weeklyResetArea" style="display: none; margin-top: 25px; padding: 20px; background: rgba(248, 81, 73, 0.1); border-radius: 15px; border: 1px solid rgba(248, 81, 73, 0.3); text-align: center; animation: fadeIn 0.5s;">
-            <div style="color: #ff7b72; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem;"><i class="fa-solid fa-trophy-award"></i> 만렙 달성! 명예의 전당 등록 완료</div>
-            <button class="btn-calc" style="background: #30363d; height: 45px; font-size: 0.95rem;" onclick="resetWeeklyChallenge()">새로운 도전 시작하기</button>
+        <div id="weeklyResetArea" style="display: none; margin-top: 25px; padding: 20px; background: rgba(31, 111, 235, 0.1); border-radius: 15px; border: 1px solid #1f6feb; text-align: center;">
+            <div style="color: #539bf5; font-weight: bold; margin-bottom: 12px;"><i class="fa-solid fa-medal"></i> 만렙 달성! 기록이 전송되었습니다.</div>
+            <button class="btn-calc" style="background: #30363d; height: 40px; font-size: 0.9rem;" onclick="resetWeeklyChallenge()">기록 삭제 및 새로 시작</button>
         </div>
 
-        <div style="margin-top: 35px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 15px; border: 1px solid #30363d;">
-            <h4 style="color: #ffcc00; margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; text-align: center; letter-spacing: 1px;">
-                <i class="fa-solid fa-crown"></i> 주간 TOP 3 랭킹
+        <div style="margin-top: 30px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 15px; border: 1px solid #30363d;">
+            <h4 style="color: #ffcc00; margin-top: 0; margin-bottom: 15px; font-size: 1rem; text-align: center;">
+                <i class="fa-solid fa-crown"></i> 주간 명예의 전당
             </h4>
-            <div id="rankingBoard" style="color: #adbac7;">
-                데이터를 불러오는 중입니다...
+            <div id="rankingBoard" style="color: #adbac7; font-size: 0.95rem;">
+                데이터 로딩 중...
             </div>
         </div>
     </div>
@@ -4222,184 +4247,188 @@ function resetCounts() {
 }
 
 /* =======================================
-    [주간 페트 챔피언십 로직]
+    [주간 페트 챔피언십 로직 - 최종 통합본]
    ======================================= */
-const WEEKLY_PET_NAME = "메가갈푸스"; // 운영자가 매주 변경할 페트 이름
+const WEEKLY_PET_NAME = "메가갈푸스"; // 운영자가 매주 변경
 
+// 1. 알 부화 로직 (확률 및 조건 강화)
 function startWeeklyChallenge() {
+    const data = JSON.parse(localStorage.getItem('weeklyPetData'));
+    
+    // 만렙 체크: 현재 육성 중인 페트가 있으면 140렙 전까지 새 부화 금지
+    if (data) {
+        const NOW = new Date().getTime();
+        const passedSec = (NOW - data.startTime) / 1000;
+        let currentLv = Math.floor(((passedSec / 86400) + data.huntBonus) * 140) + 1;
+        if (currentLv < 140) return alert("현재 육성 중인 페트가 만렙(140)이 되어야 새로 부화할 수 있습니다.");
+    }
+
     const petTemplate = PET_DATABASE.find(p => p.name === WEEKLY_PET_NAME);
     if (!petTemplate) return alert("선정된 페트 데이터가 없습니다.");
     
-    if (localStorage.getItem('weeklyPetData')) {
-        if (!confirm("현재 육성 중인 페트가 있습니다. 초기화하시겠습니까?")) return;
-    }
+    // 🎲 성장률 확률 시스템 (극악 확률 적용)
+    let roll = Math.random();
+    let bonusMult = 1.0; 
+    if (roll < 0.001) bonusMult = 1.12;      // 0.1% 확률 (신급)
+    else if (roll < 0.01) bonusMult = 1.08; // 1% 확률 (축복)
+    else if (roll < 0.05) bonusMult = 1.03; // 5% 확률 (우수)
+    else if (roll < 0.35) bonusMult = 0.99; // 30% 확률 (평범)
+    else bonusMult = 0.94;                  // 63.9% 확률 (저성장)
 
-    const baseGrowth = petTemplate.gatk + petTemplate.gdef + petTemplate.gspd;
-    const personalGrowth = (baseGrowth * (Math.random() * 0.1 + 0.95)).toFixed(3); 
+    const totalBaseG = petTemplate.gatk + petTemplate.gdef + petTemplate.gspd;
+    const personalGrowth = (totalBaseG * bonusMult).toFixed(3);
     
     const newPetData = {
         name: petTemplate.name,
         img: petTemplate.img,
+        base: { hp: petTemplate.hp, atk: petTemplate.atk, def: petTemplate.def, spd: petTemplate.spd },
+        g: { 
+            hp: petTemplate.ghp * bonusMult, 
+            atk: petTemplate.gatk * bonusMult, 
+            def: petTemplate.gdef * bonusMult, 
+            spd: petTemplate.gspd * bonusMult 
+        },
         startTime: new Date().getTime(),
         growth: parseFloat(personalGrowth),
         huntBonus: 0,
-        lastHuntTime: 0 // 사냥 쿨타임용 변수 추가
+        lastHuntTime: 0
     };
 
     localStorage.setItem('weeklyPetData', JSON.stringify(newPetData));
     localStorage.setItem('weeklyPetSubmitted', 'false'); 
-    alert(`${petTemplate.name} 육성을 시작합니다.\n부여된 잠재 성장률: ${personalGrowth}`);
+    alert(`${petTemplate.name}의 알이 부화했습니다!\n성장률은 140레벨 달성 시 공개됩니다.`);
     renderWeeklyUI();
 }
 
+// 2. 사냥하기 로직 (작동 불능 버그 수정 및 즉시 반영)
 function doWeeklyHunt() {
     let data = JSON.parse(localStorage.getItem('weeklyPetData'));
     if (!data) return alert("먼저 알을 부화시켜주세요.");
     
     const NOW = new Date().getTime();
-    const COOLDOWN_MS = 10 * 60 * 1000; // 10분 쿨타임 설정
+    const COOLDOWN_MS = 10 * 60 * 1000; // 10분 쿨타임
     
-    if (data.lastHuntTime && NOW - data.lastHuntTime < COOLDOWN_MS) {
-        return; // 쿨타임 중이면 무시
-    }
+    if (data.lastHuntTime && NOW - data.lastHuntTime < COOLDOWN_MS) return;
 
-    if (Math.floor(((NOW - data.startTime) / 1000) / 86400 * 140 + data.huntBonus * 140) + 1 >= 140) return;
+    const passedSec = (NOW - data.startTime) / 1000;
+    let currentLv = Math.floor(((passedSec / 86400) + data.huntBonus) * 140) + 1;
+    if (currentLv >= 140) return alert("이미 최고 레벨(140)에 도달했습니다.");
 
-    data.huntBonus += ((3600 * 4) / 86400);
-    data.lastHuntTime = NOW; // 마지막 사냥시간 갱신
+    // 데이터 업데이트: 4시간 단축 적용
+    data.huntBonus += 1.1; 
+    data.lastHuntTime = NOW; 
+    
     localStorage.setItem('weeklyPetData', JSON.stringify(data));
-    renderWeeklyUI();
+    renderWeeklyUI(); // 클릭 즉시 UI 갱신
 }
 
-// 텍스트 변경 시에만 DOM 업데이트 (깜빡임 방지용 유틸)
+// 3. UI 렌더링 로직 (대칭 UI 및 실시간 능력치 계산)
+function renderWeeklyUI() {
+    const rawData = localStorage.getItem('weeklyPetData');
+    const btnStart = document.getElementById('btnWeeklyStart');
+    
+    if (!rawData) {
+        if(btnStart) {
+            btnStart.disabled = false;
+            btnStart.style.background = "var(--accent-orange)";
+            btnStart.style.opacity = "1";
+            btnStart.style.cursor = "pointer";
+            btnStart.innerHTML = `<i class="fa-solid fa-egg"></i> 알 부화시키기`;
+        }
+        return;
+    }
+
+    const data = JSON.parse(rawData);
+    const imgEl = document.getElementById('weeklyPetImg');
+    const resetArea = document.getElementById('weeklyResetArea');
+    const btnHunt = document.getElementById('btnWeeklyHunt');
+
+    const NOW = new Date().getTime();
+    const passedSec = (NOW - data.startTime) / 1000;
+    
+    // 통합 레벨 계산 (모든 UI에서 동일한 값 사용)
+    let currentLv = Math.floor(((passedSec / 86400) + data.huntBonus) * 140) + 1;
+    if (currentLv > 140) currentLv = 140;
+
+    // 부화 버튼 상태 제어 (레벨 동기화)
+    if (btnStart) {
+        if (currentLv < 140) {
+            btnStart.disabled = true;
+            btnStart.style.background = "#21262d";
+            btnStart.style.opacity = "0.5";
+            btnStart.style.cursor = "not-allowed";
+            updateDOMText('btnWeeklyStart', `육성 중... (Lv.${currentLv})`);
+        } else {
+            btnStart.disabled = false;
+            btnStart.style.background = "var(--accent-orange)";
+            btnStart.style.opacity = "1";
+            btnStart.style.cursor = "pointer";
+            btnStart.innerHTML = `<i class="fa-solid fa-egg"></i> 새 알 부화시키기`;
+        }
+    }
+
+    // 성장률 은폐 및 능력치 실시간 업데이트
+    updateDOMText('weeklyPetLevel', `Lv.${currentLv}`);
+    updateDOMText('weeklyPetGrowth', currentLv < 140 ? '성장률: 측정 중...' : `성장률: ${data.growth}`);
+    
+    if (data.base && data.g) {
+        const calcStat = (base, growth, lv) => (Number(base) + (Number(growth) * (lv - 1))).toFixed(2);
+        updateDOMText('weeklyStatHP', calcStat(data.base.hp, data.g.hp, currentLv));
+        updateDOMText('weeklyStatAtk', calcStat(data.base.atk, data.g.atk, currentLv));
+        updateDOMText('weeklyStatDef', calcStat(data.base.def, data.g.def, currentLv));
+        updateDOMText('weeklyStatSpd', calcStat(data.base.spd, data.g.spd, currentLv));
+    }
+
+    // 페트 이미지 및 이름
+    if (data.img && imgEl && imgEl.getAttribute('src') !== data.img) imgEl.src = data.img;
+    updateDOMText('weeklyPetName', data.name);
+
+    // 사냥 버튼 쿨타임 UI 처리
+    if (btnHunt) {
+        const COOLDOWN_MS = 10 * 60 * 1000;
+        if (data.lastHuntTime && NOW - data.lastHuntTime < COOLDOWN_MS) {
+            const remainSec = Math.ceil((COOLDOWN_MS - (NOW - data.lastHuntTime)) / 1000);
+            const m = Math.floor(remainSec / 60);
+            const s = (remainSec % 60).toString().padStart(2, '0');
+            btnHunt.style.background = "#21262d";
+            btnHunt.style.cursor = "not-allowed";
+            updateDOMText('huntCooldownText', `대기: ${m}:${s}`);
+        } else {
+            btnHunt.style.background = "#1f6feb";
+            btnHunt.style.cursor = "pointer";
+            updateDOMText('huntCooldownText', "(4시간 단축)");
+        }
+    }
+
+    // 만렙 달성 시 랭킹 제출 영역 활성화
+    if (currentLv >= 140) {
+        if(resetArea) resetArea.style.display = 'block';
+        if (localStorage.getItem('weeklyPetSubmitted') === 'false' && typeof submitToFirebase === 'function') {
+            localStorage.setItem('weeklyPetSubmitted', 'pending'); 
+            submitToFirebase(data.name, data.growth);
+        }
+    } else {
+        if(resetArea) resetArea.style.display = 'none';
+    }
+}
+
+// 4. 초기화 로직 (전체 리셋)
+function resetWeeklyChallenge() {
+    if (confirm("모든 기록을 삭제하고 새로 시작하시겠습니까?")) {
+        localStorage.removeItem('weeklyPetData');
+        localStorage.removeItem('weeklyPetSubmitted');
+        location.reload();
+    }
+}
+
+// 보조: 텍스트 업데이트 유틸
 function updateDOMText(id, newText) {
     const el = document.getElementById(id);
     if (el && el.innerText !== newText) el.innerText = newText;
 }
 
-function renderWeeklyUI() {
-    const data = JSON.parse(localStorage.getItem('weeklyPetData'));
-    if (!data) return;
-
-    const imgEl = document.getElementById('weeklyPetImg');
-    const resetArea = document.getElementById('weeklyResetArea');
-    const btnHunt = document.getElementById('btnWeeklyHunt');
-
-    if (!imgEl) return;
-
-    const NOW = new Date().getTime();
-    const passedSec = (NOW - data.startTime) / 1000;
-    const timeProgress = passedSec / 86400; // 24시간 기준
-    let currentLv = Math.floor((timeProgress + data.huntBonus) * 140) + 1;
-    if (currentLv > 140) currentLv = 140;
-
-    // 이미지 업데이트 (배너가 아닌 페트 이미지 정상 노출)
-    if (data.img && imgEl.getAttribute('src') !== data.img) {
-        imgEl.src = data.img;
-    }
-    
-    updateDOMText('weeklyPetName', data.name);
-    updateDOMText('weeklyPetLevel', `Lv.${currentLv}`);
-    updateDOMText('weeklyPetGrowth', `성장률: ${data.growth}`);
-
-    // 사냥버튼 쿨타임 UI 처리 및 다크 테마 색상 적용
-    if (btnHunt) {
-        const huntTextId = 'huntCooldownText';
-        const COOLDOWN_MS = 10 * 60 * 1000;
-        
-        if (data.lastHuntTime && NOW - data.lastHuntTime < COOLDOWN_MS) {
-            const remainSec = Math.ceil((COOLDOWN_MS - (NOW - data.lastHuntTime)) / 1000);
-            const m = Math.floor(remainSec / 60);
-            const s = (remainSec % 60).toString().padStart(2, '0');
-            
-            btnHunt.style.background = "#21262d"; // 비활성화 색상
-            btnHunt.style.borderColor = "#30363d";
-            btnHunt.style.cursor = "not-allowed";
-            btnHunt.style.opacity = "0.6";
-            updateDOMText(huntTextId, `대기: ${m}:${s}`);
-        } else {
-            btnHunt.style.background = "#1f6feb"; // 활성화 색상
-            btnHunt.style.borderColor = "transparent";
-            btnHunt.style.opacity = "1";
-            btnHunt.style.cursor = "pointer";
-            updateDOMText(huntTextId, "(4시간 단축)");
-        }
-    }
-
-    if (currentLv >= 140) {
-        if(resetArea.style.display !== 'block') resetArea.style.display = 'block';
-        if (localStorage.getItem('weeklyPetSubmitted') === 'false' && typeof submitToFirebase === 'function') {
-            // 🚨 무한 팝업 에러 방지를 위해 상태를 'pending'으로 즉시 변경
-            localStorage.setItem('weeklyPetSubmitted', 'pending'); 
-            submitToFirebase(data.name, data.growth);
-        }
-    } else {
-        if(resetArea.style.display !== 'none') resetArea.style.display = 'none';
-    }
-}
-
-function resetWeeklyChallenge() {
-    if (confirm("현재 기록을 초기화하고 처음부터 다시 시작하시겠습니까?")) {
-        localStorage.removeItem('weeklyPetData');
-        localStorage.removeItem('weeklyPetSubmitted');
-        
-        // 초기화 시 이미지와 텍스트 리셋
-        document.getElementById('weeklyPetImg').src = "./images/zzz.png"; // 빈 이미지 경로
-        updateDOMText('weeklyPetName', "페트 대기 중");
-        updateDOMText('weeklyPetLevel', "Lv.1");
-        updateDOMText('weeklyPetGrowth', "성장률: -");
-        document.getElementById('weeklyResetArea').style.display = 'none';
-        
-        const btnHunt = document.getElementById('btnWeeklyHunt');
-        if (btnHunt) {
-            btnHunt.style.background = "#1f6feb";
-            btnHunt.style.borderColor = "transparent";
-            btnHunt.style.cursor = "pointer";
-            btnHunt.style.opacity = "1";
-            updateDOMText('huntCooldownText', "(4시간 단축)");
-        }
-    }
-}
-
-// 1초마다 자동 렌더링 (값 변경 시에만 DOM 교체됨)
+// 1초마다 자동 렌더링 실행
 setInterval(renderWeeklyUI, 1000);
-       
-        window.onload = () => {
-    updateSelectColor('calcMode');
-    updateSelectColor('huntingGround');
-    updateSelectColor('petElement');
-    updateSelectColor('petGrade');
-    updateSelectColor('petPassive');
-    updateSelectColor('petEncyBuff');
-    updateSelectColor('petRegStatus');
-    updateSelectColor('partyExp');
-    updateEquipUI();
-    updateEnchantUI();
-
-
-    initCustomSelects();
-    updateEncyProgress();
-
-    filterPets();
-    
-    showPage('page-home');
-    initExpTable();
-    renderNoticePage();
-    updateTopNoticeBanner();
-    
-    // 계산기 초기 화면 렌더링용 추가
-    toggleMode();
-    applyGround();
-
-    // 홈 화면 랭킹 UI 페트 정보 연동
-    const weeklyPetObj = PET_DATABASE.find(p => p.name === WEEKLY_PET_NAME);
-    if(weeklyPetObj) {
-        const homeImg = document.getElementById('homeWeeklyPetImg');
-        const homeName = document.getElementById('homeWeeklyPetName');
-        if(homeImg) homeImg.src = weeklyPetObj.img;
-        if(homeName) homeName.innerText = weeklyPetObj.name;
-    }
-};
 
 /* ==========================================================
    👇👇👇 페트 초기화 시뮬레이션 관련 JavaScript 👇👇👇
@@ -5339,44 +5368,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const db = firebase.database();
 
     function submitToFirebase(petName, growthRate) {
-        const userName = prompt("MAX 레벨 달성! 랭킹에 등록할 닉네임을 입력하세요.") || "익명 테이머";
-        db.ref(`weekly_rank/${petName}`).push({
-            name: userName,
-            score: growthRate,
-            timestamp: Date.now()
-        }).then(() => {
-            localStorage.setItem('weeklyPetSubmitted', 'true');
-            alert("랭킹이 등록되었습니다.");
-        }).catch(e => alert("랭킹 등록 실패: " + e.message));
+    const userName = prompt("MAX 레벨 달성! 랭킹에 등록할 닉네임을 입력하세요.") || "익명 테이머";
+    
+    db.ref(`weekly_rank/${petName}`).push({
+        name: userName,
+        // 🔥 핵심 수정: growthRate를 숫자로 변환하여 저장해야 정확한 정렬이 가능합니다.
+        score: Number(growthRate), 
+        timestamp: Date.now()
+    }).then(() => {
+        localStorage.setItem('weeklyPetSubmitted', 'true');
+        alert("랭킹이 등록되었습니다.");
+    }).catch(e => alert("랭킹 등록 실패: " + e.message));
+}
+    // 실시간 랭킹 리스너 (홈 & 챔피언십 페이지 공통 수정)
+db.ref(`weekly_rank/${WEEKLY_PET_NAME}`).orderByChild('score').limitToLast(3).on('value', (snapshot) => {
+    const board = document.getElementById('rankingBoard');
+    const homeBoard = document.getElementById('homeRankingBoard');
+    
+    if (!board && !homeBoard) return;
+    
+    let ranks = [];
+    snapshot.forEach(child => {
+        // [중요] score를 숫자로 확실히 변환하여 저장
+        let val = child.val();
+        val.score = Number(val.score); 
+        ranks.push(val);
+    });
+
+    // 🔥 핵심 수정: 데이터를 점수가 높은 순서로 다시 정렬
+    ranks.sort((a, b) => b.score - a.score); 
+    
+    let html = "";
+    if (ranks.length === 0) {
+        html = "아직 등록된 랭킹이 없습니다.";
+    } else {
+        const medals = ["🥇", "🥈", "🥉"];
+        ranks.forEach((r, idx) => {
+            // 이제 idx 0번이 가장 높은 점수(1위)가 됩니다.
+            html += `<div style="font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                        <span>${medals[idx] || ''} ${idx + 1}위: ${r.name}</span> 
+                        <span style="font-weight: bold; color: #539bf5;">${r.score.toFixed(3)}</span>
+                     </div>`;
+        });
     }
 
-    // 실시간 랭킹 리스너 (홈 & 챔피언십 페이지 동시 렌더링)
-    db.ref(`weekly_rank/${WEEKLY_PET_NAME}`).orderByChild('score').limitToLast(3).on('value', (snapshot) => {
-        const board = document.getElementById('rankingBoard');
-        const homeBoard = document.getElementById('homeRankingBoard');
-        
-        if (!board && !homeBoard) return;
-        
-        let ranks = [];
-        snapshot.forEach(child => ranks.push(child.val()));
-        ranks.sort((a, b) => b.score - a.score);
-        
-        let html = "";
-        if (ranks.length === 0) {
-            html = "아직 등록된 랭킹이 없습니다.";
-        } else {
-            const colors = ["#ffcc00", "#e3b341", "#8b949e"];
-            const medals = ["🥇", "🥈", "🥉"];
-            ranks.forEach((r, idx) => {
-                html += `<div style="font-size: 1.1rem; color: ${colors[idx] || '#adbac7'}; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px; display: flex; justify-content: space-between;">
-                            <span>${medals[idx]} ${idx + 1}위: ${r.name}</span> <span>${r.score}</span>
-                         </div>`;
-            });
-        }
-
-        if (board) board.innerHTML = html;
-        if (homeBoard) homeBoard.innerHTML = html;
-    });
+    if (board) board.innerHTML = html;
+    if (homeBoard) homeBoard.innerHTML = html;
+});
 </script>
 
 <div id="sRankPopup">
