@@ -4315,7 +4315,7 @@ function doWeeklyHunt() {
     if (currentLv >= 140) return alert("이미 최고 레벨(140)에 도달했습니다.");
 
     // 데이터 업데이트: 4시간 단축 적용
-    data.huntBonus += 1.1; 
+    data.huntBonus += ((3600 * 4) / 86400); 
     data.lastHuntTime = NOW; 
     
     localStorage.setItem('weeklyPetData', JSON.stringify(data));
