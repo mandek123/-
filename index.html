@@ -5415,6 +5415,75 @@ db.ref(`weekly_rank/${WEEKLY_PET_NAME}`).orderByChild('score').limitToLast(3).on
     if (board) board.innerHTML = html;
     if (homeBoard) homeBoard.innerHTML = html;
 });
+
+/* =======================================
+    [시스템 연동: 랭킹 정렬 및 초기화 로직]
+   ======================================= */
+
+// 1. Firebase 실시간 랭킹 리스너 (정렬 및 홈/챔피언십 동시 업데이트)
+db.ref(`weekly_rank/${WEEKLY_PET_NAME}`).orderByChild('score').limitToLast(3).on('value', (snapshot) => {
+    const board = document.getElementById('rankingBoard');
+    const homeBoard = document.getElementById('homeRankingBoard');
+    
+    let ranks = [];
+    snapshot.forEach(child => {
+        let val = child.val();
+        val.score = Number(val.score); // 숫자로 변환하여 정렬 오류 방지
+        ranks.push(val);
+    });
+
+    // 높은 점수(성장률)가 1위가 되도록 내림차순 정렬
+    ranks.sort((a, b) => b.score - a.score); 
+    
+    let html = "";
+    if (ranks.length === 0) {
+        html = "등록된 랭킹이 없습니다.";
+    } else {
+        const medals = ["🥇", "🥈", "🥉"];
+        ranks.forEach((r, idx) => {
+            html += `
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 5px 0;">
+                    <span>${medals[idx] || ''} ${idx + 1}위: ${r.name}</span>
+                    <span style="color: #539bf5; font-weight: bold;">${r.score.toFixed(3)}</span>
+                </div>`;
+        });
+    }
+
+    if (board) board.innerHTML = html;
+    if (homeBoard) homeBoard.innerHTML = html;
+});
+
+// 2. 페이지 로드 시 실행되는 초기화 블록
+window.onload = () => {
+    // 기존 기능 초기화 (함수가 존재할 경우에만 실행)
+    if (typeof updateSelectColor === 'function') {
+        ['calcMode', 'huntingGround', 'petElement', 'petGrade', 'petPassive', 'petEncyBuff', 'petRegStatus', 'partyExp'].forEach(id => updateSelectColor(id));
+    }
+    if (typeof updateEquipUI === 'function') updateEquipUI();
+    if (typeof updateEnchantUI === 'function') updateEnchantUI();
+    if (typeof initCustomSelects === 'function') initCustomSelects();
+    if (typeof updateEncyProgress === 'function') updateEncyProgress();
+    if (typeof filterPets === 'function') filterPets();
+    if (typeof initExpTable === 'function') initExpTable();
+    
+    // 페이지 및 공지사항 초기화
+    showPage('page-home');
+    if (typeof renderNoticePage === 'function') renderNoticePage();
+    if (typeof updateTopNoticeBanner === 'function') updateTopNoticeBanner();
+    
+    if (typeof toggleMode === 'function') toggleMode();
+    if (typeof applyGround === 'function') applyGround();
+
+    // 홈 화면 랭킹 UI 페트 정보 연동 (이미지 및 이름 로드)
+    const weeklyPetObj = PET_DATABASE.find(p => p.name === WEEKLY_PET_NAME);
+    if (weeklyPetObj) {
+        const homeImg = document.getElementById('homeWeeklyPetImg');
+        const homeName = document.getElementById('homeWeeklyPetName');
+        if (homeImg) homeImg.src = weeklyPetObj.img;
+        if (homeName) homeName.innerText = weeklyPetObj.name;
+    }
+};
+
 </script>
 
 <div id="sRankPopup">
