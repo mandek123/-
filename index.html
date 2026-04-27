@@ -1148,22 +1148,23 @@
     </div>
 
     <div class="main-container" id="page-acc">
-        <div class="card">
-            <div class="card-header"><i class="fa-solid fa-crosshairs"></i> 명중률 계산</div>
-            <label>공격자 순발력 (A)</label>
-            <input type="number" id="attSpd" placeholder="예: 252">
-            <label>방어자 순발력 (B)</label>
-            <input type="number" id="defSpd" placeholder="예: 61">
-            <button class="btn-calc" onclick="calcAccuracy()" style="background: var(--accent-blue);">명중률 측정</button>
-        </div>
-        <div class="card">
-            <div class="card-header"><i class="fa-solid fa-square-poll-vertical"></i> 결과</div>
-            <div class="res-box" id="acc-result-container" style="text-align:center; padding: 50px 0;">
-                <div class="res-label">최종 회피 확률 / 명중 확률</div>
-                <div id="accResult" class="res-val" style="font-size:2.2rem; color:var(--accent-blue); margin-top: 10px;">-</div>
-            </div>
+    <div class="card">
+        <div class="card-header"><i class="fa-solid fa-crosshairs"></i> 명중률 계산</div>
+        <label>공격자 순발력 (A)</label>
+        <input type="number" id="attSpd" placeholder="예: 252">
+        <label>방어자 순발력 (B)</label>
+        <input type="number" id="defSpd" placeholder="예: 61">
+        <button class="btn-calc" onclick="calcAccuracy()" style="background: var(--accent-blue);">명중률 측정</button>
+    </div>
+    <div class="card">
+        <div class="card-header"><i class="fa-solid fa-square-poll-vertical"></i> 결과 리포트</div>
+        <div class="res-box" id="acc-result-container" style="text-align:center; padding: 40px 0;">
+            <div class="res-label">최종 회피 및 명중 확률</div>
+            <div id="accResult" class="res-val" style="font-size:2.2rem; color:var(--accent-blue); margin-top: 10px; line-height: 1.4;">-</div>
+            <p style="font-size:0.75rem; color:#8b949e; margin-top:15px;">* 5%~75% 시스템 보정치가 적용된 수치입니다.</p>
         </div>
     </div>
+</div>
 
     <div class="main-container" id="page-rev">
         <div class="card">
@@ -1675,12 +1676,16 @@
                 <option value="hellhound">지옥견 털옷 (갑옷 / 옷)</option>
                 <option value="rumexus">루메크스 귀걸이 (악세서리 / 귀걸이)</option>
                 <option value="caston">카스톤 반지 (악세서리 / 반지)</option>
+                <option value="trinity">삼위일체(眞) (악세서리 / 토템)</option>
+                <option value="hunter_collar">사냥꾼의 펫 목줄 (악세서리 / 목줄)</option>
+                <option value="grace_collar">은혜의 펫 목줄 (악세서리 / 목줄)</option>
+                <option value="devotion_collar">헌신의 펫 목줄 (악세서리 / 목줄)</option>
             </select>
         
         <div id="equipInfoBox" class="res-box" style="margin-bottom:15px; text-align:center;">
         </div>
 
-<button class="btn-calc" style="background:#539bf5; color:#ffffff;" onclick="runEquipIdentify()">감정하기 (7포인트 분배)</button>
+        <button class="btn-calc" style="background:#539bf5; color:#ffffff;" onclick="runEquipIdentify()">감정하기 (7포인트 분배)</button>
 
         <div id="equipResultBox" class="res-box" style="margin-top:15px; display:none; border-color:var(--accent-blue);">
             <div style="font-weight:bold; margin-bottom:10px; color:var(--text-highlight);">[감정 결과]</div>
@@ -1696,6 +1701,7 @@
             <option value="fire">홍염석 (무기 전용)</option>
             <option value="jade">비취석 (방어구 전용)</option>
             <option value="deep">심해석 (악세서리 전용)</option>
+            <option value="hongyo">홍요석 (토템 전용)</option>
         </select>
 
         <div id="enchantInfoBox" class="res-box" style="margin-bottom:15px; text-align:center;">
@@ -1718,7 +1724,7 @@
         </div>
     </div>
 
-<div class="card" style="grid-column: span 2; background: rgba(20, 20, 25, 0.6); border: 1px solid #d2a8ff; text-align: center;">
+    <div class="card" style="grid-column: span 2; background: rgba(20, 20, 25, 0.6); border: 1px solid #d2a8ff; text-align: center;">
             <h2 style="color:#d2a8ff; margin-bottom: 15px;"><i class="fa-solid fa-gem"></i> 누적 시도 횟수</h2>
             
             <div style="display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap: 15px;">
@@ -1736,7 +1742,7 @@
             </div>
         </div>
     
-</div> 
+</div>
 
     <div class="footer">
         <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
@@ -2768,6 +2774,27 @@
 
 const NOTICE_DATABASE = [
     {
+        id: 10,
+        date: "26년 4월 27일",
+        title: "26년 4월 27일 공지사항입니다.",
+        summary: "1. 명중/회피 계산식 개편 | 2. 아이템 시뮬레이터 신규 장비 4종 및 홍요석 추가 | 3. 아이템 시뮬레이터 밸런스 조정", 
+        content: `
+            <strong>1) 명중 및 회피 계산 시스템 개편</strong>
+            <span>- 시스템 회피율 최소/최대 보정치(5% ~ 75%)가 적용된 명중 공식을 도입하였습니다.</span>
+            <span>- 무기군 명중률 차등 적용: 원거리 무기(활)는 근접 무기 대비 명중률이 20% 감소하여 적용됩니다.</span>
+            
+            <strong>2) 아이템 시뮬레이터 신규 아이템 추가</strong>
+            <span>- 삼위일체(眞) [토템] 장비가 추가되었습니다.</span>
+            <span>- 펫 목줄 3종 [악세서리]: 사냥꾼, 은혜, 헌신의 펫 목줄이 추가되었습니다. (※ 목줄류는 재감정만 가능)</span>
+            <span>- 홍요석 인챈트석이 추가되었습니다.</span>
+
+            <strong>3) 아이템 시뮬레이터 밸런스 개선</strong>
+            <span>- 장비 감정 및 인챈트 시 유효 옵션(PVE 공격력, 명중 등)의 등장 확률이 소폭 상향되었습니다.</span>
+            <span>- 인챈트 당첨 시 능력치가 한곳에 몰리지 않고 여러 스탯으로 자연스럽게 분산되도록 로직이 개편되었습니다.</span>
+        `
+    },
+
+    {
         id: 9,
         date: "26년 4월 21일",
         title: "26년 4월 21일 공지사항입니다.",
@@ -3525,28 +3552,46 @@ const NOTICE_DATABASE = [
         }
 
         /* ==========================================================
-        1. 명중률 계산기 (디스코드 봇 파이썬 로직 적용)
-        ========================================================== */
-    function calcAccuracy() {
-    const A = parseFloat(document.getElementById('attSpd').value) || 0;
-    const B = parseFloat(document.getElementById('defSpd').value) || 0;
-    
-    let base = 0;
-    if (B >= A) {
-        base = Math.sqrt((B - A) / 0.02) * 1.0;
-    } else {
-        base = Math.sqrt((A - B) / 0.02) * (B / A);
-    }
-    
-    let bonus = Math.max(Math.min((A - B) / 25, 4), -4);
-    let finalHit = 100 - (base + bonus);
-    
-    // 회피율은 100 - 명중률로 역산
-    let finalEvasion = 100 - finalHit;
+    1. 명중률 계산기 (디스코드 봇 최신 로직 적용)
+    ========================================================== */
+function calcAccuracy() {
+    const A = parseFloat(document.getElementById('attSpd').value); // 공격자 순발력
+    const B = parseFloat(document.getElementById('defSpd').value); // 방어자 순발력
+    const resultDiv = document.getElementById('accResult');
 
-    document.getElementById('accResult').innerText = 
-        `${finalEvasion.toFixed(2)}% / ${finalHit.toFixed(2)}%`;
+    if (!A || isNaN(A) || A === 0) {
+        alert("공격자의 순발력은 0이 될 수 없습니다.");
+        return;
     }
+    if (isNaN(B)) {
+        alert("방어자의 순발력을 입력해주세요.");
+        return;
+    }
+
+    // 1. 기본 회피율 계산: sqrt(|방어자 - 공격자| / 200) * (방어자 / 공격자) * 100
+    let rawEvasion = Math.sqrt(Math.abs(B - A) / 200) * (B / A) * 100;
+
+    // 2. 회피율 한계치 보정 (5% ~ 75% 고정)
+    let clampedEvasion = Math.max(5.0, Math.min(75.0, rawEvasion));
+
+    // 3. 근접 명중률 계산 (100% - 보정된 회피율)
+    let meleeAccuracy = 100.0 - clampedEvasion;
+
+    // 4. 활 공격 명중률 계산 (20% 감소, 최소 0% 고정)
+    let bowAccuracy = Math.max(0.0, meleeAccuracy - 20.0);
+
+    // 결과 출력 (기존 UI 스타일 유지하며 상세 정보 제공)
+    resultDiv.style.fontSize = "1.4rem"; // 내용이 많아지므로 폰트 크기 소폭 조절
+    resultDiv.innerHTML = `
+        <div style="font-size: 0.9rem; color: #8b949e; margin-bottom: 8px;">
+            회피: ${clampedEvasion.toFixed(1)}% / 명중: ${meleeAccuracy.toFixed(1)}%
+        </div>
+        <div style="border-top: 1px solid #30363d; padding-top: 10px;">
+            <span style="color: #539bf5;">⚔️ 근접: ${meleeAccuracy.toFixed(1)}%</span><br>
+            <span style="color: #d2a8ff;">🏹 활: ${bowAccuracy.toFixed(1)}%</span>
+        </div>
+    `;
+}
         /* ==========================================================
         2. 역순 순발력 범위 (디스코드 봇 파이썬 로직 적용)
         ========================================================== */
@@ -3698,13 +3743,43 @@ const EQUIP_DB = {
         specialBase: "", 
         baseStats: { "공격력": 7, "치명 (%)": 7 }, 
         pool: ["공격력", "방어력", "순발력", "체력", "치명 (%)"] 
+    },
+    "trinity": { 
+        name: "삼위일체(眞)", img: "./images/item10.png", type: "악세서리 / 토템", 
+        baseStr: "공격력 7 / 방어력 7 / 순발력 7 / 체력 10", 
+        specialBase: "", 
+        baseStats: { "공격력": 7, "방어력": 7, "순발력": 7, "체력": 10 }, 
+        pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
+    },
+    // [수정] 펫 목줄 3종 감정 옵션(pool)에 PVE 공/방 추가
+    "hunter_collar": { 
+        name: "사냥꾼의 펫 목줄", img: "./images/item11.png", type: "악세서리 / 목줄", 
+        baseStr: "매력 10 / 기본 PVE 공격력 5% 적용 / 야생 펫 출현 확률 +5%", 
+        specialBase: "", 
+        baseStats: { "매력": 10, "PVE 공격력 (%)": 5 }, 
+        pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
+    },
+    "grace_collar": { 
+        name: "은혜의 펫 목줄", img: "./images/item12-1.png", type: "악세서리 / 목줄", 
+        baseStr: "매력 10 / 빛의 정령(1회) - 멀티, PVP 미적용", 
+        specialBase: "", 
+        baseStats: { "매력": 10 }, 
+        pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
+    },
+    "devotion_collar": { 
+        name: "헌신의 펫 목줄", img: "./images/item13.png", type: "악세서리 / 목줄", 
+        baseStr: "매력 10 / 산책 중 펫 경험치 +5% (상시)", 
+        specialBase: "", 
+        baseStats: { "매력": 10 }, 
+        pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
     }
 };
 
 const ENCHANT_DB = {
     "fire": { name: "홍염석", img: "./images/item3.png", target: "무기", fixedStr: "공격력 +2", fixedStat: { "공격력": 2 }, pool: ["공격력", "방어력", "순발력", "명중 (%)", "치명 (%)", "회피 (%)"] },
     "jade": { name: "비취석", img: "./images/item4.png", target: "방어구", fixedStr: "방어력 +2", fixedStat: { "방어력": 2 }, pool: ["공격력", "방어력", "순발력", "체력", "행운 (%)"] },
-    "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "체력 +5", fixedStat: { "체력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] }
+    "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "체력 +5", fixedStat: { "체력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] },
+    "hongyo": { name: "홍요석", img: "./images/item14.png", target: "토템", fixedStr: "없음", fixedStat: {}, pool: ["공격력", "방어력", "순발력", "체력", "명중 (%)", "치명 (%)", "회피 (%)"] }
 };
 
 let currentIdentifyStats = {};
@@ -3715,16 +3790,17 @@ let countIdentify = 0;
 let countEnchant = 0;
 let totalDiamonds = 0; 
 
-const PRICE_IDENTIFY_EQUIP = 10000;  
-const PRICE_IDENTIFY_ACC = 130000;   
+const PRICE_IDENTIFY_EQUIP = 15000;  
+const PRICE_IDENTIFY_ACC = 125000;   
 
 const PRICE_ENCHANT = {
     "fire": 7000,  
     "jade": 7000,  
-    "deep": 10000  
+    "deep": 7000,
+    "hongyo": 700
 };
 
-// [수정] 유효 옵션 가중치 추가 상향 (기존 2 -> 3)
+// 유효 옵션 가중치 추가 상향 (기존 2 -> 3)
 function getWeightedStat(pool) {
     const rareStats = ["PVE 공격력 (%)", "명중 (%)", "치명 (%)", "행운 (%)"];
     const weights = pool.map(stat => rareStats.includes(stat) ? 3 : 10); 
@@ -3866,13 +3942,26 @@ function runEnchant() {
     const eq = EQUIP_DB[document.getElementById('itemSimEquip').value];
     const en = ENCHANT_DB[document.getElementById('itemSimEnchant').value];
 
+    // 펫 목줄 인챈트 시도 및 부위 검사
     let isValidTarget = false;
-    if (en.target === "무기" && eq.type.includes("무기")) isValidTarget = true;
-    else if (en.target === "방어구" && (eq.type.includes("투구") || eq.type.includes("모자") || eq.type.includes("갑옷") || eq.type.includes("옷"))) isValidTarget = true;
-    else if (en.target === "악세서리" && (eq.type.includes("목걸이") || eq.type.includes("반지") || eq.type.includes("귀걸이") || eq.type.includes("팔찌") || eq.type.includes("부적") || eq.type.includes("토템") || eq.type.includes("악기"))) isValidTarget = true;
+    if (eq.type.includes("목줄")) {
+        isValidTarget = false; // 목줄은 무조건 인챈트 불가
+    } else if (en.target === "무기" && eq.type.includes("무기")) {
+        isValidTarget = true;
+    } else if (en.target === "방어구" && (eq.type.includes("투구") || eq.type.includes("모자") || eq.type.includes("갑옷") || eq.type.includes("옷"))) {
+        isValidTarget = true;
+    } else if (en.target === "악세서리" && (eq.type.includes("목걸이") || eq.type.includes("반지") || eq.type.includes("귀걸이") || eq.type.includes("팔찌") || eq.type.includes("부적") || eq.type.includes("토템") || eq.type.includes("악기"))) {
+        isValidTarget = true;
+    } else if (en.target === "토템" && eq.type.includes("토템")) {
+        isValidTarget = true;
+    }
 
     if (!isValidTarget) {
-        alert(`[인챈트 실패]\n${en.name}은(는) [${en.target}] 전용 인챈트석입니다.\n현재 선택된 장비(${eq.name})의 부위는 [${eq.type}]입니다.`);
+        if (eq.type.includes("목줄")) {
+            alert(`[인챈트 실패]\n펫 목줄은 인챈트가 불가능하며 재감정만 가능합니다.`);
+        } else {
+            alert(`[인챈트 실패]\n${en.name}은(는) [${en.target}] 전용 인챈트석입니다.\n현재 선택된 장비(${eq.name})의 부위는 [${eq.type}]입니다.`);
+        }
         return;
     }
 
@@ -3886,47 +3975,88 @@ function runEnchant() {
     document.getElementById('enchantResultBox').style.display = 'none';
 
     setTimeout(() => {
-        const roll = Math.random();
-        let points = roll < 0.68 ? 1 : (roll < 0.90 ? 2 : 3);
-        
-        currentEnchantFixed = en.fixedStat;
+        const stoneKey = document.getElementById('itemSimEnchant').value;
+        currentEnchantFixed = en.fixedStat || {};
         currentEnchantStats = {}; 
-        
-        for(let i = 0; i < points; i++) {
-            let pickedStat = getWeightedStat(en.pool);
-            let incValue = pickedStat === "체력" ? 3 : 1; 
-            currentEnchantStats[pickedStat] = (currentEnchantStats[pickedStat] || 0) + incValue;
-        }
         
         let isHighlight = false;
         let isJackpot = false;
-        const stoneKey = document.getElementById('itemSimEnchant').value;
+        let html = "";
 
-        if (stoneKey === 'fire') {
-            const hitVal = currentEnchantStats['명중 (%)'] || 0;
-            if (hitVal >= 2) isHighlight = true;
-            if (hitVal >= 3) isJackpot = true;
-        } else if (stoneKey === 'jade') {
-            const luckVal = currentEnchantStats['행운 (%)'] || 0;
-            if (luckVal >= 1) isHighlight = true;
-            if (luckVal >= 3) isJackpot = true;
-        }
+        // 홍요석 전용 확률 굴림 (1~5개 능력치 부여)
+        if (stoneKey === 'hongyo') {
+            const roll = Math.random();
+            let numStats = 1;
+            if (roll < 0.70) numStats = 1;
+            else if (roll < 0.90) numStats = 2; // 20%
+            else if (roll < 0.96) numStats = 3; // 6%
+            else if (roll < 0.99) numStats = 4; // 3%
+            else numStats = 5; // 1%
 
-        let statHtml = "";
-        for (let [sName, sVal] of Object.entries(currentEnchantStats)) {
-            let isTarget = (stoneKey === 'fire' && sName === '명중 (%)') || (stoneKey === 'jade' && sName === '행운 (%)');
-            if (isTarget && isHighlight) {
-                statHtml += `<div style="color:#f85149; font-weight:bold;">■ ${sName} +${sVal}</div>`;
-            } else {
+            // 중복 없이 numStats개의 옵션을 선택
+            let pickedStats = new Set();
+            while (pickedStats.size < numStats) {
+                pickedStats.add(getWeightedStat(en.pool));
+            }
+            
+            // 선택된 각 옵션에 +1 부여 (체력은 +3)
+            for (let pickedStat of pickedStats) {
+                let incValue = pickedStat === "체력" ? 3 : 1; 
+                currentEnchantStats[pickedStat] = incValue;
+            }
+
+            if (numStats >= 4) {
+                isJackpot = true; // 능력치 4개 이상부터 잭팟 효과
+            }
+
+            let statHtml = "";
+            for (let [sName, sVal] of Object.entries(currentEnchantStats)) {
                 statHtml += `<div style="color:#2ea043;">■ ${sName} +${sVal}</div>`;
             }
+
+            html = `
+                ${en.fixedStr !== "없음" ? `<div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>` : ''}
+                ${statHtml}
+                <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: 능력치 ${numStats}개 부여 당첨</div>
+            `;
+        } 
+        // 기존 인챈트석 로직 (홍염석, 비취석, 심해석)
+        else {
+            const roll = Math.random();
+            let points = roll < 0.68 ? 1 : (roll < 0.90 ? 2 : 3);
+            
+            for(let i = 0; i < points; i++) {
+                let pickedStat = getWeightedStat(en.pool);
+                let incValue = pickedStat === "체력" ? 3 : 1; 
+                currentEnchantStats[pickedStat] = (currentEnchantStats[pickedStat] || 0) + incValue;
+            }
+            
+            if (stoneKey === 'fire') {
+                const hitVal = currentEnchantStats['명중 (%)'] || 0;
+                if (hitVal >= 2) isHighlight = true;
+                if (hitVal >= 3) isJackpot = true;
+            } else if (stoneKey === 'jade') {
+                const luckVal = currentEnchantStats['행운 (%)'] || 0;
+                if (luckVal >= 1) isHighlight = true;
+                if (luckVal >= 3) isJackpot = true;
+            }
+
+            let statHtml = "";
+            for (let [sName, sVal] of Object.entries(currentEnchantStats)) {
+                let isTarget = (stoneKey === 'fire' && sName === '명중 (%)') || (stoneKey === 'jade' && sName === '행운 (%)');
+                if (isTarget && isHighlight) {
+                    statHtml += `<div style="color:#f85149; font-weight:bold;">■ ${sName} +${sVal}</div>`;
+                } else {
+                    statHtml += `<div style="color:#2ea043;">■ ${sName} +${sVal}</div>`;
+                }
+            }
+            
+            html = `
+                <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
+                ${statHtml}
+                <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 분산 적용</div>
+            `;
         }
-        
-        let html = `
-            <div style="color:#ffcc00; margin-bottom:5px;">■ ${en.fixedStr} (고정)</div>
-            ${statHtml}
-            <div style="font-size:0.8rem; color:#888; margin-top:8px;">* 굴림 결과: ${points}포인트 분산 적용</div>
-        `;
 
         btn.innerText = originalText;
         btn.classList.remove('btn-loading');
