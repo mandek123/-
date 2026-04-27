@@ -4247,15 +4247,13 @@ function resetCounts() {
 }
 
 /* =======================================
-    [주간 페트 챔피언십 로직 - 최종 통합본]
+    [주간 페트 챔피언십 로직 - 등급 및 편차 시스템 적용본]
    ======================================= */
 const WEEKLY_PET_NAME = "메가갈푸스"; // 운영자가 매주 변경
 
-// 1. 알 부화 로직 (확률 및 조건 강화)
+// 1. 알 부화 로직 (명칭 변경, 확률 조정, 등급 내 편차 적용)
 function startWeeklyChallenge() {
     const data = JSON.parse(localStorage.getItem('weeklyPetData'));
-    
-    // 만렙 체크: 현재 육성 중인 페트가 있으면 140렙 전까지 새 부화 금지
     if (data) {
         const NOW = new Date().getTime();
         const passedSec = (NOW - data.startTime) / 1000;
@@ -4266,14 +4264,36 @@ function startWeeklyChallenge() {
     const petTemplate = PET_DATABASE.find(p => p.name === WEEKLY_PET_NAME);
     if (!petTemplate) return alert("선정된 페트 데이터가 없습니다.");
     
-    // 🎲 성장률 확률 시스템 (극악 확률 적용)
     let roll = Math.random();
-    let bonusMult = 1.0; 
-    if (roll < 0.001) bonusMult = 1.12;      // 0.1% 확률 (신급)
-    else if (roll < 0.01) bonusMult = 1.08; // 1% 확률 (축복)
-    else if (roll < 0.05) bonusMult = 1.03; // 5% 확률 (우수)
-    else if (roll < 0.35) bonusMult = 0.99; // 30% 확률 (평범)
-    else bonusMult = 0.94;                  // 63.9% 확률 (저성장)
+    let bonusMult = 0.85; 
+    let gradeName = "";
+
+    // 등급별 확률 및 범위 랜덤 설정 (편차 적용)
+    if (roll < 0.01) {
+        // 1% 확률: 멸룡급 (1.100 ~ 1.150)
+        gradeName = "멸룡급";
+        bonusMult = 1.10 + (Math.random() * 0.05);
+    } else if (roll < 0.06) {
+        // 5% 확률: S급 (1.050 ~ 1.099)
+        gradeName = "S급";
+        bonusMult = 1.05 + (Math.random() * 0.049);
+    } else if (roll < 0.21) {
+        // 15% 확률: A급 (1.010 ~ 1.049)
+        gradeName = "A급";
+        bonusMult = 1.01 + (Math.random() * 0.039);
+    } else if (roll < 0.51) {
+        // 30% 확률: B급 (0.970 ~ 1.009)
+        gradeName = "B급";
+        bonusMult = 0.97 + (Math.random() * 0.039);
+    } else if (roll < 0.81) {
+        // 30% 확률: C급 (0.920 ~ 0.969)
+        gradeName = "C급";
+        bonusMult = 0.92 + (Math.random() * 0.049);
+    } else {
+        // 19% 확률: F급 (0.850 ~ 0.919)
+        gradeName = "F급";
+        bonusMult = 0.85 + (Math.random() * 0.069);
+    }
 
     const totalBaseG = petTemplate.gatk + petTemplate.gdef + petTemplate.gspd;
     const personalGrowth = (totalBaseG * bonusMult).toFixed(3);
@@ -4290,23 +4310,24 @@ function startWeeklyChallenge() {
         },
         startTime: new Date().getTime(),
         growth: parseFloat(personalGrowth),
+        grade: gradeName, // 등급 저장
         huntBonus: 0,
         lastHuntTime: 0
     };
 
     localStorage.setItem('weeklyPetData', JSON.stringify(newPetData));
     localStorage.setItem('weeklyPetSubmitted', 'false'); 
-    alert(`${petTemplate.name}의 알이 부화했습니다!\n성장률은 140레벨 달성 시 공개됩니다.`);
+    alert(`${petTemplate.name}의 알이 부화했습니다!\n성장률과 등급은 140레벨 달성 시 공개됩니다.`);
     renderWeeklyUI();
 }
 
-// 2. 사냥하기 로직 (작동 불능 버그 수정 및 즉시 반영)
+// 2. 사냥하기 로직 (변경 없음)
 function doWeeklyHunt() {
     let data = JSON.parse(localStorage.getItem('weeklyPetData'));
     if (!data) return alert("먼저 알을 부화시켜주세요.");
     
     const NOW = new Date().getTime();
-    const COOLDOWN_MS = 10 * 60 * 1000; // 10분 쿨타임
+    const COOLDOWN_MS = 10 * 60 * 1000; 
     
     if (data.lastHuntTime && NOW - data.lastHuntTime < COOLDOWN_MS) return;
 
@@ -4314,15 +4335,14 @@ function doWeeklyHunt() {
     let currentLv = Math.floor(((passedSec / 86400) + data.huntBonus) * 140) + 1;
     if (currentLv >= 140) return alert("이미 최고 레벨(140)에 도달했습니다.");
 
-    // 데이터 업데이트: 4시간 단축 적용
     data.huntBonus += ((3600 * 4) / 86400); 
     data.lastHuntTime = NOW; 
     
     localStorage.setItem('weeklyPetData', JSON.stringify(data));
-    renderWeeklyUI(); // 클릭 즉시 UI 갱신
+    renderWeeklyUI();
 }
 
-// 3. UI 렌더링 로직 (대칭 UI 및 실시간 능력치 계산)
+// 3. UI 렌더링 로직 (만렙 시 등급 표기 추가)
 function renderWeeklyUI() {
     const rawData = localStorage.getItem('weeklyPetData');
     const btnStart = document.getElementById('btnWeeklyStart');
@@ -4346,11 +4366,9 @@ function renderWeeklyUI() {
     const NOW = new Date().getTime();
     const passedSec = (NOW - data.startTime) / 1000;
     
-    // 통합 레벨 계산 (모든 UI에서 동일한 값 사용)
     let currentLv = Math.floor(((passedSec / 86400) + data.huntBonus) * 140) + 1;
     if (currentLv > 140) currentLv = 140;
 
-    // 부화 버튼 상태 제어 (레벨 동기화)
     if (btnStart) {
         if (currentLv < 140) {
             btnStart.disabled = true;
@@ -4367,9 +4385,11 @@ function renderWeeklyUI() {
         }
     }
 
-    // 성장률 은폐 및 능력치 실시간 업데이트
     updateDOMText('weeklyPetLevel', `Lv.${currentLv}`);
-    updateDOMText('weeklyPetGrowth', currentLv < 140 ? '성장률: 측정 중...' : `성장률: ${data.growth}`);
+    
+    // 만렙 달성 시 성장률 옆에 [등급] 표기 추가
+    const growthText = currentLv < 140 ? '성장률: 측정 중...' : `성장률: ${data.growth} [${data.grade || '-'}]`;
+    updateDOMText('weeklyPetGrowth', growthText);
     
     if (data.base && data.g) {
         const calcStat = (base, growth, lv) => (Number(base) + (Number(growth) * (lv - 1))).toFixed(2);
@@ -4379,11 +4399,9 @@ function renderWeeklyUI() {
         updateDOMText('weeklyStatSpd', calcStat(data.base.spd, data.g.spd, currentLv));
     }
 
-    // 페트 이미지 및 이름
     if (data.img && imgEl && imgEl.getAttribute('src') !== data.img) imgEl.src = data.img;
     updateDOMText('weeklyPetName', data.name);
 
-    // 사냥 버튼 쿨타임 UI 처리
     if (btnHunt) {
         const COOLDOWN_MS = 10 * 60 * 1000;
         if (data.lastHuntTime && NOW - data.lastHuntTime < COOLDOWN_MS) {
@@ -4400,7 +4418,6 @@ function renderWeeklyUI() {
         }
     }
 
-    // 만렙 달성 시 랭킹 제출 영역 활성화
     if (currentLv >= 140) {
         if(resetArea) resetArea.style.display = 'block';
         if (localStorage.getItem('weeklyPetSubmitted') === 'false' && typeof submitToFirebase === 'function') {
@@ -4421,13 +4438,11 @@ function resetWeeklyChallenge() {
     }
 }
 
-// 보조: 텍스트 업데이트 유틸
 function updateDOMText(id, newText) {
     const el = document.getElementById(id);
     if (el && el.innerText !== newText) el.innerText = newText;
 }
 
-// 1초마다 자동 렌더링 실행
 setInterval(renderWeeklyUI, 1000);
 
 /* ==========================================================
