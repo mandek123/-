@@ -1696,6 +1696,59 @@
             </span>
         </div>
         
+<div style="max-width: 600px; margin: 0 auto 12px auto; text-align: right; width: 95%;">
+    <button onclick="toggleWeeklyGuide()" style="background: #21262d; color: #8b949e; border: 1px solid #30363d; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-circle-question"></i> <span id="guide-btn-text">도움말 보기</span>
+    </button>
+</div>
+
+<div id="weekly-guide-card" class="card" style="display: none; max-width: 600px; margin: 0 auto 25px auto; width: calc(100% - 20px); background: #0d1117; border: 1px solid #30363d; box-shadow: 0 15px 35px rgba(0,0,0,0.4); box-sizing: border-box; overflow: hidden;">
+    <div class="card-header" style="font-size: 1.05rem; color: #c9d1d9; border-bottom: 1px solid #30363d; background: rgba(255,255,255,0.02); padding: 12px 20px;">
+        <i class="fa-solid fa-circle-info" style="color: #539bf5; margin-right: 8px;"></i> 챔피언십 이용 가이드
+    </div>
+    
+    <div style="padding: 20px; display: flex; flex-wrap: wrap; gap: 15px;">
+        <div style="flex: 1 1 280px; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 12px; border: 1px solid #21262d; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;">
+            <h4 style="color: #539bf5; margin: 0 0 12px 0; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-star"></i> 기본 규칙
+            </h4>
+            <ul style="color: #adbac7; font-size: 0.85rem; padding-left: 18px; margin: 0; line-height: 1.7;">
+                <li>매주 선정되는 <b style="color:#fff;">주간 페트</b> 육성 도전</li>
+                <li>부화 시 초기치 및 잠재 성장률 <b style="color:#fff;">랜덤 부여</b></li>
+                <li>성장률과 등급은 <b style="color:#fff;">Lv.140 달성 시</b> 공개</li>
+                <li>방치 시 만렙까지 약 <b style="color:#fff;">24시간</b> 소요</li>
+            </ul>
+        </div>
+
+        <div style="flex: 1 1 200px; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 12px; border: 1px solid #21262d; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;">
+            <h4 style="color: #8b949e; margin: 0 0 12px 0; font-size: 0.9rem; text-align: center;">
+                <i class="fa-solid fa-chart-line"></i> 등급 및 확률
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #adbac7; font-size: 0.8rem;">
+                <div style="color: #ff7b72; font-weight: bold; background: rgba(248, 81, 73, 0.15); padding: 4px; border-radius: 4px; text-align: center;">멸룡 (1%)</div>
+                <div style="color: #ffcc00; font-weight: bold; background: rgba(255, 204, 0, 0.15); padding: 4px; border-radius: 4px; text-align: center;">S급 (5%)</div>
+                <div style="text-align: center; color: #8b949e;">A급 (15%)</div>
+                <div style="text-align: center; color: #8b949e;">B급 (30%)</div>
+                <div style="text-align: center; color: #8b949e;">C급 (30%)</div>
+                <div style="text-align: center; color: #8b949e;">F급 (19%)</div>
+            </div>
+            <p style="font-size: 0.7rem; color: #57606a; margin-top: 8px; text-align: center; margin-bottom: 0;">
+                * 등급별 미세 편차 존재
+            </p>
+        </div>
+
+        <div style="width: 100%; background: linear-gradient(90deg, rgba(31, 111, 235, 0.08), rgba(31, 111, 235, 0.02)); padding: 15px 20px; border-radius: 12px; border: 1px solid rgba(31, 111, 235, 0.2); box-sizing: border-box; display: flex; align-items: center; gap: 15px;">
+            <div style="flex: 0 0 35px; height: 35px; background: #1f6feb; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem;">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div style="color: #adbac7; font-size: 0.85rem; line-height: 1.6;">
+                <b style="color: #539bf5;">사냥하기</b> 클릭 시 즉시 <b style="color: #fff;">4시간</b> 분량 경험치 획득<br>
+                쿨타임 <b style="color: #fff;">10분</b>, 효율적 사냥 시 약 <b style="color: #fff;">60분</b> 내외 만렙 가능
+            </div>
+        </div>
+    </div>
+</div>
+
         <div style="margin-top: 25px; padding: 25px; background: linear-gradient(145deg, #0d1117, #161b22); border-radius: 20px; border: 1px solid #30363d; display: flex; align-items: center; gap: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
             
             <div style="flex: 0 0 160px; text-align: center;">
@@ -2869,6 +2922,7 @@
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+
     {
     id: 11,
     date: "26년 4월 28일",
@@ -4252,11 +4306,11 @@ function resetCounts() {
 }
 
 /* =======================================
-    [주간 페트 챔피언십 로직 - 등급 및 편차 시스템 적용본]
+    [주간 페트 챔피언십 로직 - 최종 통합본]
    ======================================= */
 const WEEKLY_PET_NAME = "메가갈푸스"; // 운영자가 매주 변경
 
-// 1. 알 부화 로직 (명칭 변경, 확률 조정, 등급 내 편차 적용)
+// 1. 알 부화 로직 (멸룡급~F급 등급 및 범위 랜덤 시스템)
 function startWeeklyChallenge() {
     const data = JSON.parse(localStorage.getItem('weeklyPetData'));
     if (data) {
@@ -4273,7 +4327,7 @@ function startWeeklyChallenge() {
     let bonusMult = 0.85; 
     let gradeName = "";
 
-    // 등급별 확률 및 범위 랜덤 설정 (편차 적용)
+    // 등급별 확률 및 범위 랜덤 설정 (등급 내 편차 적용)
     if (roll < 0.01) {
         // 1% 확률: 멸룡급 (1.100 ~ 1.150)
         gradeName = "멸룡급";
@@ -4315,7 +4369,7 @@ function startWeeklyChallenge() {
         },
         startTime: new Date().getTime(),
         growth: parseFloat(personalGrowth),
-        grade: gradeName, // 등급 저장
+        grade: gradeName,
         huntBonus: 0,
         lastHuntTime: 0
     };
@@ -4326,7 +4380,7 @@ function startWeeklyChallenge() {
     renderWeeklyUI();
 }
 
-// 2. 사냥하기 로직 (변경 없음)
+// 2. 사냥하기 로직 (10분 쿨타임 및 4시간 단축)
 function doWeeklyHunt() {
     let data = JSON.parse(localStorage.getItem('weeklyPetData'));
     if (!data) return alert("먼저 알을 부화시켜주세요.");
@@ -4347,7 +4401,7 @@ function doWeeklyHunt() {
     renderWeeklyUI();
 }
 
-// 3. UI 렌더링 로직 (만렙 시 등급 표기 추가)
+// 3. UI 렌더링 로직 (실시간 레벨/능력치/성장률/등급 업데이트)
 function renderWeeklyUI() {
     const rawData = localStorage.getItem('weeklyPetData');
     const btnStart = document.getElementById('btnWeeklyStart');
@@ -4370,10 +4424,10 @@ function renderWeeklyUI() {
 
     const NOW = new Date().getTime();
     const passedSec = (NOW - data.startTime) / 1000;
-    
     let currentLv = Math.floor(((passedSec / 86400) + data.huntBonus) * 140) + 1;
     if (currentLv > 140) currentLv = 140;
 
+    // 부화 버튼 상태 제어 (레벨 동기화)
     if (btnStart) {
         if (currentLv < 140) {
             btnStart.disabled = true;
@@ -4390,12 +4444,12 @@ function renderWeeklyUI() {
         }
     }
 
+    // 레벨 및 성장률(등급) 표기
     updateDOMText('weeklyPetLevel', `Lv.${currentLv}`);
+    const growthDisplay = currentLv < 140 ? '성장률: 측정 중...' : `성장률: ${data.growth} [${data.grade || '-'}]`;
+    updateDOMText('weeklyPetGrowth', growthDisplay);
     
-    // 만렙 달성 시 성장률 옆에 [등급] 표기 추가
-    const growthText = currentLv < 140 ? '성장률: 측정 중...' : `성장률: ${data.growth} [${data.grade || '-'}]`;
-    updateDOMText('weeklyPetGrowth', growthText);
-    
+    // 능력치 실시간 계산
     if (data.base && data.g) {
         const calcStat = (base, growth, lv) => (Number(base) + (Number(growth) * (lv - 1))).toFixed(2);
         updateDOMText('weeklyStatHP', calcStat(data.base.hp, data.g.hp, currentLv));
@@ -4407,6 +4461,7 @@ function renderWeeklyUI() {
     if (data.img && imgEl && imgEl.getAttribute('src') !== data.img) imgEl.src = data.img;
     updateDOMText('weeklyPetName', data.name);
 
+    // 사냥 버튼 쿨타임 UI
     if (btnHunt) {
         const COOLDOWN_MS = 10 * 60 * 1000;
         if (data.lastHuntTime && NOW - data.lastHuntTime < COOLDOWN_MS) {
@@ -4423,6 +4478,7 @@ function renderWeeklyUI() {
         }
     }
 
+    // 만렙 달성 시 처리
     if (currentLv >= 140) {
         if(resetArea) resetArea.style.display = 'block';
         if (localStorage.getItem('weeklyPetSubmitted') === 'false' && typeof submitToFirebase === 'function') {
@@ -4434,7 +4490,7 @@ function renderWeeklyUI() {
     }
 }
 
-// 4. 초기화 로직 (전체 리셋)
+// 4. 초기화 로직
 function resetWeeklyChallenge() {
     if (confirm("모든 기록을 삭제하고 새로 시작하시겠습니까?")) {
         localStorage.removeItem('weeklyPetData');
@@ -4443,11 +4499,28 @@ function resetWeeklyChallenge() {
     }
 }
 
+// 5. 도움말 토글 함수
+function toggleWeeklyGuide() {
+    const guideCard = document.getElementById('weekly-guide-card');
+    const btnText = document.getElementById('guide-btn-text');
+    if (!guideCard || !btnText) return;
+    
+    if (guideCard.style.display === 'none') {
+        guideCard.style.display = 'block';
+        btnText.innerText = '도움말 닫기';
+    } else {
+        guideCard.style.display = 'none';
+        btnText.innerText = '도움말 보기';
+    }
+}
+
+// 헬퍼: 텍스트 업데이트
 function updateDOMText(id, newText) {
     const el = document.getElementById(id);
     if (el && el.innerText !== newText) el.innerText = newText;
 }
 
+// 1초 간격 렌더링
 setInterval(renderWeeklyUI, 1000);
 
 /* ==========================================================
