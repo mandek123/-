@@ -6442,7 +6442,7 @@ function updateMyInfoDisplay(data) {
     const btnReset = document.getElementById('btn-reset-info');
 
     if (!data) {
-        display.style.display = 'none';
+        if(display) display.style.display = 'none';
         if(setupInputs) setupInputs.classList.remove('disabled-section');
         if(btnSave) btnSave.style.display = 'block';
         if(btnReset) btnReset.style.display = 'none';
@@ -6453,7 +6453,6 @@ function updateMyInfoDisplay(data) {
     const now = new Date();
     const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
     
-    // 데이터에 저장된 마지막 초기화 달과 현재 달이 다르면 전적만 초기화
     if (data.lastResetMonth !== currentMonthLabel) {
         db.ref(`arena_users/${data.nick}`).update({
             record: { bot: {win:0, lose:0}, user: {win:0, lose:0} },
@@ -6461,22 +6460,16 @@ function updateMyInfoDisplay(data) {
         });
         return; 
     }
-    // --------------------------------------------
     
-    display.style.display = 'block';
+    if(display) display.style.display = 'block';
     if(setupInputs) setupInputs.classList.add('disabled-section');
     if(btnSave) btnSave.style.display = 'none';
     if(btnReset) btnReset.style.display = 'block';
 
     arenaSelectedPet = data.pet; 
 
-    // Firebase에 저장된 데이터 기준으로 로컬 카운트 동기화
     let todayStr = new Date().toDateString();
-    if (data.playRecord && data.playRecord.date === todayStr) {
-        todayPlayCount = data.playRecord.count || 0;
-    } else {
-        todayPlayCount = 0; 
-    }
+    todayPlayCount = (data.playRecord && data.playRecord.date === todayStr) ? (data.playRecord.count || 0) : 0;
     
     const chanceEl = document.getElementById('arena-chances');
     if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
@@ -6485,33 +6478,35 @@ function updateMyInfoDisplay(data) {
     const record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
     const petElements = data.pet.elements || "무";
 
-    display.innerHTML = `
-        <div class="my-info-header" style="text-align:center; font-size:13px; font-weight:bold; color:var(--royal-gold);">
-            <i class="fas fa-lock"></i> [ 등록된 캐릭터 정보 고정됨 ]
-        </div>
-        <div style="display:flex; gap:15px; align-items:center; margin-bottom:12px;">
-            <img src="${data.pet.img}" style="width: 55px; height: 55px; border-radius: 10px; border: 1px solid var(--border-gold); background: #000;">
-            <div>
-                <div style="color:#fff; font-size:15px; font-weight:bold;">${data.nick} <span style="color:var(--royal-gold); font-size:12px;">🏆 ${data.score} pts</span></div>
-                <div style="color:#8b949e; font-size:11px;">대표 펫: ${data.pet.name} <span style="color:#fff; font-weight:bold;">[${petElements}]</span></div>
-                <div style="font-size:11px; color:#ccc; margin-top:3px;">
-                    ⚔️ 유저전: <span style="color:#7ee787">${record.user.win}승</span> <span style="color:#ff7b72">${record.user.lose}패</span> | 
-                    🤖 BOT전: <span style="color:#7ee787">${record.bot.win}승</span> <span style="color:#ff7b72">${record.bot.lose}패</span>
+    if(display) {
+        display.innerHTML = `
+            <div class="my-info-header" style="text-align:center; font-size:13px; font-weight:bold; color:var(--royal-gold);">
+                <i class="fas fa-lock"></i> [ 등록된 캐릭터 정보 고정됨 ]
+            </div>
+            <div style="display:flex; gap:15px; align-items:center; margin-bottom:12px;">
+                <img src="${data.pet.img}" style="width: 55px; height: 55px; border-radius: 10px; border: 1px solid var(--border-gold); background: #000;">
+                <div>
+                    <div style="color:#fff; font-size:15px; font-weight:bold;">${data.nick} <span style="color:var(--royal-gold); font-size:12px;">🏆 ${data.score} pts</span></div>
+                    <div style="color:#8b949e; font-size:11px;">대표 펫: ${data.pet.name} <span style="color:#fff; font-weight:bold;">[${petElements}]</span></div>
+                    <div style="font-size:11px; color:#ccc; margin-top:3px;">
+                        ⚔️ 유저전: <span style="color:#7ee787">${record.user.win}승</span> <span style="color:#ff7b72">${record.user.lose}패</span> | 
+                        🤖 BOT전: <span style="color:#7ee787">${record.bot.win}승</span> <span style="color:#ff7b72">${record.bot.lose}패</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; padding:5px; border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top:10px;">
-            <div style="color:#ff4d4d; font-size:12px; font-weight:bold;">최종 HP: <span style="color:#fff;">${data.stats.hp}</span></div>
-            <div style="color:#539bf5; font-size:12px; font-weight:bold;">최종 공격: <span style="color:#fff;">${data.stats.atk}</span></div>
-            <div style="color:#7ee787; font-size:12px; font-weight:bold;">최종 방어: <span style="color:#fff;">${data.stats.def}</span></div>
-            <div style="color:#d2a8ff; font-size:12px; font-weight:bold;">최종 순발: <span style="color:#fff;">${data.stats.spd}</span></div>
-            <div style="grid-column: span 2; text-align:center; margin-top:5px; font-size:11px; color:var(--royal-gold);">
-                현재 속성: 
-                <span style="color:${attrColors[data.attr.t1]}; font-weight:bold;">${data.attr.t1}(${data.attr.v1})</span> / 
-                <span style="color:${attrColors[data.attr.t2]}; font-weight:bold;">${data.attr.t2}(${data.attr.v2})</span>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; padding:5px; border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top:10px;">
+                <div style="color:#ff4d4d; font-size:12px; font-weight:bold;">최종 HP: <span style="color:#fff;">${data.stats.hp}</span></div>
+                <div style="color:#539bf5; font-size:12px; font-weight:bold;">최종 공격: <span style="color:#fff;">${data.stats.atk}</span></div>
+                <div style="color:#7ee787; font-size:12px; font-weight:bold;">최종 방어: <span style="color:#fff;">${data.stats.def}</span></div>
+                <div style="color:#d2a8ff; font-size:12px; font-weight:bold;">최종 순발: <span style="color:#fff;">${data.stats.spd}</span></div>
+                <div style="grid-column: span 2; text-align:center; margin-top:5px; font-size:11px; color:var(--royal-gold);">
+                    현재 속성: 
+                    <span style="color:${attrColors[data.attr.t1]}; font-weight:bold;">${data.attr.t1}(${data.attr.v1})</span> / 
+                    <span style="color:${attrColors[data.attr.t2]}; font-weight:bold;">${data.attr.t2}(${data.attr.v2})</span>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+    }
 }
 
 function resetArenaInfo() {
@@ -6621,7 +6616,7 @@ function saveArenaInfo() {
             elements: arenaSelectedPet.elements || "무",
             attr: arenaSelectedPet.attr || { t1: "무" }
         },
-        score: myArenaData && myArenaData.score !== undefined ? myArenaData.score : 1000,
+        score: Number(myArenaData && myArenaData.score !== undefined ? myArenaData.score : 1000),
         record: myArenaData && myArenaData.record ? myArenaData.record : { bot: {win:0, lose:0}, user: {win:0, lose:0} },
         playRecord: myArenaData && myArenaData.playRecord ? myArenaData.playRecord : { date: new Date().toDateString(), count: 0 },
         lastResetMonth: myArenaData && myArenaData.lastResetMonth ? myArenaData.lastResetMonth : `${new Date().getFullYear()}-${new Date().getMonth() + 1}`,
@@ -6724,6 +6719,7 @@ function syncAttributeValues(idx) {
 function searchArenaPet() {
     const query = document.getElementById('arena-pet-search').value;
     const resultDiv = document.getElementById('arena-pet-results');
+    if(!resultDiv) return;
     resultDiv.innerHTML = '';
     if(!query) return;
 
@@ -6777,17 +6773,14 @@ async function initBattle(isBot, oppData = null) {
     if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 대전이 가능합니다.");
     if(todayPlayCount >= BATTLE_LIMIT) return alert("일일 대전 횟수를 초과했습니다.");
 
-    let myChar = {};
-    let myPet = {};
-
-    myChar = {
+    let myChar = {
         id: 'my-char', team: 'my', type: 'char', name: myArenaData.nick,
         maxHp: myArenaData.stats.hp, atk: myArenaData.stats.atk, def: myArenaData.stats.def, spd: myArenaData.stats.spd,
         attr: { t1: myArenaData.attr.t1 }, isGuard: false, buffs: {}, isDead: false
     };
     myChar.hp = myChar.maxHp;
 
-    myPet = {
+    let myPet = {
         ...myArenaData.pet, id: 'my-pet', team: 'my', type: 'pet',
         maxHp: myArenaData.pet.sHp, atk: myArenaData.pet.sAtk, def: myArenaData.pet.sDef, spd: myArenaData.pet.sSpd,
         elements: myArenaData.pet.elements || "무",
@@ -6870,28 +6863,34 @@ async function initBattle(isBot, oppData = null) {
 function updateAllHPUI() {
     Object.values(battleState.units).forEach(u => {
         const pct = Math.max(0, (u.hp / u.maxHp) * 100);
-        document.getElementById(`hp-${u.id}`).style.width = `${pct}%`;
-        document.getElementById(`hp-txt-${u.id}`).innerText = `${Math.floor(u.hp)} / ${u.maxHp}`;
+        const hpBar = document.getElementById(`hp-${u.id}`);
+        const hpTxt = document.getElementById(`hp-txt-${u.id}`);
+        if(hpBar) hpBar.style.width = `${pct}%`;
+        if(hpTxt) hpTxt.innerText = `${Math.floor(u.hp)} / ${u.maxHp}`;
+        
         const box = document.getElementById(`unit-${u.id}`);
         if(u.hp <= 0 && !u.isDead) {
             u.isDead = true; u.hp = 0;
-            box.classList.add('dead');
+            if(box) box.classList.add('dead');
             addLog(`💀 ${u.name} 쓰러짐!`);
         } else if (u.hp > 0) {
             u.isDead = false;
-            box.classList.remove('dead');
+            if(box) box.classList.remove('dead');
         }
     });
 }
 
 function addLog(msg) {
     const box = document.getElementById('battle-log-box');
-    box.innerHTML += `<div>${msg}</div>`;
-    box.scrollTop = box.scrollHeight;
+    if(box) {
+        box.innerHTML += `<div>${msg}</div>`;
+        box.scrollTop = box.scrollHeight;
+    }
 }
 
 function showFloatingDmg(targetId, dmgText, type) {
     const box = document.getElementById(`unit-${targetId}`);
+    if(!box) return;
     const div = document.createElement('div');
     div.className = `floating-dmg ${type}`;
     div.innerText = dmgText;
@@ -7013,13 +7012,9 @@ async function executeTurn() {
 
         let isBackToWall = act.type === 'skill_back';
         let currentAtk = isBackToWall ? attacker.atk * 2 : attacker.atk;
-        
-        // --- [수정] 충견진돗개 타격 시 데미지 20% 감소 로직 ---
         if(act.type === 'skill_dog') currentAtk *= 0.8;
-
         if(isBackToWall) { attacker.buffs.defPenalty = 0.5; addLog(`🔥 [${attacker.name}] 배수의진!`); }
 
-        // --- [수정] 충견진돗개 보호 로직 (다굴 피격 시에는 보호 불가) ---
         let isDogIntercept = false;
         if(target.type === 'char' && !act.isDagul) {
             let defPet = battleState.units[`${target.team}-pet`];
@@ -7031,9 +7026,10 @@ async function executeTurn() {
             }
         }
 
-        document.getElementById(`unit-${attacker.id}`).classList.add('active-turn');
+        const attackerBox = document.getElementById(`unit-${attacker.id}`);
+        if(attackerBox) attackerBox.classList.add('active-turn');
         let moveClass = attacker.team === 'my' ? 'anim-attack-right' : 'anim-attack-left';
-        document.getElementById(`unit-${attacker.id}`).classList.add(moveClass);
+        if(attackerBox) attackerBox.classList.add(moveClass);
         await delay(300);
 
         let dodgeChance = Math.max(5, Math.min(30, 5 + (target.spd - attacker.spd) * 0.1));
@@ -7045,18 +7041,20 @@ async function executeTurn() {
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.09) || 5);
             if(isCrit) baseDmg *= 1.5;
             if(target.isGuard) baseDmg *= 0.5;
-            if(isDogIntercept) baseDmg *= 0.3; // 보호 시 데미지 경감 효과
+            if(isDogIntercept) baseDmg *= 0.3; 
             
             let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
             target.hp -= finalDmg;
-            document.getElementById(`unit-${target.id}`).classList.add('anim-hit');
+            const targetBox = document.getElementById(`unit-${target.id}`);
+            if(targetBox) targetBox.classList.add('anim-hit');
             showFloatingDmg(target.id, finalDmg, isCrit ? "crit" : "normal");
             addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지! ${act.isDagul?'(🔗다굴)':''}`);
             updateAllHPUI();
         }
         await delay(500);
-        document.getElementById(`unit-${attacker.id}`).classList.remove(moveClass, 'active-turn');
-        document.getElementById(`unit-${target.id}`).classList.remove('anim-hit');
+        if(attackerBox) attackerBox.classList.remove(moveClass, 'active-turn');
+        const targetBox = document.getElementById(`unit-${target.id}`);
+        if(targetBox) targetBox.classList.remove('anim-hit');
         attacker.buffs.defPenalty = 1;
     }
     if(!checkWinCondition()) { battleState.turn++; startTurnPhase(); }
@@ -7082,9 +7080,12 @@ function checkWinCondition() {
         document.getElementById('battle-control-panel').style.display = 'none';
         
         let closeBtn = document.getElementById('btn-close-battle');
-        closeBtn.innerText = isWin ? "🎉 승리! 결과 확인하고 나가기" : "💀 패배... 결과 확인하고 나가기";
-        closeBtn.style.display = 'block';
-        document.querySelector('.battle-field').style.opacity = '0.5';
+        if(closeBtn) {
+            closeBtn.innerText = isWin ? "🎉 승리! 결과 확인하고 나가기" : "💀 패배... 결과 확인하고 나가기";
+            closeBtn.style.display = 'block';
+        }
+        const field = document.querySelector('.battle-field');
+        if(field) field.style.opacity = '0.5';
         
         let scoreSet = battleState.matchType === 'user_pvp' ? {w:20, l:-15} : 
                       (battleState.matchType.includes('easy') ? {w:5, l:-5} : 
@@ -7121,7 +7122,7 @@ function updateMatchScore(isWin, winPts, losePts) {
         let data = snap.val();
         if(!data) return;
         
-        let currentScore = data.score || 1000;
+        let currentScore = Number(data.score || 1000); // 숫자 변환 보장
         let record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
         
         let currentCount = (data.playRecord && data.playRecord.date === todayStr) ? (data.playRecord.count || 0) : 0;
@@ -7146,7 +7147,7 @@ function updateMatchScore(isWin, winPts, losePts) {
         db.ref(`arena_users/${battleState.oppNick}`).once('value', snap => {
             let oppData = snap.val();
             if(!oppData) return;
-            let currentScore = oppData.score || 1000;
+            let currentScore = Number(oppData.score || 1000); // 숫자 변환 보장
             let record = oppData.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
             let change = isWin ? losePts : winPts;
             if (!isWin) record.user.win = (record.user.win || 0) + 1; 
@@ -7160,10 +7161,6 @@ function updateMatchScore(isWin, winPts, losePts) {
     }
 }
 
-/**
- * --- [수정] 대전 횟수 수동 조절 관리자 함수 ---
- * 사용법: 브라우저 콘솔창(F12)에서 adminSetPlayCount(0) 입력
- */
 function adminSetPlayCount(targetCount) {
     let myNick = localStorage.getItem('arenaUserNick');
     if(!myNick) return;
@@ -7175,8 +7172,53 @@ function adminSetPlayCount(targetCount) {
 
 function closeBattleUI() {
     document.getElementById('battle-arena-modal').style.display = 'none';
-    document.querySelector('.battle-field').style.opacity = '1';
+    const field = document.querySelector('.battle-field');
+    if(field) field.style.opacity = '1';
     refreshUserList();
+}
+
+/**
+ * 첫 페이지 랭킹 실시간 연동 로직
+ * (on('value') 리스너를 사용하여 실시간 반영)
+ */
+function loadHomeArenaRanking() {
+    const board = document.getElementById('homeArenaRankingBoard');
+    if(!board) return; 
+
+    // .on('value')를 통해 데이터 변경 시 즉시 콜백 실행
+    db.ref('arena_users').orderByChild('score').limitToLast(3).on('value', (snapshot) => {
+        let users = [];
+        snapshot.forEach(child => { 
+            let val = child.val();
+            val.score = Number(val.score); // 숫자 타입 고정
+            users.push(val); 
+        });
+        users.reverse(); // 점수 높은 순 정렬
+
+        if(users.length === 0) { board.innerHTML = "데이터 없음"; return; }
+        
+        let html = ""; 
+        const medals = ["🥇", "🥈", "🥉"];
+        
+        users.forEach((user, i) => {
+            if(user) {
+                // PET_DATABASE에서 해당 페트 정보를 찾아 이미지를 가져오는 로직 (제공된 코드 참고)
+                const petObj = (typeof PET_DATABASE !== 'undefined') ? PET_DATABASE.find(p => p.name === user.pet.name) : null;
+                const petImg = petObj ? petObj.img : user.pet.img;
+
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:14px;">${medals[i]}</span>
+                        <img src="${petImg}" style="width:24px; height:24px; border-radius:4px; background:#000;">
+                        <b style="font-size:13px; color:#fff;">${user.nick}</b>
+                    </div>
+                    <span style="font-size:12px; color:var(--royal-gold); font-weight:bold;">${user.score} pts</span>
+                </div>`;
+            }
+        });
+        board.innerHTML = html;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7184,21 +7226,6 @@ document.addEventListener('DOMContentLoaded', () => {
     calcArenaPoints(); 
     loadHomeArenaRanking();
 });
-
-function loadHomeArenaRanking() {
-    const board = document.getElementById('homeArenaRankingBoard');
-    if(!board) return; 
-    db.ref('arena_users').orderByChild('score').limitToLast(3).once('value', (snapshot) => {
-        let users = []; snapshot.forEach(child => { users.push(child.val()); });
-        users.reverse(); 
-        if(users.length === 0) { board.innerHTML = "데이터 없음"; return; }
-        let html = ""; const medals = ["🥇", "🥈", "🥉"];
-        for(let i=0; i<3; i++) {
-            if(users[i]) html += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${medals[i]} <b>${users[i].nick}</b></span><span>${users[i].score} pts</span></div>`;
-        }
-        board.innerHTML = html;
-    });
-}
 
 </script>
 
