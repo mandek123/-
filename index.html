@@ -7057,9 +7057,10 @@ async function executeTurn() {
         // --- [순발력 전투 로직 강화: 회피 및 반격] ---
         let dodgeChance = Math.max(10, Math.min(55, 12 + (target.spd - attacker.spd) * 0.3));
         
-        if(!target.isGuard && Math.random() * 100 < dodgeChance && !isDogIntercept) {
-            showFloatingDmg(target.id, "MISS", "miss"); 
-            addLog(`💨 [${target.name}] 회피 성공!`);
+        // [수정됨] act.isDagul(협공) 상태일 경우 회피 로직을 건너뜁니다.
+        if(!target.isGuard && !act.isDagul && Math.random() * 100 < dodgeChance && !isDogIntercept) {
+            showFloatingDmg(target.id, "MISS", "miss"); 
+            addLog(`💨 [${target.name}] 회피 성공!`);
             
             // [반격 시스템] 순발력이 40 이상 높을 경우 35% 확률로 기습 반격
             if((target.spd - attacker.spd) > 40 && Math.random() < 0.35) {
@@ -7076,7 +7077,7 @@ async function executeTurn() {
             // 크리티컬 확률 공식 상향 (순발력 차이 반영)
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
-            if(target.isGuard) baseDmg *= 0.3;
+            if(target.isGuard) baseDmg *= 0.1;
             if(isDogIntercept) baseDmg *= 0.25; 
             
             let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
