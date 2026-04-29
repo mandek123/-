@@ -6429,6 +6429,20 @@ function updateMyInfoDisplay(data) {
         if(btnReset) btnReset.style.display = 'none';
         return;
     }
+
+    // --- [시스템] 매월 1일 전적 자동 초기화 로직 ---
+    const now = new Date();
+    const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
+    
+    // 데이터에 저장된 마지막 초기화 달과 현재 달이 다르면 전적만 초기화
+    if (data.lastResetMonth !== currentMonthLabel) {
+        db.ref(`arena_users/${data.nick}`).update({
+            record: { bot: {win:0, lose:0}, user: {win:0, lose:0} },
+            lastResetMonth: currentMonthLabel
+        });
+        return; 
+    }
+    // --------------------------------------------
     
     display.style.display = 'block';
     if(setupInputs) setupInputs.classList.add('disabled-section');
@@ -6591,6 +6605,7 @@ function saveArenaInfo() {
         score: myArenaData && myArenaData.score !== undefined ? myArenaData.score : 1000,
         record: myArenaData && myArenaData.record ? myArenaData.record : { bot: {win:0, lose:0}, user: {win:0, lose:0} },
         playRecord: myArenaData && myArenaData.playRecord ? myArenaData.playRecord : { date: new Date().toDateString(), count: 0 },
+        lastResetMonth: myArenaData && myArenaData.lastResetMonth ? myArenaData.lastResetMonth : `${new Date().getFullYear()}-${new Date().getMonth() + 1}`,
         timestamp: Date.now()
     };
 
@@ -6979,12 +6994,22 @@ async function executeTurn() {
 
         let isBackToWall = act.type === 'skill_back';
         let currentAtk = isBackToWall ? attacker.atk * 2 : attacker.atk;
+        
+        // --- [수정] 충견진돗개 타격 시 데미지 20% 감소 로직 ---
+        if(act.type === 'skill_dog') currentAtk *= 0.8;
+
         if(isBackToWall) { attacker.buffs.defPenalty = 0.5; addLog(`🔥 [${attacker.name}] 배수의진!`); }
 
-        if(target.type === 'char') {
+        // --- [수정] 충견진돗개 보호 로직 (다굴 피격 시에는 보호 불가) ---
+        let isDogIntercept = false;
+        if(target.type === 'char' && !act.isDagul) {
             let defPet = battleState.units[`${target.team}-pet`];
             let petAction = battleState.actions.find(a => a.unitId === defPet.id && !battleState.units[a.unitId].isDead);
-            if(petAction && petAction.type === 'skill_dog' && !defPet.isDead) { target = defPet; addLog(`🐶 [${defPet.name}] 충견진돗개!`); }
+            if(petAction && petAction.type === 'skill_dog' && !defPet.isDead) { 
+                target = defPet; 
+                isDogIntercept = true;
+                addLog(`🐶 [${defPet.name}] 충견진돗개! 캐릭터 대신 맞습니다!`); 
+            }
         }
 
         document.getElementById(`unit-${attacker.id}`).classList.add('active-turn');
@@ -6993,7 +7018,7 @@ async function executeTurn() {
         await delay(300);
 
         let dodgeChance = Math.max(5, Math.min(30, 5 + (target.spd - attacker.spd) * 0.1));
-        if(!target.isGuard && Math.random() * 100 < dodgeChance) {
+        if(!target.isGuard && Math.random() * 100 < dodgeChance && !isDogIntercept) {
             showFloatingDmg(target.id, "MISS", "miss"); addLog(`💨 [${target.name}] 회피!`);
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
@@ -7001,7 +7026,8 @@ async function executeTurn() {
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.09) || 5);
             if(isCrit) baseDmg *= 1.5;
             if(target.isGuard) baseDmg *= 0.5;
-            if(act.type === 'skill_dog') baseDmg *= 0.3;
+            if(isDogIntercept) baseDmg *= 0.3; // 보호 시 데미지 경감 효과
+            
             let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
             target.hp -= finalDmg;
             document.getElementById(`unit-${target.id}`).classList.add('anim-hit');
@@ -7018,17 +7044,16 @@ async function executeTurn() {
 }
 
 /**
- * 12. 승패 결과 판정 및 서버 연동 (중복 차감 버그 수정됨)
+ * 12. 승패 결과 판정
  */
 function checkWinCondition() {
-    // [중요 수정] 이미 게임 종료 처리가 되었다면 업데이트 로직을 타지 않고 바로 종료 상태만 반환합니다.
     if (battleState.isGameOver) return true; 
 
     let myAlive = !battleState.units['my-char'].isDead;
     let oppAlive = !battleState.units['opp-char'].isDead;
 
     if (!myAlive || !oppAlive || battleState.turn > 20) {
-        battleState.isGameOver = true; // 여기서 true로 선언하여 이후의 중복 호출을 막습니다.
+        battleState.isGameOver = true; 
         
         let isWin = myAlive && (!oppAlive || battleState.units['my-char'].hp > battleState.units['opp-char'].hp);
         
@@ -7114,6 +7139,19 @@ function updateMatchScore(isWin, winPts, losePts) {
             });
         });
     }
+}
+
+/**
+ * --- [수정] 대전 횟수 수동 조절 관리자 함수 ---
+ * 사용법: 브라우저 콘솔창(F12)에서 adminSetPlayCount(0) 입력
+ */
+function adminSetPlayCount(targetCount) {
+    let myNick = localStorage.getItem('arenaUserNick');
+    if(!myNick) return;
+    let todayStr = new Date().toDateString();
+    db.ref(`arena_users/${myNick}`).update({
+        playRecord: { date: todayStr, count: parseInt(targetCount) }
+    }).then(() => alert(`대전 횟수가 ${targetCount}회로 변경되었습니다.`));
 }
 
 function closeBattleUI() {
