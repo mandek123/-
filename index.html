@@ -6409,7 +6409,7 @@ let myArenaData = null;
 const INITIAL_POINTS = 637;
 const BATTLE_LIMIT = 5;
 
-// 메모리상에서만 카운트하며, 실제 값은 Firebase(내 정보)에서 불러옵니다. (로컬스토리지 어뷰징 차단)
+// 실제 값은 Firebase(내 정보)에서 불러와 동기화합니다.
 let todayPlayCount = 0;
 
 /**
@@ -6437,13 +6437,14 @@ function updateMyInfoDisplay(data) {
 
     arenaSelectedPet = data.pet; 
 
-    // Firebase에 저장된 일일 횟수 동기화 (시크릿모드/캐시삭제 꼼수 차단)
+    // Firebase에 저장된 데이터 기준으로 로컬 카운트 동기화
     let todayStr = new Date().toDateString();
     if (data.playRecord && data.playRecord.date === todayStr) {
         todayPlayCount = data.playRecord.count || 0;
     } else {
-        todayPlayCount = 0; // 날짜가 바뀌었거나 기록이 없으면 0으로 초기화
+        todayPlayCount = 0; 
     }
+    
     const chanceEl = document.getElementById('arena-chances');
     if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
 
@@ -6739,10 +6740,7 @@ function getAttrBonus(atkAttr, defAttr) {
 
 async function initBattle(isBot, oppData = null) {
     if(!arenaSelectedPet) return alert("참전할 펫을 선택해주세요.");
-    
-    // 서버에 정보가 등록(저장)되지 않은 익명 유저는 대전 금지 (어뷰징 차단 핵심)
     if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 대전이 가능합니다.");
-    
     if(todayPlayCount >= BATTLE_LIMIT) return alert("일일 대전 횟수를 초과했습니다.");
 
     let myChar = {};
@@ -6767,10 +6765,8 @@ async function initBattle(isBot, oppData = null) {
 
     if (isBot) {
         battleState.matchType = isBot;
-        
         let botPts = [0, 0, 0, 0];
         for(let i=0; i<637; i++) botPts[Math.floor(Math.random() * 4)]++;
-        
         const attrTypes = ["지", "수", "화", "풍"];
         let botAttr = { t1: attrTypes[Math.floor(Math.random() * 4)], v1: 10 };
 
@@ -6831,11 +6827,9 @@ async function initBattle(isBot, oppData = null) {
     updateAllHPUI();
     document.getElementById('battle-log-box').innerHTML = "";
     addLog(`전투가 시작되었습니다! VS ${oppChar.name}`);
-    
     document.getElementById('battle-arena-modal').style.display = 'flex';
     document.getElementById('battle-control-panel').style.display = 'block'; 
     document.getElementById('btn-close-battle').style.display = 'none'; 
-    
     startTurnPhase();
 }
 
@@ -6844,7 +6838,6 @@ function updateAllHPUI() {
         const pct = Math.max(0, (u.hp / u.maxHp) * 100);
         document.getElementById(`hp-${u.id}`).style.width = `${pct}%`;
         document.getElementById(`hp-txt-${u.id}`).innerText = `${Math.floor(u.hp)} / ${u.maxHp}`;
-        
         const box = document.getElementById(`unit-${u.id}`);
         if(u.hp <= 0 && !u.isDead) {
             u.isDead = true; u.hp = 0;
@@ -6876,16 +6869,13 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 function startTurnPhase() {
     if(checkWinCondition()) return;
-    
     Object.values(battleState.units).forEach(u => { u.isGuard = false; });
     battleState.actions = [];
     battleState.phase = 'SELECT_CHAR';
-    
     document.getElementById('battle-turn-indicator').innerText = `[ ${battleState.turn} 턴 ] 캐릭터의 행동을 선택하세요.`;
     document.getElementById('control-status').innerText = "내 캐릭터 행동 대기중...";
     document.getElementById('btn-skill-back').style.display = 'none';
     document.getElementById('btn-skill-dog').style.display = 'none';
-    
     if(battleState.units['my-char'].isDead) {
         battleState.phase = 'SELECT_PET';
         document.getElementById('control-status').innerText = "내 펫 행동 대기중...";
@@ -6897,7 +6887,6 @@ function startTurnPhase() {
 function setPlayerAction(actionType) {
     let activeUnitId = battleState.phase === 'SELECT_CHAR' ? 'my-char' : 'my-pet';
     if(battleState.units[activeUnitId].isDead) return;
-
     if(actionType === 'guard') {
         battleState.actions.push({ unitId: activeUnitId, type: 'guard', target: activeUnitId });
         moveToNextSelection();
@@ -6911,92 +6900,66 @@ function selectTarget(targetId) {
     if(!battleState.activeSelector) return;
     if(battleState.units[targetId].isDead) return alert("이미 쓰러진 대상입니다.");
     if(battleState.units[targetId].team === 'my') return alert("적을 선택하세요!");
-
-    battleState.actions.push({
-        unitId: battleState.activeSelector.unitId,
-        type: battleState.activeSelector.type,
-        target: targetId
-    });
-    
+    battleState.actions.push({ unitId: battleState.activeSelector.unitId, type: battleState.activeSelector.type, target: targetId });
     battleState.activeSelector = null;
     document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('targeted'));
-    
     moveToNextSelection();
 }
 
 function moveToNextSelection() {
     if (battleState.phase === 'SELECT_CHAR') {
         battleState.phase = 'SELECT_PET';
-        if(battleState.units['my-pet'].isDead) {
-            executeTurn(); 
-        } else {
+        if(battleState.units['my-pet'].isDead) executeTurn(); 
+        else {
             document.getElementById('control-status').innerText = "내 펫 행동 대기중...";
             document.getElementById('btn-skill-back').style.display = 'inline-block';
             document.getElementById('btn-skill-dog').style.display = 'inline-block';
         }
-    } else if (battleState.phase === 'SELECT_PET') {
-        executeTurn();
-    }
+    } else if (battleState.phase === 'SELECT_PET') executeTurn();
 }
 
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
     document.getElementById('control-status').innerText = "전투 진행 중...";
-    
     let aliveMy = ['my-char', 'my-pet'].filter(tid => !battleState.units[tid].isDead);
     let aliveOpp = ['opp-char', 'opp-pet'].filter(tid => !battleState.units[tid].isDead);
 
-    // AI 행동 결정 로직
     if (aliveMy.length > 0) {
         let oppChar = battleState.units['opp-char'];
         let oppPet = battleState.units['opp-pet'];
         let commonTarget = aliveMy[Math.floor(Math.random() * aliveMy.length)];
-
-        // 다굴 조건: 둘 다 생존해 있고 순발력 차이가 30 미만일 때 80% 확률로 타겟 통일
         let tryDagul = false;
         if (!oppChar.isDead && !oppPet.isDead && Math.abs(oppChar.spd - oppPet.spd) < 30) {
             if (Math.random() < 0.8) tryDagul = true;
         }
-
         aliveOpp.forEach(id => {
             let u = battleState.units[id];
             let target = tryDagul ? commonTarget : aliveMy[Math.floor(Math.random() * aliveMy.length)];
             let type = 'attack';
-
-            if (Math.random() < 0.1) {
-                // 10% 확률로 방어
-                type = 'guard';
-                target = id;
-            } else if (!tryDagul && u.type === 'pet' && Math.random() < 0.2) {
-                // 다굴 시도가 아닐 경우, 펫은 20% 확률로 스킬 사용
+            if (Math.random() < 0.1) { type = 'guard'; target = id; }
+            else if (!tryDagul && u.type === 'pet' && Math.random() < 0.2) {
                 type = Math.random() < 0.5 ? 'skill_back' : 'skill_dog';
                 if (type === 'skill_dog') target = 'opp-char'; 
             }
-
             battleState.actions.push({ unitId: id, type: type, target: target });
         });
     }
 
-    // 행동 순서(actionSpd) 계산
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         let R = Math.random() * ((u.spd * 0.15) + 20);
         act.actionSpd = u.spd + 20 - R;
         if(act.type === 'guard') act.actionSpd += 500;
     });
-
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
-    // 다굴 성립 판정
     for(let i=0; i < battleState.actions.length - 1; i++) {
-        let a1 = battleState.actions[i];
-        let a2 = battleState.actions[i+1];
+        let a1 = battleState.actions[i]; let a2 = battleState.actions[i+1];
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
             let u1 = battleState.units[a1.unitId]; let u2 = battleState.units[a2.unitId];
             if(u1.team === u2.team && a1.target === a2.target) {
                 if(Math.abs(a1.actionSpd - a2.actionSpd) < 30 && Math.random() < 0.7) {
                     a1.isDagul = true; a2.isDagul = true;
-                    a1.dagulGroup = a2.unitId; a2.dagulGroup = a1.unitId;
                 }
             }
         }
@@ -7006,16 +6969,8 @@ async function executeTurn() {
         let attacker = battleState.units[act.unitId];
         if(attacker.isDead) continue;
         if(checkWinCondition()) break;
-
         let target = battleState.units[act.target];
-        
-        if(act.type === 'guard') {
-            attacker.isGuard = true;
-            addLog(`🛡️ [${attacker.name}] 방어 태세! (데미지 반감)`);
-            await delay(500);
-            continue;
-        }
-
+        if(act.type === 'guard') { attacker.isGuard = true; addLog(`🛡️ [${attacker.name}] 방어 태세!`); await delay(500); continue; }
         if(target.isDead) {
             let aliveEnemies = Object.values(battleState.units).filter(u => u.team !== attacker.team && !u.isDead);
             if(aliveEnemies.length === 0) break;
@@ -7024,20 +6979,12 @@ async function executeTurn() {
 
         let isBackToWall = act.type === 'skill_back';
         let currentAtk = isBackToWall ? attacker.atk * 2 : attacker.atk;
-        if(isBackToWall) { 
-            attacker.buffs.defPenalty = 0.5; 
-            addLog(`🔥 [${attacker.name}] 배수의진 발동! 공격력 2배, 방어력 50% 감소!`); 
-        }
+        if(isBackToWall) { attacker.buffs.defPenalty = 0.5; addLog(`🔥 [${attacker.name}] 배수의진!`); }
 
-        let isDogIntercept = false;
         if(target.type === 'char') {
             let defPet = battleState.units[`${target.team}-pet`];
             let petAction = battleState.actions.find(a => a.unitId === defPet.id && !battleState.units[a.unitId].isDead);
-            if(petAction && petAction.type === 'skill_dog' && !defPet.isDead) {
-                target = defPet;
-                isDogIntercept = true;
-                addLog(`🐶 [${defPet.name}] 충견진돗개 발동! 캐릭터 대신 맞습니다!`);
-            }
+            if(petAction && petAction.type === 'skill_dog' && !defPet.isDead) { target = defPet; addLog(`🐶 [${defPet.name}] 충견진돗개!`); }
         }
 
         document.getElementById(`unit-${attacker.id}`).classList.add('active-turn');
@@ -7045,58 +6992,33 @@ async function executeTurn() {
         document.getElementById(`unit-${attacker.id}`).classList.add(moveClass);
         await delay(300);
 
-        let dodgeChance = 5 + Math.max(0, (target.spd - attacker.spd) * 0.1);
-        dodgeChance = Math.max(5, Math.min(30, dodgeChance));
-
-        if(!target.isGuard && Math.random() * 100 < dodgeChance && !isDogIntercept) {
-            showFloatingDmg(target.id, "MISS", "miss");
-            addLog(`💨 [${target.name}] 공격을 회피했습니다!`);
+        let dodgeChance = Math.max(5, Math.min(30, 5 + (target.spd - attacker.spd) * 0.1));
+        if(!target.isGuard && Math.random() * 100 < dodgeChance) {
+            showFloatingDmg(target.id, "MISS", "miss"); addLog(`💨 [${target.name}] 회피!`);
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
-            let targetDef = target.def * (target.buffs.defPenalty || 1);
-            let baseDmg = (currentAtk * 1.5) - (targetDef * 0.8);
-            baseDmg *= attrBonus;
-
-            let critChance = Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.09) || 5;
-            let isCrit = Math.random() * 100 < critChance;
+            let baseDmg = ((currentAtk * 1.5) - (target.def * (target.buffs.defPenalty || 1) * 0.8)) * attrBonus;
+            let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.09) || 5);
             if(isCrit) baseDmg *= 1.5;
-
             if(target.isGuard) baseDmg *= 0.5;
-            
             if(act.type === 'skill_dog') baseDmg *= 0.3;
-
-            let dmgMod = attacker.dmgMod || 1.0; 
-            baseDmg *= dmgMod;
-
-            let finalDmg = Math.max(1, Math.floor(baseDmg));
+            let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
             target.hp -= finalDmg;
-
             document.getElementById(`unit-${target.id}`).classList.add('anim-hit');
             showFloatingDmg(target.id, finalDmg, isCrit ? "crit" : "normal");
-            
-            let logMsg = `⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지!`;
-            if(isCrit) logMsg = "⚡크리티컬! " + logMsg;
-            if(act.isDagul) logMsg = "🔗다굴 연계! " + logMsg;
-            addLog(logMsg);
-
+            addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지! ${act.isDagul?'(🔗다굴)':''}`);
             updateAllHPUI();
         }
-
         await delay(500);
         document.getElementById(`unit-${attacker.id}`).classList.remove(moveClass, 'active-turn');
         document.getElementById(`unit-${target.id}`).classList.remove('anim-hit');
-        
         attacker.buffs.defPenalty = 1;
     }
-
-    if(!checkWinCondition()) {
-        battleState.turn++;
-        startTurnPhase();
-    }
+    if(!checkWinCondition()) { battleState.turn++; startTurnPhase(); }
 }
 
 /**
- * 12. 승패 결과 판정 및 서버 연동 (기록 및 점수)
+ * 12. 승패 결과 판정 및 서버 연동
  */
 function checkWinCondition() {
     let myAlive = !battleState.units['my-char'].isDead;
@@ -7109,85 +7031,89 @@ function checkWinCondition() {
         addLog(`<br>=======================`);
         addLog(isWin ? "🎉 전투 승리!" : "💀 전투 패배...");
         document.getElementById('battle-turn-indicator').innerText = isWin ? "전투 종료 - 승리!" : "전투 종료 - 패배";
-        
         document.getElementById('battle-control-panel').style.display = 'none';
         
         let closeBtn = document.getElementById('btn-close-battle');
         closeBtn.innerText = isWin ? "🎉 승리! 결과 확인하고 나가기" : "💀 패배... 결과 확인하고 나가기";
         closeBtn.style.display = 'block';
-        
         document.querySelector('.battle-field').style.opacity = '0.5';
         
-        if(battleState.matchType === 'user_pvp') {
-            updateMatchScore(isWin, 20, -15);
-        } else {
-            let pts = battleState.matchType.includes('easy') ? 5 : (battleState.matchType.includes('normal') ? 10 : 15);
-            updateMatchScore(isWin, pts, -5); 
-        }
-
-        todayPlayCount++;
-        const chanceEl = document.getElementById('arena-chances');
-        if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
+        // 점수와 대전 횟수 업데이트 호출
+        let scoreSet = battleState.matchType === 'user_pvp' ? {w:20, l:-15} : 
+                      (battleState.matchType.includes('easy') ? {w:5, l:-5} : 
+                      (battleState.matchType.includes('normal') ? {w:10, l:-5} : {w:15, l:-5}));
+        
+        updateMatchScore(isWin, scoreSet.w, scoreSet.l);
         return true;
     }
     return false;
 }
 
 function surrenderBattle() {
-    if (battleState.isGameOver) return;
-    if (battleState.phase === 'ANIMATION') return alert("전투 애니메이션 진행 중에는 항복할 수 없습니다.");
-    
-    if (confirm("정말로 항복하시겠습니까? (즉시 패배 처리되며 점수가 차감될 수 있습니다)")) {
-        addLog(`<br>🏳️ <b>플레이어가 항복을 선언했습니다!</b>`);
-        
+    if (battleState.isGameOver || battleState.phase === 'ANIMATION') return;
+    if (confirm("정말로 항복하시겠습니까? (즉시 패배 처리)")) {
+        addLog(`<br>🏳️ 항복 선언!`);
         battleState.units['my-char'].hp = 0;
         updateAllHPUI();
-        
         battleState.turn = 21; 
         checkWinCondition();
     }
 }
 
+/**
+ * 대전 결과 서버 전송 (횟수 차감 핵심 로직)
+ */
 function updateMatchScore(isWin, winPts, losePts) {
     let myNick = localStorage.getItem('arenaUserNick');
+    if(!myNick) return;
+
     let matchCategory = battleState.matchType === 'user_pvp' ? 'user' : 'bot';
     let todayStr = new Date().toDateString();
 
+    // 1. 공격자(나) 데이터 업데이트 (점수 + 횟수 동시 처리)[cite: 1]
     db.ref(`arena_users/${myNick}`).once('value', snap => {
         let data = snap.val();
         if(!data) return;
         
         let currentScore = data.score || 1000;
         let record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
+        
+        // 서버 데이터를 기준으로 횟수 계산
+        let currentCount = (data.playRecord && data.playRecord.date === todayStr) ? (data.playRecord.count || 0) : 0;
+        let nextCount = currentCount + 1;
 
         let change = isWin ? winPts : losePts;
         if (isWin) record[matchCategory].win = (record[matchCategory].win || 0) + 1;
         else record[matchCategory].lose = (record[matchCategory].lose || 0) + 1;
 
-        // 공격자(나)의 데이터 업데이트 시에만 횟수(playRecord)를 함께 저장
+        // 서버 업데이트
         db.ref(`arena_users/${myNick}`).update({
             score: currentScore + change,
             record: record,
-            playRecord: { date: todayStr, count: todayPlayCount } 
+            playRecord: { date: todayStr, count: nextCount } 
+        }).then(() => {
+            // 서버 저장 성공 시에만 로컬 변수와 UI 갱신
+            todayPlayCount = nextCount;
+            const chanceEl = document.getElementById('arena-chances');
+            if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
         });
     });
 
+    // 2. 방어자(상대방) 데이터 업데이트 (횟수 제외)[cite: 1]
     if(battleState.matchType === 'user_pvp' && battleState.oppNick) {
         db.ref(`arena_users/${battleState.oppNick}`).once('value', snap => {
             let oppData = snap.val();
             if(!oppData) return;
-
             let currentScore = oppData.score || 1000;
             let record = oppData.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
-
             let change = isWin ? losePts : winPts;
             if (!isWin) record.user.win = (record.user.win || 0) + 1; 
             else record.user.lose = (record.user.lose || 0) + 1; 
 
-            // 도전을 받은 방어자(상대방)는 점수/승패만 갱신 (playRecord는 업데이트 제외)
             db.ref(`arena_users/${battleState.oppNick}`).update({
                 score: currentScore + change,
                 record: record
+                // 방어자는 playRecord를 업데이트하지 않음
             });
         });
     }
@@ -7199,56 +7125,26 @@ function closeBattleUI() {
     refreshUserList();
 }
 
-// 13. 초기화 이벤트
 document.addEventListener('DOMContentLoaded', () => {
     refreshUserList();
     calcArenaPoints(); 
+    loadHomeArenaRanking();
 });
-/// ====== 투기장 코드 끝 ======== ///
 
-/**
- * 홈 화면 월간 투기장 랭킹 불러오기
- */
 function loadHomeArenaRanking() {
     const board = document.getElementById('homeArenaRankingBoard');
     if(!board) return; 
-    
     db.ref('arena_users').orderByChild('score').limitToLast(3).once('value', (snapshot) => {
-        let users = [];
-        snapshot.forEach(child => { users.push(child.val()); });
+        let users = []; snapshot.forEach(child => { users.push(child.val()); });
         users.reverse(); 
-        
-        if(users.length === 0) {
-            board.innerHTML = "<div style='text-align:center; color:#8b949e;'>랭킹 데이터가 없습니다.</div>";
-            return;
-        }
-        
-        let html = "";
-        const medals = ["🥇", "🥈", "🥉"];
-        
+        if(users.length === 0) { board.innerHTML = "데이터 없음"; return; }
+        let html = ""; const medals = ["🥇", "🥈", "🥉"];
         for(let i=0; i<3; i++) {
-            if(users[i]) {
-                html += `
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom: 1px dashed rgba(212,175,55,0.2); padding-bottom:5px;">
-                    <span>${medals[i]} <b style="color:#fff;">${users[i].nick}</b></span>
-                    <span style="color:var(--royal-gold); font-weight:bold;">${users[i].score} pts</span>
-                </div>`;
-            } else {
-                html += `
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom: 1px dashed rgba(212,175,55,0.2); padding-bottom:5px; color:#555;">
-                    <span>${medals[i]} -</span>
-                    <span>-</span>
-                </div>`;
-            }
+            if(users[i]) html += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${medals[i]} <b>${users[i].nick}</b></span><span>${users[i].score} pts</span></div>`;
         }
         board.innerHTML = html;
     });
 }
-
-// 홈 화면 렌더링 시 자동 실행
-document.addEventListener('DOMContentLoaded', () => {
-    loadHomeArenaRanking();
-});
 
 </script>
 
