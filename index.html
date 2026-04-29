@@ -6409,21 +6409,8 @@ let myArenaData = null;
 const INITIAL_POINTS = 637;
 const BATTLE_LIMIT = 5;
 
-// 일일 플레이 횟수 로컬스토리지 연동 함수
-function getTodayPlayCount() {
-    let record = JSON.parse(localStorage.getItem('arenaPlayRecord') || '{}');
-    let today = new Date().toDateString();
-    return record.date === today ? (record.count || 0) : 0;
-}
-
-function addTodayPlayCount() {
-    let count = getTodayPlayCount() + 1;
-    let today = new Date().toDateString();
-    localStorage.setItem('arenaPlayRecord', JSON.stringify({ date: today, count: count }));
-    return count;
-}
-
-let todayPlayCount = getTodayPlayCount();
+// 메모리상에서만 카운트하며, 실제 값은 Firebase(내 정보)에서 불러옵니다. (로컬스토리지 어뷰징 차단)
+let todayPlayCount = 0;
 
 /**
  * 1. 내 등록 정보 화면 업데이트 함수
@@ -6449,6 +6436,16 @@ function updateMyInfoDisplay(data) {
     if(btnReset) btnReset.style.display = 'block';
 
     arenaSelectedPet = data.pet; 
+
+    // Firebase에 저장된 일일 횟수 동기화 (시크릿모드/캐시삭제 꼼수 차단)
+    let todayStr = new Date().toDateString();
+    if (data.playRecord && data.playRecord.date === todayStr) {
+        todayPlayCount = data.playRecord.count || 0;
+    } else {
+        todayPlayCount = 0; // 날짜가 바뀌었거나 기록이 없으면 0으로 초기화
+    }
+    const chanceEl = document.getElementById('arena-chances');
+    if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
 
     const attrColors = { "지": "#7ee787", "수": "#a5d6ff", "화": "#ff7b72", "풍": "#fca311", "무": "#8b949e" };
     const record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
@@ -6498,6 +6495,7 @@ function resetArenaInfo() {
         arenaSelectedPet = null;
         const petPreview = document.getElementById('selected-arena-pet');
         if(petPreview) petPreview.innerHTML = '선택된 펫 없음';
+        myArenaData = null; 
     }
 }
 
@@ -6591,6 +6589,7 @@ function saveArenaInfo() {
         },
         score: myArenaData && myArenaData.score !== undefined ? myArenaData.score : 1000,
         record: myArenaData && myArenaData.record ? myArenaData.record : { bot: {win:0, lose:0}, user: {win:0, lose:0} },
+        playRecord: myArenaData && myArenaData.playRecord ? myArenaData.playRecord : { date: new Date().toDateString(), count: 0 },
         timestamp: Date.now()
     };
 
@@ -6741,46 +6740,28 @@ function getAttrBonus(atkAttr, defAttr) {
 async function initBattle(isBot, oppData = null) {
     if(!arenaSelectedPet) return alert("참전할 펫을 선택해주세요.");
     
-    todayPlayCount = getTodayPlayCount();
+    // 서버에 정보가 등록(저장)되지 않은 익명 유저는 대전 금지 (어뷰징 차단 핵심)
+    if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 대전이 가능합니다.");
+    
     if(todayPlayCount >= BATTLE_LIMIT) return alert("일일 대전 횟수를 초과했습니다.");
 
     let myChar = {};
     let myPet = {};
 
-    if (myArenaData && document.getElementById('character-setup-inputs') && document.getElementById('character-setup-inputs').classList.contains('disabled-section')) {
-        myChar = {
-            id: 'my-char', team: 'my', type: 'char', name: myArenaData.nick,
-            maxHp: myArenaData.stats.hp, atk: myArenaData.stats.atk, def: myArenaData.stats.def, spd: myArenaData.stats.spd,
-            attr: { t1: myArenaData.attr.t1 }, isGuard: false, buffs: {}, isDead: false
-        };
-        myChar.hp = myChar.maxHp;
+    myChar = {
+        id: 'my-char', team: 'my', type: 'char', name: myArenaData.nick,
+        maxHp: myArenaData.stats.hp, atk: myArenaData.stats.atk, def: myArenaData.stats.def, spd: myArenaData.stats.spd,
+        attr: { t1: myArenaData.attr.t1 }, isGuard: false, buffs: {}, isDead: false
+    };
+    myChar.hp = myChar.maxHp;
 
-        myPet = {
-            ...myArenaData.pet, id: 'my-pet', team: 'my', type: 'pet',
-            maxHp: myArenaData.pet.sHp, atk: myArenaData.pet.sAtk, def: myArenaData.pet.sDef, spd: myArenaData.pet.sSpd,
-            elements: myArenaData.pet.elements || "무",
-            attr: myArenaData.pet.attr || { t1: "무" }, isGuard: false, buffs: {}, isDead: false
-        };
-        myPet.hp = myPet.maxHp;
-    } else {
-        const pHP = parseInt(document.getElementById('ar-hp').value) || 0;
-        const pATK = parseInt(document.getElementById('ar-atk').value) || 0;
-        const pDEF = parseInt(document.getElementById('ar-def').value) || 0;
-        const pSPD = parseInt(document.getElementById('ar-spd').value) || 0;
-
-        myChar = {
-            id: 'my-char', team: 'my', type: 'char', name: localStorage.getItem('arenaUserNick') || "플레이어",
-            maxHp: (pHP * 4) + pATK + pDEF + pSPD,
-            atk: parseFloat(((pHP * 0.1) + pATK + (pDEF * 0.1) + (pSPD * 0.05)).toFixed(1)),
-            def: parseFloat(((pHP * 0.1) + (pATK * 0.1) + pDEF + (pSPD * 0.05)).toFixed(1)),
-            spd: pSPD, attr: { t1: document.getElementById('ar-attr1-type').value },
-            isGuard: false, buffs: {}, isDead: false
-        };
-        myChar.hp = myChar.maxHp;
-
-        myPet = { ...arenaSelectedPet, id: 'my-pet', team: 'my', type: 'pet', maxHp: arenaSelectedPet.sHp, atk: arenaSelectedPet.sAtk, def: arenaSelectedPet.sDef, spd: arenaSelectedPet.sSpd, elements: arenaSelectedPet.elements || "무", attr: arenaSelectedPet.attr || { t1: "무" }, isGuard: false, buffs: {}, isDead: false };
-        myPet.hp = myPet.maxHp;
-    }
+    myPet = {
+        ...myArenaData.pet, id: 'my-pet', team: 'my', type: 'pet',
+        maxHp: myArenaData.pet.sHp, atk: myArenaData.pet.sAtk, def: myArenaData.pet.sDef, spd: myArenaData.pet.sSpd,
+        elements: myArenaData.pet.elements || "무",
+        attr: myArenaData.pet.attr || { t1: "무" }, isGuard: false, buffs: {}, isDead: false
+    };
+    myPet.hp = myPet.maxHp;
 
     let oppChar = {}, oppPet = {};
 
@@ -7144,8 +7125,9 @@ function checkWinCondition() {
             updateMatchScore(isWin, pts, -5); 
         }
 
-        todayPlayCount = addTodayPlayCount();
-        document.getElementById('arena-chances').innerText = `${BATTLE_LIMIT - todayPlayCount}/${BATTLE_LIMIT}`;
+        todayPlayCount++;
+        const chanceEl = document.getElementById('arena-chances');
+        if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
         return true;
     }
     return false;
@@ -7169,6 +7151,7 @@ function surrenderBattle() {
 function updateMatchScore(isWin, winPts, losePts) {
     let myNick = localStorage.getItem('arenaUserNick');
     let matchCategory = battleState.matchType === 'user_pvp' ? 'user' : 'bot';
+    let todayStr = new Date().toDateString();
 
     db.ref(`arena_users/${myNick}`).once('value', snap => {
         let data = snap.val();
@@ -7181,9 +7164,11 @@ function updateMatchScore(isWin, winPts, losePts) {
         if (isWin) record[matchCategory].win = (record[matchCategory].win || 0) + 1;
         else record[matchCategory].lose = (record[matchCategory].lose || 0) + 1;
 
+        // 공격자(나)의 데이터 업데이트 시에만 횟수(playRecord)를 함께 저장
         db.ref(`arena_users/${myNick}`).update({
             score: currentScore + change,
-            record: record
+            record: record,
+            playRecord: { date: todayStr, count: todayPlayCount } 
         });
     });
 
@@ -7199,6 +7184,7 @@ function updateMatchScore(isWin, winPts, losePts) {
             if (!isWin) record.user.win = (record.user.win || 0) + 1; 
             else record.user.lose = (record.user.lose || 0) + 1; 
 
+            // 도전을 받은 방어자(상대방)는 점수/승패만 갱신 (playRecord는 업데이트 제외)
             db.ref(`arena_users/${battleState.oppNick}`).update({
                 score: currentScore + change,
                 record: record
@@ -7217,10 +7203,6 @@ function closeBattleUI() {
 document.addEventListener('DOMContentLoaded', () => {
     refreshUserList();
     calcArenaPoints(); 
-    
-    todayPlayCount = getTodayPlayCount();
-    const chanceEl = document.getElementById('arena-chances');
-    if(chanceEl) chanceEl.innerText = `${BATTLE_LIMIT - todayPlayCount}/${BATTLE_LIMIT}`;
 });
 /// ====== 투기장 코드 끝 ======== ///
 
