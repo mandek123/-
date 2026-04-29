@@ -6957,27 +6957,39 @@ async function executeTurn() {
     let aliveMy = ['my-char', 'my-pet'].filter(tid => !battleState.units[tid].isDead);
     let aliveOpp = ['opp-char', 'opp-pet'].filter(tid => !battleState.units[tid].isDead);
 
+    // [AI 전략 결정]
     if (aliveMy.length > 0) {
         let oppChar = battleState.units['opp-char'];
         let oppPet = battleState.units['opp-pet'];
         let commonTarget = aliveMy[Math.floor(Math.random() * aliveMy.length)];
-        let tryDagul = false;
-        if (!oppChar.isDead && !oppPet.isDead && Math.abs(oppChar.spd - oppPet.spd) < 30) {
-            if (Math.random() < 0.8) tryDagul = true;
-        }
-        aliveOpp.forEach(id => {
-            let u = battleState.units[id];
-            let target = tryDagul ? commonTarget : aliveMy[Math.floor(Math.random() * aliveMy.length)];
-            let type = 'attack';
-            if (Math.random() < 0.1) { type = 'guard'; target = id; }
-            else if (!tryDagul && u.type === 'pet' && Math.random() < 0.2) {
-                type = Math.random() < 0.5 ? 'skill_back' : 'skill_dog';
-                if (type === 'skill_dog') target = 'opp-char'; 
+        
+        let charAct = { unitId: 'opp-char', type: 'attack', target: commonTarget };
+        let petAct = { unitId: 'opp-pet', type: 'attack', target: commonTarget };
+
+        // 1. 위기 관리 로직: 캐릭터 체력이 30% 이하일 때
+        if (!oppChar.isDead && (oppChar.hp / oppChar.maxHp) < 0.3) {
+            charAct.type = 'guard'; // 캐릭터는 방어
+            charAct.target = 'opp-char';
+            
+            if(!oppPet.isDead) {
+                // 페트는 상황에 따라 충견진돗개(보호) 또는 배수의진(막타) 사용
+                petAct.type = (Math.random() < 0.6) ? 'skill_dog' : 'skill_back';
+                petAct.target = (petAct.type === 'skill_dog') ? 'opp-char' : commonTarget;
             }
-            battleState.actions.push({ unitId: id, type: type, target: target });
-        });
+        } 
+        // 2. 다굴(합공) 로직: 캐릭터와 페트의 순발력 차이가 40 이내면 합공 노림
+        else if (!oppChar.isDead && !oppPet.isDead && Math.abs(oppChar.spd - oppPet.spd) < 40) {
+            if (Math.random() < 0.8) {
+                charAct.target = commonTarget;
+                petAct.target = commonTarget;
+            }
+        }
+
+        if(!oppChar.isDead) battleState.actions.push(charAct);
+        if(!oppPet.isDead) battleState.actions.push(petAct);
     }
 
+    // 행동 속도 결정 (순발력 기반)
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         let R = Math.random() * ((u.spd * 0.15) + 20);
@@ -6986,12 +6998,13 @@ async function executeTurn() {
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
+    // 합공(다굴) 체크 연출용
     for(let i=0; i < battleState.actions.length - 1; i++) {
         let a1 = battleState.actions[i]; let a2 = battleState.actions[i+1];
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
             let u1 = battleState.units[a1.unitId]; let u2 = battleState.units[a2.unitId];
             if(u1.team === u2.team && a1.target === a2.target) {
-                if(Math.abs(a1.actionSpd - a2.actionSpd) < 30 && Math.random() < 0.7) {
+                if(Math.abs(a1.actionSpd - a2.actionSpd) < 30) {
                     a1.isDagul = true; a2.isDagul = true;
                 }
             }
@@ -7003,7 +7016,14 @@ async function executeTurn() {
         if(attacker.isDead) continue;
         if(checkWinCondition()) break;
         let target = battleState.units[act.target];
-        if(act.type === 'guard') { attacker.isGuard = true; addLog(`🛡️ [${attacker.name}] 방어 태세!`); await delay(500); continue; }
+
+        if(act.type === 'guard') { 
+            attacker.isGuard = true; 
+            addLog(`🛡️ [${attacker.name}] 방어 태세!`); 
+            await delay(400); 
+            continue; 
+        }
+
         if(target.isDead) {
             let aliveEnemies = Object.values(battleState.units).filter(u => u.team !== attacker.team && !u.isDead);
             if(aliveEnemies.length === 0) break;
@@ -7011,7 +7031,7 @@ async function executeTurn() {
         }
 
         let isBackToWall = act.type === 'skill_back';
-        let currentAtk = isBackToWall ? attacker.atk * 2 : attacker.atk;
+        let currentAtk = isBackToWall ? attacker.atk * 2.2 : attacker.atk;
         if(act.type === 'skill_dog') currentAtk *= 0.8;
         if(isBackToWall) { attacker.buffs.defPenalty = 0.5; addLog(`🔥 [${attacker.name}] 배수의진!`); }
 
@@ -7022,7 +7042,7 @@ async function executeTurn() {
             if(petAction && petAction.type === 'skill_dog' && !defPet.isDead) { 
                 target = defPet; 
                 isDogIntercept = true;
-                addLog(`🐶 [${defPet.name}] 충견진돗개! 캐릭터 대신 맞습니다!`); 
+                addLog(`🐶 [${defPet.name}] 충견진돗개! 주인을 지킵니다!`); 
             }
         }
 
@@ -7032,16 +7052,30 @@ async function executeTurn() {
         if(attackerBox) attackerBox.classList.add(moveClass);
         await delay(300);
 
-        let dodgeChance = Math.max(5, Math.min(30, 5 + (target.spd - attacker.spd) * 0.1));
+        // [순발력 영향력 강화: 회피 및 반격]
+        // 회피 확률 계산 (기본 10% + 순발력 차이 가중치 0.2로 상향)
+        let dodgeChance = Math.max(8, Math.min(45, 10 + (target.spd - attacker.spd) * 0.2));
+        
         if(!target.isGuard && Math.random() * 100 < dodgeChance && !isDogIntercept) {
-            showFloatingDmg(target.id, "MISS", "miss"); addLog(`💨 [${target.name}] 회피!`);
+            showFloatingDmg(target.id, "MISS", "miss"); 
+            addLog(`💨 [${target.name}] 회피 성공!`);
+            
+            // [반격 시스템] 순발력이 30 이상 높을 경우 20% 확률로 반격
+            if((target.spd - attacker.spd) > 30 && Math.random() < 0.2) {
+                let counterDmg = Math.floor(target.atk * 0.5);
+                attacker.hp -= counterDmg;
+                showFloatingDmg(attacker.id, counterDmg, "normal");
+                addLog(`↪️ [${target.name}]의 기습 반격! ${counterDmg} 데미지!`);
+            }
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
-            let baseDmg = ((currentAtk * 1.5) - (target.def * (target.buffs.defPenalty || 1) * 0.8)) * attrBonus;
-            let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.09) || 5);
-            if(isCrit) baseDmg *= 1.5;
-            if(target.isGuard) baseDmg *= 0.5;
-            if(isDogIntercept) baseDmg *= 0.3; 
+            let baseDmg = ((currentAtk * 1.6) - (target.def * (target.buffs.defPenalty || 1) * 0.75)) * attrBonus;
+            
+            // 크리티컬 확률 보정 (상향)
+            let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.07) || 6);
+            if(isCrit) baseDmg *= 1.6;
+            if(target.isGuard) baseDmg *= 0.45;
+            if(isDogIntercept) baseDmg *= 0.35; 
             
             let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
             target.hp -= finalDmg;
@@ -7122,7 +7156,7 @@ function updateMatchScore(isWin, winPts, losePts) {
         let data = snap.val();
         if(!data) return;
         
-        let currentScore = Number(data.score || 1000); // 숫자 변환 보장
+        let currentScore = Number(data.score || 1000); 
         let record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
         
         let currentCount = (data.playRecord && data.playRecord.date === todayStr) ? (data.playRecord.count || 0) : 0;
@@ -7147,7 +7181,7 @@ function updateMatchScore(isWin, winPts, losePts) {
         db.ref(`arena_users/${battleState.oppNick}`).once('value', snap => {
             let oppData = snap.val();
             if(!oppData) return;
-            let currentScore = Number(oppData.score || 1000); // 숫자 변환 보장
+            let currentScore = Number(oppData.score || 1000); 
             let record = oppData.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
             let change = isWin ? losePts : winPts;
             if (!isWin) record.user.win = (record.user.win || 0) + 1; 
@@ -7179,21 +7213,19 @@ function closeBattleUI() {
 
 /**
  * 첫 페이지 랭킹 실시간 연동 로직
- * (on('value') 리스너를 사용하여 실시간 반영)
  */
 function loadHomeArenaRanking() {
     const board = document.getElementById('homeArenaRankingBoard');
     if(!board) return; 
 
-    // .on('value')를 통해 데이터 변경 시 즉시 콜백 실행
     db.ref('arena_users').orderByChild('score').limitToLast(3).on('value', (snapshot) => {
         let users = [];
         snapshot.forEach(child => { 
             let val = child.val();
-            val.score = Number(val.score); // 숫자 타입 고정
+            val.score = Number(val.score); 
             users.push(val); 
         });
-        users.reverse(); // 점수 높은 순 정렬
+        users.reverse(); 
 
         if(users.length === 0) { board.innerHTML = "데이터 없음"; return; }
         
@@ -7202,7 +7234,6 @@ function loadHomeArenaRanking() {
         
         users.forEach((user, i) => {
             if(user) {
-                // PET_DATABASE에서 해당 페트 정보를 찾아 이미지를 가져오는 로직 (제공된 코드 참고)
                 const petObj = (typeof PET_DATABASE !== 'undefined') ? PET_DATABASE.find(p => p.name === user.pet.name) : null;
                 const petImg = petObj ? petObj.img : user.pet.img;
 
