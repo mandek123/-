@@ -7018,14 +7018,18 @@ async function executeTurn() {
 }
 
 /**
- * 12. 승패 결과 판정 및 서버 연동
+ * 12. 승패 결과 판정 및 서버 연동 (중복 차감 버그 수정됨)
  */
 function checkWinCondition() {
+    // [중요 수정] 이미 게임 종료 처리가 되었다면 업데이트 로직을 타지 않고 바로 종료 상태만 반환합니다.
+    if (battleState.isGameOver) return true; 
+
     let myAlive = !battleState.units['my-char'].isDead;
     let oppAlive = !battleState.units['opp-char'].isDead;
 
     if (!myAlive || !oppAlive || battleState.turn > 20) {
-        battleState.isGameOver = true;
+        battleState.isGameOver = true; // 여기서 true로 선언하여 이후의 중복 호출을 막습니다.
+        
         let isWin = myAlive && (!oppAlive || battleState.units['my-char'].hp > battleState.units['opp-char'].hp);
         
         addLog(`<br>=======================`);
@@ -7038,7 +7042,6 @@ function checkWinCondition() {
         closeBtn.style.display = 'block';
         document.querySelector('.battle-field').style.opacity = '0.5';
         
-        // 점수와 대전 횟수 업데이트 호출
         let scoreSet = battleState.matchType === 'user_pvp' ? {w:20, l:-15} : 
                       (battleState.matchType.includes('easy') ? {w:5, l:-5} : 
                       (battleState.matchType.includes('normal') ? {w:10, l:-5} : {w:15, l:-5}));
@@ -7061,7 +7064,7 @@ function surrenderBattle() {
 }
 
 /**
- * 대전 결과 서버 전송 (횟수 차감 핵심 로직)
+ * 대전 결과 서버 전송
  */
 function updateMatchScore(isWin, winPts, losePts) {
     let myNick = localStorage.getItem('arenaUserNick');
@@ -7070,7 +7073,6 @@ function updateMatchScore(isWin, winPts, losePts) {
     let matchCategory = battleState.matchType === 'user_pvp' ? 'user' : 'bot';
     let todayStr = new Date().toDateString();
 
-    // 1. 공격자(나) 데이터 업데이트 (점수 + 횟수 동시 처리)[cite: 1]
     db.ref(`arena_users/${myNick}`).once('value', snap => {
         let data = snap.val();
         if(!data) return;
@@ -7078,7 +7080,6 @@ function updateMatchScore(isWin, winPts, losePts) {
         let currentScore = data.score || 1000;
         let record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
         
-        // 서버 데이터를 기준으로 횟수 계산
         let currentCount = (data.playRecord && data.playRecord.date === todayStr) ? (data.playRecord.count || 0) : 0;
         let nextCount = currentCount + 1;
 
@@ -7086,20 +7087,17 @@ function updateMatchScore(isWin, winPts, losePts) {
         if (isWin) record[matchCategory].win = (record[matchCategory].win || 0) + 1;
         else record[matchCategory].lose = (record[matchCategory].lose || 0) + 1;
 
-        // 서버 업데이트
         db.ref(`arena_users/${myNick}`).update({
             score: currentScore + change,
             record: record,
             playRecord: { date: todayStr, count: nextCount } 
         }).then(() => {
-            // 서버 저장 성공 시에만 로컬 변수와 UI 갱신
             todayPlayCount = nextCount;
             const chanceEl = document.getElementById('arena-chances');
             if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
         });
     });
 
-    // 2. 방어자(상대방) 데이터 업데이트 (횟수 제외)[cite: 1]
     if(battleState.matchType === 'user_pvp' && battleState.oppNick) {
         db.ref(`arena_users/${battleState.oppNick}`).once('value', snap => {
             let oppData = snap.val();
@@ -7113,7 +7111,6 @@ function updateMatchScore(isWin, winPts, losePts) {
             db.ref(`arena_users/${battleState.oppNick}`).update({
                 score: currentScore + change,
                 record: record
-                // 방어자는 playRecord를 업데이트하지 않음
             });
         });
     }
