@@ -6792,7 +6792,7 @@ async function initBattle(isBot, oppData = null) {
 
     if (isBot) {
         battleState.matchType = isBot;
-        let bonusPts = (isBot === 'bot_hard') ? 780 : (isBot === 'bot_normal' ? 680 : 600);
+        let bonusPts = (isBot === 'bot_hard' || isBot === 'bot_normal') ? INITIAL_POINTS : 600;
         let botPts = [0, 0, 0, 0];
         for(let i=0; i<bonusPts; i++) botPts[Math.floor(Math.random() * 4)]++;
         
@@ -6811,7 +6811,7 @@ async function initBattle(isBot, oppData = null) {
         }
 
         let randomPetBase = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
-        let growthMulti = (isBot === 'bot_hard') ? 148 : 139;
+        let growthMulti = 139;
         let botPetS = {
             name: randomPetBase.name,
             img: randomPetBase.img,
@@ -6830,8 +6830,8 @@ async function initBattle(isBot, oppData = null) {
             oppChar = buildBotChar("만득BOT(보통)", botPts, botAttr, 1.0);
             oppPet = { ...botPetS, dmgMod: 1.0 }; 
         } else if (isBot === 'bot_hard') { 
-            oppChar = buildBotChar("만득BOT(어려움)", botPts, botAttr, 1.3);
-            oppPet = { ...botPetS, dmgMod: 1.2 }; 
+            oppChar = buildBotChar("만득BOT(어려움)", botPts, botAttr, 1.5);
+            oppPet = { ...botPetS, dmgMod: 1.5 }; 
         }
     } else {
         battleState.matchType = 'user_pvp';
