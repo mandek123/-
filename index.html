@@ -6962,16 +6962,41 @@ async function executeTurn() {
     battleState.phase = 'ANIMATION';
     document.getElementById('control-status').innerText = "전투 진행 중...";
     
-    ['opp-char', 'opp-pet'].forEach(id => {
-        let u = battleState.units[id];
-        if(!u.isDead) {
-            let aliveMy = ['my-char', 'my-pet'].filter(tid => !battleState.units[tid].isDead);
-            let target = aliveMy[Math.floor(Math.random() * aliveMy.length)];
-            if(Math.random() < 0.1) battleState.actions.push({ unitId: id, type: 'guard', target: id });
-            else battleState.actions.push({ unitId: id, type: 'attack', target: target });
-        }
-    });
+    let aliveMy = ['my-char', 'my-pet'].filter(tid => !battleState.units[tid].isDead);
+    let aliveOpp = ['opp-char', 'opp-pet'].filter(tid => !battleState.units[tid].isDead);
 
+    // AI 행동 결정 로직
+    if (aliveMy.length > 0) {
+        let oppChar = battleState.units['opp-char'];
+        let oppPet = battleState.units['opp-pet'];
+        let commonTarget = aliveMy[Math.floor(Math.random() * aliveMy.length)];
+
+        // 다굴 조건: 둘 다 생존해 있고 순발력 차이가 30 미만일 때 80% 확률로 타겟 통일
+        let tryDagul = false;
+        if (!oppChar.isDead && !oppPet.isDead && Math.abs(oppChar.spd - oppPet.spd) < 30) {
+            if (Math.random() < 0.8) tryDagul = true;
+        }
+
+        aliveOpp.forEach(id => {
+            let u = battleState.units[id];
+            let target = tryDagul ? commonTarget : aliveMy[Math.floor(Math.random() * aliveMy.length)];
+            let type = 'attack';
+
+            if (Math.random() < 0.1) {
+                // 10% 확률로 방어
+                type = 'guard';
+                target = id;
+            } else if (!tryDagul && u.type === 'pet' && Math.random() < 0.2) {
+                // 다굴 시도가 아닐 경우, 펫은 20% 확률로 스킬 사용
+                type = Math.random() < 0.5 ? 'skill_back' : 'skill_dog';
+                if (type === 'skill_dog') target = 'opp-char'; 
+            }
+
+            battleState.actions.push({ unitId: id, type: type, target: target });
+        });
+    }
+
+    // 행동 순서(actionSpd) 계산
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         let R = Math.random() * ((u.spd * 0.15) + 20);
@@ -6981,6 +7006,7 @@ async function executeTurn() {
 
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
+    // 다굴 성립 판정
     for(let i=0; i < battleState.actions.length - 1; i++) {
         let a1 = battleState.actions[i];
         let a2 = battleState.actions[i+1];
@@ -7017,7 +7043,10 @@ async function executeTurn() {
 
         let isBackToWall = act.type === 'skill_back';
         let currentAtk = isBackToWall ? attacker.atk * 2 : attacker.atk;
-        if(isBackToWall) { attacker.buffs.defPenalty = 0.5; addLog(`🔥 [${attacker.name}] 배수의진 발동! 공격력 2배, 방어력 50% 감소!`); }
+        if(isBackToWall) { 
+            attacker.buffs.defPenalty = 0.5; 
+            addLog(`🔥 [${attacker.name}] 배수의진 발동! 공격력 2배, 방어력 50% 감소!`); 
+        }
 
         let isDogIntercept = false;
         if(target.type === 'char') {
@@ -7200,12 +7229,12 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function loadHomeArenaRanking() {
     const board = document.getElementById('homeArenaRankingBoard');
-    if(!board) return; // 해당 UI가 없으면 실행 안함
+    if(!board) return; 
     
     db.ref('arena_users').orderByChild('score').limitToLast(3).once('value', (snapshot) => {
         let users = [];
         snapshot.forEach(child => { users.push(child.val()); });
-        users.reverse(); // 가장 점수가 높은 순으로 정렬
+        users.reverse(); 
         
         if(users.length === 0) {
             board.innerHTML = "<div style='text-align:center; color:#8b949e;'>랭킹 데이터가 없습니다.</div>";
