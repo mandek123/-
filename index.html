@@ -6669,6 +6669,7 @@ function updateMyInfoDisplay(data) {
     if (data.lastResetMonth !== currentMonthLabel) {
         db.ref(`arena_users/${data.nick}`).update({
             record: { bot: {win:0, lose:0}, user: {win:0, lose:0} },
+            score: 1000, // 점수 초기화 항목 추가
             lastResetMonth: currentMonthLabel
         });
         return; 
