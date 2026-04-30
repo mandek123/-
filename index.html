@@ -6423,6 +6423,7 @@ window.onload = () => {
 //          투기장 메인 시스템 스크립트
 // ==========================================
 
+let isEditingArena = false; // 캐릭터 정보 수정 중인지 확인하는 플래그
 let arenaSelectedPet = null;
 let myArenaData = null; 
 const INITIAL_POINTS = 637;
@@ -6435,6 +6436,10 @@ let todayPlayCount = 0;
  * 1. 내 등록 정보 화면 업데이트 함수
  */
 function updateMyInfoDisplay(data) {
+    myArenaData = data;
+    
+    if (isEditingArena) return; // 수정 중일 때는 외부 데이터 업데이트로 UI를 덮어쓰지 않음
+    
     myArenaData = data;
     const display = document.getElementById('my-info-display');
     const setupInputs = document.getElementById('character-setup-inputs');
@@ -6511,6 +6516,8 @@ function updateMyInfoDisplay(data) {
 
 function resetArenaInfo() {
     if(confirm("등록된 캐릭터 스탯과 펫 정보를 초기화하시겠습니까?\n(현재 보유 점수 및 전적은 안전하게 유지됩니다.)")) {
+        // 핵심: 편집 모드 활성화 (외부 업데이트로부터 UI 보호)
+        isEditingArena = true;
         const setupInputs = document.getElementById('character-setup-inputs');
         const btnSave = document.getElementById('btn-save-info');
         const btnReset = document.getElementById('btn-reset-info');
@@ -6524,7 +6531,6 @@ function resetArenaInfo() {
         arenaSelectedPet = null;
         const petPreview = document.getElementById('selected-arena-pet');
         if(petPreview) petPreview.innerHTML = '선택된 펫 없음';
-        myArenaData = null; 
     }
 }
 
@@ -6625,6 +6631,7 @@ function saveArenaInfo() {
 
     db.ref(`arena_users/${userNick}`).set(arenaData)
     .then(() => {
+        isEditingArena = false; // 저장 성공 시 편집 모드 해제
         alert("🛡️ 투기장 정보가 성공적으로 저장되었습니다!");
         updateMyInfoDisplay(arenaData);
         refreshUserList();
