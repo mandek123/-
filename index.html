@@ -3819,9 +3819,11 @@ const NOTICE_DATABASE = [
         <span>- 실시간 데이터 관련 수정 작업 중 예상치 못한 오류로 인해 기존 데이터가 일부 손실되었습니다.</span>
         <span>- 이에 따라 부득이하게 모든 시스템의 새로운 시즌을 시작하게 되었음을 알려드립니다. 이용에 불편을 드려 대단히 죄송합니다.</span>
 
-        <strong>2) 투기장(PvP) 시스템 재등록 안내</strong>
+        <strong>2) 투기장(PvP) 안내</strong>
         <span>- 재등록 필요 : 데이터 초기화로 인해 월간 투기장 이용을 위해서는 캐릭터 스탯을 새로 등록해야 합니다.</span>
-
+        <span>- 페트 신규기술 추가 : 신규 기술인 가드브레이크를 추가하였습니다.</span>
+        <span>- 스탯 밸런스 조절 : 기존 기본 공격력(데미지)를 낮추고 방어력의 성능을 높였습니다.</span>
+        
         <strong>3) 주간 펫 육성 챔피언십 새로운 시즌 시작</strong>
         <span>- 신규 시즌 페트 : 메가고르돈으로 새로운 육성 시즌이 시작됩니다.</span>
         <span>- 데이터 초기화 : 기존에 육성 중이던 데이터는 진행되지만 랭킹 등록은 되지 않습니다. 키우고 있던 페트가 있으시다면 140까지 육성 후 새로운 알을 부화시켜 참여해야 합니다.</span>
@@ -6583,7 +6585,7 @@ window.onload = () => {
 
 
 // ==========================================
-//          투기장 메인 시스템 스크립트
+//     투기장 메인 시스템 스크립트
 // ==========================================
 
 let isEditingArena = false; // 캐릭터 정보 수정 중인지 확인하는 플래그
@@ -7081,11 +7083,15 @@ function startTurnPhase() {
     document.getElementById('control-status').innerText = "내 캐릭터 행동 대기중...";
     document.getElementById('btn-skill-back').style.display = 'none';
     document.getElementById('btn-skill-dog').style.display = 'none';
+    let btnGB = document.getElementById('btn-skill-gb');
+    if(btnGB) btnGB.style.display = 'none';
+
     if(battleState.units['my-char'].isDead) {
         battleState.phase = 'SELECT_PET';
         document.getElementById('control-status').innerText = "내 펫 행동 대기중...";
         document.getElementById('btn-skill-back').style.display = 'inline-block';
         document.getElementById('btn-skill-dog').style.display = 'inline-block';
+        if(btnGB) btnGB.style.display = 'inline-block';
     }
 }
 
@@ -7119,6 +7125,8 @@ function moveToNextSelection() {
             document.getElementById('control-status').innerText = "내 펫 행동 대기중...";
             document.getElementById('btn-skill-back').style.display = 'inline-block';
             document.getElementById('btn-skill-dog').style.display = 'inline-block';
+            let btnGB = document.getElementById('btn-skill-gb');
+            if(btnGB) btnGB.style.display = 'inline-block';
         }
     } else if (battleState.phase === 'SELECT_PET') executeTurn();
 }
@@ -7133,24 +7141,26 @@ async function executeTurn() {
         let oppChar = battleState.units['opp-char'];
         let oppPet = battleState.units['opp-pet'];
         
-        // 1. 점사(Focus Fire) 타겟팅: 체력이 가장 낮은 아군 우선 타겟
         let focusTarget = aliveMy.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
         
         let charAct = { unitId: 'opp-char', type: 'attack', target: focusTarget };
         let petAct = { unitId: 'opp-pet', type: 'attack', target: focusTarget };
 
-        // 2. 위기 관리 로직: BOT 캐릭터 체력이 40% 이하일 때
+        let playerGuardAction = battleState.actions.find(a => a.unitId.startsWith('my-') && a.type === 'guard');
+        if (playerGuardAction && Math.random() < 0.75) {
+            petAct.type = 'guardbreak';
+            petAct.target = playerGuardAction.unitId; 
+        }
+
         if (!oppChar.isDead && (oppChar.hp / oppChar.maxHp) < 0.4) {
             charAct.type = 'guard'; 
             charAct.target = 'opp-char';
             
             if(!oppPet.isDead) {
-                // 페트는 상황에 따라 충견진돗개(보호) 사용 확률 대폭 상향
                 petAct.type = (Math.random() < 0.8) ? 'skill_dog' : 'skill_back';
                 petAct.target = (petAct.type === 'skill_dog') ? 'opp-char' : focusTarget;
             }
         } 
-        // 3. 다굴(합공) 로직 보정
         else if (!oppChar.isDead && !oppPet.isDead && Math.abs(oppChar.spd - oppPet.spd) < 50) {
             if (Math.random() < 0.85) {
                 charAct.target = focusTarget;
@@ -7162,18 +7172,17 @@ async function executeTurn() {
         if(!oppPet.isDead) battleState.actions.push(petAct);
     }
 
-    // 행동 속도 및 가중치 결정
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         let R = Math.random() * ((u.spd * 0.1) + 15);
         act.actionSpd = u.spd + 15 - R;
-        if(act.type === 'guard') act.actionSpd += 1500; // 방어 우선순위 대폭 상향
+        if(act.type === 'guard') act.actionSpd += 1500; 
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
-    // 합공 체크
     for(let i=0; i < battleState.actions.length - 1; i++) {
         let a1 = battleState.actions[i]; let a2 = battleState.actions[i+1];
+        // 가드브레이크는 attack 타입이 아니므로 다굴 성립 조건에서 원천 제외됩니다.
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
             let u1 = battleState.units[a1.unitId]; let u2 = battleState.units[a2.unitId];
             if(u1.team === u2.team && a1.target === a2.target) {
@@ -7203,9 +7212,22 @@ async function executeTurn() {
         }
 
         let isBackToWall = act.type === 'skill_back';
-        let currentAtk = isBackToWall ? attacker.atk * 2.4 : attacker.atk; // 배수의 진 소폭 상향
+        let isGuardBreak = act.type === 'guardbreak';
+        let gbSuccess = false; 
+
+        let currentAtk = isBackToWall ? attacker.atk * 2.0 : attacker.atk; 
         if(act.type === 'skill_dog') currentAtk *= 0.8;
         if(isBackToWall) { attacker.buffs.defPenalty = 0.5; addLog(`🔥 [${attacker.name}] 배수의진!`); }
+
+        if(isGuardBreak) {
+            if(target.isGuard) {
+                target.isGuard = false; 
+                gbSuccess = true;
+                addLog(`💥 [${attacker.name}](이)가 가드브레이크를 사용하여 방어를 뚫었습니다!`);
+            } else {
+                addLog(`💨 [${attacker.name}]의 가드브레이크 시도! 하지만 대상이 방어 태세가 아닙니다.`);
+            }
+        }
 
         let isDogIntercept = false;
         if(target.type === 'char' && !act.isDagul) {
@@ -7224,29 +7246,39 @@ async function executeTurn() {
         if(attackerBox) attackerBox.classList.add(moveClass);
         await delay(300);
 
-        // --- [순발력 전투 로직 강화: 회피 및 반격] ---
         let dodgeChance = Math.max(10, Math.min(55, 12 + (target.spd - attacker.spd) * 0.3));
         
-        // [수정됨] act.isDagul(협공) 상태일 경우 회피 로직을 건너뜁니다.
-        if(!target.isGuard && !act.isDagul && Math.random() * 100 < dodgeChance && !isDogIntercept) {
-            showFloatingDmg(target.id, "MISS", "miss"); 
-            addLog(`💨 [${target.name}] 회피 성공!`);
+        let isForcedMiss = isGuardBreak && !gbSuccess; 
+        let cannotDodge = isGuardBreak && gbSuccess;   
+
+        if(isForcedMiss || (!target.isGuard && !act.isDagul && !cannotDodge && Math.random() * 100 < dodgeChance && !isDogIntercept)) {
+            showFloatingDmg(target.id, "MISS", "miss"); 
             
-            // [반격 시스템] 순발력이 40 이상 높을 경우 35% 확률로 기습 반격
-            if((target.spd - attacker.spd) > 40 && Math.random() < 0.35) {
-                let counterDmg = Math.floor(target.atk * 0.65);
-                attacker.hp -= counterDmg;
-                showFloatingDmg(attacker.id, counterDmg, "normal");
-                addLog(`↪️ [${target.name}]의 기습 반격! ${counterDmg} 데미지!`);
-                updateAllHPUI();
+            if (isForcedMiss) {
+                addLog(`❌ 가드브레이크 실패! 데미지를 주지 못했습니다.`);
+            } else {
+                addLog(`💨 [${target.name}] 회피 성공!`);
+                if((target.spd - attacker.spd) > 40 && Math.random() < 0.35) {
+                    let counterDmg = Math.floor(target.atk * 0.65);
+                    attacker.hp -= counterDmg;
+                    showFloatingDmg(attacker.id, counterDmg, "normal");
+                    addLog(`↪️ [${target.name}]의 기습 반격! ${counterDmg} 데미지!`);
+                    updateAllHPUI();
+                }
             }
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
-            let baseDmg = ((attacker.atk * (act.isDagul ? 1.4 : 1.7)) - (target.def * 0.65)) * attrBonus;
+
+            // 공격 및 방어 가중치 밸런스 조정
+            let skillMultiplier = act.isDagul ? 1.0 : 1.2; 
+            let baseDmg = ((currentAtk * skillMultiplier) - (target.def * 0.85)) * attrBonus;
+
+            // 방어력이 공격력보다 월등히 높아 데미지가 0 이하로 떨어지는 것을 방지 (최소 데미지 보장)
+            baseDmg = Math.max(currentAtk * 0.1, baseDmg);
             
-            // 크리티컬 확률 공식 상향 (순발력 차이 반영)
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
+            
             if(target.isGuard) baseDmg *= 0.1;
             if(isDogIntercept) baseDmg *= 0.25; 
             
