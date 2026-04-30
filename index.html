@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W5S4CMH3QR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W5S4CMH3QR');
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>만득월드</title>
@@ -4038,6 +4049,37 @@ const NOTICE_DATABASE = [
         } else {
         navbar.style.display = 'flex';
         if (topNotice) topNotice.style.display = 'none';
+
+        // --- [GA4 메뉴 클릭 추적 코드 시작] ---
+    const menuNames = {
+        'page-home': '홈(메인화면)',
+        'page-exp': '경험치계산기',
+        'page-acc': '명중/회피계산기',
+        'page-rev': '순발력범위계산기',
+        'page-battle': '종합전투시뮬',
+        'page-ency': '펫 도감',
+        'page-ency-status': '나의 도감 현황',
+        'page-notice': '공지사항',
+        'page-arena': '투기장 (PvP)',
+        'page-weekly-championship': '펫 육성 챔피언십',
+        'page-item-sim': '아이템 시뮬레이터',
+        'page-levelup-sim': '레벨업 시뮬레이션',
+        'page-init-sim': '초기화 시뮬레이션',
+        'page-raid-guide': '레이드 패시브 안내/기타',
+        'page-bot': '만득봇 안내'
+    };
+
+    // 등록되지 않은 pageId일 경우 pageId 자체를 출력
+    const menuName = menuNames[pageId] || pageId;
+
+    // gtag가 정상적으로 로드되었을 때만 이벤트 전송
+    if (typeof gtag === 'function') {
+        gtag('event', 'menu_click', {
+            'menu_name': menuName
+        });
+    }
+    // --- [GA4 메뉴 클릭 추적 코드 끝] ---
+
         }
     
     // 메뉴 하이라이트 분기 추가
