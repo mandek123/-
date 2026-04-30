@@ -5305,7 +5305,7 @@ function startWeeklyChallenge() {
 
     localStorage.setItem('weeklyPetData', JSON.stringify(newPetData));
     localStorage.setItem('weeklyPetSubmitted', 'false'); 
-    alert(`[${petTemplate.name}] 부화! 종합 성장 비율: ${(ratio * 100).toFixed(1)}%`);
+    alert(`[${petTemplate.name}]의 알이 부화했습니다!\n꾸준히 사냥하여 140레벨을 달성하고 랭킹에 도전하세요.`);
     renderWeeklyUI();
 }
 
