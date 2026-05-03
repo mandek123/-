@@ -2749,7 +2749,7 @@
                     <li><strong>전투 규칙:</strong><br>
                         - 캐릭터의 체력이 0이 되면 즉시 패배 처리됩니다.<br>
                         - 기존 다굴시스템의 성능이 너무 좋으므로 하향(너프)하였습니다.<br>
-                        아군의 턴이 연속될 때 설정한 역순 범위 내 일 경우 70% 확률로 발동합니다.<br>
+                        아군의 턴이 연속될 때 설정한 역순 범위 내 일 경우 60% 확률로 발동합니다.<br>
                         (수정된 역순 범위는 비공개입니다.)
                     </li>
                     <li><strong>승점 시스템:</strong><br>
@@ -7547,7 +7547,7 @@ async function executeTurn() {
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
             let u1 = battleState.units[a1.unitId]; let u2 = battleState.units[a2.unitId];
             if(u1.team === u2.team && a1.target === a2.target) {
-                if(Math.abs(a1.actionSpd - a2.actionSpd) < 40) {
+                if(Math.abs(a1.actionSpd - a2.actionSpd) < 20 && Math.random() < 0.6) {
                     a1.isDagul = true; a2.isDagul = true;
                 }
             }
