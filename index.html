@@ -7202,9 +7202,10 @@ async function executeTurn() {
             
             if(!oppPet.isDead) {
                 petAct.type = (Math.random() < 0.8) ? 'skill_dog' : 'skill_back';
-                petAct.target = (petAct.type === 'skill_dog') ? 'opp-char' : focusTarget;
+                // ▼ 이 부분을 focusTarget으로 수정하여 적을 타격하게 만듭니다.
+                petAct.target = focusTarget; 
             }
-        } 
+        }
         else if (!oppChar.isDead && !oppPet.isDead && Math.abs(oppChar.spd - oppPet.spd) < 50) {
             if (Math.random() < 0.85) {
                 charAct.target = focusTarget;
@@ -7272,9 +7273,8 @@ async function executeTurn() {
                 addLog(`💨 [${attacker.name}]의 가드브레이크 시도! 하지만 대상이 방어 태세가 아닙니다.`);
             }
         }
-
-        let isDogIntercept = false;
-        if(target.type === 'char' && !act.isDagul) {
+ 
+        if(target.type === 'char' && !act.isDagul && act.type !== 'guardbreak') {
             let defPet = battleState.units[`${target.team}-pet`];
             let petAction = battleState.actions.find(a => a.unitId === defPet.id && !battleState.units[a.unitId].isDead);
             if(petAction && petAction.type === 'skill_dog' && !defPet.isDead) { 
@@ -7323,9 +7323,9 @@ async function executeTurn() {
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
             
-            if(target.isGuard) baseDmg *= 0.1;
-            if(isDogIntercept) baseDmg *= 0.25; 
-            
+            // 방어 시 데미지 감소 효율 너프 (기존 0.1 -> 변경 0.5)
+            if(target.isGuard) baseDmg *= 0.5;
+                        
             let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
             target.hp -= finalDmg;
             const targetBox = document.getElementById(`unit-${target.id}`);
