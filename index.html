@@ -917,30 +917,35 @@
                 투기장 페이지 전용 CSS 시작
    ========================================================= */
 
-/* [공통 테마 변수] */
+/* [공통 테마 변수] - 기존 유지 */
 :root {
     --royal-gold: #d4af37;
     --deep-burgundy: #2d0a0a;
     --bright-red: #8b0000;
     --border-gold: rgba(212, 175, 55, 0.4);
+    --active-green: #7ee787;
+    --target-red: #ff4d4d;
+    --bot-easy: #7ee787;
+    --bot-normal: #fca311;
+    --bot-hard: #ff4d4d;
+    --user-blue: #a5d6ff;
 }
 
-/* [1] 레이아웃 및 페이지 공통 설정 */
+/* [1] 레이아웃 및 페이지 공통 설정 - 너비 최적화 */
 #page-arena {
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1000px; 
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px; 
     box-sizing: border-box;
-    background-color: var(--deep-burgundy); /* 로열 레드 배경 적용 */
+    background-color: var(--deep-burgundy); 
     border-radius: 20px;
 }
 
-/* 활성화 시 표시 */
 #page-arena.active {
     display: flex !important;
     animation: fadeIn 0.3s ease;
@@ -949,19 +954,19 @@
 .arena-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    gap: 30px;
+    gap: 20px; 
     width: 100%;
     justify-content: center;
     align-items: start;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
-/* [2] 카드 및 리포트 섹션 */
+/* [2] 카드 및 리포트 섹션 - 기존 유지 */
 .arena-card {
-    background: linear-gradient(145deg, #1a0505, #2d0a0a); /* 붉은 그라데이션 */
-    border: 1px solid var(--border-gold); /* 금색 테두리 */
+    background: linear-gradient(145deg, #1a0505, #2d0a0a); 
+    border: 1px solid var(--border-gold); 
     border-radius: 20px;
-    padding: 30px;
+    padding: 20px; 
     box-shadow: 0 10px 40px rgba(0,0,0,0.6);
     height: fit-content;
     width: 100%;
@@ -971,21 +976,21 @@
 }
 
 .card-title {
-    font-size: 1.25rem;
-    color: var(--royal-gold); /* 금색 제목 */
-    margin-bottom: 25px;
+    font-size: 1.15rem; 
+    color: var(--royal-gold); 
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     border-bottom: 1px solid var(--border-gold);
-    padding-bottom: 15px;
+    padding-bottom: 12px;
 }
 
-/* 내 정보 등록창 UI (최종 스탯 박스와 통일) */
+/* 내 정보 등록창 UI - 기존 유지 */
 .my-registered-info {
-    margin-bottom: 25px;
-    padding: 18px;
+    margin-bottom: 20px;
+    padding: 15px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border-gold);
     border-radius: 14px;
@@ -994,17 +999,17 @@
 
 .my-info-header {
     border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    padding-bottom: 10px;
-    margin-bottom: 12px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
     color: var(--royal-gold);
 }
 
-/* 최종 스탯 리포트 (강조 및 디자인 통일) */
+/* 최종 스탯 리포트 - 기존 유지 */
 #arena-stat-summary {
     display: block !important;
     width: 100%;
-    margin-bottom: 20px;
-    padding: 18px;
+    margin-bottom: 15px;
+    padding: 15px;
     background: rgba(0, 0, 0, 0.5) !important;
     border-radius: 14px;
     border: 1px solid var(--border-gold) !important;
@@ -1019,13 +1024,14 @@
     font-weight: 800;
 }
 
-/* [3] 전투 유닛 및 체력바 UI */
+/* [3] 전투 유닛 및 체력바 UI - 슬림화 */
 .hp-container {
-    width: 100%;
-    height: 8px;
-    background: #333;
-    border-radius: 4px;
-    margin-bottom: 5px;
+    width: 100% !important;
+    height: 5px !important; 
+    background: #000;
+    border-radius: 3px;
+    margin-top: 2px;
+    border: 1px solid rgba(255,255,255,0.1);
     overflow: hidden;
 }
 
@@ -1033,65 +1039,64 @@
     height: 100%; 
     background: linear-gradient(to right, #2ea043, #55ff77); 
     width: 100%; 
-    transition: width 0.3s; 
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
 
 .hp-bar-opp { 
     height: 100%; 
-    background: linear-gradient(to right, #ff4d4d, #ff9999); 
+    background: linear-gradient(to right, #8b0000, #ff4d4d); 
     width: 100%; 
-    transition: width 0.3s; 
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
 
-.battle-unit { 
-    text-align: center; 
-    width: 80px; 
-    transition: transform 0.2s; 
-}
-
-.unit-name { 
-    font-size: 11px; 
-    margin-top: 5px; 
-    color: #ccc; 
-}
-
-.rank-slot { 
-    font-weight: bold; 
-    color: var(--royal-gold); 
-    font-size: 1.1rem; 
-}
-
-/* [4] 입력 필드 및 속성 설정 (디자인 통일) */
+/* [4] 입력 필드 및 속성 설정 - 기존 유지 */
 .stat-input-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .input-group label, 
 .pet-setup label {
     display: block;
-    font-size: 0.85rem;
-    color: var(--royal-gold); /* 금색 라벨 */
-    margin-bottom: 8px;
+    font-size: 0.8rem;
+    color: var(--royal-gold); 
+    margin-bottom: 6px;
     text-align: center;
     font-weight: bold;
 }
 
 .input-group input, 
 #arena-pet-search {
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.5); /* 어두운 배경 */
-    border: 1px solid var(--border-gold); /* 금색 테두리 */
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.5); 
+    border: 1px solid var(--border-gold); 
     text-align: center;
-    padding: 12px;
-    font-size: 1rem;
+    padding: 10px;
+    font-size: 0.95rem;
     width: 100%;
     box-sizing: border-box;
     color: white;
     font-weight: bold;
     transition: all 0.3s ease;
+}
+
+.disabled-section {
+    position: relative;
+    opacity: 0.3;
+    pointer-events: none;
+    filter: grayscale(100%) brightness(0.6);
+    transition: all 0.4s ease;
+}
+
+.disabled-section::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    border-radius: 15px;
 }
 
 .input-group input:focus, 
@@ -1101,21 +1106,20 @@
     outline: none;
 }
 
-/* 캐릭터 속성 설정 박스 */
 .new-attr-container {
-    margin: 20px 0;
-    padding: 20px;
+    margin: 15px 0;
+    padding: 15px;
     background: rgba(0, 0, 0, 0.4);
-    border-radius: 15px;
+    border-radius: 12px;
     border: 1px solid var(--border-gold);
 }
 
 .new-attr-header {
     text-align: center;
     color: var(--royal-gold);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .new-attr-body {
@@ -1129,43 +1133,36 @@
 .attr-group {
     display: flex;
     flex: 1;
-    gap: 8px; /* 입력칸과 선택칸 사이 간격 넓힘 */
+    gap: 6px; 
     align-items: center;
     min-width: 0;
 }
 
 .visual-select {
-    flex: 1 !important; /* 남은 공간을 모두 차지하도록 설정 */
-    height: 45px;
+    flex: 1 !important; 
+    height: 40px;
     background: rgba(26, 5, 5, 0.8) !important;
     color: #fff !important;
     border: 1px solid var(--border-gold) !important;
     border-radius: 8px !important;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     text-align: center;
 }
 
 .visual-input {
-    flex: none !important; /* 비율 분배 해제 */
-    width: 60px !important; /* 숫자가 온전히 보일 수 있는 고정 너비 지정 */
-    padding: 0 !important; /* 텍스트 잘림을 유발하는 브라우저 기본 패딩 제거 */
-    height: 45px;
+    flex: none !important; 
+    width: 55px !important; 
+    padding: 0 !important; 
+    height: 40px;
     background: rgba(139, 0, 0, 0.2) !important;
     color: var(--royal-gold) !important;
     border: 1px solid var(--border-gold) !important;
     border-radius: 8px !important;
     text-align: center;
     font-weight: 800;
-    font-size: 15px;
+    font-size: 14px;
     box-sizing: border-box;
-}
-
-/* 숫자 화살표 제거 */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
 }
 
 .attr-divider {
@@ -1174,15 +1171,15 @@ input::-webkit-inner-spin-button {
     padding: 0 5px;
 }
 
-/* [5] 상단 랭킹 및 버튼 효과 */
+/* [5] 상단 랭킹 및 버튼 효과 - 기존 유지 */
 .arena-top-rank {
     width: 100%;
     background: linear-gradient(180deg, #3d0e0e 0%, #1a0505 100%);
     border: 2px solid var(--royal-gold);
     border-radius: 16px;
-    padding: 25px;
+    padding: 15px;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
     box-sizing: border-box;
 }
@@ -1190,45 +1187,40 @@ input::-webkit-inner-spin-button {
 .rank-display {
     display: flex;
     justify-content: center;
-    gap: 25px;
+    gap: 15px;
     flex-wrap: wrap;
 }
 
 .rank-display > span {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
     color: var(--royal-gold);
     background: rgba(0, 0, 0, 0.3);
-    padding: 10px 25px;
+    padding: 8px 20px;
     border-radius: 30px;
     border: 1px solid var(--border-gold);
     transition: transform 0.2s;
-    display: inline-block; /* 클릭 영역을 위해 추가 */
+    display: inline-block; 
 }
 
-/* =========================================================
-   새롭게 적용된 대전 리스트(우측 컬럼) 세련된 UI CSS 시작
-   ========================================================= */
-
-/* 대전 리스트 공통 컨테이너 */
+/* 대전 리스트 UI - 기존 유지 */
 .battle-buttons {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
-/* 배틀 버튼 기본 폼 */
 .btn-battle {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 16px 20px;
+    padding: 12px 18px;
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.6);
     border: 1px solid var(--border-gold);
     color: #fff;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -1240,239 +1232,307 @@ input::-webkit-inner-spin-button {
     box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
 }
 
-/* 버튼 내 텍스트 및 정보 영역 */
 .battle-info {
     display: flex;
     align-items: center;
     gap: 10px;
 }
-.battle-info i { font-size: 18px; }
-.battle-info small { color: #8b949e; font-size: 12px; font-weight: normal; margin-left: 5px; }
 
-/* 획득 점수/태그 표시 영역 */
 .battle-point {
     background: rgba(212, 175, 55, 0.2);
     color: var(--royal-gold);
-    padding: 5px 12px;
+    padding: 4px 10px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
+    min-width: 40px;
+    text-align: center;
 }
 
-/* 봇 난이도별 색상 및 호버 효과 */
-.bot-easy { border-left: 4px solid #7ee787; }
-.bot-easy:hover { background: linear-gradient(90deg, rgba(126, 231, 135, 0.15) 0%, rgba(0,0,0,0.6) 100%); border-color: #7ee787; }
-.bot-easy .battle-info i { color: #7ee787; }
-.bot-easy .battle-point { color: #7ee787; background: rgba(126, 231, 135, 0.15); }
+.bot-easy { border-left: 5px solid var(--bot-easy); }
+.bot-easy .battle-point { color: var(--bot-easy); background: rgba(126, 231, 135, 0.15); }
 
-.bot-normal { border-left: 4px solid #fca311; }
-.bot-normal:hover { background: linear-gradient(90deg, rgba(252, 163, 17, 0.15) 0%, rgba(0,0,0,0.6) 100%); border-color: #fca311; }
-.bot-normal .battle-info i { color: #fca311; }
-.bot-normal .battle-point { color: #fca311; background: rgba(252, 163, 17, 0.15); }
+.bot-normal { border-left: 5px solid var(--bot-normal); }
+.bot-normal .battle-point { color: var(--bot-normal); background: rgba(252, 163, 17, 0.15); }
 
-.bot-hard { border-left: 4px solid #ff4d4d; }
-.bot-hard:hover { background: linear-gradient(90deg, rgba(255, 77, 77, 0.15) 0%, rgba(0,0,0,0.6) 100%); border-color: #ff4d4d; }
-.bot-hard .battle-info i { color: #ff4d4d; }
-.bot-hard .battle-point { color: #ff4d4d; background: rgba(255, 77, 77, 0.15); }
+.bot-hard { border-left: 5px solid var(--bot-hard); }
+.bot-hard .battle-point { color: var(--bot-hard); background: rgba(255, 77, 77, 0.15); }
 
-/* 중앙 구분선 */
+.user-pvp { border-left: 5px solid var(--user-blue); }
+.user-pvp .battle-point { color: var(--user-blue); background: rgba(165, 214, 255, 0.15); }
+
 .battle-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 15px 0 5px 0;
+    margin: 10px 0 5px 0;
     color: #8b949e;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
 }
 .battle-divider::before, .battle-divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    content: ''; flex: 1; border-bottom: 1px solid rgba(212, 175, 55, 0.2);
 }
-.battle-divider span {
-    padding: 0 15px;
-    color: var(--royal-gold);
-}
-
-/* 실시간 유저 리스트 출력 컨테이너 */
-.user-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 350px;
-    overflow-y: auto;
-    padding-right: 5px;
-}
-.user-list-container::-webkit-scrollbar { width: 6px; }
-.user-list-container::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 3px; }
-
-/* 유저 PVP 버튼 색상 */
-.user-pvp { border-left: 4px solid #a5d6ff; }
-.user-pvp:hover { background: linear-gradient(90deg, rgba(165, 214, 255, 0.15) 0%, rgba(0,0,0,0.6) 100%); border-color: #a5d6ff; }
-.user-pvp .battle-info i { color: #a5d6ff; }
-.user-pvp .battle-point { color: #a5d6ff; background: rgba(165, 214, 255, 0.15); }
-
-/* =========================================================
-   새롭게 적용된 대전 리스트(우측 컬럼) 세련된 UI CSS 끝
-   ========================================================= */
+.battle-divider span { padding: 0 10px; color: var(--royal-gold); }
 
 .btn-update-info {
     width: 100%;
-    margin-top: 25px;
-    padding: 16px;
+    margin-top: 20px;
+    padding: 14px;
     background: var(--bright-red);
     color: white;
     border: 1px solid var(--royal-gold);
     border-radius: 12px;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: 0.3s;
 }
 
-.btn-update-info:hover {
-    filter: brightness(1.2);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(248, 81, 73, 0.3);
-}
-
-/* 펫 미리보기 박스 */
-.pet-stat-preview {
-    margin-top: 15px;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-gold);
-    border-radius: 15px;
-    text-align: center;
-    color: var(--royal-gold);
-}
-
-/* [6] 애니메이션 및 반응형 설정 */
-.hit-shake { animation: shake 0.2s ease-in-out; }
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    50% { transform: translateX(6px); }
-    75% { transform: translateX(-6px); }
-}
-
-@media (max-width: 768px) {
-    .arena-grid { grid-template-columns: 1fr; }
-    .arena-card { max-width: 100%; }
-}
-
-/* 구역 잠금 효과 */
-.disabled-section {
-    opacity: 0.4;
-    pointer-events: none;
-    filter: grayscale(80%);
-    transition: all 0.3s ease;
-}
-
-/* 월간 투기장 안내사항 박스 */
 .arena-guide-box {
-    margin-top: 25px;
-    padding: 18px;
+    margin-top: 20px;
+    padding: 15px;
     background: rgba(0,0,0,0.4);
     border: 1px dashed var(--border-gold);
     border-radius: 12px;
 }
-.arena-guide-box h4 {
-    color: var(--royal-gold);
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    text-align: center;
+.arena-guide-box h4 { color: var(--royal-gold); margin: 0 0 10px 0; font-size: 13px; text-align: center; }
+.arena-guide-box ul { margin: 0; padding-left: 15px; color: #a3a3a3; font-size: 11px; line-height: 1.6; }
+
+/* ==========================================================
+                전투 화면 컴팩트 UI 및 로그 최적화 (수정됨)
+   ========================================================= */
+
+/* [1] 전장 레이아웃 축소 - 6v6이 한눈에 들어오도록 설정 */
+.battle-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 950px; 
+    margin: 0 auto;
+    padding: 30px 0 5px 0; 
+    position: relative;
+    overflow: visible !important;
 }
-.arena-guide-box ul {
-    margin: 0;
-    padding-left: 18px;
-    color: #a3a3a3;
+
+/* 대상 선택 중일 때 마우스 포인터 변경 */
+.battle-field.selecting-target {
+    cursor: crosshair !important;
+}
+
+.battle-team-zone {
+    display: flex;
+    flex-direction: column;
+    gap: 3px; 
+    width: 48%;
+    z-index: 2;
+}
+
+/* [2] 유닛 박스 크기 슬림화 */
+.battle-unit-box {
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-start;
+    justify-content: center;
+    height: auto !important;
+    min-height: 64px; 
+    padding: 4px 10px !important; 
+    background: linear-gradient(145deg, rgba(35,35,35,0.95) 0%, rgba(15,15,15,1) 100%) !important;
+    border: 1px solid var(--border-gold);
+    border-radius: 6px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+/* 차례인 유닛 강조 효과 */
+.battle-unit-box.active-actor {
+    border: 2px solid #ffcc00 !important;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+    transform: scale(1.02);
+    z-index: 5;
+}
+
+/* 공격 대상 선택 시 호버 효과 */
+.battle-unit-box.targetable:hover {
+    border: 2px solid var(--target-red) !important;
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.8) !important;
+    background: linear-gradient(145deg, rgba(60,20,20,0.95) 0%, rgba(30,5,5,1) 100%) !important;
+    transform: translateY(-2px);
+}
+
+/* 이름 크기 및 간격 조정 */
+.unit-name {
+    width: 100%;
+    font-size: 13px !important; 
+    color: #ffffff !important; 
+    margin-bottom: 3px !important;
+    font-weight: 800 !important; 
+    text-shadow: 1px 1px 2px #000000;
+}
+
+/* 하단 콘텐츠 축소 */
+.unit-content-wrapper {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 이미지 박스 크기 축소 */
+.sprite-container {
+    width: 38px; 
+    height: 38px;
+    border: 1px solid #444;
+    background: #000;
+    flex-shrink: 0;
+}
+
+.pet-sprite, .char-sprite {
+    width: 34px;
+    height: 34px;
+}
+
+/* 체력바 및 텍스트 슬림화 */
+.unit-stats-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.hp-text-small {
+    font-size: 11px;
+    color: #999;
+}
+
+/* [3] 기술 선택창 디자인 강화 */
+.battle-control-panel {
+    background: rgba(10, 10, 10, 0.98);
+    border-top: 2px solid var(--royal-gold);
+    padding: 10px 15px; 
+    border-radius: 0 0 15px 15px;
+    margin-top: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible !important; /* 그림자 반짝임 잘림 방지 */
+}
+
+/* 기술 버튼 공통 스타일 */
+.btn-battle-action {
+    position: relative;
+    min-width: 85px; 
+    height: 36px; 
+    background: #222 !important;
+    border: 1px solid rgba(212, 175, 55, 0.3) !important;
+    border-radius: 6px !important;
+    color: #eee !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /* overflow: hidden; -> 반짝임 그림자 가시성을 위해 제거 */
+}
+
+.btn-battle-action:hover:not(:disabled) {
+    background: #333 !important;
+    border-color: var(--royal-gold) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* [핵심] 기술 선택 시(Active) 반짝임 가시성 강화 */
+.btn-battle-action.active-selecting {
+    background: var(--royal-gold) !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+    transform: scale(1.08);
+    z-index: 10;
+    animation: skill-sparkle 0.8s infinite alternate ease-in-out !important; 
+}
+
+/* 반짝임 애니메이션 최적화 (강한 글로우 효과) */
+@keyframes skill-sparkle {
+    0% { 
+        box-shadow: 0 0 8px var(--royal-gold), inset 0 0 5px rgba(255, 255, 255, 0.5);
+        filter: brightness(1);
+    }
+    100% { 
+        box-shadow: 0 0 25px #fff, 0 0 15px var(--royal-gold), inset 0 0 12px rgba(255, 255, 255, 0.8);
+        filter: brightness(1.5);
+    }
+}
+
+/* 개별 버튼 하단 포인트 컬러 */
+#btn-attack { border-bottom: 3px solid var(--user-blue) !important; }
+#btn-guard { border-bottom: 3px solid #7ee787 !important; }
+#btn-skill-back { border-bottom: 3px solid #ff4d4d !important; }
+#btn-skill-dog { border-bottom: 3px solid var(--active-green) !important; }
+#btn-skill-gb { border-bottom: 3px solid #d2a8ff !important; }
+
+.btn-surrender {
+    background: linear-gradient(180deg, #400 0%, #200 100%) !important;
+    border: 1px solid #ff4d4d !important;
+}
+
+/* 전투 로그(해설칸) */
+#battle-log-box {
+    height: 85px !important; 
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin-top: 10px;
     font-size: 12px;
-    line-height: 1.7;
+    line-height: 1.6;
+    overflow-y: auto;
+    color: #eee;
+    text-align: left;
 }
-.arena-guide-box li strong { color: #d2a8ff; }
+
+/* [핵심] 휘발성 데미지 플로팅 애니메이션 및 색상 수정 */
+.floating-dmg {
+    position: absolute;
+    left: 50%;
+    top: 15%; 
+    transform: translateX(-50%);
+    z-index: 100;
+    pointer-events: none; 
+    font-weight: 900;
+    text-shadow: 2px 2px 4px #000;
+    white-space: nowrap;
+    animation: floatUpAndFade 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes floatUpAndFade {
+    0% { 
+        opacity: 0; 
+        transform: translate(-50%, 10px) scale(0.5); 
+    }
+    20% { 
+        opacity: 1; 
+        transform: translate(-50%, -25px) scale(1.4); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -90px) scale(1); 
+    }
+}
+
+/* 데미지 색상 커스터마이징 */
+.floating-dmg.normal { color: #ffffff !important; font-size: 26px; } /* 기본 데미지 - 흰색 */
+.floating-dmg.crit { color: #ff4d4d !important; font-size: 34px; text-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 2px 2px 4px #000; } /* 치명타 - 빨간색(글로우 추가) */
+.floating-dmg.miss { color: #888888 !important; font-size: 24px; } /* MISS - 회색 */
+
+@media (max-width: 900px) {
+    .battle-field { padding-top: 25px; }
+    .battle-unit-box { min-height: 58px; }
+    .battle-team-zone { gap: 2px; }
+}
 
 /* ==========================================================
                 투기장 페이지 전용 CSS 끝
    ========================================================= */
-
-   /* ==========================================
-           배틀 시스템 전용 애니메이션 & UI
-   ========================================== */
-.battle-unit-box {
-    background: rgba(0,0,0,0.5); 
-    border: 1px solid var(--border-gold);
-    border-radius: 10px; 
-    padding: 15px 10px; 
-    text-align: center;
-    position: relative; 
-    cursor: pointer; 
-    transition: 0.2s;
-    width: 100%; /* 좌우 박스 동일 크기 강제 */
-    box-sizing: border-box;
-}
-.battle-unit-box.targeted {
-    border-color: #ff4d4d; box-shadow: 0 0 15px rgba(255, 77, 77, 0.6); transform: scale(1.05);
-}
-.battle-unit-box.active-turn {
-    border-color: #7ee787; box-shadow: 0 0 15px rgba(126, 231, 135, 0.6);
-}
-.battle-unit-box.dead { filter: grayscale(100%) opacity(50%); pointer-events: none; }
-
-.hp-text { font-size:11px; color:#fff; margin-top:2px; }
-.sprite { font-size:40px; margin-top:5px; transition: all 0.3s; display:inline-block; }
-.pet-sprite { width: 50px; height: 50px; object-fit: contain; }
-
-.btn-battle-action {
-    background: #222; color:#fff; border: 1px solid var(--border-gold);
-    padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
-}
-.btn-battle-action:hover { background: #444; }
-.btn-battle-action:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* 시각 효과 애니메이션 */
-@keyframes atk-move-right {
-    0% { transform: translateX(0); }
-    50% { transform: translateX(30px) scale(1.1); }
-    100% { transform: translateX(0); }
-}
-@keyframes atk-move-left {
-    0% { transform: translateX(0); }
-    50% { transform: translateX(-30px) scale(1.1); }
-    100% { transform: translateX(0); }
-}
-@keyframes damage-shake {
-    0%, 100% { transform: translateX(0) scale(1); }
-    25% { transform: translateX(-5px) scale(0.95); filter: brightness(2) drop-shadow(0 0 5px red); }
-    50% { transform: translateX(5px) scale(0.95); }
-    75% { transform: translateX(-5px) scale(0.95); }
-}
-
-.anim-attack-right .sprite { animation: atk-move-right 0.4s ease-in-out; z-index: 10; }
-.anim-attack-left .sprite { animation: atk-move-left 0.4s ease-in-out; z-index: 10; }
-.anim-hit .sprite { animation: damage-shake 0.4s ease-in-out; }
-
-/* 플로팅 데미지 텍스트 */
-.floating-dmg {
-    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-    font-size: 24px; font-weight: 900; color: #ff4d4d;
-    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
-    pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 20;
-}
-.floating-dmg.heal { color: #7ee787; }
-.floating-dmg.miss { color: #8b949e; font-size: 20px; }
-.floating-dmg.crit { color: #fca311; font-size: 28px; font-style: italic; }
-
-@keyframes floatUp {
-    0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-    50% { transform: translate(-50%, -30px) scale(1.2); }
-    100% { opacity: 0; transform: translate(-50%, -50px) scale(1); }
-}
-/* ==========================================
-        배틀 시스템 전용 애니메이션 & UI 끝
-   ========================================== */
 
 </style>
 </head>
@@ -2598,22 +2658,10 @@ input::-webkit-inner-spin-button {
                 <div id="arena-stat-summary"></div>
 
                 <div class="stat-input-grid">
-                    <div class="input-group">
-                        <label>체력</label>
-                        <input type="number" id="ar-hp" value="0" oninput="calcArenaPoints()">
-                    </div>
-                    <div class="input-group">
-                        <label>공격</label>
-                        <input type="number" id="ar-atk" value="0" oninput="calcArenaPoints()">
-                    </div>
-                    <div class="input-group">
-                        <label>방어</label>
-                        <input type="number" id="ar-def" value="0" oninput="calcArenaPoints()">
-                    </div>
-                    <div class="input-group">
-                        <label>순발</label>
-                        <input type="number" id="ar-spd" value="0" oninput="calcArenaPoints()">
-                    </div>
+                    <div class="input-group"><label>체력</label><input type="number" id="ar-hp" value="0" oninput="calcArenaPoints()"></div>
+                    <div class="input-group"><label>공격</label><input type="number" id="ar-atk" value="0" oninput="calcArenaPoints()"></div>
+                    <div class="input-group"><label>방어</label><input type="number" id="ar-def" value="0" oninput="calcArenaPoints()"></div>
+                    <div class="input-group"><label>순발</label><input type="number" id="ar-spd" value="0" oninput="calcArenaPoints()"></div>
                 </div>
 
                 <!-- 캐릭터 속성 설정 박스 -->
@@ -2623,10 +2671,7 @@ input::-webkit-inner-spin-button {
                         <div class="attr-group">
                             <select id="ar-attr1-type" class="visual-select" onchange="syncAttributes(1)">
                                 <option value="지" disabled selected hidden>속성선택</option>
-                                <option value="지">지</option>
-                                <option value="수">수</option>
-                                <option value="화">화</option>
-                                <option value="풍">풍</option>
+                                <option value="지">지</option><option value="수">수</option><option value="화">화</option><option value="풍">풍</option>
                             </select>
                             <input type="number" id="ar-attr1-val" class="visual-input" value="5" min="0" max="10" oninput="syncAttributeValues(1); calcArenaPoints();">
                         </div>
@@ -2634,22 +2679,33 @@ input::-webkit-inner-spin-button {
                         <div class="attr-group">
                             <select id="ar-attr2-type" class="visual-select" onchange="syncAttributes(2)">
                                 <option value="풍" disabled selected hidden>속성선택</option>
-                                <option value="지">지</option>
-                                <option value="수">수</option>
-                                <option value="화">화</option>
-                                <option value="풍">풍</option>
+                                <option value="지">지</option><option value="수">수</option><option value="화">화</option><option value="풍">풍</option>
                             </select>
                             <input type="number" id="ar-attr2-val" class="visual-input" value="5" min="0" max="10" oninput="syncAttributeValues(2); calcArenaPoints();">
                         </div>
                     </div>
                 </div>
 
-                <!-- 대표 펫 설정 -->
+                <!-- 5마리 펫 등록 설정 박스 (확장된 부분) -->
                 <div class="pet-setup" style="position: relative;">
-                    <label>대표 펫 설정 (Lv.140 S급 기준)</label>
-                    <input type="text" id="arena-pet-search" placeholder="펫 이름을 입력하세요..." onkeyup="searchArenaPet()">
+                    <label>전투 펫 편성 (최대 5마리 등록 가능 / Lv.140 S급 기준)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
+                        <select id="pet-slot-selector" style="height: 45px; width: 100%; padding: 0 5px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--border-gold); border-radius: 12px; font-weight: bold; text-align: center; font-size: 0.95rem; box-sizing: border-box; cursor: pointer; outline: none;">
+                            <option value="" disabled selected>페트를 선택하세요.</option>
+                            <option value="0">1번 펫 (대표)</option>
+                            <option value="1">2번 펫</option>
+                            <option value="2">3번 펫</option>
+                            <option value="3">4번 펫</option>
+                            <option value="4">5번 펫</option>
+                        </select>
+                        <input type="text" id="arena-pet-search" style="height: 45px; width: 100%; margin: 0; padding: 0 15px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--border-gold); border-radius: 12px; font-weight: bold; text-align: center; font-size: 1rem; box-sizing: border-box; outline: none;" placeholder="펫 이름 검색" onkeyup="searchArenaPet()">
+                    </div>
                     <div id="arena-pet-results" class="custom-select-results"></div>
-                    <div id="selected-arena-pet" class="pet-stat-preview">선택된 펫 없음</div>
+                    
+                    <!-- 5마리 등록 현황 미리보기 Grid -->
+                    <div id="selected-pets-container" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 15px;">
+                        <!-- 자바스크립트에서 동적으로 채워집니다 -->
+                    </div>
                 </div>
             </div>
             <!-- ▲ 래퍼 끝 ▲ -->
@@ -2669,16 +2725,13 @@ input::-webkit-inner-spin-button {
             
             <div class="battle-buttons">
                 <button onclick="initBattle('bot_easy')" class="btn-battle bot-easy">
-                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(쉬움)</small></span></div>
-                    <span class="battle-point">5점</span>
+                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(쉬움)</small></span></div><span class="battle-point">5점</span>
                 </button>
                 <button onclick="initBattle('bot_normal')" class="btn-battle bot-normal">
-                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(보통)</small></span></div>
-                    <span class="battle-point">10점</span>
+                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(보통)</small></span></div><span class="battle-point">10점</span>
                 </button>
                 <button onclick="initBattle('bot_hard')" class="btn-battle bot-hard">
-                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(어려움)</small></span></div>
-                    <span class="battle-point">15점</span>
+                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(어려움)</small></span></div><span class="battle-point">15점</span>
                 </button>
                 
                 <div class="battle-divider"><span>실시간 유저 대전 (20점)</span></div>
@@ -2687,25 +2740,39 @@ input::-webkit-inner-spin-button {
             </div>
 
             <!-- 월간 투기장 안내사항 박스 -->
-<div class="arena-guide-box">
-    <h4>📜 월간 투기장 이용 안내</h4>
-    <ul>
-        <li><strong>시즌제 운영:</strong> 매월 1일 점수가 1000점으로 통일(리셋)됩니다.</li>
-        <li><strong>대전 횟수:</strong> 하루 최대 5회 대전이 가능합니다.</li>
-        <li><strong>전투 규칙:</strong><br>
-            - 캐릭터의 체력이 0이 되면 즉시 패배 처리됩니다.<br>
-            - 기존 다굴시스템의 성능이 너무 좋으므로 너프합니다.<br>
-            아군의 턴이 연속될 때 설정한 역순 범위 내 일 경우 70% 확률로 발동합니다.<br>
-            (수정된 역순 범위는 비공개입니다.)
-        </li>
-        <li><strong>승점 시스템:</strong><br>
-            - 👤 유저 대전: 승리 <strong>+20점</strong> / 패배 <strong>-15점</strong><br>
-            - 🤖 BOT 쉬움: 승리 <strong>+5점</strong> / 패배 <strong>-5점</strong><br>
-            - 🤖 BOT 보통: 승리 <strong>+10점</strong> / 패배 <strong>-5점</strong><br>
-            - 🤖 BOT 어려움: 승리 <strong>+15점</strong> / 패배 <strong>-5점</strong>
-        </li>
-    </ul>
-</div>
+            <div class="arena-guide-box">
+                <h4>📜 월간 투기장 이용 안내</h4>
+                <ul>
+                    <li><strong>시즌제 운영:</strong> 매월 1일 점수가 1000점으로 통일(리셋)됩니다.</li>
+                    <li><strong>다대다 전투:</strong> 최대 5마리의 펫을 편성할 수 있습니다.</li>
+                    <li><strong>대전 횟수:</strong> 하루 최대 10회 대전이 가능합니다.</li>
+                    <li><strong>전투 규칙:</strong><br>
+                        - 캐릭터의 체력이 0이 되면 즉시 패배 처리됩니다.<br>
+                        - 기존 다굴시스템의 성능이 너무 좋으므로 하향(너프)하였습니다.<br>
+                        아군의 턴이 연속될 때 설정한 역순 범위 내 일 경우 70% 확률로 발동합니다.<br>
+                        (수정된 역순 범위는 비공개입니다.)
+                    </li>
+                    <li><strong>승점 시스템:</strong><br>
+                        - 👤 유저 대전: 승리 <strong>+20점</strong> / 패배 <strong>-15점</strong><br>
+                        - 🤖 BOT 쉬움: 승리 <strong>+5점</strong> / 패배 <strong>-5점</strong><br>
+                        - 🤖 BOT 보통: 승리 <strong>+10점</strong> / 패배 <strong>-5점</strong><br>
+                        - 🤖 BOT 어려움: 승리 <strong>+15점</strong> / 패배 <strong>-5점</strong>
+                    </li>
+                </ul>
+            </div>
+            <!-- ▼ 역대 시즌 랭킹 토글 섹션 추가 ▼ -->
+            <div class="arena-history-section" style="margin-top: 20px;">
+                <button onclick="toggleArenaHistory()" class="btn-battle" style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--royal-gold); color: var(--royal-gold); width: 100%; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-history"></i> 역대 시즌 랭킹 확인하기 (클릭)
+                </button>
+                
+                <!-- 토글될 랭킹 박스 (기본값은 숨김 상태) -->
+                <div id="arena-history-container" style="display: none; margin-top: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 10px; padding: 15px; max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--royal-gold) transparent;">
+                    <div style="text-align:center; color:#8b949e; font-size:12px;">데이터를 불러오는 중입니다...</div>
+                </div>
+            </div>
+            <!-- ▲ 역대 시즌 랭킹 토글 섹션 끝 ▲ -->
+
         </div>
         <!-- 오른쪽 컬럼 끝 -->
 
@@ -2713,82 +2780,111 @@ input::-webkit-inner-spin-button {
 </div> <!-- main-container 끝 -->
 <!-- 투기장 컨테이너 끝 -->
 
-<!-- 투기장 전투 배틀 모달 (기본 숨김) -->
-<div id="battle-arena-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+<!-- 투기장 전투 배틀 모달 (6vs6 확장) -->
+<div id="battle-arena-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:10px; box-sizing:border-box;">
     
     <div class="battle-header">
         <h2 style="color:var(--royal-gold); margin:0; text-align:center;">⚔️ 투기장 전투 ⚔️</h2>
-        <div id="battle-turn-indicator" style="color:#fff; font-size:14px; margin-top:5px; text-align:center;">[ 1 턴 ] 액션을 선택하세요</div>
+        <div id="battle-turn-indicator" style="color:#fff; font-size:16px; font-weight:bold; margin-top:8px; text-align:center;">[ 1 턴 ] 액션을 선택하세요</div>
     </div>
 
-    <!-- 배틀 필드 -->
-    <div class="battle-field" style="display:flex; width:100%; max-width:800px; justify-content:space-between; margin-top:20px; background:var(--deep-burgundy); border:2px solid var(--border-gold); border-radius:15px; padding:20px; position:relative; overflow:hidden;">
+    <!-- 배틀 필드 (6 vs 6 Grid 지원 영역) -->
+    <div class="battle-field" style="display:flex; width:100%; max-width:900px; justify-content:space-between; margin-top:20px; background:var(--deep-burgundy); border:2px solid var(--border-gold); border-radius:15px; padding:15px; overflow:hidden;">
         
         <!-- 내 진영 (Left) -->
-        <div id="my-team-zone" style="display:flex; flex-direction:column; gap:20px; width:45%;">
-            <!-- 캐릭터 -->
+        <div id="my-team-zone" class="battle-team-zone">
             <div id="unit-my-char" class="battle-unit-box" onclick="selectTarget('my-char')">
                 <div class="unit-name" id="name-my-char">내 캐릭터</div>
                 <div class="hp-container"><div id="hp-my-char" class="hp-bar"></div></div>
-                <div class="hp-text" id="hp-txt-my-char">100 / 100</div>
-                <div class="sprite char-sprite">👤</div>
+                <div class="hp-text" id="hp-txt-my-char">100 / 100</div><div class="sprite char-sprite">👤</div>
             </div>
-            <!-- 펫 -->
-            <div id="unit-my-pet" class="battle-unit-box" onclick="selectTarget('my-pet')">
-                <div class="unit-name" id="name-my-pet">내 펫</div>
-                <div class="hp-container"><div id="hp-my-pet" class="hp-bar"></div></div>
-                <div class="hp-text" id="hp-txt-my-pet">100 / 100</div>
-                <img id="img-my-pet" src="" class="sprite pet-sprite" alt="펫">
+            <div id="unit-my-pet-0" class="battle-unit-box" style="display:none;" onclick="selectTarget('my-pet-0')">
+                <div class="unit-name" id="name-my-pet-0">내 펫1</div>
+                <div class="hp-container"><div id="hp-my-pet-0" class="hp-bar"></div></div>
+                <div class="hp-text" id="hp-txt-my-pet-0">100 / 100</div><img id="img-my-pet-0" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-my-pet-1" class="battle-unit-box" style="display:none;" onclick="selectTarget('my-pet-1')">
+                <div class="unit-name" id="name-my-pet-1">내 펫2</div>
+                <div class="hp-container"><div id="hp-my-pet-1" class="hp-bar"></div></div>
+                <div class="hp-text" id="hp-txt-my-pet-1">100 / 100</div><img id="img-my-pet-1" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-my-pet-2" class="battle-unit-box" style="display:none;" onclick="selectTarget('my-pet-2')">
+                <div class="unit-name" id="name-my-pet-2">내 펫3</div>
+                <div class="hp-container"><div id="hp-my-pet-2" class="hp-bar"></div></div>
+                <div class="hp-text" id="hp-txt-my-pet-2">100 / 100</div><img id="img-my-pet-2" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-my-pet-3" class="battle-unit-box" style="display:none;" onclick="selectTarget('my-pet-3')">
+                <div class="unit-name" id="name-my-pet-3">내 펫4</div>
+                <div class="hp-container"><div id="hp-my-pet-3" class="hp-bar"></div></div>
+                <div class="hp-text" id="hp-txt-my-pet-3">100 / 100</div><img id="img-my-pet-3" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-my-pet-4" class="battle-unit-box" style="display:none;" onclick="selectTarget('my-pet-4')">
+                <div class="unit-name" id="name-my-pet-4">내 펫5</div>
+                <div class="hp-container"><div id="hp-my-pet-4" class="hp-bar"></div></div>
+                <div class="hp-text" id="hp-txt-my-pet-4">100 / 100</div><img id="img-my-pet-4" src="" class="sprite pet-sprite">
             </div>
         </div>
 
-        <!-- VS 중앙 마크 -->
-        <div style="display:flex; align-items:center; justify-content:center; color:var(--bright-red); font-size:30px; font-weight:bold; font-style:italic; text-shadow: 0 0 10px rgba(255,0,0,0.5);">
+        <!-- VS 마크 -->
+        <div style="display:flex; align-items:center; justify-content:center; color:var(--bright-red); font-size:24px; font-weight:bold; font-style:italic; text-shadow: 0 0 10px rgba(255,0,0,0.5);">
             VS
         </div>
 
         <!-- 상대 진영 (Right) -->
-        <!-- 기존의 align-items: flex-end 를 제거하여 왼쪽과 똑같이 가로로 꽉 차게 변경 -->
-        <div id="opp-team-zone" style="display:flex; flex-direction:column; gap:20px; width:45%;">
-            <!-- 캐릭터 -->
+        <div id="opp-team-zone" class="battle-team-zone">
             <div id="unit-opp-char" class="battle-unit-box" onclick="selectTarget('opp-char')">
                 <div class="unit-name" id="name-opp-char">상대 캐릭터</div>
                 <div class="hp-container"><div id="hp-opp-char" class="hp-bar-opp"></div></div>
-                <div class="hp-text" id="hp-txt-opp-char">100 / 100</div>
-                <div class="sprite char-sprite">🤖</div>
+                <div class="hp-text" id="hp-txt-opp-char">100 / 100</div><div class="sprite char-sprite">🤖</div>
             </div>
-            <!-- 펫 -->
-            <div id="unit-opp-pet" class="battle-unit-box" onclick="selectTarget('opp-pet')">
-                <div class="unit-name" id="name-opp-pet">상대 펫</div>
-                <div class="hp-container"><div id="hp-opp-pet" class="hp-bar-opp"></div></div>
-                <div class="hp-text" id="hp-txt-opp-pet">100 / 100</div>
-                <img id="img-opp-pet" src="" class="sprite pet-sprite" alt="펫">
+            <div id="unit-opp-pet-0" class="battle-unit-box" style="display:none;" onclick="selectTarget('opp-pet-0')">
+                <div class="unit-name" id="name-opp-pet-0">상대 펫1</div>
+                <div class="hp-container"><div id="hp-opp-pet-0" class="hp-bar-opp"></div></div>
+                <div class="hp-text" id="hp-txt-opp-pet-0">100 / 100</div><img id="img-opp-pet-0" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-opp-pet-1" class="battle-unit-box" style="display:none;" onclick="selectTarget('opp-pet-1')">
+                <div class="unit-name" id="name-opp-pet-1">상대 펫2</div>
+                <div class="hp-container"><div id="hp-opp-pet-1" class="hp-bar-opp"></div></div>
+                <div class="hp-text" id="hp-txt-opp-pet-1">100 / 100</div><img id="img-opp-pet-1" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-opp-pet-2" class="battle-unit-box" style="display:none;" onclick="selectTarget('opp-pet-2')">
+                <div class="unit-name" id="name-opp-pet-2">상대 펫3</div>
+                <div class="hp-container"><div id="hp-opp-pet-2" class="hp-bar-opp"></div></div>
+                <div class="hp-text" id="hp-txt-opp-pet-2">100 / 100</div><img id="img-opp-pet-2" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-opp-pet-3" class="battle-unit-box" style="display:none;" onclick="selectTarget('opp-pet-3')">
+                <div class="unit-name" id="name-opp-pet-3">상대 펫4</div>
+                <div class="hp-container"><div id="hp-opp-pet-3" class="hp-bar-opp"></div></div>
+                <div class="hp-text" id="hp-txt-opp-pet-3">100 / 100</div><img id="img-opp-pet-3" src="" class="sprite pet-sprite">
+            </div>
+            <div id="unit-opp-pet-4" class="battle-unit-box" style="display:none;" onclick="selectTarget('opp-pet-4')">
+                <div class="unit-name" id="name-opp-pet-4">상대 펫5</div>
+                <div class="hp-container"><div id="hp-opp-pet-4" class="hp-bar-opp"></div></div>
+                <div class="hp-text" id="hp-txt-opp-pet-4">100 / 100</div><img id="img-opp-pet-4" src="" class="sprite pet-sprite">
             </div>
         </div>
     </div>
 
-    <!-- 조작 패널 (진행중) -->
-    <div id="battle-control-panel" style="width:100%; max-width:800px; margin-top:15px; background:#111; border:1px solid #333; padding:15px; border-radius:10px;">
-        <div id="control-status" style="color:var(--royal-gold); font-size:14px; text-align:center; margin-bottom:10px;">캐릭터의 행동을 선택하세요.</div>
+    <!-- 조작 패널 -->
+    <div id="battle-control-panel" style="width:100%; max-width:900px; margin-top:15px; background:#111; border:1px solid #333; padding:15px; border-radius:10px;">
+        <div id="control-status" style="color:var(--royal-gold); font-size:14px; text-align:center; margin-bottom:10px;">행동 대기중...</div>
         <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
             <button class="btn-battle-action" onclick="setPlayerAction('attack')">⚔️ 공격</button>
             <button class="btn-battle-action" onclick="setPlayerAction('guard')">🛡️ 방어</button>
             <button class="btn-battle-action" id="btn-skill-back" onclick="setPlayerAction('skill_back')" style="display:none; color:#ff7b72;">🔥 배수의진</button>
             <button class="btn-battle-action" id="btn-skill-dog" onclick="setPlayerAction('skill_dog')" style="display:none; color:#a5d6ff;">🐶 충견진돗개</button>
-            <button class="btn-battle-action" id="btn-skill-gb" onclick="setPlayerAction('guardbreak')" style="display: none;">💥 가드브레이크</button>
-            <!-- 항복 버튼 추가 -->
+            <button class="btn-battle-action" id="btn-skill-gb" onclick="setPlayerAction('guardbreak')" style="display:none;">💥 가드브레이크</button>
             <button class="btn-battle-action" id="btn-surrender" onclick="surrenderBattle()" style="background:#4a0f0f; color:#ff9999; border-color:#ff4d4d; margin-left: 20px;">🏳️ 항복하기</button>
         </div>
     </div>
 
     <!-- 전투 해설 로그 -->
-    <div id="battle-log-box" style="width:100%; max-width:800px; height:150px; background:rgba(0,0,0,0.8); border:1px solid var(--border-gold); border-radius:10px; margin-top:15px; overflow-y:auto; padding:10px; color:#ccc; font-size:13px; line-height:1.6; scroll-behavior: smooth;">
-        <!-- 텍스트 로그가 여기에 쌓입니다 -->
-    </div>
-
-    <!-- 결과 확인 및 닫기 버튼 (종료시 노출) -->
-    <button id="btn-close-battle" onclick="closeBattleUI()" style="display:none; margin-top:20px; padding:15px 40px; background:var(--royal-gold); color:#000; font-size:16px; font-weight:900; border-radius:10px; border:none; cursor:pointer; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);">결과 확인하고 나가기</button>
-</div><!-- 투기장 전투 배틀 모달 끝 -->
+    <div id="battle-log-box" style="width:100%; max-width:900px; height:130px; background:rgba(0,0,0,0.8); border:1px solid var(--border-gold); border-radius:10px; margin-top:10px; overflow-y:auto; padding:10px; color:#ccc; font-size:12px; line-height:1.6; scroll-behavior: smooth;"></div>
+    
+    <!-- 결과 확인 및 닫기 버튼 -->
+    <button id="btn-close-battle" onclick="closeBattleUI()" style="display:none; margin-top:15px; padding:15px 40px; background:var(--royal-gold); color:#000; font-size:16px; font-weight:900; border-radius:10px; border:none; cursor:pointer; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);">결과 확인하고 나가기</button>
+</div>
+<!-- 투기장 전투 배틀 모달 끝 -->
 
 
 </div>
@@ -3821,6 +3917,19 @@ input::-webkit-inner-spin-button {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+    id: 15,
+    date: "26년 5월 4일",
+    title: "26년 5월 4일 업데이트 공지사항입니다.",
+    summary: "1. 투기장(PvP) 6:6 전투 시스템 개편 | 2. UI 및 밸런스 조정 | 3. 전적 초기화",
+    content: `
+        <strong>1) 투기장(PvP) 변경사항</strong>
+        <span>- 전투 방식 개편: 기존 페트 1마리 전투 방식에서 플레이어 포함 총 5마리의 페트가 참여하는 6:6 전투 방식으로 변경되었습니다.</span>
+        <span>- UI 및 밸런스 조정: 다대다 전투 시스템 도입에 따른 전장 UI 수정 및 전투 밸런스 최적화 작업이 진행되었습니다.</span>
+        <span>- 유저 정보 초기화: 시스템 대규모 개편으로 인해 기존의 모든 유저 정보(전적 및 랭킹 점수 포함)가 초기화되었습니다.</span>
+    `
+    },
+
     {
     id: 14,
     date: "26년 5월 3일",
@@ -6644,27 +6753,141 @@ window.onload = () => {
 
 
 // ==========================================
-//     투기장 메인 시스템 스크립트
+//    투기장 5페트(6v6) 다대다 배틀 시스템 스크립트
 // ==========================================
 
 let isEditingArena = false; // 캐릭터 정보 수정 중인지 확인하는 플래그
-let arenaSelectedPet = null;
+let arenaSelectedPets = [null, null, null, null, null]; // 5개 펫 슬롯 배열
 let myArenaData = null; 
 const INITIAL_POINTS = 637;
-const BATTLE_LIMIT = 10;
+const BATTLE_LIMIT = 10; // 1일 대전 횟수 제한
 
 // 실제 값은 Firebase(내 정보)에서 불러와 동기화합니다.
 let todayPlayCount = 0;
 
-/**
- * 1. 내 등록 정보 화면 업데이트 함수
- */
+// 연도와 월을 기반으로 시즌 번호 계산 (시즌 1 = 26년 4월 기준)
+function getSeasonNumber(monthLabel) {
+    if (!monthLabel) return 1;
+    const [year, month] = monthLabel.split('-').map(Number);
+    const baseYear = 2026;
+    const baseMonth = 4; 
+    let season = (year - baseYear) * 12 + (month - baseMonth) + 1;
+    return season > 0 ? season : 1;
+}
+
+// 역대 투기장 랭킹 보기 토글
+let isHistoryLoaded = false;
+function toggleArenaHistory() {
+    const container = document.getElementById('arena-history-container');
+    if(!container) return;
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        if (!isHistoryLoaded) loadArenaHistoryData();
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// 역대 랭킹 데이터 로드
+function loadArenaHistoryData() {
+    const container = document.getElementById('arena-history-container');
+    container.innerHTML = '<div style="text-align:center; color:#888;">데이터를 불러오는 중...</div>';
+
+    db.ref('arena_history').once('value', (snapshot) => {
+        const historyData = snapshot.val();
+        if (!historyData) {
+            container.innerHTML = '<div style="text-align:center; color:#888;">역대 랭킹 데이터가 없습니다.</div>';
+            return;
+        }
+
+        let html = '';
+        const months = Object.keys(historyData).sort((a, b) => {
+            const [yA, mA] = a.split('-').map(Number);
+            const [yB, mB] = b.split('-').map(Number);
+            return (yB * 12 + mB) - (yA * 12 + mA);
+        });
+
+        months.forEach(monthLabel => {
+            const seasonNum = getSeasonNumber(monthLabel);
+            const usersObj = historyData[monthLabel];
+            let users = Object.values(usersObj);
+            users.sort((a, b) => b.score - a.score);
+            let top3 = users.slice(0, 3);
+
+            html += `<div style="margin-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 10px;">
+                        <div style="color: var(--royal-gold); font-weight: bold; margin-bottom: 8px;">시즌 ${seasonNum} (${monthLabel})</div>`;
+
+            const medals = ["🥇", "🥈", "🥉"];
+            top3.forEach((user, i) => {
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; font-size:13px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span>${medals[i]}</span>
+                        <img src="${user.petImg}" style="width:20px; height:20px; border-radius:4px; background:#000;">
+                        <span style="color:#fff;">${user.nick}</span>
+                    </div>
+                    <span style="color:var(--royal-gold); font-weight:bold;">${user.score} pts</span>
+                </div>`;
+            });
+            html += `</div>`;
+        });
+
+        container.innerHTML = html;
+        isHistoryLoaded = true;
+    });
+}
+
+// [UI] 선택된 5마리 펫 박스 렌더링
+function renderSelectedPets() {
+    const container = document.getElementById('selected-pets-container');
+    const currentSlotEl = document.getElementById('pet-slot-selector');
+    if(!container || !currentSlotEl) return;
+
+    let currentSlot = parseInt(currentSlotEl.value);
+    container.innerHTML = '';
+    
+    arenaSelectedPets.forEach((pet, idx) => {
+        const div = document.createElement('div');
+        
+        const isSelected = (idx === currentSlot);
+        div.style.border = isSelected ? '2px solid var(--royal-gold)' : '1px solid var(--border-gold)';
+        div.style.borderRadius = '8px';
+        div.style.padding = '5px';
+        div.style.textAlign = 'center';
+        div.style.background = isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(0,0,0,0.4)';
+        div.style.cursor = 'pointer'; 
+        div.style.transition = 'all 0.2s ease';
+        
+        div.onclick = () => {
+            currentSlotEl.value = idx;
+            renderSelectedPets(); 
+        };
+
+        if(pet) {
+            div.innerHTML = `
+                <img src="${pet.img}" width="35" style="margin-bottom:3px; background:#000; border-radius:5px; object-fit:contain;"><br>
+                <strong style="color:var(--royal-gold); font-size:11px;">${pet.name}</strong>
+                <div style="display:flex; flex-direction:column; align-items:center; margin-top:4px; gap:2px; font-size:10px; font-weight:bold;">
+                    <span style="color:#ff4d4d;">HP: ${pet.sHp}</span>
+                    <span style="color:#539bf5;">공: ${pet.sAtk}</span>
+                    <span style="color:#7ee787;">방: ${pet.sDef}</span>
+                    <span style="color:#d2a8ff;">순: ${pet.sSpd}</span>
+                </div>
+            `;
+        } else {
+            div.innerHTML = `
+                <div style="height:35px; margin-bottom:3px; color:#555; line-height:35px; font-size:18px;">+</div>
+                <span style="color:#888; font-size:10px;">${idx+1}번 슬롯</span>
+            `;
+        }
+        container.appendChild(div);
+    });
+}
+
 function updateMyInfoDisplay(data) {
+    if (isEditingArena) return; 
     myArenaData = data;
     
-    if (isEditingArena) return; // 수정 중일 때는 외부 데이터 업데이트로 UI를 덮어쓰지 않음
-    
-    myArenaData = data;
     const display = document.getElementById('my-info-display');
     const setupInputs = document.getElementById('character-setup-inputs');
     const btnSave = document.getElementById('btn-save-info');
@@ -6672,31 +6895,48 @@ function updateMyInfoDisplay(data) {
 
     if (!data) {
         if(display) display.style.display = 'none';
-        if(setupInputs) setupInputs.classList.remove('disabled-section');
+        if(setupInputs) {
+            setupInputs.classList.remove('disabled-section');
+            setupInputs.querySelectorAll('input, select').forEach(el => el.disabled = false);
+        }
         if(btnSave) btnSave.style.display = 'block';
         if(btnReset) btnReset.style.display = 'none';
+        renderSelectedPets();
         return;
     }
 
-    // --- [시스템] 매월 1일 전적 자동 초기화 로직 ---
     const now = new Date();
     const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
     
-    if (data.lastResetMonth !== currentMonthLabel) {
-        db.ref(`arena_users/${data.nick}`).update({
-            record: { bot: {win:0, lose:0}, user: {win:0, lose:0} },
-            score: 1000, // 점수 초기화 항목 추가
-            lastResetMonth: currentMonthLabel
+    if (data.lastResetMonth && data.lastResetMonth !== currentMonthLabel) {
+        db.ref(`arena_history/${data.lastResetMonth}/${data.nick}`).set({
+            nick: data.nick,
+            score: data.score || 1000,
+            petImg: (data.pets && data.pets[0]) ? data.pets[0].img : (data.pet ? data.pet.img : '')
+        }).then(() => {
+            db.ref(`arena_users/${data.nick}`).update({
+                record: { bot: {win:0, lose:0}, user: {win:0, lose:0} },
+                score: 1000,
+                lastResetMonth: currentMonthLabel
+            });
         });
         return; 
+    } else if (!data.lastResetMonth) {
+        db.ref(`arena_users/${data.nick}`).update({ lastResetMonth: currentMonthLabel });
     }
     
     if(display) display.style.display = 'block';
-    if(setupInputs) setupInputs.classList.add('disabled-section');
+    if(setupInputs) {
+        setupInputs.classList.add('disabled-section');
+        setupInputs.querySelectorAll('input, select').forEach(el => el.disabled = true);
+    }
     if(btnSave) btnSave.style.display = 'none';
     if(btnReset) btnReset.style.display = 'block';
 
-    arenaSelectedPet = data.pet; 
+    if(data.pets) arenaSelectedPets = data.pets;
+    else if(data.pet) arenaSelectedPets = [data.pet, null, null, null, null];
+    
+    renderSelectedPets();
 
     let todayStr = new Date().toDateString();
     todayPlayCount = (data.playRecord && data.playRecord.date === todayStr) ? (data.playRecord.count || 0) : 0;
@@ -6706,7 +6946,10 @@ function updateMyInfoDisplay(data) {
 
     const attrColors = { "지": "#7ee787", "수": "#a5d6ff", "화": "#ff7b72", "풍": "#fca311", "무": "#8b949e" };
     const record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
-    const petElements = data.pet.elements || "무";
+    
+    const mainPet = arenaSelectedPets.find(p => p !== null) || { name: '없음', elements: '무', img: '' };
+    const petElements = mainPet.elements || "무";
+    const totalPetsCount = arenaSelectedPets.filter(p => p !== null).length;
 
     if(display) {
         display.innerHTML = `
@@ -6714,10 +6957,10 @@ function updateMyInfoDisplay(data) {
                 <i class="fas fa-lock"></i> [ 등록된 캐릭터 정보 고정됨 ]
             </div>
             <div style="display:flex; gap:15px; align-items:center; margin-bottom:12px;">
-                <img src="${data.pet.img}" style="width: 55px; height: 55px; border-radius: 10px; border: 1px solid var(--border-gold); background: #000;">
+                <img src="${mainPet.img}" style="width: 55px; height: 55px; border-radius: 10px; border: 1px solid var(--border-gold); background: #000; object-fit:contain;">
                 <div>
                     <div style="color:#fff; font-size:15px; font-weight:bold;">${data.nick} <span style="color:var(--royal-gold); font-size:12px;">🏆 ${data.score} pts</span></div>
-                    <div style="color:#8b949e; font-size:11px;">대표 펫: ${data.pet.name} <span style="color:#fff; font-weight:bold;">[${petElements}]</span></div>
+                    <div style="color:#8b949e; font-size:11px;">대표 펫: ${mainPet.name} [${petElements}] <strong style="color:#d2a8ff;">(총 ${totalPetsCount}마리 출전)</strong></div>
                     <div style="font-size:11px; color:#ccc; margin-top:3px;">
                         ⚔️ 유저전: <span style="color:#7ee787">${record.user.win}승</span> <span style="color:#ff7b72">${record.user.lose}패</span> | 
                         🤖 BOT전: <span style="color:#7ee787">${record.bot.win}승</span> <span style="color:#ff7b72">${record.bot.lose}패</span>
@@ -6741,21 +6984,22 @@ function updateMyInfoDisplay(data) {
 
 function resetArenaInfo() {
     if(confirm("등록된 캐릭터 스탯과 펫 정보를 초기화하시겠습니까?\n(현재 보유 점수 및 전적은 안전하게 유지됩니다.)")) {
-        // 핵심: 편집 모드 활성화 (외부 업데이트로부터 UI 보호)
         isEditingArena = true;
         const setupInputs = document.getElementById('character-setup-inputs');
         const btnSave = document.getElementById('btn-save-info');
         const btnReset = document.getElementById('btn-reset-info');
         const display = document.getElementById('my-info-display');
 
-        if(setupInputs) setupInputs.classList.remove('disabled-section');
+        if(setupInputs) {
+            setupInputs.classList.remove('disabled-section');
+            setupInputs.querySelectorAll('input, select').forEach(el => el.disabled = false);
+        }
         if(btnSave) btnSave.style.display = 'block';
         if(btnReset) btnReset.style.display = 'none';
         if(display) display.style.display = 'none';
         
-        arenaSelectedPet = null;
-        const petPreview = document.getElementById('selected-arena-pet');
-        if(petPreview) petPreview.innerHTML = '선택된 펫 없음';
+        arenaSelectedPets = [null, null, null, null, null];
+        renderSelectedPets();
     }
 }
 
@@ -6765,6 +7009,8 @@ function calcArenaPoints() {
     const a1V_el = document.getElementById('ar-attr1-val');
     const a2V_el = document.getElementById('ar-attr2-val');
     
+    if(!a1T_el || !a2T_el || !a1V_el || !a2V_el) return;
+
     const attr1Type = a1T_el.value;
     const attr2Type = a2T_el.value;
     const attr1Val = parseInt(a1V_el.value) || 0;
@@ -6812,7 +7058,7 @@ function calcArenaPoints() {
 }
 
 function saveArenaInfo() {
-    if (!arenaSelectedPet) return alert("참전할 펫을 먼저 선택하세요.");
+    if (arenaSelectedPets.filter(p => p !== null).length === 0) return alert("참전할 펫을 최소 1마리 이상 편성하세요.");
 
     let userNick = localStorage.getItem('arenaUserNick');
     if (!userNick) {
@@ -6825,6 +7071,8 @@ function saveArenaInfo() {
     const pATK = parseInt(document.getElementById('ar-atk').value) || 0;
     const pDEF = parseInt(document.getElementById('ar-def').value) || 0;
     const pSPD = parseInt(document.getElementById('ar-spd').value) || 0;
+
+    const mainPet = arenaSelectedPets.find(p => p !== null); 
 
     const arenaData = {
         nick: userNick,
@@ -6840,12 +7088,13 @@ function saveArenaInfo() {
             t2: document.getElementById('ar-attr2-type').value,
             v2: parseInt(document.getElementById('ar-attr2-val').value) || 0
         },
-        pet: {
-            name: arenaSelectedPet.name,
-            img: arenaSelectedPet.img,
-            sHp: arenaSelectedPet.sHp, sAtk: arenaSelectedPet.sAtk, sDef: arenaSelectedPet.sDef, sSpd: arenaSelectedPet.sSpd,
-            elements: arenaSelectedPet.elements || "무",
-            attr: arenaSelectedPet.attr || { t1: "무" }
+        pets: arenaSelectedPets, 
+        pet: {  
+            name: mainPet.name,
+            img: mainPet.img,
+            sHp: mainPet.sHp, sAtk: mainPet.sAtk, sDef: mainPet.sDef, sSpd: mainPet.sSpd,
+            elements: mainPet.elements || "무",
+            attr: mainPet.attr || { t1: "무" }
         },
         score: Number(myArenaData && myArenaData.score !== undefined ? myArenaData.score : 1000),
         record: myArenaData && myArenaData.record ? myArenaData.record : { bot: {win:0, lose:0}, user: {win:0, lose:0} },
@@ -6856,7 +7105,7 @@ function saveArenaInfo() {
 
     db.ref(`arena_users/${userNick}`).set(arenaData)
     .then(() => {
-        isEditingArena = false; // 저장 성공 시 편집 모드 해제
+        isEditingArena = false; 
         alert("🛡️ 투기장 정보가 성공적으로 저장되었습니다!");
         updateMyInfoDisplay(arenaData);
         refreshUserList();
@@ -6903,13 +7152,16 @@ function refreshUserList() {
             }
             
             const r = user.record || { user: {win:0, lose:0} };
-            const pElements = user.pet.elements || "무";
+            const mainPet = (user.pets && user.pets.find(p => p !== null)) || user.pet || { name: '없음', elements: '무' };
+            const pElements = mainPet.elements || "무";
+            const pCount = user.pets ? user.pets.filter(p=>p!==null).length : 1;
+
             html += `
         <button onclick="initBattle(false, ${JSON.stringify(user).replace(/"/g, '&quot;')})" class="btn-battle user-pvp">
             <div class="battle-info">
                 <i class="fas fa-user-ninja"></i>
                 <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                    <span>${user.nick} <small>(${user.pet.name} [${pElements}])</small></span>
+                    <span>${user.nick} <small>(${mainPet.name} [${pElements}] 외 ${pCount-1}마리)</small></span>
                     <small style="margin:0; font-size:10px; color:#8b949e;">전적: ${r.user.win}승 ${r.user.lose}패</small>
                 </div>
             </div>
@@ -6951,9 +7203,19 @@ function syncAttributeValues(idx) {
 function searchArenaPet() {
     const query = document.getElementById('arena-pet-search').value;
     const resultDiv = document.getElementById('arena-pet-results');
+    const slotSelect = document.getElementById('pet-slot-selector');
+    
+    let slotIdx = parseInt(slotSelect.value);
+
     if(!resultDiv) return;
     resultDiv.innerHTML = '';
     if(!query) return;
+
+    if (isNaN(slotIdx)) {
+        slotIdx = arenaSelectedPets.findIndex(p => p === null);
+        if (slotIdx === -1) slotIdx = 0; 
+        slotSelect.value = slotIdx;
+    }
 
     const filtered = PET_DATABASE.filter(p => p.name.includes(query)).slice(0, 5);
     filtered.forEach(pet => {
@@ -6969,15 +7231,21 @@ function searchArenaPet() {
             
             const pElements = pet.elements || "무";
 
-            arenaSelectedPet = { ...pet, sHp, sAtk, sDef, sSpd, elements: pElements };
-            document.getElementById('selected-arena-pet').innerHTML = `
-                <div style="padding:10px; text-align:center;">
-                    <img src="${pet.img}" width="50" style="margin-bottom:5px;"><br>
-                    <strong style="color:var(--royal-gold);">${pet.name} [${pElements}] (Lv.140 S급)</strong><br>
-                    <div style="font-size:12px; color:#539bf5; margin-top:5px;">
-                        HP:${sHp} | 공:${sAtk} | 방:${sDef} | 순:${sSpd}
-                    </div>
-                </div>`;
+            arenaSelectedPets[slotIdx] = { ...pet, sHp, sAtk, sDef, sSpd, elements: pElements };
+            
+            let nextEmptySlot = arenaSelectedPets.findIndex((p, i) => i > slotIdx && p === null);
+            if (nextEmptySlot === -1) { 
+                nextEmptySlot = arenaSelectedPets.findIndex(p => p === null);
+            }
+            if (nextEmptySlot !== -1) {
+                slotSelect.value = nextEmptySlot;
+            } else {
+                slotSelect.value = ""; 
+            }
+
+            renderSelectedPets();
+            
+            document.getElementById('arena-pet-search').value = '';
             resultDiv.innerHTML = '';
         };
         resultDiv.appendChild(div);
@@ -6985,11 +7253,12 @@ function searchArenaPet() {
 }
 
 // ==========================================
-//    배틀 엔진 (상급 AI & 전략 패치 적용)
+//    배틀 엔진 (6v6 턴 큐 시스템 적용)
 // ==========================================
 let battleState = {
     turn: 1, phase: 'IDLE', activeSelector: null,
-    units: {}, actions: [], matchType: '', oppNick: '', isGameOver: false
+    units: {}, actions: [], matchType: '', oppNick: '', isGameOver: false,
+    myAliveQueue: [], currentActorIndex: 0
 };
 
 function getAttrBonus(atkAttr, defAttr) {
@@ -7000,27 +7269,62 @@ function getAttrBonus(atkAttr, defAttr) {
     return 1.0;
 }
 
+/**
+ * [수정] 유닛 박스 레이아웃 초기화 함수 (image_0d9ae0.png 반영)
+ */
+function renderArenaUnitLayout(uId, unit) {
+    const box = document.getElementById(`unit-${uId}`);
+    if(!box) return;
+
+    box.style.display = 'flex';
+    box.innerHTML = `
+        <div class="unit-name" id="name-${uId}">${unit.name}</div>
+        <div class="unit-content-wrapper">
+            <div class="sprite-container" id="sprite-cont-${uId}">
+                <img src="${unit.img || ''}" id="img-${uId}" class="${unit.type === 'char' ? 'char-sprite' : 'pet-sprite'}">
+            </div>
+            <div class="unit-stats-right">
+                <div class="hp-container">
+                    <div id="hp-${uId}" class="${uId.startsWith('opp') ? 'hp-bar-opp' : 'hp-bar'}" style="width:100%"></div>
+                </div>
+                <div class="hp-text-small" id="hp-txt-${uId}">${Math.floor(unit.hp)} / ${unit.maxHp}</div>
+            </div>
+        </div>
+    `;
+}
+
 async function initBattle(isBot, oppData = null) {
-    if(!arenaSelectedPet) return alert("참전할 펫을 선택해주세요.");
+    if(arenaSelectedPets.filter(p=>p!==null).length === 0) return alert("전투에 참가할 펫이 없습니다. 최소 1마리 이상 설정하세요.");
     if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 대전이 가능합니다.");
     if(todayPlayCount >= BATTLE_LIMIT) return alert("일일 대전 횟수를 초과했습니다.");
 
+    battleState.units = {};
+    document.querySelectorAll('.battle-unit-box').forEach(el => el.style.display = 'none');
+
+    // 아군 캐릭터 설정
     let myChar = {
-        id: 'my-char', team: 'my', type: 'char', name: myArenaData.nick,
+        id: 'my-char', team: 'my', type: 'char', name: myArenaData.nick, img: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         maxHp: myArenaData.stats.hp, atk: myArenaData.stats.atk, def: myArenaData.stats.def, spd: myArenaData.stats.spd,
-        attr: { t1: myArenaData.attr.t1 }, isGuard: false, buffs: {}, isDead: false
+        hp: myArenaData.stats.hp, attr: { t1: myArenaData.attr.t1 }, isGuard: false, buffs: {}, isDead: false
     };
-    myChar.hp = myChar.maxHp;
+    battleState.units['my-char'] = myChar;
+    renderArenaUnitLayout('my-char', myChar);
 
-    let myPet = {
-        ...myArenaData.pet, id: 'my-pet', team: 'my', type: 'pet',
-        maxHp: myArenaData.pet.sHp, atk: myArenaData.pet.sAtk, def: myArenaData.pet.sDef, spd: myArenaData.pet.sSpd,
-        elements: myArenaData.pet.elements || "무",
-        attr: myArenaData.pet.attr || { t1: "무" }, isGuard: false, buffs: {}, isDead: false
-    };
-    myPet.hp = myPet.maxHp;
+    // 아군 펫 설정
+    let myPetsToLoad = myArenaData.pets || [myArenaData.pet, null, null, null, null];
+    myPetsToLoad.forEach((p, idx) => {
+        if(!p) return;
+        let pId = `my-pet-${idx}`;
+        battleState.units[pId] = { 
+            ...p, id: pId, team: 'my', type: 'pet', 
+            maxHp: p.sHp, hp: p.sHp, atk: p.sAtk, def: p.sDef, spd: p.sSpd, 
+            attr: p.attr || {t1:"무"}, isGuard: false, buffs: {}, isDead: false 
+        };
+        renderArenaUnitLayout(pId, battleState.units[pId]);
+    });
 
-    let oppChar = {}, oppPet = {};
+    let oppChar = {}; 
+    let oppPetsData = [];
 
     if (isBot) {
         battleState.matchType = isBot;
@@ -7031,60 +7335,50 @@ async function initBattle(isBot, oppData = null) {
         const attrTypes = ["지", "수", "화", "풍"];
         let botAttr = { t1: attrTypes[Math.floor(Math.random() * 4)], v1: 10 };
 
-        function buildBotChar(name, pts, attr, dmgMod) {
-            let [pHP, pATK, pDEF, pSPD] = pts;
-            return {
-                name: name,
-                maxHp: (pHP * 4) + pATK + pDEF + pSPD,
-                atk: parseFloat(((pHP * 0.1) + pATK + (pDEF * 0.1) + (pSPD * 0.05)).toFixed(1)),
-                def: parseFloat(((pHP * 0.1) + (pATK * 0.1) + pDEF + (pSPD * 0.05)).toFixed(1)),
-                spd: pSPD, attr: attr, dmgMod: dmgMod
-            };
-        }
-
-        let randomPetBase = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
-        let growthMulti = 139;
-        let botPetS = {
-            name: randomPetBase.name,
-            img: randomPetBase.img,
-            maxHp: Math.floor(randomPetBase.hp + (randomPetBase.ghp * growthMulti)),
-            atk: parseFloat((randomPetBase.atk + (randomPetBase.gatk * growthMulti)).toFixed(2)),
-            def: parseFloat((randomPetBase.def + (randomPetBase.gdef * growthMulti)).toFixed(2)),
-            spd: parseFloat(((randomPetBase.spd || randomPetBase.agi || 0) + (randomPetBase.gspd * growthMulti)).toFixed(2)),
-            elements: randomPetBase.elements || "무",
-            attr: randomPetBase.attr || { t1: "무" }
+        let dmgMod = (isBot === 'bot_easy') ? 0.8 : (isBot === 'bot_normal' ? 1.0 : 1.5);
+        oppChar = {
+            name: (isBot === 'bot_easy' ? "만득BOT(쉬움)" : (isBot === 'bot_normal' ? "만득BOT(보통)" : "만득BOT(어려움)")), img: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png',
+            maxHp: (botPts[0] * 4) + botPts[1] + botPts[2] + botPts[3],
+            atk: parseFloat(((botPts[0] * 0.1) + botPts[1] + (botPts[2] * 0.1) + (botPts[3] * 0.05)).toFixed(1)),
+            def: parseFloat(((botPts[0] * 0.1) + (botPts[1] * 0.1) + botPts[2] + (botPts[3] * 0.05)).toFixed(1)),
+            spd: botPts[3], attr: botAttr, dmgMod: dmgMod
         };
-
-        if (isBot === 'bot_easy') { 
-            oppChar = buildBotChar("만득BOT(쉬움)", botPts, botAttr, 0.8);
-            oppPet = { ...botPetS, dmgMod: 0.8 }; 
-        } else if (isBot === 'bot_normal') { 
-            oppChar = buildBotChar("만득BOT(보통)", botPts, botAttr, 1.0);
-            oppPet = { ...botPetS, dmgMod: 1.0 }; 
-        } else if (isBot === 'bot_hard') { 
-            oppChar = buildBotChar("만득BOT(어려움)", botPts, botAttr, 1.5);
-            oppPet = { ...botPetS, dmgMod: 1.5 }; 
+        
+        for(let k=0; k<5; k++) {
+            let rndP = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
+            let g = 139;
+            oppPetsData.push({ 
+                name: rndP.name, img: rndP.img, 
+                sHp: Math.floor(rndP.hp + (rndP.ghp * g)), 
+                sAtk: parseFloat((rndP.atk + (rndP.gatk * g)).toFixed(2)), 
+                sDef: parseFloat((rndP.def + (rndP.gdef * g)).toFixed(2)), 
+                sSpd: parseFloat(((rndP.spd || rndP.agi || 0) + (rndP.gspd * g)).toFixed(2)), 
+                attr: rndP.attr || {t1:"무"} 
+            });
         }
     } else {
         battleState.matchType = 'user_pvp';
         battleState.oppNick = oppData.nick;
-        oppChar = { name: oppData.nick, maxHp: oppData.stats.hp, atk: oppData.stats.atk, def: oppData.stats.def, spd: oppData.stats.spd, attr: oppData.attr, dmgMod: 1.0 };
-        oppPet = { name: oppData.pet.name, img: oppData.pet.img, maxHp: oppData.pet.sHp, atk: oppData.pet.sAtk, def: oppData.pet.sDef, spd: oppData.pet.sSpd, elements: oppData.pet.elements || "무", attr: oppData.pet.attr || { t1: "무" }, dmgMod: 1.0 };
+        oppChar = { name: oppData.nick, img: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png', maxHp: oppData.stats.hp, atk: oppData.stats.atk, def: oppData.stats.def, spd: oppData.stats.spd, attr: oppData.attr, dmgMod: 1.0 };
+        oppPetsData = oppData.pets || [oppData.pet, null, null, null, null];
     }
 
     oppChar = { ...oppChar, id: 'opp-char', team: 'opp', type: 'char', hp: oppChar.maxHp, isGuard: false, buffs: {}, isDead: false };
-    oppPet = { ...oppPet, id: 'opp-pet', team: 'opp', type: 'pet', hp: oppPet.maxHp, isGuard: false, buffs: {}, isDead: false };
+    battleState.units['opp-char'] = oppChar;
+    renderArenaUnitLayout('opp-char', oppChar);
 
-    battleState.units = { 'my-char': myChar, 'my-pet': myPet, 'opp-char': oppChar, 'opp-pet': oppPet };
+    oppPetsData.forEach((p, idx) => {
+        if(!p) return;
+        let pId = `opp-pet-${idx}`;
+        battleState.units[pId] = { 
+            ...p, id: pId, team: 'opp', type: 'pet', 
+            maxHp: p.sHp, hp: p.sHp, atk: p.sAtk, def: p.sDef, spd: p.sSpd, 
+            attr: p.attr || {t1:"무"}, dmgMod: oppChar.dmgMod || 1.0, isGuard: false, buffs: {}, isDead: false 
+        };
+        renderArenaUnitLayout(pId, battleState.units[pId]);
+    });
+
     battleState.turn = 1; battleState.isGameOver = false; battleState.actions = [];
-
-    document.getElementById('name-my-char').innerText = myChar.name;
-    document.getElementById('name-my-pet').innerText = myPet.name;
-    document.getElementById('img-my-pet').src = myPet.img;
-    document.getElementById('name-opp-char').innerText = oppChar.name;
-    document.getElementById('name-opp-pet').innerText = oppPet.name;
-    document.getElementById('img-opp-pet').src = oppPet.img || "https://via.placeholder.com/50";
-    
     updateAllHPUI();
     document.getElementById('battle-log-box').innerHTML = "";
     addLog(`전투가 시작되었습니다! VS ${oppChar.name}`);
@@ -7122,14 +7416,19 @@ function addLog(msg) {
     }
 }
 
+/**
+ * [수정] 데미지 숫자가 박스 위로 올라가도 잘리지 않도록 z-index와 overflow 예외 처리
+ */
 function showFloatingDmg(targetId, dmgText, type) {
     const box = document.getElementById(`unit-${targetId}`);
     if(!box) return;
     const div = document.createElement('div');
     div.className = `floating-dmg ${type}`;
     div.innerText = dmgText;
+    // 잘림 방지를 위해 박스 자체가 아닌 바디 혹은 전장 컨테이너에 붙이는 것도 방법이지만, 
+    // CSS overflow:visible 처리를 위해 박스에 유지합니다.
     box.appendChild(div);
-    setTimeout(() => div.remove(), 1000);
+    setTimeout(() => div.remove(), 2500); // 애니메이션 시간(2.5s)에 맞춤
 }
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -7138,99 +7437,101 @@ function startTurnPhase() {
     if(checkWinCondition()) return;
     Object.values(battleState.units).forEach(u => { u.isGuard = false; });
     battleState.actions = [];
-    battleState.phase = 'SELECT_CHAR';
-    document.getElementById('battle-turn-indicator').innerText = `[ ${battleState.turn} 턴 ] 캐릭터의 행동을 선택하세요.`;
-    document.getElementById('control-status').innerText = "내 캐릭터 행동 대기중...";
-    document.getElementById('btn-skill-back').style.display = 'none';
-    document.getElementById('btn-skill-dog').style.display = 'none';
-    let btnGB = document.getElementById('btn-skill-gb');
-    if(btnGB) btnGB.style.display = 'none';
+    
+    const ALL_MY_IDS = ['my-char', 'my-pet-0', 'my-pet-1', 'my-pet-2', 'my-pet-3', 'my-pet-4'];
+    battleState.myAliveQueue = ALL_MY_IDS.filter(id => battleState.units[id] && !battleState.units[id].isDead);
+    battleState.currentActorIndex = 0;
+    
+    updateControlPanelForCurrentActor();
+}
 
-    if(battleState.units['my-char'].isDead) {
-        battleState.phase = 'SELECT_PET';
-        document.getElementById('control-status').innerText = "내 펫 행동 대기중...";
-        document.getElementById('btn-skill-back').style.display = 'inline-block';
-        document.getElementById('btn-skill-dog').style.display = 'inline-block';
-        if(btnGB) btnGB.style.display = 'inline-block';
+function updateControlPanelForCurrentActor() {
+    document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('active-actor', 'targetable'));
+
+    if (battleState.currentActorIndex >= battleState.myAliveQueue.length) {
+        executeTurn(); 
+        return;
     }
+    
+    let activeUnitId = battleState.myAliveQueue[battleState.currentActorIndex];
+    let unit = battleState.units[activeUnitId];
+    
+    const activeBox = document.getElementById(`unit-${activeUnitId}`);
+    if (activeBox) activeBox.classList.add('active-actor');
+
+    document.getElementById('battle-turn-indicator').innerText = `[ ${battleState.turn} 턴 ] ${unit.name}의 행동을 선택하세요.`;
+    document.getElementById('control-status').innerHTML = `<span style="color:#ffcc00; font-weight:bold;">${unit.name}</span> 행동 대기중...`;
+    
+    let isPet = activeUnitId.includes('pet');
+    document.getElementById('btn-skill-back').style.display = isPet ? 'inline-block' : 'none';
+    document.getElementById('btn-skill-dog').style.display = isPet ? 'inline-block' : 'none';
+    let btnGB = document.getElementById('btn-skill-gb');
+    if(btnGB) btnGB.style.display = isPet ? 'inline-block' : 'none';
 }
 
 function setPlayerAction(actionType) {
-    let activeUnitId = battleState.phase === 'SELECT_CHAR' ? 'my-char' : 'my-pet';
-    if(battleState.units[activeUnitId].isDead) return;
+    let activeUnitId = battleState.myAliveQueue[battleState.currentActorIndex];
+    if(!activeUnitId || battleState.units[activeUnitId].isDead) return;
+    
+    document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('targetable'));
+
     if(actionType === 'guard') {
         battleState.actions.push({ unitId: activeUnitId, type: 'guard', target: activeUnitId });
-        moveToNextSelection();
+        battleState.currentActorIndex++;
+        updateControlPanelForCurrentActor(); 
     } else {
         battleState.activeSelector = { unitId: activeUnitId, type: actionType };
-        document.getElementById('control-status').innerText = "공격할 대상을 클릭하세요.";
+        document.getElementById('control-status').innerHTML = `<b style="color:#ff4d4d;">[대상 선택]</b> 공격할 적 유닛을 클릭하세요!`;
+
+        Object.keys(battleState.units).forEach(id => {
+            if (id.startsWith('opp-') && !battleState.units[id].isDead) {
+                const targetBox = document.getElementById(`unit-${id}`);
+                if (targetBox) targetBox.classList.add('targetable');
+            }
+        });
     }
 }
 
 function selectTarget(targetId) {
     if(!battleState.activeSelector) return;
-    if(battleState.units[targetId].isDead) return alert("이미 쓰러진 대상입니다.");
+    if(!battleState.units[targetId] || battleState.units[targetId].isDead) return alert("이미 쓰러진 대상입니다.");
     if(battleState.units[targetId].team === 'my') return alert("적을 선택하세요!");
+    
     battleState.actions.push({ unitId: battleState.activeSelector.unitId, type: battleState.activeSelector.type, target: targetId });
     battleState.activeSelector = null;
-    document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('targeted'));
-    moveToNextSelection();
-}
-
-function moveToNextSelection() {
-    if (battleState.phase === 'SELECT_CHAR') {
-        battleState.phase = 'SELECT_PET';
-        if(battleState.units['my-pet'].isDead) executeTurn(); 
-        else {
-            document.getElementById('control-status').innerText = "내 펫 행동 대기중...";
-            document.getElementById('btn-skill-back').style.display = 'inline-block';
-            document.getElementById('btn-skill-dog').style.display = 'inline-block';
-            let btnGB = document.getElementById('btn-skill-gb');
-            if(btnGB) btnGB.style.display = 'inline-block';
-        }
-    } else if (battleState.phase === 'SELECT_PET') executeTurn();
+    
+    document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('targetable'));
+    
+    battleState.currentActorIndex++;
+    updateControlPanelForCurrentActor(); 
 }
 
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
     document.getElementById('control-status').innerText = "전투 진행 중...";
-    let aliveMy = ['my-char', 'my-pet'].filter(tid => !battleState.units[tid].isDead);
     
-    // --- [상급 AI 지능형 전략 결정] ---
-    if (aliveMy.length > 0) {
-        let oppChar = battleState.units['opp-char'];
-        let oppPet = battleState.units['opp-pet'];
-        
+    let aliveMy = Object.keys(battleState.units).filter(id => id.startsWith('my-') && !battleState.units[id].isDead);
+    let aliveOpp = Object.keys(battleState.units).filter(id => id.startsWith('opp-') && !battleState.units[id].isDead);
+    
+    if (aliveMy.length > 0 && aliveOpp.length > 0) {
         let focusTarget = aliveMy.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
-        
-        let charAct = { unitId: 'opp-char', type: 'attack', target: focusTarget };
-        let petAct = { unitId: 'opp-pet', type: 'attack', target: focusTarget };
 
-        let playerGuardAction = battleState.actions.find(a => a.unitId.startsWith('my-') && a.type === 'guard');
-        if (playerGuardAction && Math.random() < 0.75) {
-            petAct.type = 'guardbreak';
-            petAct.target = playerGuardAction.unitId; 
-        }
+        aliveOpp.forEach(oppId => {
+            let u = battleState.units[oppId];
+            let act = { unitId: oppId, type: 'attack', target: focusTarget };
 
-        if (!oppChar.isDead && (oppChar.hp / oppChar.maxHp) < 0.4) {
-            charAct.type = 'guard'; 
-            charAct.target = 'opp-char';
-            
-            if(!oppPet.isDead) {
-                petAct.type = (Math.random() < 0.8) ? 'skill_dog' : 'skill_back';
-                // ▼ 이 부분을 focusTarget으로 수정하여 적을 타격하게 만듭니다.
-                petAct.target = focusTarget; 
+            if (oppId === 'opp-char') {
+                if ((u.hp / u.maxHp) < 0.4) { act.type = 'guard'; act.target = 'opp-char'; }
+            } else { 
+                let oppChar = battleState.units['opp-char'];
+                if (oppChar && !oppChar.isDead && (oppChar.hp / oppChar.maxHp) < 0.4) {
+                    act.type = (Math.random() < 0.8) ? 'skill_dog' : 'skill_back';
+                } else if (Math.random() < 0.2) { 
+                    act.type = 'guardbreak'; 
+                }
             }
-        }
-        else if (!oppChar.isDead && !oppPet.isDead && Math.abs(oppChar.spd - oppPet.spd) < 50) {
-            if (Math.random() < 0.85) {
-                charAct.target = focusTarget;
-                petAct.target = focusTarget;
-            }
-        }
-
-        if(!oppChar.isDead) battleState.actions.push(charAct);
-        if(!oppPet.isDead) battleState.actions.push(petAct);
+            battleState.actions.push(act);
+        });
     }
 
     battleState.actions.forEach(act => {
@@ -7243,7 +7544,6 @@ async function executeTurn() {
 
     for(let i=0; i < battleState.actions.length - 1; i++) {
         let a1 = battleState.actions[i]; let a2 = battleState.actions[i+1];
-        // 가드브레이크는 attack 타입이 아니므로 다굴 성립 조건에서 원천 제외됩니다.
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
             let u1 = battleState.units[a1.unitId]; let u2 = battleState.units[a2.unitId];
             if(u1.team === u2.team && a1.target === a2.target) {
@@ -7262,7 +7562,7 @@ async function executeTurn() {
         if(act.type === 'guard') { 
             attacker.isGuard = true; 
             addLog(`🛡️ [${attacker.name}] 방어 태세!`); 
-            await delay(400); 
+            await delay(400); // 딜레이 증가
             continue; 
         }
 
@@ -7286,60 +7586,44 @@ async function executeTurn() {
                 gbSuccess = true;
                 addLog(`💥 [${attacker.name}](이)가 가드브레이크를 사용하여 방어를 뚫었습니다!`);
             } else {
-                addLog(`💨 [${attacker.name}]의 가드브레이크 시도! 하지만 대상이 방어 태세가 아닙니다.`);
+                addLog(`💨 [${attacker.name}]의 가드브레이크 시도! (대상이 방어중이 아님)`);
             }
         }
  
+        let isDogIntercept = false;
         if(target.type === 'char' && !act.isDagul && act.type !== 'guardbreak') {
-            let defPet = battleState.units[`${target.team}-pet`];
-            let petAction = battleState.actions.find(a => a.unitId === defPet.id && !battleState.units[a.unitId].isDead);
-            if(petAction && petAction.type === 'skill_dog' && !defPet.isDead) { 
-                target = defPet; 
+            let dogAct = battleState.actions.find(a => a.unitId.startsWith(`${target.team}-pet`) && a.type === 'skill_dog' && !battleState.units[a.unitId].isDead);
+            if(dogAct) { 
+                target = battleState.units[dogAct.unitId]; 
                 isDogIntercept = true;
-                addLog(`🐶 [${defPet.name}] 충견진돗개! 주인을 지킵니다!`); 
+                addLog(`🐶 [${target.name}] 충견진돗개! 주인을 지킵니다!`); 
             }
         }
 
         const attackerBox = document.getElementById(`unit-${attacker.id}`);
+        const spriteCont = document.getElementById(`sprite-cont-${attacker.id}`); // 이미지가 든 컨테이너만 움직이도록 설정 권장
+        
         if(attackerBox) attackerBox.classList.add('active-turn');
         let moveClass = attacker.team === 'my' ? 'anim-attack-right' : 'anim-attack-left';
         if(attackerBox) attackerBox.classList.add(moveClass);
-        await delay(300);
+        await delay(300); // 돌진 전 대기
 
         let dodgeChance = Math.max(10, Math.min(55, 12 + (target.spd - attacker.spd) * 0.3));
-        
         let isForcedMiss = isGuardBreak && !gbSuccess; 
         let cannotDodge = isGuardBreak && gbSuccess;   
 
         if(isForcedMiss || (!target.isGuard && !act.isDagul && !cannotDodge && Math.random() * 100 < dodgeChance && !isDogIntercept)) {
             showFloatingDmg(target.id, "MISS", "miss"); 
-            
-            if (isForcedMiss) {
-                addLog(`❌ 가드브레이크 실패! 데미지를 주지 못했습니다.`);
-            } else {
-                addLog(`💨 [${target.name}] 회피 성공!`);
-                if((target.spd - attacker.spd) > 40 && Math.random() < 0.35) {
-                    let counterDmg = Math.floor(target.atk * 0.65);
-                    attacker.hp -= counterDmg;
-                    showFloatingDmg(attacker.id, counterDmg, "normal");
-                    addLog(`↪️ [${target.name}]의 기습 반격! ${counterDmg} 데미지!`);
-                    updateAllHPUI();
-                }
-            }
+            if (isForcedMiss) addLog(`❌ 가드브레이크 실패!`);
+            else addLog(`💨 [${target.name}] 회피 성공!`);
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
-
-            // 공격 및 방어 가중치 밸런스 조정
             let skillMultiplier = act.isDagul ? 1.0 : 1.2; 
             let baseDmg = ((currentAtk * skillMultiplier) - (target.def * 0.85)) * attrBonus;
-
-            // 방어력이 공격력보다 월등히 높아 데미지가 0 이하로 떨어지는 것을 방지 (최소 데미지 보장)
             baseDmg = Math.max(currentAtk * 0.1, baseDmg);
             
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
-            
-            // 방어 시 데미지 감소 효율 너프 (기존 0.1 -> 변경 0.5)
             if(target.isGuard) baseDmg *= 0.5;
                         
             let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
@@ -7350,7 +7634,8 @@ async function executeTurn() {
             addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지! ${act.isDagul?'(🔗다굴)':''}`);
             updateAllHPUI();
         }
-        await delay(500);
+        await delay(800); // 피격/데미지 확인 시간 증가 (0.4s -> 0.8s)
+        
         if(attackerBox) attackerBox.classList.remove(moveClass, 'active-turn');
         const targetBox = document.getElementById(`unit-${target.id}`);
         if(targetBox) targetBox.classList.remove('anim-hit');
@@ -7472,7 +7757,16 @@ function closeBattleUI() {
 
 function loadHomeArenaRanking() {
     const board = document.getElementById('homeArenaRankingBoard');
+    const titleEl = document.getElementById('arena-season-title');
+    const labelEl = document.getElementById('arena-season-label');
     if(!board) return; 
+
+    const now = new Date();
+    const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
+    const currentSeason = getSeasonNumber(currentMonthLabel);
+
+    if(titleEl) titleEl.innerHTML = `<i class="fas fa-trophy" style="color: var(--royal-gold); margin-right: 5px;"></i> 월간 투기장 명예의 전당 (시즌 ${currentSeason})`;
+    if(labelEl) labelEl.innerText = `시즌 ${currentSeason}`;
 
     db.ref('arena_users').orderByChild('score').limitToLast(3).on('value', (snapshot) => {
         let users = [];
@@ -7490,13 +7784,13 @@ function loadHomeArenaRanking() {
         
         users.forEach((user, i) => {
             if(user) {
-                const petImg = user.pet.img;
-
+                const petImg = (user.pets && user.pets[0]) ? user.pets[0].img : (user.pet ? user.pet.img : '');
+                
                 html += `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:14px;">${medals[i]}</span>
-                        <img src="${petImg}" style="width:24px; height:24px; border-radius:4px; background:#000;">
+                        <img src="${petImg}" style="width:24px; height:24px; border-radius:4px; background:#000; object-fit:contain;">
                         <b style="font-size:13px; color:#fff;">${user.nick}</b>
                     </div>
                     <span style="font-size:12px; color:var(--royal-gold); font-weight:bold;">${user.score} pts</span>
@@ -7511,7 +7805,15 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshUserList();
     calcArenaPoints(); 
     loadHomeArenaRanking();
+    
+    const slotSelector = document.getElementById('pet-slot-selector');
+    if(slotSelector) {
+        slotSelector.addEventListener('change', renderSelectedPets);
+    }
 });
+/* ==========================================
+                투기장 페이지 전용 CSS 끝
+   ========================================== */
 
 </script>
 
