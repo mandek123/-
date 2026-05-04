@@ -6756,14 +6756,16 @@ window.onload = () => {
 //    투기장 5페트(6v6) 다대다 배틀 시스템 스크립트
 // ==========================================
 
-let isEditingArena = false; 
-let arenaSelectedPets = [null, null, null, null, null]; 
+let isEditingArena = false; // 캐릭터 정보 수정 중인지 확인하는 플래그
+let arenaSelectedPets = [null, null, null, null, null]; // 5개 펫 슬롯 배열
 let myArenaData = null; 
 const INITIAL_POINTS = 637;
-const BATTLE_LIMIT = 10; 
+const BATTLE_LIMIT = 10; // 1일 대전 횟수 제한
 
+// 실제 값은 Firebase(내 정보)에서 불러와 동기화합니다.
 let todayPlayCount = 0;
 
+// 연도와 월을 기반으로 시즌 번호 계산 (시즌 1 = 26년 4월 기준)
 function getSeasonNumber(monthLabel) {
     if (!monthLabel) return 1;
     const [year, month] = monthLabel.split('-').map(Number);
@@ -6773,6 +6775,7 @@ function getSeasonNumber(monthLabel) {
     return season > 0 ? season : 1;
 }
 
+// 역대 투기장 랭킹 보기 토글
 let isHistoryLoaded = false;
 function toggleArenaHistory() {
     const container = document.getElementById('arena-history-container');
@@ -6785,6 +6788,7 @@ function toggleArenaHistory() {
     }
 }
 
+// 역대 랭킹 데이터 로드
 function loadArenaHistoryData() {
     const container = document.getElementById('arena-history-container');
     container.innerHTML = '<div style="text-align:center; color:#888;">데이터를 불러오는 중...</div>';
@@ -6833,6 +6837,7 @@ function loadArenaHistoryData() {
     });
 }
 
+// [UI] 선택된 5마리 펫 박스 렌더링
 function renderSelectedPets() {
     const container = document.getElementById('selected-pets-container');
     const currentSlotEl = document.getElementById('pet-slot-selector');
@@ -6978,7 +6983,7 @@ function updateMyInfoDisplay(data) {
 }
 
 function resetArenaInfo() {
-    if(confirm("등록된 캐릭터 스탯과 펫 정보를 초기화하시겠습니까?")) {
+    if(confirm("등록된 캐릭터 스탯과 펫 정보를 초기화하시겠습니까?\n(현재 보유 점수 및 전적은 안전하게 유지됩니다.)")) {
         isEditingArena = true;
         const setupInputs = document.getElementById('character-setup-inputs');
         const btnSave = document.getElementById('btn-save-info');
@@ -7042,6 +7047,11 @@ function calcArenaPoints() {
                 <div style="color:#539bf5; font-weight:bold;">최종 공격: <span style="color:#fff;">${finalATK.toFixed(1)}</span></div>
                 <div style="color:#7ee787; font-weight:bold;">최종 방어: <span style="color:#fff;">${finalDEF.toFixed(1)}</span></div>
                 <div style="color:#d2a8ff; font-weight:bold;">최종 순발: <span style="color:#fff;">${pSPD}</span></div>
+                <div style="grid-column: span 2; color:var(--royal-gold); font-size:11px; border-top:1px solid rgba(212, 175, 55, 0.2); padding-top:8px; margin-top:5px; text-align:center;">
+                    현재 속성: 
+                    <span style="color:${attrColors[attr1Type]}; font-weight:bold;">${attr1Type}(${attr1Val})</span> / 
+                    <span style="color:${attrColors[attr2Type]}; font-weight:bold;">${attr2Type}(${attr2Val})</span>
+                </div>
             </div>`;
         summaryEl.style.display = 'block';
     }
@@ -7079,6 +7089,13 @@ function saveArenaInfo() {
             v2: parseInt(document.getElementById('ar-attr2-val').value) || 0
         },
         pets: arenaSelectedPets, 
+        pet: {  
+            name: mainPet.name,
+            img: mainPet.img,
+            sHp: mainPet.sHp, sAtk: mainPet.sAtk, sDef: mainPet.sDef, sSpd: mainPet.sSpd,
+            elements: mainPet.elements || "무",
+            attr: mainPet.attr || { t1: "무" }
+        },
         score: Number(myArenaData && myArenaData.score !== undefined ? myArenaData.score : 1000),
         record: myArenaData && myArenaData.record ? myArenaData.record : { bot: {win:0, lose:0}, user: {win:0, lose:0} },
         playRecord: myArenaData && myArenaData.playRecord ? myArenaData.playRecord : { date: new Date().toDateString(), count: 0 },
@@ -7104,6 +7121,27 @@ function refreshUserList() {
         snapshot.forEach(child => { users.push(child.val()); });
         users.reverse(); 
 
+        for(let i=0; i<3; i++) {
+            const rankEl = document.getElementById(`rank-${i+1}`);
+            if(rankEl) {
+                const parentSpan = rankEl.parentElement;
+                if(users[i]) {
+                    const r = users[i].record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
+                    const alertMsg = `[ ${users[i].nick} 님의 전적 ]\n👤 유저전: ${r.user.win}승 ${r.user.lose}패\n🤖 BOT전: ${r.bot.win}승 ${r.bot.lose}패`;
+                    
+                    rankEl.innerHTML = `${users[i].nick} <small>(${users[i].score}점)</small>`;
+                    parentSpan.style.cursor = "pointer";
+                    parentSpan.onclick = () => alert(alertMsg);
+                    parentSpan.title = "클릭하여 전적 확인"; 
+                } else {
+                    rankEl.innerHTML = "-";
+                    parentSpan.style.cursor = "default";
+                    parentSpan.onclick = null;
+                    parentSpan.title = "";
+                }
+            }
+        }
+
         let html = "";
         const myNick = localStorage.getItem('arenaUserNick');
         
@@ -7114,7 +7152,8 @@ function refreshUserList() {
             }
             
             const r = user.record || { user: {win:0, lose:0} };
-            const mainPet = (user.pets && user.pets.find(p => p !== null)) || { name: '없음', elements: '무' };
+            const mainPet = (user.pets && user.pets.find(p => p !== null)) || user.pet || { name: '없음', elements: '무' };
+            const pElements = mainPet.elements || "무";
             const pCount = user.pets ? user.pets.filter(p=>p!==null).length : 1;
 
             html += `
@@ -7122,7 +7161,7 @@ function refreshUserList() {
             <div class="battle-info">
                 <i class="fas fa-user-ninja"></i>
                 <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                    <span>${user.nick} <small>(${mainPet.name} 외 ${pCount-1}마리)</small></span>
+                    <span>${user.nick} <small>(${mainPet.name} [${pElements}] 외 ${pCount-1}마리)</small></span>
                     <small style="margin:0; font-size:10px; color:#8b949e;">전적: ${r.user.win}승 ${r.user.lose}패</small>
                 </div>
             </div>
@@ -7134,6 +7173,82 @@ function refreshUserList() {
         });
         
         listDiv.innerHTML = html || '<div style="text-align:center; color:#8b949e; padding:15px; font-size:12px;">대전 가능한 유저가 현재 없습니다.</div>';
+    });
+}
+
+function syncAttributes(idx) {
+    const a1T = document.getElementById('ar-attr1-type');
+    const a2T = document.getElementById('ar-attr2-type');
+    if (a1T.value === a2T.value) {
+        const types = ["지", "수", "화", "풍"];
+        a2T.value = types.find(t => t !== a1T.value);
+    }
+    const invalidPairs = [["지", "화"], ["화", "지"], ["수", "풍"], ["풍", "수"]];
+    if (invalidPairs.some(pair => a1T.value === pair[0] && a2T.value === pair[1])) {
+        const safeTypes = { "지": "수", "수": "지", "화": "수", "풍": "지" };
+        a2T.value = safeTypes[a1T.value];
+    }
+    calcArenaPoints();
+}
+
+function syncAttributeValues(idx) {
+    const v1 = document.getElementById('ar-attr1-val');
+    const v2 = document.getElementById('ar-attr2-val');
+    let val = Math.max(0, Math.min(10, parseInt(idx === 1 ? v1.value : v2.value) || 0));
+    if (idx === 1) { v1.value = val; v2.value = 10 - val; } 
+    else { v2.value = val; v1.value = 10 - val; }
+    calcArenaPoints();
+}
+
+function searchArenaPet() {
+    const query = document.getElementById('arena-pet-search').value;
+    const resultDiv = document.getElementById('arena-pet-results');
+    const slotSelect = document.getElementById('pet-slot-selector');
+    
+    let slotIdx = parseInt(slotSelect.value);
+
+    if(!resultDiv) return;
+    resultDiv.innerHTML = '';
+    if(!query) return;
+
+    if (isNaN(slotIdx)) {
+        slotIdx = arenaSelectedPets.findIndex(p => p === null);
+        if (slotIdx === -1) slotIdx = 0; 
+        slotSelect.value = slotIdx;
+    }
+
+    const filtered = PET_DATABASE.filter(p => p.name.includes(query)).slice(0, 5);
+    filtered.forEach(pet => {
+        const div = document.createElement('div');
+        div.className = 'custom-select-option';
+        div.innerHTML = `<img src="${pet.img}" width="20"> ${pet.name}`;
+        div.onclick = () => {
+            const growthMulti = 139; 
+            const sHp = Math.floor(pet.hp + (pet.ghp * growthMulti));
+            const sAtk = parseFloat((pet.atk + (pet.gatk * growthMulti)).toFixed(2));
+            const sDef = parseFloat((pet.def + (pet.gdef * growthMulti)).toFixed(2));
+            const sSpd = parseFloat(((pet.spd || pet.agi || 0) + (pet.gspd * growthMulti)).toFixed(2));
+            
+            const pElements = pet.elements || "무";
+
+            arenaSelectedPets[slotIdx] = { ...pet, sHp, sAtk, sDef, sSpd, elements: pElements };
+            
+            let nextEmptySlot = arenaSelectedPets.findIndex((p, i) => i > slotIdx && p === null);
+            if (nextEmptySlot === -1) { 
+                nextEmptySlot = arenaSelectedPets.findIndex(p => p === null);
+            }
+            if (nextEmptySlot !== -1) {
+                slotSelect.value = nextEmptySlot;
+            } else {
+                slotSelect.value = ""; 
+            }
+
+            renderSelectedPets();
+            
+            document.getElementById('arena-pet-search').value = '';
+            resultDiv.innerHTML = '';
+        };
+        resultDiv.appendChild(div);
     });
 }
 
@@ -7176,13 +7291,14 @@ function renderArenaUnitLayout(uId, unit) {
 }
 
 async function initBattle(isBot, oppData = null) {
-    if(arenaSelectedPets.filter(p=>p!==null).length === 0) return alert("전투에 참가할 펫이 없습니다.");
-    if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 합니다.");
+    if(arenaSelectedPets.filter(p=>p!==null).length === 0) return alert("전투에 참가할 펫이 없습니다. 최소 1마리 이상 설정하세요.");
+    if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 대전이 가능합니다.");
     if(todayPlayCount >= BATTLE_LIMIT) return alert("일일 대전 횟수를 초과했습니다.");
 
     battleState.units = {};
     document.querySelectorAll('.battle-unit-box').forEach(el => el.style.display = 'none');
 
+    // 아군 캐릭터 설정
     let myChar = {
         id: 'my-char', team: 'my', type: 'char', name: myArenaData.nick, img: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         maxHp: myArenaData.stats.hp, atk: myArenaData.stats.atk, def: myArenaData.stats.def, spd: myArenaData.stats.spd,
@@ -7191,7 +7307,8 @@ async function initBattle(isBot, oppData = null) {
     battleState.units['my-char'] = myChar;
     renderArenaUnitLayout('my-char', myChar);
 
-    let myPetsToLoad = myArenaData.pets;
+    // 아군 펫 설정
+    let myPetsToLoad = myArenaData.pets || [myArenaData.pet, null, null, null, null];
     myPetsToLoad.forEach((p, idx) => {
         if(!p) return;
         let pId = `my-pet-${idx}`;
@@ -7240,7 +7357,7 @@ async function initBattle(isBot, oppData = null) {
         battleState.matchType = 'user_pvp';
         battleState.oppNick = oppData.nick;
         oppChar = { name: oppData.nick, img: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png', maxHp: oppData.stats.hp, atk: oppData.stats.atk, def: oppData.stats.def, spd: oppData.stats.spd, attr: oppData.attr, dmgMod: 1.0 };
-        oppPetsData = oppData.pets;
+        oppPetsData = oppData.pets || [oppData.pet, null, null, null, null];
     }
 
     oppChar = { ...oppChar, id: 'opp-char', team: 'opp', type: 'char', hp: oppChar.maxHp, isGuard: false, buffs: { defPenalty: 1.0 }, isDead: false };
@@ -7336,6 +7453,12 @@ function updateControlPanelForCurrentActor() {
 
     document.getElementById('battle-turn-indicator').innerText = `[ ${battleState.turn} 턴 ] ${unit.name}의 행동을 선택하세요.`;
     document.getElementById('control-status').innerHTML = `<span style="color:#ffcc00; font-weight:bold;">${unit.name}</span> 행동 대기중...`;
+    
+    let isPet = activeUnitId.includes('pet');
+    document.getElementById('btn-skill-back').style.display = isPet ? 'inline-block' : 'none';
+    document.getElementById('btn-skill-dog').style.display = isPet ? 'inline-block' : 'none';
+    let btnGB = document.getElementById('btn-skill-gb');
+    if(btnGB) btnGB.style.display = isPet ? 'inline-block' : 'none';
 }
 
 function setPlayerAction(actionType) {
@@ -7364,20 +7487,17 @@ function setPlayerAction(actionType) {
 function selectTarget(targetId) {
     if(!battleState.activeSelector) return;
     if(!battleState.units[targetId] || battleState.units[targetId].isDead) return alert("이미 쓰러진 대상입니다.");
+    if(battleState.units[targetId].team === 'my') return alert("적을 선택하세요!");
     
     battleState.actions.push({ unitId: battleState.activeSelector.unitId, type: battleState.activeSelector.type, target: targetId });
     battleState.activeSelector = null;
     
     document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('targetable'));
+    
     battleState.currentActorIndex++;
     updateControlPanelForCurrentActor(); 
 }
 
-/**
- * [수정된 부분] 
- * 1. 방어력 기반 데미지 하한선 적용 (최소 10% 보장)
- * 2. 충견진돗개 사용 페트의 공격 기능 추가 (공격력 80%)
- */
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
     document.getElementById('control-status').innerText = "전투 진행 중...";
@@ -7392,7 +7512,11 @@ async function executeTurn() {
 
         if (isUserGuarding) {
             let aliveMyPets = aliveMy.filter(id => id.includes('pet'));
-            focusTarget = aliveMyPets.length > 0 ? aliveMyPets.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0] : 'my-char';
+            if (aliveMyPets.length > 0) {
+                focusTarget = aliveMyPets.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
+            } else {
+                focusTarget = 'my-char'; 
+            }
         } else {
             focusTarget = aliveMy.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
         }
@@ -7408,10 +7532,19 @@ async function executeTurn() {
                 if (oppChar && !oppChar.isDead && (oppChar.hp / oppChar.maxHp) < 0.4) {
                     act.type = (Math.random() < 0.8) ? 'skill_dog' : 'skill_back';
                 } else {
-                    if (focusTarget === 'my-char' && isUserGuarding) {
-                        act.type = Math.random() < 0.3 ? 'guardbreak' : 'attack';
-                    } else if (focusTarget.includes('pet')) {
-                        act.type = (aliveOpp.length >= 2 && Math.random() < 0.6) ? 'attack' : 'skill_back';
+                    if (focusTarget === 'my-char') {
+                        if (isUserGuarding && Math.random() < 0.3) {
+                            act.type = 'guardbreak';
+                        } else {
+                            act.type = 'attack';
+                        }
+                    } 
+                    else if (focusTarget.includes('pet')) {
+                        if (aliveOpp.length >= 2 && Math.random() < 0.6) {
+                            act.type = 'attack'; 
+                        } else {
+                            act.type = 'skill_back';
+                        }
                     }
                 }
             }
@@ -7419,18 +7552,32 @@ async function executeTurn() {
         });
 
         if (Math.random() < 0.9) {
-            const userResolveAction = battleState.actions.find(a => a.type === 'skill_back' && a.unitId.startsWith('my-') && a.target === 'opp-char');
+            const userResolveAction = battleState.actions.find(a => 
+                a.type === 'skill_back' && 
+                a.unitId.startsWith('my-') && 
+                a.target === 'opp-char'
+            );
+
             if (userResolveAction) {
-                let aiTankers = Object.values(battleState.units).filter(u => u.team === 'opp' && u.type === 'pet' && !u.isDead).sort((a, b) => b.def - a.def);
+                let aiTankers = Object.values(battleState.units)
+                    .filter(u => u.team === 'opp' && u.type === 'pet' && !u.isDead)
+                    .sort((a, b) => b.def - a.def);
+
                 if (aiTankers.length > 0) {
                     let selectedTanker = aiTankers.find(p => p.hp > (p.maxHp * 0.5)) || aiTankers[0];
                     let tankerAct = battleState.actions.find(a => a.unitId === selectedTanker.id);
-                    if (tankerAct) { tankerAct.type = 'skill_dog'; tankerAct.target = 'opp-char'; }
+                    
+                    if (tankerAct) {
+                        tankerAct.type = 'skill_dog';
+                        tankerAct.skillName = '충견진돗개';
+                        tankerAct.target = 'opp-char';
+                    }
                 }
             }
         }
     }
 
+    // 속도 계산 및 정렬
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         let R = Math.random() * ((u.spd * 0.1) + 15);
@@ -7439,6 +7586,7 @@ async function executeTurn() {
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
+    // 다굴 판정
     for(let i=0; i < battleState.actions.length - 1; i++) {
         let a1 = battleState.actions[i]; let a2 = battleState.actions[i+1];
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
@@ -7451,6 +7599,7 @@ async function executeTurn() {
         }
     }
 
+    // 액션 실행 루프
     for(let act of battleState.actions) {
         let attacker = battleState.units[act.unitId];
         if(attacker.isDead || checkWinCondition()) continue;
@@ -7474,70 +7623,72 @@ async function executeTurn() {
         let isDogSkill = act.type === 'skill_dog';
         let gbSuccess = false; 
 
-        // [밸런스] 배수의진 1.35배 / 충견진돗개 0.8배 공격력
+        // [수정] 충견진돗개 사용 시 공격력의 80%로 적 공격하도록 설정
         let currentAtk = isBackToWall ? attacker.atk * 1.35 : (isDogSkill ? attacker.atk * 0.8 : attacker.atk); 
 
         if(isBackToWall) { 
             attacker.buffs.defPenalty = 0.55; 
-            addLog(`🔥 [${attacker.name}] 배수의진!`); 
-        } else if(isDogSkill) {
-            addLog(`🐶 [${attacker.name}] 충견진돗개! 주인을 지키며 공격합니다!`);
+            addLog(`🔥 [${attacker.name}] 배수의진! (공격력↑, 방어력↓)`); 
         }
 
         if(isGuardBreak) {
-            if(target.isGuard) { target.isGuard = false; gbSuccess = true; addLog(`💥 [${attacker.name}] 가드브레이크!`); }
-            else { addLog(`💨 [${attacker.name}] 가드브레이크 시도! (실패)`); }
+            if(target.isGuard) { target.isGuard = false; gbSuccess = true; addLog(`💥 [${attacker.name}](이)가 가드브레이크 성공!`); }
+            else { addLog(`💨 [${attacker.name}]의 가드브레이크 시도! (대상이 방어중이 아님)`); }
         }
  
         let isDogIntercept = false;
         if(target.type === 'char' && !act.isDagul && act.type !== 'guardbreak') {
             let dogAct = battleState.actions.find(a => a.unitId.startsWith(`${target.team}-pet`) && a.type === 'skill_dog' && !battleState.units[a.unitId].isDead);
-            if(dogAct) { target = battleState.units[dogAct.unitId]; isDogIntercept = true; addLog(`🐶 [${target.name}] 주인을 대신해 맞습니다!`); }
+            if(dogAct) { target = battleState.units[dogAct.unitId]; isDogIntercept = true; addLog(`🐶 [${target.name}] 충견진돗개! 주인을 대신해 맞습니다!`); }
         }
 
         const attackerBox = document.getElementById(`unit-${attacker.id}`);
-        if(attackerBox) {
-            attackerBox.classList.add('active-turn');
-            let moveClass = attacker.team === 'my' ? 'anim-attack-right' : 'anim-attack-left';
-            attackerBox.classList.add(moveClass);
-            await delay(300);
-        }
+        if(attackerBox) attackerBox.classList.add('active-turn');
+        let moveClass = attacker.team === 'my' ? 'anim-attack-right' : 'anim-attack-left';
+        if(attackerBox) attackerBox.classList.add(moveClass);
+        await delay(300);
 
         let dodgeChance = Math.max(10, Math.min(55, 12 + (target.spd - attacker.spd) * 0.3));
         let isForcedMiss = isGuardBreak && !gbSuccess; 
-        let isEvasion = !target.isGuard && !act.isDagul && !isGuardBreak && !isDogIntercept && (Math.random() * 100 < dodgeChance);
+        let cannotDodge = isGuardBreak && gbSuccess;   
+
+        let isEvasion = !target.isGuard && !act.isDagul && !cannotDodge && !isDogIntercept && (Math.random() * 100 < dodgeChance);
 
         if(isForcedMiss || isEvasion) {
             showFloatingDmg(target.id, "MISS", "miss"); 
-            addLog(`💨 [${target.name}] 회피!`);
+            if (isForcedMiss) addLog(`❌ 가드브레이크 실패!`);
+            else addLog(`💨 [${target.name}] 회피 성공!`);
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
             let skillMultiplier = act.isDagul ? 1.0 : 1.2; 
-            let effectiveDef = target.def * (target.buffs.defPenalty || 1.0);
             
-            // 데미지 계산식
+            let effectiveDef = target.def * (target.buffs.defPenalty || 1.0);
             let baseDmg = ((currentAtk * skillMultiplier) - (effectiveDef * 0.85)) * attrBonus;
+            
             if(target.isGuard) baseDmg *= 0.5;
             
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
                         
-            // [수정] 방어력이 매우 높아도 최소 공격력의 10%만큼은 데미지를 줌
+            // [수정] 방어력이 높아 데미지가 0 이하로 떨어져도 최소 공격력의 10%를 보장
             let minDmg = Math.floor(currentAtk * 0.1);
             let finalDmg = Math.max(minDmg, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
 
-            target.hp -= finalDmg;
-            const targetBox = document.getElementById(`unit-${target.id}`);
-            if(targetBox) targetBox.classList.add('anim-hit');
-            showFloatingDmg(target.id, finalDmg, isCrit ? "crit" : "normal");
-            addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지!`);
-            updateAllHPUI();
+            if (finalDmg <= 0) {
+                showFloatingDmg(target.id, "MISS", "miss");
+                addLog(`🛡️ [${target.name}]의 견고한 방어! 데미지 무력화.`);
+            } else {
+                target.hp -= finalDmg;
+                const targetBox = document.getElementById(`unit-${target.id}`);
+                if(targetBox) targetBox.classList.add('anim-hit');
+                showFloatingDmg(target.id, finalDmg, isCrit ? "crit" : "normal");
+                addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지!`);
+                updateAllHPUI();
+            }
         }
         await delay(800);
         
-        if(attackerBox) {
-            attackerBox.classList.remove('active-turn', 'anim-attack-right', 'anim-attack-left');
-        }
+        if(attackerBox) attackerBox.classList.remove(moveClass, 'active-turn');
         const targetBox = document.getElementById(`unit-${target.id}`);
         if(targetBox) targetBox.classList.remove('anim-hit');
         
@@ -7548,17 +7699,33 @@ async function executeTurn() {
 
 function checkWinCondition() {
     if (battleState.isGameOver) return true; 
+
     let myAlive = !battleState.units['my-char'].isDead;
     let oppAlive = !battleState.units['opp-char'].isDead;
 
     if (!myAlive || !oppAlive || battleState.turn > 20) {
         battleState.isGameOver = true; 
+        
         let isWin = myAlive && (!oppAlive || battleState.units['my-char'].hp > battleState.units['opp-char'].hp);
+        
+        addLog(`<br>=======================`);
         addLog(isWin ? "🎉 전투 승리!" : "💀 전투 패배...");
+        document.getElementById('battle-turn-indicator').innerText = isWin ? "전투 종료 - 승리!" : "전투 종료 - 패배";
         document.getElementById('battle-control-panel').style.display = 'none';
+        
         let closeBtn = document.getElementById('btn-close-battle');
-        if(closeBtn) closeBtn.style.display = 'block';
-        updateMatchScore(isWin, 20, -15);
+        if(closeBtn) {
+            closeBtn.innerText = isWin ? "🎉 승리! 결과 확인하고 나가기" : "💀 패배... 결과 확인하고 나가기";
+            closeBtn.style.display = 'block';
+        }
+        const field = document.querySelector('.battle-field');
+        if(field) field.style.opacity = '0.5';
+        
+        let scoreSet = battleState.matchType === 'user_pvp' ? {w:20, l:-15} : 
+                      (battleState.matchType.includes('easy') ? {w:5, l:-5} : 
+                      (battleState.matchType.includes('normal') ? {w:10, l:-5} : {w:15, l:-5}));
+        
+        updateMatchScore(isWin, scoreSet.w, scoreSet.l);
         return true;
     }
     return false;
@@ -7566,7 +7733,8 @@ function checkWinCondition() {
 
 function surrenderBattle() {
     if (battleState.isGameOver || battleState.phase === 'ANIMATION') return;
-    if (confirm("항복하시겠습니까?")) {
+    if (confirm("정말로 항복하시겠습니까? (즉시 패배 처리)")) {
+        addLog(`<br>🏳️ 항복 선언!`);
         battleState.units['my-char'].hp = 0;
         updateAllHPUI();
         battleState.turn = 21; 
@@ -7577,29 +7745,124 @@ function surrenderBattle() {
 function updateMatchScore(isWin, winPts, losePts) {
     let myNick = localStorage.getItem('arenaUserNick');
     if(!myNick) return;
+
+    let matchCategory = battleState.matchType === 'user_pvp' ? 'user' : 'bot';
     let todayStr = new Date().toDateString();
 
     db.ref(`arena_users/${myNick}`).once('value', snap => {
         let data = snap.val();
         if(!data) return;
-        let record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
-        let currentCount = (data.playRecord && data.playRecord.date === todayStr) ? data.playRecord.count : 0;
         
+        let currentScore = Number(data.score || 1000); 
+        let record = data.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
+        
+        let currentCount = (data.playRecord && data.playRecord.date === todayStr) ? (data.playRecord.count || 0) : 0;
+        let nextCount = currentCount + 1;
+
+        let change = isWin ? winPts : losePts;
+        if (isWin) record[matchCategory].win = (record[matchCategory].win || 0) + 1;
+        else record[matchCategory].lose = (record[matchCategory].lose || 0) + 1;
+
         db.ref(`arena_users/${myNick}`).update({
-            score: (data.score || 1000) + (isWin ? winPts : losePts),
-            playRecord: { date: todayStr, count: currentCount + 1 } 
+            score: currentScore + change,
+            record: record,
+            playRecord: { date: todayStr, count: nextCount } 
+        }).then(() => {
+            todayPlayCount = nextCount;
+            const chanceEl = document.getElementById('arena-chances');
+            if(chanceEl) chanceEl.innerText = `${Math.max(0, BATTLE_LIMIT - todayPlayCount)}/${BATTLE_LIMIT}`;
         });
     });
+
+    if(battleState.matchType === 'user_pvp' && battleState.oppNick) {
+        db.ref(`arena_users/${battleState.oppNick}`).once('value', snap => {
+            let oppData = snap.val();
+            if(!oppData) return;
+            let currentScore = Number(oppData.score || 1000); 
+            let record = oppData.record || { bot: {win:0, lose:0}, user: {win:0, lose:0} };
+            let change = isWin ? losePts : winPts;
+            if (!isWin) record.user.win = (record.user.win || 0) + 1; 
+            else record.user.lose = (record.user.lose || 0) + 1; 
+
+            db.ref(`arena_users/${battleState.oppNick}`).update({
+                score: currentScore + change,
+                record: record
+            });
+        });
+    }
+}
+
+function adminSetPlayCount(targetCount) {
+    let myNick = localStorage.getItem('arenaUserNick');
+    if(!myNick) return;
+    let todayStr = new Date().toDateString();
+    db.ref(`arena_users/${myNick}`).update({
+        playRecord: { date: todayStr, count: parseInt(targetCount) }
+    }).then(() => alert(`대전 횟수가 ${targetCount}회로 변경되었습니다.`));
 }
 
 function closeBattleUI() {
     document.getElementById('battle-arena-modal').style.display = 'none';
+    const field = document.querySelector('.battle-field');
+    if(field) field.style.opacity = '1';
     refreshUserList();
+}
+
+function loadHomeArenaRanking() {
+    const board = document.getElementById('homeArenaRankingBoard');
+    const titleEl = document.getElementById('arena-season-title');
+    const labelEl = document.getElementById('arena-season-label');
+    if(!board) return; 
+
+    const now = new Date();
+    const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
+    const currentSeason = getSeasonNumber(currentMonthLabel);
+
+    if(titleEl) titleEl.innerHTML = `<i class="fas fa-trophy" style="color: var(--royal-gold); margin-right: 5px;"></i> 월간 투기장 명예의 전당 (시즌 ${currentSeason})`;
+    if(labelEl) labelEl.innerText = `시즌 ${currentSeason}`;
+
+    db.ref('arena_users').orderByChild('score').limitToLast(3).on('value', (snapshot) => {
+        let users = [];
+        snapshot.forEach(child => { 
+            let val = child.val();
+            val.score = Number(val.score); 
+            users.push(val); 
+        });
+        users.reverse(); 
+
+        if(users.length === 0) { board.innerHTML = "데이터 없음"; return; }
+        
+        let html = ""; 
+        const medals = ["🥇", "🥈", "🥉"];
+        
+        users.forEach((user, i) => {
+            if(user) {
+                const petImg = (user.pets && user.pets[0]) ? user.pets[0].img : (user.pet ? user.pet.img : '');
+                
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:14px;">${medals[i]}</span>
+                        <img src="${petImg}" style="width:24px; height:24px; border-radius:4px; background:#000; object-fit:contain;">
+                        <b style="font-size:13px; color:#fff;">${user.nick}</b>
+                    </div>
+                    <span style="font-size:12px; color:var(--royal-gold); font-weight:bold;">${user.score} pts</span>
+                </div>`;
+            }
+        });
+        board.innerHTML = html;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     refreshUserList();
     calcArenaPoints(); 
+    loadHomeArenaRanking();
+    
+    const slotSelector = document.getElementById('pet-slot-selector');
+    if(slotSelector) {
+        slotSelector.addEventListener('change', renderSelectedPets);
+    }
 });
 
 </script>
