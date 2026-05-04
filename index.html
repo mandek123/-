@@ -7500,8 +7500,8 @@ function selectTarget(targetId) {
 
 /**
  * [수정된 부분] 
- * 1. 배수의진 대응 확률 90% 상향
- * 2. 가드 시 회피 불가 & 방어 기반 MISS 처리
+ * 1. 유저 가드 시 AI가 페트 우선 타겟팅하는 로직 추가
+ * 2. 방어력 MISS 판정 로직 결합
  */
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
@@ -7512,7 +7512,21 @@ async function executeTurn() {
     
     // AI 행동 결정
     if (aliveMy.length > 0 && aliveOpp.length > 0) {
-        let focusTarget = aliveMy.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
+        // [추가] 유저 캐릭터의 가드 여부를 확인하여 타겟팅 전략 변경
+        const isUserGuarding = battleState.actions.some(a => a.unitId === 'my-char' && a.type === 'guard');
+        let focusTarget;
+
+        if (isUserGuarding) {
+            // 유저가 가드 중이면 캐릭터 대신 살아있는 페트 중 가장 체력이 낮은 대상 점사
+            let aliveMyPets = aliveMy.filter(id => id.includes('pet'));
+            if (aliveMyPets.length > 0) {
+                focusTarget = aliveMyPets.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
+            } else {
+                focusTarget = 'my-char'; 
+            }
+        } else {
+            focusTarget = aliveMy.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
+        }
 
         aliveOpp.forEach(oppId => {
             let u = battleState.units[oppId];
@@ -7637,7 +7651,7 @@ async function executeTurn() {
         let isForcedMiss = isGuardBreak && !gbSuccess; 
         let cannotDodge = isGuardBreak && gbSuccess;   
 
-        // [수정] 가드 상태(!target.isGuard)에서는 절대 회피가 발생하지 않음
+        // 가드 상태(!target.isGuard)에서는 절대 회피가 발생하지 않음
         let isEvasion = !target.isGuard && !act.isDagul && !cannotDodge && !isDogIntercept && (Math.random() * 100 < dodgeChance);
 
         if(isForcedMiss || isEvasion) {
@@ -7648,7 +7662,7 @@ async function executeTurn() {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
             let skillMultiplier = act.isDagul ? 1.0 : 1.2; 
             
-            // [수정] 데미지 하한선 제거하여 방어력에 의한 완전 차단 가능하게 변경
+            // [재수정] 방어력이 매우 높을 때 데미지가 0이 되어 MISS가 뜰 수 있도록 하한선 제거
             let baseDmg = ((currentAtk * skillMultiplier) - (target.def * 0.85)) * attrBonus;
             
             if(target.isGuard) baseDmg *= 0.5;
@@ -7659,7 +7673,7 @@ async function executeTurn() {
             let finalDmg = Math.max(0, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
 
             if (finalDmg <= 0) {
-                // [추가] 방어력이 높거나 가드 중이라 데미지가 0 이하인 경우 MISS 처리
+                // 방어력이 높거나 가드 중이라 데미지가 0 이하인 경우 MISS 처리
                 showFloatingDmg(target.id, "MISS", "miss");
                 addLog(`🛡️ [${target.name}]의 견고한 방어! 데미지를 완전히 차단했습니다.`);
             } else {
