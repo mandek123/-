@@ -7570,7 +7570,7 @@ async function executeTurn() {
                     if (tankerAct) {
                         tankerAct.type = 'skill_dog';
                         tankerAct.skillName = '충견진돗개';
-                        tankerAct.target = 'opp-char';
+                        // [수정] 주인을 타겟팅하지 않고 기존 타겟(적)을 유지하여 자폭 방지
                     }
                 }
             }
@@ -7623,7 +7623,6 @@ async function executeTurn() {
         let isDogSkill = act.type === 'skill_dog';
         let gbSuccess = false; 
 
-        // [수정] 충견진돗개 사용 시 공격력의 80%로 적 공격하도록 설정
         let currentAtk = isBackToWall ? attacker.atk * 1.35 : (isDogSkill ? attacker.atk * 0.8 : attacker.atk); 
 
         if(isBackToWall) { 
@@ -7638,8 +7637,18 @@ async function executeTurn() {
  
         let isDogIntercept = false;
         if(target.type === 'char' && !act.isDagul && act.type !== 'guardbreak') {
-            let dogAct = battleState.actions.find(a => a.unitId.startsWith(`${target.team}-pet`) && a.type === 'skill_dog' && !battleState.units[a.unitId].isDead);
-            if(dogAct) { target = battleState.units[dogAct.unitId]; isDogIntercept = true; addLog(`🐶 [${target.name}] 충견진돗개! 주인을 대신해 맞습니다!`); }
+            // [수정] 자가 인터셉트 방지: 공격자 본인이 충견진돗개 상태인 경우 자신의 공격은 대신 맞지 않음
+            let dogAct = battleState.actions.find(a => 
+                a.unitId.startsWith(`${target.team}-pet`) && 
+                a.type === 'skill_dog' && 
+                !battleState.units[a.unitId].isDead &&
+                a.unitId !== attacker.id
+            );
+            if(dogAct) { 
+                target = battleState.units[dogAct.unitId]; 
+                isDogIntercept = true; 
+                addLog(`🐶 [${target.name}] 주인을 대신해 맞습니다!`); 
+            }
         }
 
         const attackerBox = document.getElementById(`unit-${attacker.id}`);
@@ -7670,7 +7679,6 @@ async function executeTurn() {
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
                         
-            // [수정] 방어력이 높아 데미지가 0 이하로 떨어져도 최소 공격력의 10%를 보장
             let minDmg = Math.floor(currentAtk * 0.1);
             let finalDmg = Math.max(minDmg, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
 
