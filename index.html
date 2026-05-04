@@ -7500,8 +7500,9 @@ function selectTarget(targetId) {
 
 /**
  * [수정된 부분] 
- * 1. AI 가드브레이크 사용 조건 강화: 캐릭터가 가드 중일 때만 캐릭터 대상으로 사용
- * 2. 페트 공격 시 가드브레이크 배제
+ * 유저의 페트를 공격할 때 다굴 가능성을 판단하여 전략 선택
+ * 1. 아군 생존 유닛이 2마리 이상이고 다굴 확률(60%) 이내라면 -> 일반 공격(다굴 유도)
+ * 2. 위 조건이 충족되지 않으면(단독 공격 등) -> 배수의진 사용
  */
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
@@ -7537,17 +7538,22 @@ async function executeTurn() {
                 if (oppChar && !oppChar.isDead && (oppChar.hp / oppChar.maxHp) < 0.4) {
                     act.type = (Math.random() < 0.8) ? 'skill_dog' : 'skill_back';
                 } else {
-                    // [수정 포인트] 가드브레이크 선택 로직
-                    // 대상이 캐릭터('my-char')이고 실제로 유저가 가드 명령을 내린 경우에만 30% 확률로 사용
-                    if (focusTarget === 'my-char' && isUserGuarding) {
-                        if (Math.random() < 0.3) {
+                    if (focusTarget === 'my-char') {
+                        if (isUserGuarding && Math.random() < 0.3) {
                             act.type = 'guardbreak';
                         } else {
                             act.type = 'attack';
                         }
-                    } else {
-                        // 페트 대상이거나 유저 캐릭터가 가드 중이 아닐 때는 일반 공격
-                        act.type = 'attack';
+                    } 
+                    // [수정 포인트] 유저 페트 타겟팅 로직
+                    else if (focusTarget.includes('pet')) {
+                        // 아군 생존자 2마리 이상이며 다굴 발생 기본 확률(60%) 내일 때만 다굴 시도
+                        if (aliveOpp.length >= 2 && Math.random() < 0.6) {
+                            act.type = 'attack'; 
+                        } else {
+                            // 다굴 여건이 안 될 때는 배수의진으로 강력한 일격
+                            act.type = 'skill_back';
+                        }
                     }
                 }
             }
