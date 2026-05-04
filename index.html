@@ -7499,7 +7499,9 @@ function selectTarget(targetId) {
 }
 
 /**
- * [수정된 부분] 배수의진 시전 시 AI의 전략적 충견 대응 로직 포함
+ * [수정된 부분] 
+ * 1. 배수의진 대응 확률 90% 상향
+ * 2. 가드 시 회피 불가 & 방어 기반 MISS 처리
  */
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
@@ -7529,22 +7531,20 @@ async function executeTurn() {
             battleState.actions.push(act);
         });
 
-        // [전략 로직 추가] 유저가 AI 캐릭터에게 '배수의진' 시전 시 80% 확률로 AI 탱커 페트가 충견진돗개 사용
-        if (Math.random() < 0.8) {
+        // [전략 로직] 유저가 AI 캐릭터에게 '배수의진' 시전 시 90% 확률로 AI 탱커 페트가 충견진돗개 사용
+        if (Math.random() < 0.9) {
             const userResolveAction = battleState.actions.find(a => 
-                a.type === 'skill_back' && // 배수의진(skill_back)
+                a.type === 'skill_back' && 
                 a.unitId.startsWith('my-') && 
                 a.target === 'opp-char'
             );
 
             if (userResolveAction) {
-                // AI 페트들 중 살아있는 개체를 방어력 내림차순으로 정렬
                 let aiTankers = Object.values(battleState.units)
                     .filter(u => u.team === 'opp' && u.type === 'pet' && !u.isDead)
                     .sort((a, b) => b.def - a.def);
 
                 if (aiTankers.length > 0) {
-                    // 체력이 50% 초과인 페트 우선 선택, 없으면 방어력이 가장 높은 페트 선택
                     let selectedTanker = aiTankers.find(p => p.hp > (p.maxHp * 0.5)) || aiTankers[0];
                     let tankerAct = battleState.actions.find(a => a.unitId === selectedTanker.id);
                     
@@ -7637,27 +7637,39 @@ async function executeTurn() {
         let isForcedMiss = isGuardBreak && !gbSuccess; 
         let cannotDodge = isGuardBreak && gbSuccess;   
 
-        if(isForcedMiss || (!target.isGuard && !act.isDagul && !cannotDodge && Math.random() * 100 < dodgeChance && !isDogIntercept)) {
+        // [수정] 가드 상태(!target.isGuard)에서는 절대 회피가 발생하지 않음
+        let isEvasion = !target.isGuard && !act.isDagul && !cannotDodge && !isDogIntercept && (Math.random() * 100 < dodgeChance);
+
+        if(isForcedMiss || isEvasion) {
             showFloatingDmg(target.id, "MISS", "miss"); 
             if (isForcedMiss) addLog(`❌ 가드브레이크 실패!`);
             else addLog(`💨 [${target.name}] 회피 성공!`);
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
             let skillMultiplier = act.isDagul ? 1.0 : 1.2; 
+            
+            // [수정] 데미지 하한선 제거하여 방어력에 의한 완전 차단 가능하게 변경
             let baseDmg = ((currentAtk * skillMultiplier) - (target.def * 0.85)) * attrBonus;
-            baseDmg = Math.max(currentAtk * 0.1, baseDmg);
+            
+            if(target.isGuard) baseDmg *= 0.5;
             
             let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
-            if(target.isGuard) baseDmg *= 0.5;
                         
-            let finalDmg = Math.max(1, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
-            target.hp -= finalDmg;
-            const targetBox = document.getElementById(`unit-${target.id}`);
-            if(targetBox) targetBox.classList.add('anim-hit');
-            showFloatingDmg(target.id, finalDmg, isCrit ? "crit" : "normal");
-            addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지! ${act.isDagul?'(🔗다굴)':''}`);
-            updateAllHPUI();
+            let finalDmg = Math.max(0, Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
+
+            if (finalDmg <= 0) {
+                // [추가] 방어력이 높거나 가드 중이라 데미지가 0 이하인 경우 MISS 처리
+                showFloatingDmg(target.id, "MISS", "miss");
+                addLog(`🛡️ [${target.name}]의 견고한 방어! 데미지를 완전히 차단했습니다.`);
+            } else {
+                target.hp -= finalDmg;
+                const targetBox = document.getElementById(`unit-${target.id}`);
+                if(targetBox) targetBox.classList.add('anim-hit');
+                showFloatingDmg(target.id, finalDmg, isCrit ? "crit" : "normal");
+                addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지! ${act.isDagul?'(🔗다굴)':''}`);
+                updateAllHPUI();
+            }
         }
         await delay(800);
         
