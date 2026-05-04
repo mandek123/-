@@ -7269,9 +7269,6 @@ function getAttrBonus(atkAttr, defAttr) {
     return 1.0;
 }
 
-/**
- * [수정] 유닛 박스 레이아웃 초기화 함수 (image_0d9ae0.png 반영)
- */
 function renderArenaUnitLayout(uId, unit) {
     const box = document.getElementById(`unit-${uId}`);
     if(!box) return;
@@ -7416,19 +7413,14 @@ function addLog(msg) {
     }
 }
 
-/**
- * [수정] 데미지 숫자가 박스 위로 올라가도 잘리지 않도록 z-index와 overflow 예외 처리
- */
 function showFloatingDmg(targetId, dmgText, type) {
     const box = document.getElementById(`unit-${targetId}`);
     if(!box) return;
     const div = document.createElement('div');
     div.className = `floating-dmg ${type}`;
     div.innerText = dmgText;
-    // 잘림 방지를 위해 박스 자체가 아닌 바디 혹은 전장 컨테이너에 붙이는 것도 방법이지만, 
-    // CSS overflow:visible 처리를 위해 박스에 유지합니다.
     box.appendChild(div);
-    setTimeout(() => div.remove(), 2500); // 애니메이션 시간(2.5s)에 맞춤
+    setTimeout(() => div.remove(), 2500);
 }
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -7506,6 +7498,9 @@ function selectTarget(targetId) {
     updateControlPanelForCurrentActor(); 
 }
 
+/**
+ * [수정된 부분] 배수의진 시전 시 AI의 전략적 충견 대응 로직 포함
+ */
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
     document.getElementById('control-status').innerText = "전투 진행 중...";
@@ -7513,6 +7508,7 @@ async function executeTurn() {
     let aliveMy = Object.keys(battleState.units).filter(id => id.startsWith('my-') && !battleState.units[id].isDead);
     let aliveOpp = Object.keys(battleState.units).filter(id => id.startsWith('opp-') && !battleState.units[id].isDead);
     
+    // AI 행동 결정
     if (aliveMy.length > 0 && aliveOpp.length > 0) {
         let focusTarget = aliveMy.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
 
@@ -7532,8 +7528,37 @@ async function executeTurn() {
             }
             battleState.actions.push(act);
         });
+
+        // [전략 로직 추가] 유저가 AI 캐릭터에게 '배수의진' 시전 시 80% 확률로 AI 탱커 페트가 충견진돗개 사용
+        if (Math.random() < 0.8) {
+            const userResolveAction = battleState.actions.find(a => 
+                a.type === 'skill_back' && // 배수의진(skill_back)
+                a.unitId.startsWith('my-') && 
+                a.target === 'opp-char'
+            );
+
+            if (userResolveAction) {
+                // AI 페트들 중 살아있는 개체를 방어력 내림차순으로 정렬
+                let aiTankers = Object.values(battleState.units)
+                    .filter(u => u.team === 'opp' && u.type === 'pet' && !u.isDead)
+                    .sort((a, b) => b.def - a.def);
+
+                if (aiTankers.length > 0) {
+                    // 체력이 50% 초과인 페트 우선 선택, 없으면 방어력이 가장 높은 페트 선택
+                    let selectedTanker = aiTankers.find(p => p.hp > (p.maxHp * 0.5)) || aiTankers[0];
+                    let tankerAct = battleState.actions.find(a => a.unitId === selectedTanker.id);
+                    
+                    if (tankerAct) {
+                        tankerAct.type = 'skill_dog';
+                        tankerAct.skillName = '충견진돗개';
+                        tankerAct.target = 'opp-char';
+                    }
+                }
+            }
+        }
     }
 
+    // 속도 계산 및 정렬
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         let R = Math.random() * ((u.spd * 0.1) + 15);
@@ -7542,6 +7567,7 @@ async function executeTurn() {
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
+    // 다굴 판정 (속도 차 20 미만 && 60% 확률)
     for(let i=0; i < battleState.actions.length - 1; i++) {
         let a1 = battleState.actions[i]; let a2 = battleState.actions[i+1];
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
@@ -7554,6 +7580,7 @@ async function executeTurn() {
         }
     }
 
+    // 액션 실행 루프
     for(let act of battleState.actions) {
         let attacker = battleState.units[act.unitId];
         if(attacker.isDead || checkWinCondition()) continue;
@@ -7562,7 +7589,7 @@ async function executeTurn() {
         if(act.type === 'guard') { 
             attacker.isGuard = true; 
             addLog(`🛡️ [${attacker.name}] 방어 태세!`); 
-            await delay(400); // 딜레이 증가
+            await delay(400);
             continue; 
         }
 
@@ -7601,12 +7628,10 @@ async function executeTurn() {
         }
 
         const attackerBox = document.getElementById(`unit-${attacker.id}`);
-        const spriteCont = document.getElementById(`sprite-cont-${attacker.id}`); // 이미지가 든 컨테이너만 움직이도록 설정 권장
-        
         if(attackerBox) attackerBox.classList.add('active-turn');
         let moveClass = attacker.team === 'my' ? 'anim-attack-right' : 'anim-attack-left';
         if(attackerBox) attackerBox.classList.add(moveClass);
-        await delay(300); // 돌진 전 대기
+        await delay(300);
 
         let dodgeChance = Math.max(10, Math.min(55, 12 + (target.spd - attacker.spd) * 0.3));
         let isForcedMiss = isGuardBreak && !gbSuccess; 
@@ -7634,7 +7659,7 @@ async function executeTurn() {
             addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지! ${act.isDagul?'(🔗다굴)':''}`);
             updateAllHPUI();
         }
-        await delay(800); // 피격/데미지 확인 시간 증가 (0.4s -> 0.8s)
+        await delay(800);
         
         if(attackerBox) attackerBox.classList.remove(moveClass, 'active-turn');
         const targetBox = document.getElementById(`unit-${target.id}`);
@@ -7811,9 +7836,6 @@ document.addEventListener('DOMContentLoaded', () => {
         slotSelector.addEventListener('change', renderSelectedPets);
     }
 });
-/* ==========================================
-                투기장 페이지 전용 CSS 끝
-   ========================================== */
 
 </script>
 
