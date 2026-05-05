@@ -7570,7 +7570,6 @@ async function executeTurn() {
                     if (tankerAct) {
                         tankerAct.type = 'skill_dog';
                         tankerAct.skillName = '충견진돗개';
-                        // [수정] 주인을 타겟팅하지 않고 기존 타겟(적)을 유지하여 자폭 방지
                     }
                 }
             }
@@ -7585,6 +7584,13 @@ async function executeTurn() {
         if(act.type === 'guard') act.actionSpd += 1500; 
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
+
+    // [수정] 배수의진 유닛의 방어력 페널티 턴 전체 적용 (턴 시작 시 일괄 적용)
+    battleState.actions.forEach(act => {
+        if (act.type === 'skill_back') {
+            battleState.units[act.unitId].buffs.defPenalty = 0.55;
+        }
+    });
 
     // 다굴 판정
     for(let i=0; i < battleState.actions.length - 1; i++) {
@@ -7626,7 +7632,6 @@ async function executeTurn() {
         let currentAtk = isBackToWall ? attacker.atk * 1.35 : (isDogSkill ? attacker.atk * 0.8 : attacker.atk); 
 
         if(isBackToWall) { 
-            attacker.buffs.defPenalty = 0.55; 
             addLog(`🔥 [${attacker.name}] 배수의진! (공격력↑, 방어력↓)`); 
         }
 
@@ -7637,7 +7642,7 @@ async function executeTurn() {
  
         let isDogIntercept = false;
         if(target.type === 'char' && !act.isDagul && act.type !== 'guardbreak') {
-            // [수정] 자가 인터셉트 방지: 공격자 본인이 충견진돗개 상태인 경우 자신의 공격은 대신 맞지 않음
+            // [수정] 자가 인터셉트 방지: 공격자 본인이 충견진돗개 사용 중이면 자신의 공격은 대신 맞지 않음
             let dogAct = battleState.actions.find(a => 
                 a.unitId.startsWith(`${target.team}-pet`) && 
                 a.type === 'skill_dog' && 
@@ -7699,9 +7704,13 @@ async function executeTurn() {
         if(attackerBox) attackerBox.classList.remove(moveClass, 'active-turn');
         const targetBox = document.getElementById(`unit-${target.id}`);
         if(targetBox) targetBox.classList.remove('anim-hit');
-        
-        attacker.buffs.defPenalty = 1.0;
     }
+
+    // [수정] 턴 종료 후 모든 유닛의 방어력 페널티 초기화
+    Object.values(battleState.units).forEach(u => {
+        u.buffs.defPenalty = 1.0;
+    });
+
     if(!checkWinCondition()) { battleState.turn++; startTurnPhase(); }
 }
 
