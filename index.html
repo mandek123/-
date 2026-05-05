@@ -4789,113 +4789,122 @@ const NOTICE_DATABASE = [
         }
 
         function runCalculation() {
-            const mode = document.getElementById('calcMode').value;
-            if(mode === "none" || mode === "-") { alert("계산 모드를 선택해주세요."); return; }
+    const mode = document.getElementById('calcMode').value;
+    if(mode === "none" || mode === "-") { alert("계산 모드를 선택해주세요."); return; }
 
-            // 1. 입력 데이터 수집
-            const charData = {
-                cur: parseInt(document.getElementById('curLv').value),
-                target: parseInt(document.getElementById('targetLv').value),
-                exp: parseInt(document.getElementById('curExp').value) || 0
-            };
-            const bPetData = {
-                cur: parseInt(document.getElementById('battlePetCurLv').value),
-                target: parseInt(document.getElementById('battlePetTargetLv').value),
-                exp: parseInt(document.getElementById('battlePetCurExp').value) || 0
-            };
-            const rPetData = {
-                cur: parseInt(document.getElementById('ridePetCurLv').value),
-                target: parseInt(document.getElementById('ridePetTargetLv').value),
-                exp: parseInt(document.getElementById('ridePetCurExp').value) || 0
-            };
+    // 1. 입력 데이터 수집 (캐릭터는 필수, 페트는 입력 여부 확인)
+    const charData = {
+        cur: parseInt(document.getElementById('curLv').value),
+        target: parseInt(document.getElementById('targetLv').value),
+        exp: parseInt(document.getElementById('curExp').value) || 0
+    };
 
-            const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
-            const luck = mode === 'auto' ? (parseInt(document.getElementById('luckStat').value) || 0) : 0;
+    // 배틀 페트 활성화 여부 및 데이터 (입력값이 비어있지 않은지 확인)
+    const bPetActive = document.getElementById('battlePetCurLv').value !== "" && document.getElementById('battlePetTargetLv').value !== "";
+    const bPetData = bPetActive ? {
+        cur: parseInt(document.getElementById('battlePetCurLv').value),
+        target: parseInt(document.getElementById('battlePetTargetLv').value),
+        exp: parseInt(document.getElementById('battlePetCurExp').value) || 0
+    } : null;
 
-            // 2. 버프 및 페트 비율 설정
-            const hasCiv = document.getElementById('buffCiv').classList.contains('active');
-            const hasLeash = document.getElementById('buffPetLeash').classList.contains('active');
+    // 탑승 페트 활성화 여부 및 데이터
+    const rPetActive = document.getElementById('ridePetCurLv').value !== "" && document.getElementById('ridePetTargetLv').value !== "";
+    const rPetData = rPetActive ? {
+        cur: parseInt(document.getElementById('ridePetCurLv').value),
+        target: parseInt(document.getElementById('ridePetTargetLv').value),
+        exp: parseInt(document.getElementById('ridePetCurExp').value) || 0
+    } : null;
 
-            // [수정] 배틀 페트 기본 100%, 탑승 페트 기본 60%
-            const bPetRatio = 1.00 + (hasLeash ? 0.05 : 0); // 배틀 페트 (기본 1.0 + 목줄 0.05)
-            const rPetRatio = 0.60 + (hasCiv ? 0.06 : 0);   // 탑승 페트 (기본 0.6 + 문명 0.06)
+    const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
+    if(hourlyBase === 0) { alert("시간당 경험치를 입력해주세요."); return; }
+    const luck = mode === 'auto' ? (parseInt(document.getElementById('luckStat').value) || 0) : 0;
 
-            // 3. 필요 경험치 계산
-            const neededChar = getNeededExp(charData.cur, charData.target, charData.exp);
-            const neededBPet = getNeededExp(bPetData.cur, bPetData.target, bPetData.exp);
-            const neededRPet = getNeededExp(rPetData.cur, rPetData.target, rPetData.exp);
+    // 2. 버프 및 페트 비율 설정
+    const hasCiv = document.getElementById('buffCiv').classList.contains('active');
+    const hasLeash = document.getElementById('buffPetLeash').classList.contains('active');
 
-            let charHours = 0, bPetHours = 0, rPetHours = 0;
-            let finalHourlyChar = 0, finalHourlyBPet = 0;
+    const bPetRatio = 1.00 + (hasLeash ? 0.05 : 0); // 배틀 페트 (기본 1.0 + 목줄 0.05)
+    const rPetRatio = 0.60 + (hasCiv ? 0.06 : 0);   // 탑승 페트 (기본 0.6 + 문명 0.06)
 
-            // 4. 배율 적용 및 시간 산출
-            if(mode === 'auto') {
-                const buffs = {
-                    bead: document.getElementById('buffExpBead').classList.contains('active') ? 1.0 : 0,
-                    discord: document.getElementById('buffDiscord').classList.contains('active') ? 0.1 : 0,
-                    tribe: document.getElementById('buffTribe').classList.contains('active') ? 0.3 : 0,
-                    party: parseFloat(document.getElementById('partyExp').value) || 0,
-                    world: document.getElementById('buffWorldExp').classList.contains('active'),
-                    worldMins: parseInt(document.getElementById('worldExpMins')?.value) || 0
-                };
-                
-                // 공통 배율 합산
-                let commonMult = 1.0 + buffs.bead + buffs.discord + buffs.tribe + buffs.party + (luck / 100);
-                let worldMult = commonMult + 1.0;
+    // 3. 필요 경험치 계산 (입력되지 않은 페트는 0으로 처리)
+    const neededChar = getNeededExp(charData.cur, charData.target, charData.exp);
+    const neededBPet = bPetActive ? getNeededExp(bPetData.cur, bPetData.target, bPetData.exp) : 0;
+    const neededRPet = rPetActive ? getNeededExp(rPetData.cur, rPetData.target, rPetData.exp) : 0;
 
-                const calcTime = (needed, ratio) => {
-                    if (needed <= 0) return 0;
-                    const normalHourly = hourlyBase * commonMult * ratio;
-                    const worldHourly = hourlyBase * worldMult * ratio;
-                    
-                    if (buffs.world && buffs.worldMins > 0) {
-                        const worldHours = buffs.worldMins / 60;
-                        const expDuringWorld = worldHourly * worldHours;
-                        return expDuringWorld >= needed ? (needed / worldHourly) : (worldHours + (needed - expDuringWorld) / normalHourly);
-                    } else {
-                        const activeHourly = buffs.world ? worldHourly : normalHourly;
-                        return activeHourly > 0 ? needed / activeHourly : 0;
-                    }
-                };
+    let charHours = 0, bPetHours = 0, rPetHours = 0;
+    let finalHourlyChar = 0, finalHourlyBPet = 0;
 
-                charHours = calcTime(neededChar, 1.0);
-                bPetHours = calcTime(neededBPet, bPetRatio);
-                rPetHours = calcTime(neededRPet, rPetRatio);
+    // 4. 배율 적용 및 시간 산출
+    if(mode === 'auto') {
+        const buffs = {
+            bead: document.getElementById('buffExpBead').classList.contains('active') ? 1.0 : 0,
+            discord: document.getElementById('buffDiscord').classList.contains('active') ? 0.1 : 0,
+            tribe: document.getElementById('buffTribe').classList.contains('active') ? 0.3 : 0,
+            party: parseFloat(document.getElementById('partyExp').value) || 0,
+            world: document.getElementById('buffWorldExp').classList.contains('active'),
+            worldMins: parseInt(document.getElementById('worldExpMins')?.value) || 0
+        };
+        
+        let commonMult = 1.0 + buffs.bead + buffs.discord + buffs.tribe + buffs.party + (luck / 100);
+        let worldMult = commonMult + 1.0;
 
-                finalHourlyChar = (buffs.world && buffs.worldMins === 0) ? (hourlyBase * worldMult) : (hourlyBase * commonMult);
-                finalHourlyBPet = finalHourlyChar * bPetRatio;
-
-            } else {
-                // 수동 모드
-                const manualMult = parseFloat(document.getElementById('multiplier').value) || 1;
-                finalHourlyChar = hourlyBase * manualMult;
-                finalHourlyBPet = finalHourlyChar * bPetRatio;
-                const finalHourlyRPet = finalHourlyChar * rPetRatio;
-
-                charHours = finalHourlyChar > 0 ? neededChar / finalHourlyChar : 0;
-                bPetHours = finalHourlyBPet > 0 ? neededBPet / finalHourlyBPet : 0;
-                rPetHours = finalHourlyRPet > 0 ? neededRPet / finalHourlyRPet : 0;
-            }
-
-            // 5. 결과 리포트 출력
-            const timeStr = (h) => h > 0 ? `${h.toFixed(1)}시간 (${(h/24).toFixed(1)}일)` : "-";
-            const expStr = (val) => {
-                const isWorld = mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0;
-                return isWorld ? `${formatNumber(Math.floor(val))} <span style="font-size:11px; color:#8b949e; font-weight:normal;">(월경X)</span>` : formatNumber(Math.floor(val));
-            };
-
-            document.getElementById('resNeeded').innerText = formatNumber(neededChar);
-            document.getElementById('resPetNeeded').innerText = formatNumber(neededBPet);
+        const calcTime = (needed, ratio, active) => {
+            if (!active || needed <= 0) return 0;
+            const normalHourly = hourlyBase * commonMult * ratio;
+            const worldHourly = hourlyBase * worldMult * ratio;
             
-            document.getElementById('resTime').innerText = timeStr(charHours);
-            document.getElementById('resPetTimeCalc').innerText = timeStr(bPetHours);
-            document.getElementById('resPetTime').innerText = timeStr(rPetHours);
+            if (buffs.world && buffs.worldMins > 0) {
+                const worldHours = buffs.worldMins / 60;
+                const expDuringWorld = worldHourly * worldHours;
+                return expDuringWorld >= needed ? (needed / worldHourly) : (worldHours + (needed - expDuringWorld) / normalHourly);
+            } else {
+                const activeHourly = buffs.world ? worldHourly : normalHourly;
+                return activeHourly > 0 ? needed / activeHourly : 0;
+            }
+        };
 
-            document.getElementById('resFinalExp').innerHTML = expStr(finalHourlyChar);
-            document.getElementById('resPetFinalExp').innerHTML = formatNumber(Math.floor(finalHourlyBPet));
+        charHours = calcTime(neededChar, 1.0, true);
+        bPetHours = calcTime(neededBPet, bPetRatio, bPetActive);
+        rPetHours = calcTime(neededRPet, rPetRatio, rPetActive);
 
-            animateResults('exp-result-container');
-        }
+        finalHourlyChar = (buffs.world && buffs.worldMins === 0) ? (hourlyBase * worldMult) : (hourlyBase * commonMult);
+        finalHourlyBPet = bPetActive ? finalHourlyChar * bPetRatio : 0;
+
+    } else {
+        // 수동 모드
+        const manualMult = parseFloat(document.getElementById('multiplier').value) || 1;
+        finalHourlyChar = hourlyBase * manualMult;
+        finalHourlyBPet = bPetActive ? finalHourlyChar * bPetRatio : 0;
+        const finalHourlyRPet = rPetActive ? finalHourlyChar * rPetRatio : 0;
+
+        charHours = finalHourlyChar > 0 ? neededChar / finalHourlyChar : 0;
+        bPetHours = (bPetActive && finalHourlyBPet > 0) ? neededBPet / finalHourlyBPet : 0;
+        rPetHours = (rPetActive && finalHourlyRPet > 0) ? neededRPet / finalHourlyRPet : 0;
+    }
+
+    // 5. 결과 리포트 출력 헬퍼 함수
+    const timeStr = (h, active) => (active && h > 0) ? `${h.toFixed(1)}시간 (${(h/24).toFixed(1)}일)` : "-";
+    const expStr = (val, active) => {
+        if (!active || val <= 0) return "-";
+        const isWorld = mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0;
+        return isWorld ? `${formatNumber(Math.floor(val))} <span style="font-size:11px; color:#8b949e; font-weight:normal;">(월경X)</span>` : formatNumber(Math.floor(val));
+    };
+
+    // 캐릭터 출력
+    document.getElementById('resNeeded').innerText = formatNumber(neededChar);
+    document.getElementById('resTime').innerText = timeStr(charHours, true);
+    document.getElementById('resFinalExp').innerHTML = expStr(finalHourlyChar, true);
+
+    // 배틀 페트 출력 (활성화 여부에 따라 하이픈 처리)
+    document.getElementById('resPetNeeded').innerText = bPetActive ? formatNumber(neededBPet) : "-";
+    document.getElementById('resPetTimeCalc').innerText = timeStr(bPetHours, bPetActive);
+    document.getElementById('resPetFinalExp').innerHTML = expStr(finalHourlyBPet, bPetActive);
+
+    // 탑승 페트 출력
+    document.getElementById('resPetTime').innerText = timeStr(rPetHours, rPetActive);
+
+    animateResults('exp-result-container');
+}
 
         /* ==========================================================
     1. 명중률 계산기 (디스코드 봇 최신 로직 적용)
