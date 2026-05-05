@@ -338,65 +338,28 @@
         input::placeholder { color: #8b949e; }
         input:disabled { opacity: 0.4; cursor: not-allowed; background: var(--input-bg); }
 
-        .buff-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
-        .buff-toggle {
-            background: var(--inner-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: #8b949e;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            user-select: none;
-            flex-grow: 1;
-            justify-content: center;
-        }
-        .buff-toggle:hover {
-            border-color: #539bf5;
-            background: rgba(83, 155, 245, 0.05);
-            color: var(--text-main);
-        }
-        .buff-toggle.active {
-            background: rgba(83, 155, 245, 0.15);
-            border-color: #539bf5;
-            color: #ffffff;
-            box-shadow: 0 0 12px rgba(83, 155, 245, 0.3), inset 0 0 8px rgba(83, 155, 245, 0.15);
-            font-weight: bold;
-        }
+        .input-group-box { border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 15px; margin-bottom: 20px; background: rgba(0, 0, 0, 0.2); }
+.input-group-title { color: #fff; margin-bottom: 10px; display: block; font-weight: bold; }
 
-        .btn-calc { 
-            width: 100%; 
-            padding: 15px; 
-            color: white; 
-            border: none; 
-            border-radius: 30px; 
-            font-size: 16px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            letter-spacing: 0.5px;
-        }
-        .btn-calc:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
-        .btn-calc:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.buff-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+.buff-toggle { background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; color: #8b949e; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; user-select: none; flex-grow: 1; justify-content: center; }
+.buff-toggle:hover { border-color: #539bf5; background: rgba(83, 155, 245, 0.05); color: var(--text-main); }
+.buff-toggle.active { background: rgba(83, 155, 245, 0.15); border-color: #539bf5; color: #ffffff; box-shadow: 0 0 12px rgba(83, 155, 245, 0.3), inset 0 0 8px rgba(83, 155, 245, 0.15); font-weight: bold; }
 
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .res-box { 
-            background: var(--inner-card); 
-            border: 1px solid var(--border); 
-            border-radius: 12px; 
-            padding: 18px 15px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-        .res-box:hover { transform: translateY(-2px); }
-        .res-label { font-size: 12px; color: #8b949e; margin-bottom: 8px; font-weight: 500; }
-        .res-val { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); letter-spacing: 0.5px; }
+.btn-calc { width: 100%; padding: 15px; color: white; border: none; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.2); letter-spacing: 0.5px; }
+.btn-calc:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+.btn-calc:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.res-box { background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s ease; }
+.res-box:hover { transform: translateY(-2px); }
+.res-label { font-size: 12px; color: #8b949e; margin-bottom: 8px; font-weight: 500; }
+.res-val { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); letter-spacing: 0.5px; }
+
+.res-box.char { border-left: 3px solid #58a6ff; }
+.res-box.pet { border-left: 3px solid #ff8c00; }
+.res-box.full-width { grid-column: 1 / -1; background: rgba(210, 168, 255, 0.05); border-left: 3px solid #d2a8ff; }
+.res-box.full-width .res-label, .res-box.full-width .res-val { color: #d2a8ff; }
 
         details { 
             border: 1px solid #3d4550; 
@@ -1712,131 +1675,227 @@
 </div>
 
     <div class="main-container" id="page-exp">
-        <div class="card">
-            <div class="card-header"><i class="fa-solid fa-sliders"></i> 설정</div>
+    <!-- 박스 접힘 시 음영 처리를 위한 스타일 추가 -->
+    <style>
+        /* 접혀 있는 입력 박스 음영 및 비활성화 시각 효과 */
+        details.input-group-box:not([open]) {
+            opacity: 0.5;
+            background: rgba(0, 0, 0, 0.4) !important;
+            filter: grayscale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        details.input-group-box[open] {
+            opacity: 1;
+            filter: none;
+        }
+
+        details.input-group-box summary {
+            list-style: none;
+            outline: none;
+            cursor: pointer;
+        }
+    </style>
+
+    <div class="card">
+        <div class="card-header"><i class="fa-solid fa-sliders"></i> 설정</div>
+        
+        <label>계산 모드</label>
+        <select id="calcMode" onchange="toggleMode()">
+            <option value="none" disabled selected hidden>-</option>
+            <option value="auto">자동 계산 (사냥터 선택)</option>
+            <option value="manual">수동 계산 (시간당 경험치 직접입력)</option>
+        </select>
+        <div style="font-size: 12.5px; color: var(--accent-orange); margin-top: -8px; margin-bottom: 18px; line-height: 1.5; word-break: keep-all;">
+            <i class="fa-solid fa-triangle-exclamation"></i> 주의사항 : 온라인 기준으로 계산을 하였으며 경험치 획득량을 보수적으로 잡았습니다.<br>
+             이 점 참고하셔서 억울한 일이 생기지 않게 이용해주세요.<br>
+             보통 오프라인이 경험치를 더 많이 획득합니다.
+        </div>
+
+        <label>사냥터 선택</label>
+        <select id="huntingGround" onchange="applyGround()">
+            <option value="0" disabled selected hidden>사냥터를 선택하세요</option>
+            <option value="191442">채석장 (LV30~65)</option>
+            <option value="505000">지하 (LV65~80)</option>
+            <option value="875515">폐허 (LV80~100)</option>
+            <option value="1049089">눈동 (LV100~110)</option>
+            <option value="1685000">어동 (LV110~120)</option>
+            <option value="2000000">해저 (LV120~)</option>
+        </select>
+
+        <label>시간당 경험치 (1배율)</label>
+        <input type="number" id="hourlyExp" placeholder="시간당 경험치 입력">
+
+        <!-- ==================== 캐릭터 정보 입력 (Blue 테마) ==================== -->
+        <div class="input-group-box" style="border-left: 4px solid var(--accent-blue); background: rgba(83, 155, 245, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <label class="input-group-title" style="color: var(--accent-blue); font-weight: bold; margin-bottom: 15px; display: block;">
+                <i class="fa-solid fa-user"></i> 캐릭터 정보
+            </label>
             
-            <label>계산 모드</label>
-            <select id="calcMode" onchange="toggleMode()">
-                <option value="none" disabled selected hidden>-</option>
-                <option value="auto">자동 계산 (사냥터 선택)</option>
-                <option value="manual">수동 계산 (시간당 경험치 직접입력)</option>
-            </select>
-            <div style="font-size: 12.5px; color: var(--accent-orange); margin-top: -8px; margin-bottom: 18px; line-height: 1.5; word-break: keep-all;">
-                <i class="fa-solid fa-triangle-exclamation"></i> 주의사항 : 온라인 기준으로 계산을 하였으며 경험치 획득량을 보수적으로 잡았습니다.<br>
-                 이 점 참고하셔서 억울한 일이 생기지 않게 이용해주세요.<br>
-                 보통 오프라인이 경험치를 더 많이 획득합니다.
+            <label style="font-size: 13px;">레벨 구간</label>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="number" id="curLv" value="120" min="1" max="144" placeholder="현재">
+                <span style="color:#8b949e; font-weight:bold;">→</span>
+                <input type="number" id="targetLv" value="130" min="2" max="145" placeholder="목표">
             </div>
 
-            <label>레벨 구간</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <input type="number" id="curLv" value="120" min="1" max="144">
-                <span style="margin-bottom:18px; color:#8b949e; font-weight:bold;">→</span>
-                <input type="number" id="targetLv" value="130" min="2" max="145">
-            </div>
-
-            <label>현재 경험치량 (수치)</label>
-            <input type="number" id="curExp" value="0">
-
-            <label>사냥터 선택</label>
-                <select id="huntingGround" onchange="applyGround()">
-                <option value="0" disabled selected hidden>사냥터를 선택하세요</option>
-                <option value="191442">채석장 (LV30~65)</option>
-                <option value="505000">지하 (LV65~80)</option>
-                <option value="875515">폐허 (LV80~100)</option>
-                <option value="1049089">눈동 (LV100~110)</option>
-                <option value="1685000">어동 (LV110~120)</option>
-                <option value="2000000">해저 (LV120~)</option>
-            </select>
-
-            <label>시간당 경험치 (1배율)</label>
-            <input type="number" id="hourlyExp" placeholder="시간당 경험치 입력">
-
-            <div id="luckContainer" style="display: none;">
-                <label>행운 스탯 (1당 +1%)</label>
-                <input type="number" id="luckStat" value="0" placeholder="예: 10">
-            </div>
-
-            <label>탑펫 버프 (기존 60%의 10% = 6% 적용) (눌러서 켜기/끄기)</label>
-            <div class="buff-grid" style="margin-bottom: 15px;">
-                <div class="buff-toggle" id="buffCiv" onclick="toggleBuff(this)">
-                    <i class="fa-solid fa-scroll" style="color:#d2a8ff;"></i> 문명의 기록 (탑펫 +6%)
-                </div>
-            </div>
-
-            <div id="autoBuffContainer" style="display: none;">
-                <label>추가 버프 (눌러서 켜기/끄기)</label>
-                <div class="buff-grid">
-                    <div class="buff-toggle" id="buffExpBead" onclick="toggleBuff(this)">
-                        <i class="fa-solid fa-gem" style="color:#e3b341;"></i> 경험치구슬 (+100%)
-                    </div>
-                    <div class="buff-toggle" id="buffDiscord" onclick="toggleBuff(this)">
-                        <i class="fa-brands fa-discord" style="color:#5865F2;"></i> 디스코드인증 (+10%)
-                    </div>
-                    <div class="buff-toggle" id="buffTribe" onclick="toggleBuff(this)">
-                        <i class="fa-solid fa-users" style="color:#2ea043;"></i> 부족경험치 (+30%)
-                    </div>
-                    <div class="buff-toggle" id="buffWorldExp" onclick="toggleBuff(this)">
-                        <i class="fa-solid fa-earth-americas" style="color:#539bf5;"></i> 월드경험치 (+100%)
-                    </div>
-                </div>
-                <div id="worldExpDurationContainer" style="display: none; margin-top: -10px; margin-bottom: 20px;">
-                    <label style="color: #539bf5;"><i class="fa-solid fa-clock"></i> 월드경험치 적용 시간 (분)</label>
-                    <input type="number" id="worldExpMins" value="0" placeholder="0 입력 시 무제한 적용">
-                    <div style="font-size: 11.5px; color: #8b949e; margin-top: -12px; line-height: 1.4;">
-                        * 입력한 시간(분)까지만 +100%가 적용되고, 그 이후부터는 원래 배율로 누적 계산됩니다. (0 입력 시 종료 시까지 계속 적용)
-                    </div>
-                </div>
-                <label>파티 경험치 보너스</label>
-                <select id="partyExp" onchange="updateSelectColor('partyExp')">
-                    <option value="0">파티 없음 (1인)</option>
-                    <option value="0.1">2인 파티 (+10%)</option>
-                    <option value="0.2">3인 파티 (+20%)</option>
-                    <option value="0.3">4인 파티 (+30%)</option>
-                    <option value="0.4">5인 파티 (+40%)</option>
-                </select>
-                <div style="font-size: 12.5px; color: var(--accent-orange); margin-top: -8px; margin-bottom: 18px; line-height: 1.5; word-break: keep-all;">
-                    <i class="fa-solid fa-circle-info"></i> 사람이 많아질수록 딜레이가 길어져 계산한 만큼 경험치를 획득하지 못합니다. 가장 확실한 계산은 2인(BOT과 함께 사냥)기준입니다.
-                </div>
-            </div>
-
-            <div id="manualBuffContainer" style="display: none;">
-                <label>적용 배율 (직접입력)</label>
-                <input type="number" id="multiplier" value="1.00" step="0.01">
-            </div>
-
-            <button class="btn-calc" onclick="runCalculation()" style="background: var(--accent);">계산하기</button>
+            <label style="font-size: 13px;">현재 경험치량 (수치)</label>
+            <input type="number" id="curExp" value="0" style="margin-bottom: 0;">
         </div>
 
-        <div class="card">
-            <div class="card-header"><i class="fa-solid fa-chart-simple"></i> 리포트</div>
-            <div id="exp-result-container">
-                <div class="result-grid">
-                    <div class="res-box"><div class="res-label">소요 시간 🕒</div><div id="resTime" class="res-val">-</div></div>
-                    <div class="res-box"><div class="res-label">탑펫 소요시간 🐾</div><div id="resPetTime" class="res-val">-</div></div>
-                    <div class="res-box"><div class="res-label">필요 경험치 💎</div><div id="resNeeded" class="res-val">-</div></div>
-                    <div class="res-box"><div class="res-label">최종 시간당 경험치 📈</div><div id="resFinalExp" class="res-val">-</div></div>
+        <!-- ==================== 배틀 페트 정보 입력 (Orange 테마 / 접이식) ==================== -->
+        <!-- 배틀펫 초기 입력값(value) 제거 및 placeholder 추가 -->
+        <details class="input-group-box" style="border-left: 4px solid var(--accent-orange); background: rgba(252, 163, 17, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; cursor: pointer;">
+            <summary class="input-group-title" style="color: var(--accent-orange); font-weight: bold; list-style: none; outline: none;">
+                <i class="fa-solid fa-paw"></i> 배틀 페트 정보 <span style="font-size: 11px; font-weight: normal; margin-left: 5px;">(클릭하여 설정)</span>
+            </summary>
+            
+            <div style="margin-top: 15px; cursor: default;">
+                <label style="font-size: 13px;">레벨 구간</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="battlePetCurLv" value="" min="1" max="144" placeholder="현재">
+                    <span style="color:#8b949e; font-weight:bold;">→</span>
+                    <input type="number" id="battlePetTargetLv" value="" min="2" max="145" placeholder="목표">
+                </div>
+
+                <label style="font-size: 13px;">현재 경험치량 (수치)</label>
+                <input type="number" id="battlePetCurExp" value="" style="margin-bottom: 0;" placeholder="수치 입력">
+            </div>
+        </details>
+
+        <!-- ==================== 탑승 페트 정보 입력 (Purple 테마 / 접이식) ==================== -->
+        <!-- 탑승펫 초기 입력값(value) 제거 및 placeholder 추가 -->
+        <details class="input-group-box" style="border-left: 4px solid #d2a8ff; background: rgba(210, 168, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; cursor: pointer;">
+            <summary class="input-group-title" style="color: #d2a8ff; font-weight: bold; list-style: none; outline: none;">
+                <i class="fa-solid fa-mound"></i> 탑승 페트 정보 <span style="font-size: 11px; font-weight: normal; margin-left: 5px;">(클릭하여 설정)</span>
+            </summary>
+            
+            <div style="margin-top: 15px; cursor: default;">
+                <label style="font-size: 13px;">레벨 구간</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="ridePetCurLv" value="" min="1" max="144" placeholder="현재">
+                    <span style="color:#8b949e; font-weight:bold;">→</span>
+                    <input type="number" id="ridePetTargetLv" value="" min="2" max="145" placeholder="목표">
+                </div>
+
+                <label style="font-size: 13px;">현재 경험치량 (수치)</label>
+                <input type="number" id="ridePetCurExp" value="" style="margin-bottom: 0;" placeholder="수치 입력">
+            </div>
+        </details>
+
+        <div id="luckContainer" style="display: none;">
+            <label>행운 스탯 (1당 +1%)</label>
+            <input type="number" id="luckStat" value="0" placeholder="예: 10">
+        </div>
+
+        <label>기본 버프 (눌러서 켜기/끄기)</label>
+        <div class="buff-grid" style="margin-bottom: 15px;">
+            <div class="buff-toggle" id="buffCiv" onclick="toggleBuff(this)">
+                <i class="fa-solid fa-scroll" style="color:#d2a8ff;"></i> 문명의 기록 (탑펫 +6%)
+            </div>
+            <div class="buff-toggle" id="buffPetLeash" onclick="toggleBuff(this)">
+                <i class="fa-solid fa-link" style="color:#ff8c00;"></i> 헌신의 펫 목줄 (배틀펫 +5%)
+            </div>
+        </div>
+
+        <div id="autoBuffContainer" style="display: none;">
+            <label>추가 버프 (눌러서 켜기/끄기)</label>
+            <div class="buff-grid">
+                <div class="buff-toggle" id="buffExpBead" onclick="toggleBuff(this)">
+                    <i class="fa-solid fa-gem" style="color:#e3b341;"></i> 경험치구슬 (+100%)
+                </div>
+                <div class="buff-toggle" id="buffDiscord" onclick="toggleBuff(this)">
+                    <i class="fa-brands fa-discord" style="color:#5865F2;"></i> 디스코드인증 (+10%)
+                </div>
+                <div class="buff-toggle" id="buffTribe" onclick="toggleBuff(this)">
+                    <i class="fa-solid fa-users" style="color:#2ea043;"></i> 부족경험치 (+30%)
+                </div>
+                <div class="buff-toggle" id="buffWorldExp" onclick="toggleBuff(this)">
+                    <i class="fa-solid fa-earth-americas" style="color:#539bf5;"></i> 월드경험치 (+100%)
                 </div>
             </div>
-
-            <details open>
-    <summary>📍 사냥터별 상세 데이터 (1배율 기준)</summary>
-    <div class="table-content">
-        <div class="table-row"><strong>사냥터</strong><strong>상세 정보</strong></div>
-        <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 200,000 EXP</span></div>
-        <div class="table-row"><span>지하 (LV65~80)</span><span>마리당: - / 시간당: 약 505,000 EXP</span></div>
-        <div class="table-row"><span>폐허 (LV80~100)</span><span>마리당: - / 시간당: 약 875,515 EXP</span></div>
-        <div class="table-row"><span>눈동 (LV100~110)</span><span>마리당: - / 시간당: 약 1,049,089 EXP</span></div>
-        <div class="table-row"><span>어동 (LV110~120)</span><span>마리당: - / 시간당: 약 1,685,000 EXP</span></div>
-        <div class="table-row"><span>해저 (LV120~)</span><span>마리당: 10,200 / 시간당: 약 2,000,000 EXP</span></div>
-    </div>
-</details>
-
-            <details>
-                <summary><i class="fa-solid fa-table-list"></i> 경험치 테이블 (1~145)</summary>
-                <div class="table-content" id="fullExpTable"></div>
-            </details>
+            <div id="worldExpDurationContainer" style="display: none; margin-top: -10px; margin-bottom: 20px;">
+                <label style="color: #539bf5;"><i class="fa-solid fa-clock"></i> 월드경험치 적용 시간 (분)</label>
+                <input type="number" id="worldExpMins" value="0" placeholder="0 입력 시 무제한 적용">
+            </div>
+            <label>파티 경험치 보너스</label>
+            <select id="partyExp" onchange="updateSelectColor('partyExp')">
+                <option value="0">파티 없음 (1인)</option>
+                <option value="0.1">2인 파티 (+10%)</option>
+                <option value="0.2">3인 파티 (+20%)</option>
+                <option value="0.3">4인 파티 (+30%)</option>
+                <option value="0.4">5인 파티 (+40%)</option>
+            </select>
         </div>
+
+        <div id="manualBuffContainer" style="display: none;">
+            <label>적용 배율 (직접입력)</label>
+            <input type="number" id="multiplier" value="1.00" step="0.01">
+        </div>
+
+        <button class="btn-calc" onclick="runCalculation()" style="background: var(--accent);">계산하기</button>
     </div>
+
+    <div class="card">
+        <div class="card-header"><i class="fa-solid fa-chart-simple"></i> 리포트</div>
+        <div id="exp-result-container">
+            <div class="result-grid">
+                <!-- 캐릭터 결과 -->
+                <div class="res-box char" style="border-left: 4px solid var(--accent-blue);">
+                    <div class="res-label">캐릭터 소요 시간 🕒</div>
+                    <div id="resTime" class="res-val">-</div>
+                </div>
+                <!-- 배틀 페트 결과 -->
+                <div class="res-box pet" style="border-left: 4px solid var(--accent-orange);">
+                    <div class="res-label">배틀 페트 소요 시간 🐾</div>
+                    <div id="resPetTimeCalc" class="res-val">-</div>
+                </div>
+
+                <div class="res-box">
+                    <div class="res-label">캐릭터 필요 EXP 💎</div>
+                    <div id="resNeeded" class="res-val">-</div>
+                </div>
+                <div class="res-box">
+                    <div class="res-label">배틀 페트 필요 EXP 🍖</div>
+                    <div id="resPetNeeded" class="res-val">-</div>
+                </div>
+
+                <div class="res-box">
+                    <div class="res-label">캐릭터 시간당 EXP 📈</div>
+                    <div id="resFinalExp" class="res-val">-</div>
+                </div>
+                <div class="res-box">
+                    <div class="res-label">배틀 페트 시간당 EXP 📈</div>
+                    <div id="resPetFinalExp" class="res-val">-</div>
+                </div>
+                
+                <!-- 탑승 페트 결과 -->
+                <div class="res-box full-width" style="border-left: 4px solid #d2a8ff; background: rgba(210, 168, 255, 0.05);">
+                    <div class="res-label" style="color: #d2a8ff;">탑승 페트 소요시간 <i class="fa-solid fa-mound"></i></div>
+                    <div id="resPetTime" class="res-val" style="color: #d2a8ff;">-</div>
+                </div>
+            </div>
+        </div>
+
+        <details open style="margin-top: 20px;">
+            <summary>📍 사냥터별 상세 데이터 (1배율 기준)</summary>
+            <div class="table-content">
+                <div class="table-row"><strong>사냥터</strong><strong>상세 정보</strong></div>
+                <div class="table-row"><span>채석장 (LV30~65)</span><span>마리당: 670 / 시간당: 200,000 EXP</span></div>
+                <div class="table-row"><span>지하 (LV65~80)</span><span>마리당: - / 시간당: 약 505,000 EXP</span></div>
+                <div class="table-row"><span>폐허 (LV80~100)</span><span>마리당: - / 시간당: 약 875,515 EXP</span></div>
+                <div class="table-row"><span>눈동 (LV100~110)</span><span>마리당: - / 시간당: 약 1,049,089 EXP</span></div>
+                <div class="table-row"><span>어동 (LV110~120)</span><span>마리당: - / 시간당: 약 1,685,000 EXP</span></div>
+                <div class="table-row"><span>해저 (LV120~)</span><span>마리당: 10,200 / 시간당: 약 2,000,000 EXP</span></div>
+            </div>
+        </details>
+
+        <details>
+            <summary><i class="fa-solid fa-table-list"></i> 경험치 테이블 (1~145)</summary>
+            <div class="table-content" id="fullExpTable"></div>
+        </details>
+    </div>
+</div>
 
     <div class="main-container" id="page-acc">
     <div class="card">
@@ -4719,109 +4778,121 @@ const NOTICE_DATABASE = [
             container.classList.add('animate-result');
         }
 
+        // 필요 경험치 계산 함수
+        function getNeededExp(curLv, targetLv, curExp) {
+            if (curLv >= targetLv) return 0;
+            let needed = (EXP_TABLE[curLv + 1] || 0) - curExp;
+            for (let i = curLv + 2; i <= targetLv; i++) {
+                needed += (EXP_TABLE[i] || 0);
+            }
+            return needed;
+        }
+
         function runCalculation() {
             const mode = document.getElementById('calcMode').value;
             if(mode === "none" || mode === "-") { alert("계산 모드를 선택해주세요."); return; }
 
-            const curLv = parseInt(document.getElementById('curLv').value);
-            const curExp = parseInt(document.getElementById('curExp').value) || 0;
-            const targetLv = parseInt(document.getElementById('targetLv').value);
+            // 1. 입력 데이터 수집
+            const charData = {
+                cur: parseInt(document.getElementById('curLv').value),
+                target: parseInt(document.getElementById('targetLv').value),
+                exp: parseInt(document.getElementById('curExp').value) || 0
+            };
+            const bPetData = {
+                cur: parseInt(document.getElementById('battlePetCurLv').value),
+                target: parseInt(document.getElementById('battlePetTargetLv').value),
+                exp: parseInt(document.getElementById('battlePetCurExp').value) || 0
+            };
+            const rPetData = {
+                cur: parseInt(document.getElementById('ridePetCurLv').value),
+                target: parseInt(document.getElementById('ridePetTargetLv').value),
+                exp: parseInt(document.getElementById('ridePetCurExp').value) || 0
+            };
+
             const hourlyBase = parseInt(document.getElementById('hourlyExp').value) || 0;
-            
             const luck = mode === 'auto' ? (parseInt(document.getElementById('luckStat').value) || 0) : 0;
+
+            // 2. 버프 및 페트 비율 설정
             const hasCiv = document.getElementById('buffCiv').classList.contains('active');
+            const hasLeash = document.getElementById('buffPetLeash').classList.contains('active');
 
-            const petRatio = hasCiv ? 0.66 : 0.60;
+            // [수정] 배틀 페트 기본 100%, 탑승 페트 기본 60%
+            const bPetRatio = 1.00 + (hasLeash ? 0.05 : 0); // 배틀 페트 (기본 1.0 + 목줄 0.05)
+            const rPetRatio = 0.60 + (hasCiv ? 0.06 : 0);   // 탑승 페트 (기본 0.6 + 문명 0.06)
 
-            if(curLv >= targetLv) { alert("목표 레벨은 현재 레벨보다 높아야 합니다."); return; }
+            // 3. 필요 경험치 계산
+            const neededChar = getNeededExp(charData.cur, charData.target, charData.exp);
+            const neededBPet = getNeededExp(bPetData.cur, bPetData.target, bPetData.exp);
+            const neededRPet = getNeededExp(rPetData.cur, rPetData.target, rPetData.exp);
 
-            let needed = (EXP_TABLE[curLv + 1] || 0) - curExp;
-            for(let i = curLv + 2; i <= targetLv; i++) {
-                needed += (EXP_TABLE[i] || 0);
-            }
+            let charHours = 0, bPetHours = 0, rPetHours = 0;
+            let finalHourlyChar = 0, finalHourlyBPet = 0;
 
-            let charHours = 0;
-            let petHours = 0;
-            let finalHourlyChar = 0;
-
+            // 4. 배율 적용 및 시간 산출
             if(mode === 'auto') {
-                const hasExpBead = document.getElementById('buffExpBead').classList.contains('active');
-                const hasDiscord = document.getElementById('buffDiscord').classList.contains('active');
-                const hasTribe = document.getElementById('buffTribe').classList.contains('active');
-                const hasWorldExp = document.getElementById('buffWorldExp').classList.contains('active');
-                const worldExpMins = parseInt(document.getElementById('worldExpMins')?.value) || 0;
-                const partyBonus = parseFloat(document.getElementById('partyExp').value) || 0;
+                const buffs = {
+                    bead: document.getElementById('buffExpBead').classList.contains('active') ? 1.0 : 0,
+                    discord: document.getElementById('buffDiscord').classList.contains('active') ? 0.1 : 0,
+                    tribe: document.getElementById('buffTribe').classList.contains('active') ? 0.3 : 0,
+                    party: parseFloat(document.getElementById('partyExp').value) || 0,
+                    world: document.getElementById('buffWorldExp').classList.contains('active'),
+                    worldMins: parseInt(document.getElementById('worldExpMins')?.value) || 0
+                };
                 
-                let baseBuffSum = 0;
-                if(hasExpBead) baseBuffSum += 1.0;
-                if(hasDiscord) baseBuffSum += 0.1;
-                if(hasTribe) baseBuffSum += 0.3;
-                baseBuffSum += partyBonus;
+                // 공통 배율 합산
+                let commonMult = 1.0 + buffs.bead + buffs.discord + buffs.tribe + buffs.party + (luck / 100);
+                let worldMult = commonMult + 1.0;
 
-                let normalCharMult = 1.0 + baseBuffSum + (luck / 100);
-                let normalPetMult = normalCharMult * petRatio;
-
-                let worldCharMult = normalCharMult + 1.0;
-                let worldPetMult = worldCharMult * petRatio; 
-
-                let normalHourlyChar = hourlyBase * normalCharMult;
-                let normalHourlyPet = hourlyBase * normalPetMult;
-                let worldHourlyChar = hourlyBase * worldCharMult;
-                let worldHourlyPet = hourlyBase * worldPetMult;
-
-                finalHourlyChar = (hasWorldExp && worldExpMins === 0) ? worldHourlyChar : normalHourlyChar; 
-
-                if (hasWorldExp && worldExpMins > 0) {
-                    let worldHours = worldExpMins / 60;
+                const calcTime = (needed, ratio) => {
+                    if (needed <= 0) return 0;
+                    const normalHourly = hourlyBase * commonMult * ratio;
+                    const worldHourly = hourlyBase * worldMult * ratio;
                     
-                    let expGainedDuringWorld = worldHourlyChar * worldHours;
-                    if (expGainedDuringWorld >= needed) {
-                        charHours = needed / worldHourlyChar;
+                    if (buffs.world && buffs.worldMins > 0) {
+                        const worldHours = buffs.worldMins / 60;
+                        const expDuringWorld = worldHourly * worldHours;
+                        return expDuringWorld >= needed ? (needed / worldHourly) : (worldHours + (needed - expDuringWorld) / normalHourly);
                     } else {
-                        charHours = worldHours + ((needed - expGainedDuringWorld) / normalHourlyChar);
+                        const activeHourly = buffs.world ? worldHourly : normalHourly;
+                        return activeHourly > 0 ? needed / activeHourly : 0;
                     }
+                };
 
-                    let petExpGainedDuringWorld = worldHourlyPet * worldHours;
-                    if (petExpGainedDuringWorld >= needed) {
-                        petHours = needed / worldHourlyPet;
-                    } else {
-                        petHours = worldHours + ((needed - petExpGainedDuringWorld) / normalHourlyPet);
-                    }
-                } else {
-                    let currentCharMult = hasWorldExp ? worldCharMult : normalCharMult;
-                    let currentPetMult = hasWorldExp ? worldPetMult : normalPetMult;
-                    
-                    let currentHourlyChar = hourlyBase * currentCharMult;
-                    let currentHourlyPet = hourlyBase * currentPetMult;
+                charHours = calcTime(neededChar, 1.0);
+                bPetHours = calcTime(neededBPet, bPetRatio);
+                rPetHours = calcTime(neededRPet, rPetRatio);
 
-                    charHours = currentHourlyChar > 0 ? needed / currentHourlyChar : 0;
-                    petHours = currentHourlyPet > 0 ? needed / currentHourlyPet : 0;
-                }
-            } 
-            else if(mode === 'manual') {
-                const mult = parseFloat(document.getElementById('multiplier').value) || 1;
-                let charMult = mult;
-                let petMult = mult * petRatio; 
-                
-                finalHourlyChar = hourlyBase * charMult;
-                let finalHourlyPet = hourlyBase * petMult;
+                finalHourlyChar = (buffs.world && buffs.worldMins === 0) ? (hourlyBase * worldMult) : (hourlyBase * commonMult);
+                finalHourlyBPet = finalHourlyChar * bPetRatio;
 
-                charHours = finalHourlyChar > 0 ? needed / finalHourlyChar : 0;
-                petHours = finalHourlyPet > 0 ? needed / finalHourlyPet : 0;
-            }
-
-            const charDays = charHours / 24;
-            const petDays = petHours / 24;
-            
-            document.getElementById('resNeeded').innerText = formatNumber(needed);
-            document.getElementById('resTime').innerText = charHours > 0 ? `${charHours.toFixed(1)}시간 (${charDays.toFixed(1)}일)` : "-";
-            document.getElementById('resPetTime').innerText = petHours > 0 ? `${petHours.toFixed(1)}시간 (${petDays.toFixed(1)}일)` : "-";
-            
-            if (mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0) {
-                 document.getElementById('resFinalExp').innerHTML = `${formatNumber(Math.floor(finalHourlyChar))} <span style="font-size:12px; color:#8b949e; font-weight:normal;">(월경적용X)</span>`;
             } else {
-                 document.getElementById('resFinalExp').innerText = formatNumber(Math.floor(finalHourlyChar));
+                // 수동 모드
+                const manualMult = parseFloat(document.getElementById('multiplier').value) || 1;
+                finalHourlyChar = hourlyBase * manualMult;
+                finalHourlyBPet = finalHourlyChar * bPetRatio;
+                const finalHourlyRPet = finalHourlyChar * rPetRatio;
+
+                charHours = finalHourlyChar > 0 ? neededChar / finalHourlyChar : 0;
+                bPetHours = finalHourlyBPet > 0 ? neededBPet / finalHourlyBPet : 0;
+                rPetHours = finalHourlyRPet > 0 ? neededRPet / finalHourlyRPet : 0;
             }
+
+            // 5. 결과 리포트 출력
+            const timeStr = (h) => h > 0 ? `${h.toFixed(1)}시간 (${(h/24).toFixed(1)}일)` : "-";
+            const expStr = (val) => {
+                const isWorld = mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0;
+                return isWorld ? `${formatNumber(Math.floor(val))} <span style="font-size:11px; color:#8b949e; font-weight:normal;">(월경X)</span>` : formatNumber(Math.floor(val));
+            };
+
+            document.getElementById('resNeeded').innerText = formatNumber(neededChar);
+            document.getElementById('resPetNeeded').innerText = formatNumber(neededBPet);
+            
+            document.getElementById('resTime').innerText = timeStr(charHours);
+            document.getElementById('resPetTimeCalc').innerText = timeStr(bPetHours);
+            document.getElementById('resPetTime').innerText = timeStr(rPetHours);
+
+            document.getElementById('resFinalExp').innerHTML = expStr(finalHourlyChar);
+            document.getElementById('resPetFinalExp').innerHTML = formatNumber(Math.floor(finalHourlyBPet));
 
             animateResults('exp-result-container');
         }
