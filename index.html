@@ -3977,6 +3977,24 @@
 
 const NOTICE_DATABASE = [
     {
+    id: 17,
+    date: "26년 5월 8일",
+    title: "26년 5월 8일 업데이트 공지사항입니다.",
+    summary: "1. 투기장 전술 AI 고도화",
+    content: `
+        <strong>1) 투기장 전술 AI 고도화</strong>
+        <span>- 상황 인지 능력 향상: AI가 전장 상황을 더 면밀히 분석하여 판단합니다. </span>
+        <span>- 심리전 요소 추가: 유저의 행동 패턴에 따라 AI가 공격과 방어, 스킬 사용 타이밍을 유연하게 결정하도록 지능이 상향되었습니다.</span>
+        <strong>2) 스킬 및 데미지 메커니즘 조정</strong>
+        <span>- '배수의 진' 위력 개편: 방어력이 높은 대상을 상대로 더 위협적인 일격을 가할 수 있도록 효율이 조정되었습니다.</span>
+        <span>- 순발력 영향 확대: 이제 순발력 차이가 전투의 회피와 치명타 발생에 있어 이전보다 훨씬 결정적인 역할을 수행합니다.</span>
+        <strong>3) 전투 가시성 및 기타 개선</strong>
+        <span>- 전투 로그 시스템 개선을 통해 치명타 및 특수 효과 발생 상황을 더 직관적으로 확인할 수 있게 되었습니다.</span>
+        <span>- 전투 흐름 최적화를 통해 승부의 결정적인 순간에 유닛들이 더 확실한 판단을 내리도록 개선되었습니다.</span>
+    `
+    },
+
+    {
     id: 16,
     date: "26년 5월 5일",
     title: "26년 5월 5일 업데이트 공지사항입니다.",
@@ -7600,75 +7618,83 @@ async function executeTurn() {
     let aliveMy = Object.keys(battleState.units).filter(id => id.startsWith('my-') && !battleState.units[id].isDead);
     let aliveOpp = Object.keys(battleState.units).filter(id => id.startsWith('opp-') && !battleState.units[id].isDead);
     
-    // AI 행동 결정
+    // ==========================================
+    //    [고도화 패치] 지능형 전략 AI (Utility Scoring System)
+    // ==========================================
     if (aliveMy.length > 0 && aliveOpp.length > 0) {
-        const isUserGuarding = battleState.actions.some(a => a.unitId === 'my-char' && a.type === 'guard');
-        let focusTarget;
+        
+        // 1. 유저 유닛별 점수(위험도/처치우선순위) 계산 함수
+        const evaluateTargetScore = (attacker, targetId) => {
+            const target = battleState.units[targetId];
+            let score = 0;
 
-        if (isUserGuarding) {
-            let aliveMyPets = aliveMy.filter(id => id.includes('pet'));
-            if (aliveMyPets.length > 0) {
-                focusTarget = aliveMyPets.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
-            } else {
-                focusTarget = 'my-char'; 
-            }
-        } else {
-            focusTarget = aliveMy.sort((a, b) => battleState.units[a].hp - battleState.units[b].hp)[0];
-        }
+            // [기본 점수] 피가 적을수록, 방어력이 낮을수록 점수 높음 (빨리 제거 가능)
+            score += (1 - (target.hp / target.maxHp)) * 50;
+            score += (500 / (target.def + 10)) * 10;
+
+            // [상성 점수] 내가 속성상 유리하면 가산점
+            if (getAttrBonus(attacker.attr, target.attr) > 1.0) score += 30;
+
+            // [위험도 점수] 공격력이 높은 유닛은 빨리 제거해야 함
+            score += (target.atk / 10);
+
+            // [상태 점수] 배수의진 상태인 적은 방어력이 낮으므로 보너스
+            if (target.buffs.defPenalty < 1.0) score += 40;
+
+            return score;
+        };
+
+        // 2. AI 팀의 '메인 타겟' 선정 (집단 점사를 위해 선정)
+        const masterTargetId = aliveMy.sort((a, b) => {
+            return evaluateTargetScore(battleState.units['opp-char'], b) - evaluateTargetScore(battleState.units['opp-char'], a);
+        })[0];
 
         aliveOpp.forEach(oppId => {
             let u = battleState.units[oppId];
-            let act = { unitId: oppId, type: 'attack', target: focusTarget };
+            let act = { unitId: oppId, type: 'attack', target: masterTargetId };
+            const targetObj = battleState.units[masterTargetId];
 
-            if (oppId === 'opp-char') {
-                if ((u.hp / u.maxHp) < 0.4) { act.type = 'guard'; act.target = 'opp-char'; }
-            } else { 
-                let oppChar = battleState.units['opp-char'];
-                if (oppChar && !oppChar.isDead && (oppChar.hp / oppChar.maxHp) < 0.4) {
-                    act.type = (Math.random() < 0.8) ? 'skill_dog' : 'skill_back';
+            // --- 국면별 전략 (Phase Strategy) ---
+            const isEmergency = (u.hp / u.maxHp < 0.3) || (u.id === 'opp-char' && u.hp / u.maxHp < 0.4);
+
+            if (isEmergency) {
+                // 본체는 무조건 방어, 펫은 본체 보호(충견)
+                if (u.type === 'char') {
+                    act.type = 'guard'; act.target = oppId;
                 } else {
-                    if (focusTarget === 'my-char') {
-                        if (isUserGuarding && Math.random() < 0.3) {
-                            act.type = 'guardbreak';
-                        } else {
-                            act.type = 'attack';
-                        }
-                    } 
-                    else if (focusTarget.includes('pet')) {
-                        if (aliveOpp.length >= 2 && Math.random() < 0.6) {
-                            act.type = 'attack'; 
-                        } else {
-                            act.type = 'skill_back';
-                        }
+                    let oppChar = battleState.units['opp-char'];
+                    if (!oppChar.isDead) { act.type = 'skill_dog'; act.target = 'opp-char'; }
+                }
+            } else {
+                // [공격 상황 전략] 예측 심리전 포함
+                if (u.type !== 'char') {
+                    const isTargetGuarding = targetObj.isGuard;
+                    const rand = Math.random();
+
+                    if (targetObj.type === 'char' && targetObj.def > 120) {
+                        act.type = 'skill_back'; // 단단한 캐릭터는 관통
+                    } else if (isTargetGuarding && rand < 0.7) {
+                        act.type = 'guardbreak'; // 방어 중이면 가드브레이크
+                    } else if (!isTargetGuarding && targetObj.hp / targetObj.maxHp < 0.3 && rand < 0.3) {
+                        act.type = 'attack'; // 가드 낚시 대비 일반 공격
+                    } else {
+                        act.type = 'attack';
                     }
+                } else {
+                    act.type = 'attack';
                 }
             }
             battleState.actions.push(act);
         });
 
-        if (Math.random() < 0.9) {
-            const userResolveAction = battleState.actions.find(a => 
-                a.type === 'skill_back' && 
-                a.unitId.startsWith('my-') && 
-                a.target === 'opp-char'
-            );
-
-            if (userResolveAction) {
-                let aiTankers = Object.values(battleState.units)
-                    .filter(u => u.team === 'opp' && u.type === 'pet' && !u.isDead)
-                    .sort((a, b) => b.def - a.def);
-
-                if (aiTankers.length > 0) {
-                    let selectedTanker = aiTankers.find(p => p.hp > (p.maxHp * 0.5)) || aiTankers[0];
-                    let tankerAct = battleState.actions.find(a => a.unitId === selectedTanker.id);
-                    
-                    if (tankerAct) {
-                        tankerAct.type = 'skill_dog';
-                        tankerAct.skillName = '충견진돗개';
-                    }
-                }
+        // 협력 로직: 속도 기반 가로채기 체크 (확실한 마무리)
+        battleState.actions.forEach(a => {
+            let attacker = battleState.units[a.unitId];
+            let target = battleState.units[a.target];
+            if (target && target.id === 'my-char' && target.hp < (attacker.atk * 1.5) && attacker.spd > target.spd) {
+                a.type = 'attack'; 
             }
-        }
+        });
     }
 
     // 속도 계산 및 정렬
@@ -7680,7 +7706,7 @@ async function executeTurn() {
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
-    // [수정] 배수의진 유닛의 방어력 페널티 턴 전체 적용 (턴 시작 시 일괄 적용)
+    // 배수의진 방어력 페널티 턴 전체 적용
     battleState.actions.forEach(act => {
         if (act.type === 'skill_back') {
             battleState.units[act.unitId].buffs.defPenalty = 0.55;
@@ -7726,9 +7752,7 @@ async function executeTurn() {
 
         let currentAtk = isBackToWall ? attacker.atk * 1.35 : (isDogSkill ? attacker.atk * 0.8 : attacker.atk); 
 
-        if(isBackToWall) { 
-            addLog(`🔥 [${attacker.name}] 배수의진! (공격력↑, 방어력↓)`); 
-        }
+        if(isBackToWall) addLog(`🔥 [${attacker.name}] 배수의진! (공격↑, 방어↓)`); 
 
         if(isGuardBreak) {
             if(target.isGuard) { target.isGuard = false; gbSuccess = true; addLog(`💥 [${attacker.name}](이)가 가드브레이크 성공!`); }
@@ -7737,12 +7761,8 @@ async function executeTurn() {
  
         let isDogIntercept = false;
         if(target.type === 'char' && !act.isDagul && act.type !== 'guardbreak') {
-            // [수정] 자가 인터셉트 방지: 공격자 본인이 충견진돗개 사용 중이면 자신의 공격은 대신 맞지 않음
             let dogAct = battleState.actions.find(a => 
-                a.unitId.startsWith(`${target.team}-pet`) && 
-                a.type === 'skill_dog' && 
-                !battleState.units[a.unitId].isDead &&
-                a.unitId !== attacker.id
+                a.unitId.startsWith(`${target.team}-pet`) && a.type === 'skill_dog' && !battleState.units[a.unitId].isDead && a.unitId !== attacker.id
             );
             if(dogAct) { 
                 target = battleState.units[dogAct.unitId]; 
@@ -7757,26 +7777,38 @@ async function executeTurn() {
         if(attackerBox) attackerBox.classList.add(moveClass);
         await delay(300);
 
-        let dodgeChance = Math.max(10, Math.min(55, 12 + (target.spd - attacker.spd) * 0.3));
+        // ==========================================
+        //    순발력 기반 회피/치명타 공식 수정
+        // ==========================================
+        let spdDiffForDodge = target.spd - attacker.spd;
+        let dodgeChance = 5; 
+        if (spdDiffForDodge > 0) dodgeChance += (spdDiffForDodge * 0.45);
+        dodgeChance = Math.max(5, Math.min(85, dodgeChance));
+
         let isForcedMiss = isGuardBreak && !gbSuccess; 
         let cannotDodge = isGuardBreak && gbSuccess;   
-
         let isEvasion = !target.isGuard && !act.isDagul && !cannotDodge && !isDogIntercept && (Math.random() * 100 < dodgeChance);
 
         if(isForcedMiss || isEvasion) {
             showFloatingDmg(target.id, "MISS", "miss"); 
             if (isForcedMiss) addLog(`❌ 가드브레이크 실패!`);
-            else addLog(`💨 [${target.name}] 회피 성공!`);
+            else addLog(`💨 [${target.name}]의 초고속 회피! (확률: ${dodgeChance.toFixed(1)}%)`);
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
-            let skillMultiplier = act.isDagul ? 1.0 : 1.2; 
-            
+            let defReductionFactor = 0.85; 
+            if (isBackToWall) defReductionFactor = (target.type === 'char') ? 0.25 : 0.6;
+
+            let skillMultiplier = act.isDagul ? 1.0 : (isBackToWall ? 1.35 : 1.2); 
             let effectiveDef = target.def * (target.buffs.defPenalty || 1.0);
-            let baseDmg = ((currentAtk * skillMultiplier) - (effectiveDef * 0.85)) * attrBonus;
             
+            let spdDiffForCrit = attacker.spd - target.spd;
+            let critChance = 5; 
+            if (spdDiffForCrit > 0) critChance += (spdDiffForCrit * 0.4);
+            critChance = Math.max(5, Math.min(75, critChance));
+            let isCrit = (Math.random() * 100 < critChance);
+
+            let baseDmg = ((currentAtk * skillMultiplier) - (effectiveDef * defReductionFactor)) * attrBonus;
             if(target.isGuard) baseDmg *= 0.5;
-            
-            let isCrit = Math.random() * 100 < (Math.sqrt(Math.abs(attacker.spd - target.spd) / 0.03) || 9);
             if(isCrit) baseDmg *= 1.8;
                         
             let minDmg = Math.floor(currentAtk * 0.1);
@@ -7790,21 +7822,17 @@ async function executeTurn() {
                 const targetBox = document.getElementById(`unit-${target.id}`);
                 if(targetBox) targetBox.classList.add('anim-hit');
                 showFloatingDmg(target.id, finalDmg, isCrit ? "crit" : "normal");
-                addLog(`${isCrit?'⚡':''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 데미지!`);
+                addLog(`${isCrit?`⚡[치명타:${critChance.toFixed(0)}%] `:''}⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 피해!`);
                 updateAllHPUI();
             }
         }
         await delay(800);
-        
         if(attackerBox) attackerBox.classList.remove(moveClass, 'active-turn');
         const targetBox = document.getElementById(`unit-${target.id}`);
         if(targetBox) targetBox.classList.remove('anim-hit');
     }
 
-    // [수정] 턴 종료 후 모든 유닛의 방어력 페널티 초기화
-    Object.values(battleState.units).forEach(u => {
-        u.buffs.defPenalty = 1.0;
-    });
+    Object.values(battleState.units).forEach(u => u.buffs.defPenalty = 1.0);
 
     if(!checkWinCondition()) { battleState.turn++; startTurnPhase(); }
 }
@@ -7976,7 +8004,6 @@ document.addEventListener('DOMContentLoaded', () => {
         slotSelector.addEventListener('change', renderSelectedPets);
     }
 });
-
 </script>
 
 <div id="sRankPopup">
