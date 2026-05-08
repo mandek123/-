@@ -7779,16 +7779,30 @@ async function executeTurn() {
             else { addLog(`💨 [${attacker.name}]의 가드브레이크 시도! (대상이 방어중이 아님)`); }
         }
  
+        // ★ [판정 및 로그 상세화] 충견진돗개(Interception) 발동 체크 ★
         let isDogIntercept = false;
-        if(target.type === 'char' && !act.isDagul && act.type !== 'guardbreak') {
+        if(target.type === 'char' && act.type !== 'guardbreak') {
+            // 해당 팀에서 충견 스킬을 예약한 펫이 있는지 확인
             let dogAct = battleState.actions.find(a => 
-                a.unitId.startsWith(`${target.team}-pet`) && a.type === 'skill_dog' && !battleState.units[a.unitId].isDead && a.unitId !== attacker.id
+                a.unitId.startsWith(`${target.team}-pet`) && a.type === 'skill_dog' && !battleState.units[a.unitId].isDead
             );
-            if(dogAct) { 
-                target = battleState.units[dogAct.unitId]; 
-                isDogIntercept = true; 
-                addLog(`🐶 [${target.name}] 주인을 대신해 맞습니다!`); 
+
+            if(dogAct) {
+                if(act.isDagul) {
+                    // [기획 적용] 다굴 시에는 충견이 발동하지 않음 (해설 로그 추가)
+                    addLog(`⚠️ <b style="color:#ff7b72;">[다굴 효과]</b> 너무 거센 연계 공격에 충견이 끼어들 틈이 없습니다!`);
+                } else {
+                    // 다굴이 아닐 때만 정상 발동
+                    target = battleState.units[dogAct.unitId]; 
+                    isDogIntercept = true; 
+                    addLog(`🐶 <b style="color:#a5d6ff;">[충견]</b> ${target.name}(이)가 주인을 대신해 방어합니다!`);
+                }
             }
+        }
+
+        // [다굴 판정 해설 로그] 공격 시작 시점에 다굴인 경우 출력
+        if(act.isDagul) {
+             addLog(`💬 <b style="color:var(--royal-gold);">[협공]</b> ${attacker.name}의 연계 공격이 몰아칩니다!`);
         }
 
         const attackerBox = document.getElementById(`unit-${attacker.id}`);
