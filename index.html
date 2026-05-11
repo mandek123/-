@@ -79,6 +79,44 @@
     box-shadow: 0 2px 4px rgba(255,123,114,0.3);
 }
 
+/* 1. 기본 전역 스크롤바 (홈페이지 공통 - 세련된 블루) */
+::-webkit-scrollbar {
+    width: 5px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(20, 22, 25, 0.5);
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        to bottom,
+        rgba(83, 155, 245, 0.1) 0%,
+        rgba(83, 155, 245, 0.6) 50%,
+        rgba(83, 155, 245, 0.1) 100%
+    );
+    border-radius: 10px;
+}
+
+/* 2. [복구] 투기장 전용 골드 스크롤바 (ID 기반 강제 적용) */
+/* 투기장 페이지 전체 및 내부의 모든 리스트 박스 타겟팅 */
+#page-arena ::-webkit-scrollbar-thumb,
+#user-battle-list::-webkit-scrollbar-thumb,
+#arena-history-container::-webkit-scrollbar-thumb,
+#recent-matches-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        to bottom,
+        rgba(212, 175, 55, 0.1) 0%,
+        rgba(212, 175, 55, 0.7) 50%,
+        rgba(212, 175, 55, 0.1) 100%
+    ) !important; /* 우선순위를 높여 골드색 사수 */
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2) !important;
+}
+
+/* 투기장 스크롤바 호버 시 */
+#page-arena ::-webkit-scrollbar-thumb:hover,
+#user-battle-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.9) !important;
+}
+
 /* 페이징 버튼 컨테이너 */
 .notice-pagination {
     display: flex;
@@ -1493,6 +1531,41 @@
     .battle-team-zone { gap: 2px; }
 }
 
+/* 유저 리스트가 담긴 컨테이너 ID 또는 클래스 */
+#user-battle-list, .user-list-container {
+    max-height: 400px; /* 높이 제한 */
+    overflow-y: auto;  /* 스크롤 허용 */
+}
+
+/* 1. 스크롤바 전체 너비 설정 */
+#user-battle-list::-webkit-scrollbar {
+    width: 4px; /* 아주 얇게 설정하여 세련된 느낌 전달 */
+}
+
+/* 2. 스크롤바 트랙(배경) */
+#user-battle-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1); /* 거의 보이지 않는 배경 */
+    border-radius: 10px;
+}
+
+/* 3. 스크롤바 손잡이(움직이는 부분) */
+#user-battle-list::-webkit-scrollbar-thumb {
+    /* 위아래는 투명하고 중간만 밝은 골드 그라데이션 */
+    background: linear-gradient(
+        to bottom,
+        rgba(212, 175, 55, 0) 0%,
+        rgba(212, 175, 55, 0.6) 50%,
+        rgba(212, 175, 55, 0) 100%
+    );
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); /* 은은한 발광 효과 */
+}
+
+/* 4. 마우스 올렸을 때만 좀 더 진하게 */
+#user-battle-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.8);
+}
+
 /* ==========================================================
                 투기장 페이지 전용 CSS 끝
    ========================================================= */
@@ -2761,6 +2834,7 @@
             <button id="btn-save-info" class="btn-update-info" onclick="saveArenaInfo()">내 정보 저장/업데이트</button>
             <button id="btn-reset-info" class="btn-update-info" onclick="resetArenaInfo()" style="display:none; background:#4a0f0f; border-color:#ff4d4d; color:#ff9999;">초기화 및 재설정</button>
         </div>
+
         <div class="arena-card battle-list">
             <div class="list-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-gold); padding-bottom:15px; margin-bottom:20px;">
                 <h3 style="margin:0; color:var(--royal-gold);"><i class="fas fa-swords"></i> 대전 리스트</h3>
@@ -2768,29 +2842,38 @@
             </div>
             
             <div class="battle-buttons">
-                <button onclick="initBattle('bot_easy')" class="btn-battle bot-easy">
-                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(쉬움)</small></span></div><span class="battle-point">5점</span>
-                </button>
-                <button onclick="initBattle('bot_normal')" class="btn-battle bot-normal">
-                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(보통)</small></span></div><span class="battle-point">10점</span>
-                </button>
-                <button onclick="initBattle('bot_hard')" class="btn-battle bot-hard">
-                    <div class="battle-info"><i class="fas fa-robot"></i><span>만득BOT <small>(어려움)</small></span></div><span class="battle-point">15점</span>
-                </button>
+                <div class="arena-section" style="margin-bottom: 12px; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; overflow: hidden;">
+                    <div onclick="toggleArenaSection('arena-bot-list')" style="cursor:pointer; background: rgba(212, 175, 55, 0.1); padding: 10px 15px; color:var(--royal-gold); font-weight:bold; font-size:13px; display: flex; align-items: center; justify-content: space-between;">
+                        <span><i class="fas fa-robot"></i>  BOT 대전 리스트 (클릭하여 열기/닫기)</span>
+                        <i id="arena-bot-list-arrow" class="fas fa-chevron-down" style="transition: transform 0.3s ease;"></i>
+                    </div>
+                    <div id="arena-bot-list" style="background:rgba(0,0,0,0.4); padding:10px;">
+                        <button onclick="initBattle('bot_easy')" class="btn-battle bot-easy"><div class="battle-info"><span>🤖만득BOT (쉬움)</span></div><span class="battle-point">5점</span></button>
+                        <button onclick="initBattle('bot_normal')" class="btn-battle bot-normal"><div class="battle-info"><span>🤖만득BOT (보통)</span></div><span class="battle-point">10점</span></button>
+                        <button onclick="initBattle('bot_hard')" class="btn-battle bot-hard"><div class="battle-info"><span>🤖만득BOT (어려움)</span></div><span class="battle-point">15점</span></button>
+                    </div>
+                </div>
                 
-                <div class="battle-divider"><span>실시간 유저 대전 (20점)</span></div>
-                
-                <div id="user-battle-list" class="user-list-container" style="margin-bottom: 20px;"></div>
+                <div class="arena-section" style="margin-bottom: 20px; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; overflow: hidden;">
+                    <div onclick="toggleArenaSection('user-battle-list')" style="cursor:pointer; background: rgba(110, 84, 148, 0.2); padding: 10px 15px; color:#d2a8ff; font-weight:bold; font-size:13px; display: flex; align-items: center; justify-content: space-between;">
+                        <span><i class="fas fa-users"></i>  실시간 유저 대전 (클릭하여 열기/닫기)</span>
+                        <i id="user-battle-list-arrow" class="fas fa-chevron-down" style="transition: transform 0.3s ease;"></i>
+                    </div>
+                    <div id="user-battle-list" class="user-list-container" style="background:rgba(0,0,0,0.4); padding:10px; max-height:300px; overflow-y:auto;">
+                        </div>
+                </div>
             </div>
 
             <div class="arena-section" style="margin-bottom: 20px; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; overflow: hidden;">
-                <div style="background: rgba(212, 175, 55, 0.1); padding: 8px 12px; color:var(--royal-gold); font-weight:bold; font-size:13px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-bolt"></i> 최근 경기 실황 (LIVE)
+                <div onclick="toggleArenaSection('recent-matches-list')" style="cursor:pointer; background: rgba(212, 175, 55, 0.1); padding: 8px 12px; color:var(--royal-gold); font-weight:bold; font-size:13px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fas fa-bolt"></i> 최근 경기 실황 (LIVE)</span>
+                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
                 </div>
                 <div id="recent-matches-list" style="background:rgba(0,0,0,0.4); padding:5px; min-height: 50px;">
                     <div style="text-align:center; color:#555; padding:15px; font-size:12px;">경기 실황 데이터를 불러오는 중...</div>
                 </div>
             </div>
+
             <div class="arena-guide-box">
                 <h4>📜 월간 투기장 이용 안내</h4>
                 <ul>
@@ -2817,9 +2900,11 @@
                     <div style="text-align:center; color:#8b949e; font-size:12px;">데이터를 불러오는 중입니다...</div>
                 </div>
             </div>
-
         </div>
-        </div> </div> <div id="battle-arena-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:10px; box-sizing:border-box;">
+    </div>
+</div>
+       
+        <div id="battle-arena-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:10px; box-sizing:border-box;">
     <div class="battle-header">
         <h2 style="color:var(--royal-gold); margin:0; text-align:center;">⚔️ 투기장 전투 ⚔️</h2>
         <div id="battle-turn-indicator" style="color:#fff; font-size:16px; font-weight:bold; margin-top:8px; text-align:center;">[ 1 턴 ] 액션을 선택하세요</div>
@@ -3944,6 +4029,20 @@
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+    id: 18,
+    date: "26년 5월 11일",
+    title: "26년 5월 11일 업데이트 공지사항입니다.",
+    summary: "1. 전역 UI/UX 개편 및 맞춤형 스크롤바 적용",
+    content: `
+        <strong>1) 전역 UI/UX 디자인 개편</strong>
+        <span>- 홈페이지 전체 테마에 최적화된 커스텀 스크롤바로 수정 되었습니다.</span>
+        <span>- 투기장(Arena) 섹션은 공간의 정체성을 강조하기 위해 시각적 차별화를 두었습니다.</span>
+        <strong>2) 대전 리스트 인터페이스 고도화</strong>
+        <span>- 봇 대전 및 유저 대전 리스트를 열고 닫을 수 있게 수정 하였습니다.</span>
+    `
+    },
+
     {
     id: 17,
     date: "26년 5월 8일",
@@ -6854,6 +6953,20 @@ function getSeasonNumber(monthLabel) {
     const baseMonth = 4; 
     let season = (year - baseYear) * 12 + (month - baseMonth) + 1;
     return season > 0 ? season : 1;
+}
+// 대전리스트 열기/닫기 토글
+function toggleArenaSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const arrow = document.getElementById(sectionId + '-arrow');
+    if (!section) return;
+    
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+    } else {
+        section.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(-90deg)';
+    }
 }
 
 // 역대 투기장 랭킹 보기 토글
