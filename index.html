@@ -1999,6 +1999,22 @@
     animation: targetPulse 0.8s infinite alternate; /* 빛나는 효과 */
     z-index: 11;
 }
+/* CSS 영역에 이 내용을 확인해 보세요 */
+.raid-guide-toggle summary::-webkit-details-marker {
+    display: none; /* 브라우저 기본 화살표 숨김 */
+}
+
+details[open] summary .arrow-icon { 
+    transform: rotate(180deg); 
+}
+
+details[open] summary .guide-hint { 
+    display: none; 
+}
+
+details[open] summary { 
+    background: rgba(210, 168, 255, 0.2) !important; 
+}
 /* 1인 레이드 CSS 끝 */
 
 </style>
@@ -3440,19 +3456,29 @@
         
         <div id="raid-tooltip" class="raid-tooltip"></div>
 
-        <details class="raid-guide-toggle">
-    <summary>
-        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-            <i class="fa-solid fa-circle-info"></i> <strong>레이드 시스템 이용안내</strong>
+        <details class="raid-guide-toggle" style="border: 1px solid #30363d; border-radius: 12px; overflow: hidden; background: #0d1117;">
+    <summary style="list-style: none; cursor: pointer; padding: 15px 20px; background: rgba(210, 168, 255, 0.1); transition: background 0.2s; display: flex;">
+        <!-- width: 100%를 추가하여 내부 요소를 양 끝으로 밀어냅니다 -->
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; color: #d2a8ff;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-circle-info" style="font-size: 1.2em;"></i>
+                <strong style="font-size: 1.1em; letter-spacing: -0.5px;">레이드 시스템 이용안내</strong>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85em; opacity: 0.8;">
+                <span class="guide-hint">클릭하여 펼치기</span>
+                <i class="fa-solid fa-chevron-down arrow-icon" style="transition: transform 0.3s ease;"></i>
+            </div>
         </div>
     </summary>
-    <div class="guide-content" style="line-height: 1.8; padding: 20px; background-color: rgba(0,0,0,0.3); border-radius: 8px; color: #adbac7;">
+
+    <div class="guide-content" style="line-height: 1.8; padding: 25px; background-color: rgba(0,0,0,0.2); border-top: 1px solid #30363d; color: #adbac7;">
         
+        <!-- [1] 토벌대 편성 섹션 -->
         <div style="margin-bottom: 25px;">
             <strong style="color: #d2a8ff; font-size: 1.1em; display: block; margin-bottom: 8px;">
                 <i class="fa-solid fa-users-gear"></i> [1] 토벌대 편성 및 데이터 저장
             </strong>
-            <div style="padding-left: 12px; border-left: 2px solid #d2a8ff; margin-left: 5px;">
+            <div style="padding-left: 15px; border-left: 2px solid #d2a8ff; margin-left: 5px;">
                 • 잔여 포인트 내에서 스탯을 분배하고 최대 5마리의 페트를 편성하세요.<br>
                 • 최초 저장 시 <span style="color: #f1c40f; font-weight: bold;">20,000 💎와 기본 장비/인챈트 세트</span>가 즉시 지급됩니다.<br>
                 • <span style="color: #ff7b72; font-weight: bold;">주의: 최초 저장 후 슬롯의 페트는 변경이 불가하며, 스탯 초기화만 지원합니다.</span><br>
@@ -3460,7 +3486,8 @@
             </div>
         </div>
 
-        <div style="margin-bottom: 25px; background: rgba(165, 214, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(165, 214, 255, 0.3);">
+        <!-- 페트알 시스템 안내 박스 -->
+        <div style="margin-bottom: 25px; background: rgba(165, 214, 255, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed rgba(165, 214, 255, 0.3);">
             <strong style="color: #a5d6ff; font-size: 0.95em; display: block; margin-bottom: 5px;">
                 <i class="fa-solid fa-egg"></i> 페트알 시스템 안내
             </strong>
@@ -3469,37 +3496,38 @@
             </span>
         </div>
 
+        <!-- [2] 장비 공방 섹션 -->
         <div style="margin-bottom: 25px;">
             <strong style="color: #539bf5; font-size: 1.1em; display: block; margin-bottom: 8px;">
                 <i class="fa-solid fa-hammer"></i> [2] 장비 공방 및 재감정
             </strong>
-            <div style="padding-left: 12px; border-left: 2px solid #539bf5; margin-left: 5px;">
+            <div style="padding-left: 15px; border-left: 2px solid #539bf5; margin-left: 5px;">
                 • 창고에서 꺼낸 장비는 최초 장착 시 <span style="color: #a5d6ff; font-weight: bold;">1회 무료 감정</span>이 진행됩니다.<br>
                 • <span style="color: #f1c40f;">1,000 💎</span>을 소모하여 옵션을 재감정하거나 인챈트석+1,000💎으로 성능을 강화할 수 있습니다.<br>
                 • <span style="color: #ff7b72;">※ '목줄' 아이템은 시스템상 인챈트(강화)가 불가능합니다.</span>
             </div>
         </div>
 
+        <!-- [3] 보상 섹션 -->
         <div>
-            <strong style="color: #7ee787; font-size: 1.1em; display: block; margin-bottom: 12px;">
+            <strong style="color: #7ee787; font-size: 1.1em; display: block; margin-bottom: 15px;">
                 <i class="fa-solid fa-gift"></i> [3] 단계별 클리어 보상
             </strong>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px;">
-                    <span style="min-width: 60px; background: #444c56; color: #fff; text-align: center; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">1단계</span>
-                    <span style="color: #f1c40f;">1,000 💎</span>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+                    <span style="min-width: 65px; background: #444c56; color: #fff; text-align: center; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">1단계</span>
+                    <span style="color: #f1c40f; font-weight: bold;">1,000 💎</span>
                 </div>
-                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px;">
-                    <span style="min-width: 60px; background: #444c56; color: #fff; text-align: center; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">2단계</span>
-                    <span>2,000 💎 <span style="color: #444c56; margin: 0 8px;">|</span> <span style="color: #a5d6ff;">무작위 인챈트석 1개</span></span>
+                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+                    <span style="min-width: 65px; background: #444c56; color: #fff; text-align: center; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">2단계</span>
+                    <span style="font-weight: bold;">2,000 💎 <span style="color: #444c56; margin: 0 10px;">|</span> <span style="color: #a5d6ff;">무작위 인챈트석 1개</span></span>
                 </div>
-                <div style="display: flex; align-items: center; background: rgba(241, 196, 15, 0.1); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(241, 196, 15, 0.2);">
-                    <span style="min-width: 60px; background: #f1c40f; color: #000; text-align: center; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">3단계</span>
-                    <span style="font-weight: bold;"><span style="color: #f1c40f;">5,000 💎</span> <span style="color: #444c56; margin: 0 8px;">|</span> <span style="color: #a5d6ff;">무작위 인챈트석 1개</span> <span style="color: #444c56; margin: 0 8px;">|</span> <span style="color: #ffa657;">S등급 페트 선택권</span></span>
+                <div style="display: flex; align-items: center; background: rgba(241, 196, 15, 0.1); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(241, 196, 15, 0.2);">
+                    <span style="min-width: 65px; background: #f1c40f; color: #000; text-align: center; padding: 3px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">3단계</span>
+                    <span style="font-weight: bold;"><span style="color: #f1c40f;">5,000 💎</span> <span style="color: #444c56; margin: 0 10px;">|</span> <span style="color: #a5d6ff;">무작위 인챈트석 1개</span> <span style="color: #444c56; margin: 0 10px;">|</span> <span style="color: #ffa657;">S등급 페트 선택권</span></span>
                 </div>
             </div>
         </div>
-
     </div>
 </details>
 
