@@ -1570,8 +1570,440 @@
                 투기장 페이지 전용 CSS 끝
    ========================================================= */
 
+/* 1인 레이드 CSS 시작 */
+
+#page-raid.active {
+    display: block !important; 
+}
+
+#page-raid {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.raid-wrapper {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.raid-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px; 
+    margin: 0 auto; 
+    align-items: start;
+    box-sizing: border-box;
+}
+
+@media (max-width: 899px) {
+    .raid-layout-grid { grid-template-columns: 1fr; }
+}
+
+/* [수정] 박스 사이 여백 및 스타일 강화 */
+.raid-right-column .card {
+    margin-bottom: 25px; /* 박스 사이 여백 추가 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(145deg, #161b22, #0d1117);
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.premium-card {
+    background: linear-gradient(145deg, #161b22, #0d1117);
+    border: 1px solid #30363d;
+}
+
+.card-title-neon {
+    color: #58a6ff;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+}
+
+/* 버튼 스타일 */
+.btn-save-epic {
+    background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+    border: 1px solid #3fb950;
+    color: #fff; font-size: 1.05rem; font-weight: bold;
+    padding: 12px; border-radius: 8px; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(35, 134, 54, 0.3);
+    transition: all 0.3s ease;
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+}
+.btn-save-epic:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(35, 134, 54, 0.5); }
+
+.btn-reset-epic {
+    background: linear-gradient(135deg, #da3633 0%, #f85149 100%);
+    border: 1px solid #ff7b72;
+    color: #fff; font-size: 1.05rem; font-weight: bold;
+    padding: 12px; border-radius: 8px; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(248, 81, 73, 0.3);
+    transition: all 0.3s ease;
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+}
+.btn-reset-epic:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(248, 81, 73, 0.5); }
+
+.btn-enchant {
+    flex: 1; padding: 10px; border-radius: 6px; font-weight: bold; 
+    cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.05);
+}
+.btn-enchant:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+/* 스탯 디스플레이 */
+.final-stat-display {
+    background: #0d1117;
+    border: 1px solid #d4af37;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+}
+.fs-header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 10px; margin-bottom: 10px;
+}
+.fs-title { color: #d4af37; font-weight: bold; }
+.fs-attr { font-size: 12px; font-weight: bold; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; }
+.fs-attr.color-지 { color: #8bc34a; border: 1px solid #8bc34a; }
+.fs-attr.color-수 { color: #2196f3; border: 1px solid #2196f3; }
+.fs-attr.color-화 { color: #f44336; border: 1px solid #f44336; }
+.fs-attr.color-풍 { color: #ffeb3b; border: 1px solid #ffeb3b; }
+
+.fs-body { display: flex; flex-direction: column; gap: 15px; }
+
+.fs-stats { 
+    flex: 2; display: grid; 
+    grid-template-columns: repeat(4, 1fr); gap: 6px; 
+}
+.fs-stats div { 
+    background: rgba(255,255,255,0.05); padding: 6px; 
+    border-radius: 6px; display: flex; flex-direction: column; align-items: center; 
+}
+.fs-stats .label { font-size: 10px; color: #8b949e; margin-bottom: 4px; white-space: nowrap; }
+.fs-stats .val { font-size: 13px; font-weight: bold; color: #fff; }
+.fs-stats .val.boosted { color: #7ee787; text-shadow: 0 0 5px rgba(126, 231, 135, 0.5); }
+
+/* 장비 슬롯 */
+.fs-equip-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 5px;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    padding-top: 15px;
+}
+.equip-slot {
+    background: rgba(210, 168, 255, 0.05);
+    border: 1px dashed #d2a8ff;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 70px;
+    cursor: pointer;
+    transition: 0.2s;
+    position: relative;
+}
+.equip-slot:hover { background: rgba(210, 168, 255, 0.15); border-style: solid; }
+.equip-slot.highlight-slot {
+    border: 2px solid #58a6ff !important;
+    background: rgba(88, 166, 255, 0.2);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.6);
+    animation: slot-pulse 1.5s infinite;
+}
+
+@keyframes slot-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.equip-slot::before {
+    content: attr(data-type);
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    font-size: 10px;
+    color: #8b949e;
+}
+.equip-slot img {
+    max-width: 32px;
+    max-height: 32px;
+    margin-top: 10px;
+    object-fit: contain;
+}
+.equip-slot .empty-text {
+    font-size: 10px;
+    color: #d2a8ff;
+    opacity: 0.6;
+}
+
+/* 잠금 오버레이 */
+.locked-container { position: relative; }
+.lock-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(4px); z-index: 10;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    color: #f85149; font-weight: bold; border-radius: 12px; font-size: 1.1rem; gap: 10px;
+    border: 1px solid #f85149;
+}
+.lock-overlay.hidden { display: none; }
+
+/* 툴팁 */
+.raid-tooltip {
+    position: fixed;
+    z-index: 1000;
+    background: rgba(13, 17, 23, 0.95);
+    border: 1px solid #30363d;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #fff;
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    min-width: 140px;
+}
+.tooltip-title { font-weight: bold; color: #d2a8ff; border-bottom: 1px solid #30363d; margin-bottom: 5px; padding-bottom: 3px; }
+.t-base { color: #fff; }
+.t-identify { color: #539bf5; }
+.t-enchant { color: #f85149; }
+
+/* 이용 안내 */
+.raid-guide-toggle {
+    width: 100%; max-width: 1100px; margin: 0 auto 25px auto;
+    background: linear-gradient(145deg, #161b22, #0d1117);
+    border: 1px solid #30363d; border-radius: 12px; overflow: hidden;
+}
+.raid-guide-toggle summary {
+    padding: 16px 20px; font-weight: bold; color: #d2a8ff; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(210, 168, 255, 0.05); list-style: none;
+}
+.raid-guide-toggle[open] { border-color: #d2a8ff; }
+.guide-content {
+    padding: 20px; color: #adbac7; font-size: 0.95rem; line-height: 1.7; 
+    border-top: 1px solid #30363d; background: rgba(0,0,0,0.2);
+}
+
+/* 페트 슬롯 선택기 */
+.pet-slot-box {
+    flex: 1; text-align: center; padding: 12px 5px;
+    background: #0d1117; border: 1px solid #30363d;
+    border-radius: 6px; cursor: pointer; color: #8b949e;
+    transition: 0.2s; font-size: 0.85rem; font-weight: bold;
+}
+.pet-slot-box.active {
+    border-color: #58a6ff; color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
+    box-shadow: inset 0 0 8px rgba(88, 166, 255, 0.3);
+}
+
+/* [수정] 페트 카드 상세 정보 및 버튼 스타일 */
+.pet-info-tag {
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin: 4px 0;
+    display: inline-block;
+}
+.grade-S { color: #ffcc00; font-weight: bold; text-shadow: 0 0 5px rgba(255, 204, 0, 0.3); }
+.grade-A { color: #539bf5; font-weight: bold; }
+.grade-B { color: #7ee787; font-weight: bold; }
+.grade-C { color: #adbac7; font-weight: bold; }
+.grade-D { color: #8b949e; font-weight: bold; }
+
+.pet-action-btns {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+}
+.btn-pet-action {
+    flex: 1; font-size: 10px; padding: 5px 0;
+    cursor: pointer; border: none; border-radius: 4px;
+    color: #fff; font-weight: bold; transition: 0.2s;
+}
+.btn-place { background: #238636; }
+.btn-sell { background: #da3633; }
+.btn-pet-action:hover { opacity: 0.8; transform: translateY(-1px); }
+
+/* [수정] 1. 레이드 도전 박스 디자인 (석기시대 사냥터 테마) */
+.raid-card-epic { 
+    background: linear-gradient(180deg, #2a1506 0%, #000000 100%) !important; 
+    border: 2px solid #8b4513 !important; /* 고동색 테두리 */
+    padding: 20px;
+}
+.raid-title-epic { color: #ffa657; text-align: center; margin-bottom: 15px; text-shadow: 0 0 10px rgba(255, 166, 87, 0.4); }
+
+.floor-nav { 
+    display: flex; 
+    justify-content: center; 
+    gap: 15px; 
+    margin-bottom: 20px; 
+}
+.floor-node { 
+    text-align: center; 
+    padding: 10px; 
+    border: 1px solid #30363d; 
+    border-radius: 8px; 
+    width: 70px; 
+    font-size: 13px; 
+    color: #8b949e; 
+    background: #0d1117;
+    transition: all 0.3s ease; 
+}
+.floor-node.active { 
+    border-color: #ffa657; 
+    color: #fff; 
+    background: rgba(255, 166, 87, 0.2); 
+    transform: scale(1.05); 
+    box-shadow: 0 0 15px rgba(255, 166, 87, 0.4); 
+}
+.raid-progress-container { 
+    width: 100%; height: 10px; background: #21262d; 
+    border-radius: 5px; margin: 20px 0; overflow: hidden; 
+}
+.raid-progress-fill { 
+    width: 33.3%; height: 100%; 
+    background: linear-gradient(90deg, #8b4513, #ffa657); 
+    box-shadow: 0 0 10px #ffa657; 
+    transition: width 0.5s ease; 
+}
+.btn-raid-start-epic { 
+    width: 100%; padding: 16px; 
+    background: linear-gradient(135deg, #da3633 0%, #f85149 100%); 
+    border: 1px solid #ff7b72; color: #fff; font-weight: 900; 
+    border-radius: 8px; cursor: pointer; font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+}
+
+/* 공통 그리드 및 인풋 */
+.raid-setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+.raid-setup-input { width: 100%; padding: 8px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 4px; box-sizing: border-box; }
+
+.warehouse-tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #30363d; }
+.w-tab { flex: 1; padding: 10px; background: transparent; border: none; color: #8b949e; cursor: pointer; font-weight: bold; border-bottom: 2px solid transparent; }
+.w-tab.active { color: #fca311; border-bottom-color: #fca311; background: rgba(252, 163, 17, 0.1); }
+
+.warehouse-content { display: none; width: 100%; box-sizing: border-box; }
+.warehouse-content.active { display: block !important; }
+
+.warehouse-grid { 
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); 
+    gap: 12px; padding: 5px; max-height: 350px; overflow-y: auto; 
+}
+
+.item-card { 
+    background: #0d1117; border: 1px solid #30363d; border-radius: 8px; 
+    padding: 10px; text-align: center; position: relative; transition: 0.2s; 
+}
+.item-card:hover { border-color: #fca311; }
+.item-card img { width: 45px; height: 45px; margin-bottom: 5px; object-fit: contain; }
+
+.btn-use { width: 100%; margin-top: 5px; padding: 5px; background: #238636; border: none; color: #fff; font-size: 11px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.btn-equip { background: #d2a8ff; color: #000; }
+.item-count { position: absolute; top: 5px; right: 8px; font-size: 11px; color: #fca311; font-weight: bold; }
+
+/* 옥션 */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; }
+.shop-item { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+.shop-item:hover { border-color: #d2a8ff; transform: translateY(-3px); }
+.egg-info strong { display: block; font-size: 11px; color: #adbac7; margin-bottom: 3px; }
+.egg-info span { font-size: 11px; color: #fca311; font-weight: bold; }
+
+/* [추가] 전투 버튼 및 스킬 버튼 스타일 */
+.btn-battle-act {
+    padding: 10px 20px;
+    background: #30363d;
+    border: 1px solid #8b4513;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 100px;
+    transition: 0.2s;
+}
+.btn-battle-act:hover { background: #8b4513; transform: scale(1.05); }
+.btn-battle-act.skill { border-color: #ffa657; color: #ffa657; }
+.btn-battle-act.skill:hover { background: rgba(255, 166, 87, 0.2); }
+
+/* 전투 화면 텍스트 겹침 및 타겟팅 개선 (추가 권장) */
+.enemy-unit-card {
+    position: relative;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    transition: 0.2s;
+}
+
+.target-tag {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background: #f85149;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    border: 1px solid #ff7b72;
+}
+
+.enemy-unit-card.waiting-target {
+    border-color: #f85149 !important;
+    box-shadow: 0 0 10px rgba(248, 81, 73, 0.4);
+    cursor: crosshair !important;
+}
+
+.enemy-unit-card.waiting-target:hover {
+    background: #1c1c1c;
+    transform: scale(1.02);
+}
+
+/* [추가] 피격 애니메이션 효과 */
+@keyframes shakeHit {
+    0% { transform: translateX(0); background-color: #da3633; }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.anim-hit-target {
+    animation: shakeHit 0.4s ease-out !important;
+    border-color: #ff7b72 !important;
+    box-shadow: 0 0 15px rgba(218, 54, 51, 0.6) !important;
+}
+/* 마우스 호버 시 타겟 강조 효과 */
+@keyframes targetPulse {
+    0% { box-shadow: 0 0 5px rgba(248, 81, 73, 0.4); }
+    100% { box-shadow: 0 0 15px rgba(248, 81, 73, 0.8); }
+}
+
+.enemy-unit-card.selectable:hover {
+    transform: scale(1.02); /* 살짝 확대 */
+    border-color: #f85149 !important; /* 테두리 강조 */
+    background: #1c1110 !important; /* 배경색 살짝 변경 */
+    animation: targetPulse 0.8s infinite alternate; /* 빛나는 효과 */
+    z-index: 11;
+}
+/* 1인 레이드 CSS 끝 */
+
 </style>
 </head>
+
 <body>
 <div class="desktop-notice" id="top-notice-banner">
     </div>
@@ -1603,7 +2035,12 @@
         ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
     </a>
     <div class="dropdown-content">
-        <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center; border-top: 1px solid #30363d; margin-top: 5px; padding-top: 8px;">
+        <a href="javascript:void(0);" onclick="showPage('page-raid'); closeDropdown();" style="display: flex; align-items: center;">
+            <i class="fa-solid fa-skull-crossbones" style="color: #f85149; width: 18px;"></i> 
+            <span>1인 레이드</span>
+            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+        </a>
+        <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
             <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
             <span>투기장 (PvP)</span>
             <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
@@ -1617,7 +2054,6 @@
         <a href="javascript:void(0);" onclick="showPage('page-item-sim'); closeDropdown();" style="display: flex; align-items: center;">
             <i class="fa-solid fa-hammer" style="color: #ffcc00; width: 18px;"></i> 
             <span>아이템 시뮬레이터</span>
-            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
         </a>
 
         <a href="javascript:void(0);" onclick="showPage('page-levelup-sim'); closeDropdown();" style="display: flex; align-items: center;">
@@ -1730,7 +2166,7 @@
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
     </div>
     
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid')">
         <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 10px;"></i>
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
     </div>
@@ -2998,6 +3434,285 @@
 </div>
 <!-- 투기장 전투 배틀 모달 끝 -->
 
+<!-- 1인 레이드 모달 시작 -->
+<div class="main-container" id="page-raid" style="display: none;">
+    <div class="raid-wrapper">
+        
+        <div id="raid-tooltip" class="raid-tooltip"></div>
+
+        <details class="raid-guide-toggle">
+    <summary>
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <i class="fa-solid fa-circle-info"></i> <strong>레이드 시스템 이용안내</strong>
+        </div>
+    </summary>
+    <div class="guide-content" style="line-height: 1.8; padding: 20px; background-color: rgba(0,0,0,0.3); border-radius: 8px; color: #adbac7;">
+        
+        <div style="margin-bottom: 25px;">
+            <strong style="color: #d2a8ff; font-size: 1.1em; display: block; margin-bottom: 8px;">
+                <i class="fa-solid fa-users-gear"></i> [1] 토벌대 편성 및 데이터 저장
+            </strong>
+            <div style="padding-left: 12px; border-left: 2px solid #d2a8ff; margin-left: 5px;">
+                • 잔여 포인트 내에서 스탯을 분배하고 최대 5마리의 페트를 편성하세요.<br>
+                • 최초 저장 시 <span style="color: #f1c40f; font-weight: bold;">20,000 💎와 기본 장비/인챈트 세트</span>가 즉시 지급됩니다.<br>
+                • <span style="color: #ff7b72; font-weight: bold;">주의: 최초 저장 후 슬롯의 페트는 변경이 불가하며, 스탯 초기화만 지원합니다.</span><br>
+                • 편성된 페트 외에 새로운 페트는 옥션에서 <span style="color: #a5d6ff; font-weight: bold;">'페트알'</span>을 구매하여 보충할 수 있습니다.
+            </div>
+        </div>
+
+        <div style="margin-bottom: 25px; background: rgba(165, 214, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(165, 214, 255, 0.3);">
+            <strong style="color: #a5d6ff; font-size: 0.95em; display: block; margin-bottom: 5px;">
+                <i class="fa-solid fa-egg"></i> 페트알 시스템 안내
+            </strong>
+            <span style="font-size: 0.9em;">
+                옥션에서 판매되는 각 페트알은 해당 종류에 속한 페트 중 <span style="color: #fff; font-weight: bold;">한 마리가 무작위(랜덤)로 출현</span>합니다. 획득한 페트는 '페트 보관함'으로 지급되며, 현재 토벌대 슬롯에 있는 페트와 교체하여 사용할 수 있습니다.
+            </span>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <strong style="color: #539bf5; font-size: 1.1em; display: block; margin-bottom: 8px;">
+                <i class="fa-solid fa-hammer"></i> [2] 장비 공방 및 재감정
+            </strong>
+            <div style="padding-left: 12px; border-left: 2px solid #539bf5; margin-left: 5px;">
+                • 창고에서 꺼낸 장비는 최초 장착 시 <span style="color: #a5d6ff; font-weight: bold;">1회 무료 감정</span>이 진행됩니다.<br>
+                • <span style="color: #f1c40f;">1,000 💎</span>을 소모하여 옵션을 재감정하거나 인챈트석+1,000💎으로 성능을 강화할 수 있습니다.<br>
+                • <span style="color: #ff7b72;">※ '목줄' 아이템은 시스템상 인챈트(강화)가 불가능합니다.</span>
+            </div>
+        </div>
+
+        <div>
+            <strong style="color: #7ee787; font-size: 1.1em; display: block; margin-bottom: 12px;">
+                <i class="fa-solid fa-gift"></i> [3] 단계별 클리어 보상
+            </strong>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px;">
+                    <span style="min-width: 60px; background: #444c56; color: #fff; text-align: center; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">1단계</span>
+                    <span style="color: #f1c40f;">1,000 💎</span>
+                </div>
+                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px;">
+                    <span style="min-width: 60px; background: #444c56; color: #fff; text-align: center; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">2단계</span>
+                    <span>2,000 💎 <span style="color: #444c56; margin: 0 8px;">|</span> <span style="color: #a5d6ff;">무작위 인챈트석 1개</span></span>
+                </div>
+                <div style="display: flex; align-items: center; background: rgba(241, 196, 15, 0.1); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(241, 196, 15, 0.2);">
+                    <span style="min-width: 60px; background: #f1c40f; color: #000; text-align: center; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 15px;">3단계</span>
+                    <span style="font-weight: bold;"><span style="color: #f1c40f;">5,000 💎</span> <span style="color: #444c56; margin: 0 8px;">|</span> <span style="color: #a5d6ff;">무작위 인챈트석 1개</span> <span style="color: #444c56; margin: 0 8px;">|</span> <span style="color: #ffa657;">S등급 페트 선택권</span></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</details>
+
+        <div class="raid-layout-grid">
+            
+            <div class="raid-left-column">
+                <div class="card premium-card">
+                    <h2 class="card-title-neon">
+                        <i class="fa-solid fa-user-gear"></i> 레이드 토벌대 편성
+                    </h2>
+                    
+                    <div style="margin-bottom: 20px; padding: 15px; background: rgba(83, 155, 245, 0.1); border-radius: 8px; border: 1px solid #30363d;">
+                        <label style="color: #539bf5; font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 8px;">
+                            <i class="fa-solid fa-id-card"></i> 탐험가 닉네임
+                        </label>
+                        <input type="text" id="rd-nickname" class="raid-setup-input" placeholder="데이터를 저장할 닉네임을 입력하세요..." style="font-size: 1rem; border-color: #539bf5;">
+                    </div>
+
+                    <div class="final-stat-display">
+                        <div class="fs-header">
+                            <span class="fs-title">최종 전투 능력치</span>
+                            <span class="fs-attr" id="fs-attr-display" style="font-weight: 800; border-width: 2px;">속성: 미선택</span>
+                        </div>
+                        <div class="fs-body" style="flex-direction: column;">
+                            <div class="fs-stats">
+                                <div><span class="label">체력(HP)</span><span class="val" id="fs-hp">0</span></div>
+                                <div><span class="label">공격력</span><span class="val" id="fs-atk">0.0</span></div>
+                                <div><span class="label">방어력</span><span class="val" id="fs-def">0.0</span></div>
+                                <div><span class="label">순발력</span><span class="val" id="fs-spd">0</span></div>
+                                
+                                <div><span class="label">PVE공격</span><span class="val" id="fs-pve-atk">0%</span></div>
+                                <div><span class="label">PVE방어</span><span class="val" id="fs-pve-def">0%</span></div>
+                                <div><span class="label">치명타</span><span class="val" id="fs-crit">0%</span></div>
+                                <div><span class="label">명중률</span><span class="val" id="fs-hit">0%</span></div>
+                                
+                                <div><span class="label">회피율</span><span class="val" id="fs-eva">0%</span></div>
+                                <div><span class="label">관통</span><span class="val" id="fs-pen">0</span></div>
+                                <div><span class="label">쉴드</span><span class="val" id="fs-shd">0</span></div>
+                                <div><span class="label">행운</span><span class="val" id="fs-luk">0%</span></div>
+                            </div>
+                            
+                            <div class="fs-equip-grid">
+                                <div class="equip-slot" id="slot-weapon" onclick="unequipItem('weapon')" data-type="무기"></div>
+                                <div class="equip-slot" id="slot-head" onclick="unequipItem('head')" data-type="투구"></div>
+                                <div class="equip-slot" id="slot-body" onclick="unequipItem('body')" data-type="갑옷"></div>
+                                <div class="equip-slot" id="slot-acc1" onclick="unequipItem('acc1')" data-type="악세1"></div>
+                                <div class="equip-slot" id="slot-acc2" onclick="unequipItem('acc2')" data-type="악세2"></div>
+                                <div class="equip-slot" id="slot-acc3" onclick="unequipItem('acc3')" data-type="악세3"></div>
+                                <div class="equip-slot" id="slot-acc4" onclick="unequipItem('acc4')" data-type="악세4"></div>
+                                <div class="equip-slot" id="slot-collar" onclick="unequipItem('collar')" data-type="목줄"></div>
+                                <div class="equip-slot" id="slot-totem" onclick="unequipItem('totem')" data-type="토템"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="raid-setup-inputs">
+                        <div class="raid-setup-grid">
+                            <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 5px;">
+                                <span style="color: #adbac7; font-weight: bold;">기본 스탯 분배</span>
+                                <span id="rd-remain-points" style="color: #d4af37; font-weight: bold; font-size: 0.9rem;">잔여 포인트: 637</span>
+                            </div>
+                            <div><label>HP</label><input type="number" id="rd-hp" class="raid-setup-input" value="0" oninput="calcRaidPoints()"></div>
+                            <div><label>공격력</label><input type="number" id="rd-atk" class="raid-setup-input" value="0" oninput="calcRaidPoints()"></div>
+                            <div><label>방어력</label><input type="number" id="rd-def" class="raid-setup-input" value="0" oninput="calcRaidPoints()"></div>
+                            <div><label>순발력</label><input type="number" id="rd-spd" class="raid-setup-input" value="0" oninput="calcRaidPoints()"></div>
+                            
+                            <div>
+                                <label>주 속성</label>
+                                <select id="rd-attr1-type" class="raid-setup-input" onchange="updateAttrDisplay()">
+                                    <option value="" disabled selected style="color: #8b949e;">속성선택</option>
+                                    <option value="지">지(地)</option>
+                                    <option value="수">수(水)</option>
+                                    <option value="화">화(火)</option>
+                                    <option value="풍">풍(風)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>수치 (0~10)</label>
+                                <input type="number" id="rd-attr1-val" class="raid-setup-input" value="10" min="0" max="10" oninput="updateAttrDisplay()">
+                            </div>
+                        </div>
+
+                        <div id="rd-pet-selection-area" style="border-top: 1px solid #30363d; padding-top: 15px; margin-bottom: 15px;">
+                            <label style="color:#d2a8ff; font-weight:bold;">동행 페트 선택 (최대 5마리)</label>
+                            
+                            <div style="display:flex; gap:10px; margin-top:10px; align-items: stretch;" id="rd-pet-search-controls">
+                                <div style="flex: 1; display: flex; gap: 5px;">
+                                    <div class="pet-slot-box active" onclick="setPetSlot(0)">1번</div>
+                                    <div class="pet-slot-box" onclick="setPetSlot(1)">2번</div>
+                                    <div class="pet-slot-box" onclick="setPetSlot(2)">3번</div>
+                                    <div class="pet-slot-box" onclick="setPetSlot(3)">4번</div>
+                                    <div class="pet-slot-box" onclick="setPetSlot(4)">5번</div>
+                                </div>
+                                <div style="flex: 1; display: flex;">
+                                    <input type="text" id="rd-pet-search" class="raid-setup-input" placeholder="페트 검색..." oninput="searchRaidPet()">
+                                </div>
+                            </div>
+                            
+                            <div id="rd-pet-results" style="max-height: 150px; overflow-y: auto; background: #21262d; border-radius: 4px; margin-top: 5px;"></div>
+                            <div id="rd-pet-lock-msg" style="display:none; color:#f85149; font-size:12px; text-align:center; margin-top:10px;">
+                                <i class="fa-solid fa-lock"></i> 캐릭터 확정 시 보관함 페트와 교체만 가능합니다.
+                            </div>
+                        </div>
+
+                        <div id="rd-selected-pets-container" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; margin-bottom:15px;">
+                        </div>
+                    </div>
+
+                    <button id="btn-save-raid-info" class="btn-save-epic" style="width: 100%; margin-bottom: 10px;" onclick="saveRaidInfo()">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>레이드 정보 저장 (스탯/페트/등급 확정)</span>
+                    </button>
+                    <p style="color: #8b949e; font-size: 0.75rem; text-align: center; margin-bottom: 15px;">* 저장 시 20,000 💎 및 기본 장비/인챈트석 세트가 지급됩니다.</p>
+                    
+                    <button id="btn-reset-raid-info" class="btn-reset-epic" style="width: 100%; display: none;" onclick="resetRaidInfo()">
+                        <i class="fa-solid fa-rotate-left"></i> <span>캐릭터 재설정 (아이템 유지)</span>
+                    </button>
+                </div>
+
+                <div class="card raid-card-epic">
+                    <h2 class="raid-title-epic"><i class="fa-solid fa-fire-glow"></i> 심연의 시련 (1단계 ~ 3단계)</h2>
+                    <p style="color: #8b949e; font-size: 0.85rem; text-align: center; margin-bottom: 20px;">
+                        * 각 층 클릭 시 해당 난이도로 설정됩니다.
+                    </p>
+                    
+                    <div class="floor-nav">
+                        <div id="raid-f1" class="floor-node active" onclick="selectRaidFloor(1)"><strong>1단계</strong><br>Lv.135</div>
+                        <div id="raid-f2" class="floor-node" onclick="selectRaidFloor(2)"><strong>2단계</strong><br>Lv.140</div>
+                        <div id="raid-f3" class="floor-node" onclick="selectRaidFloor(3)"><strong>3단계</strong><br>Lv.150</div>
+                    </div>
+                    
+                    <div class="raid-progress-container">
+                        <div id="raid-progress-bar" class="raid-progress-fill" style="width: 33.3%;"></div>
+                    </div>
+                    
+                    <button class="btn-raid-start-epic" onclick="startRaidQuest()">
+                        <i class="fa-solid fa-swords"></i> 레이드 도전 시작
+                    </button>
+                </div>
+            </div> 
+            
+            <div class="raid-right-column">
+                
+                <div class="card warehouse-card locked-container" id="raid-warehouse-card">
+                    <div class="lock-overlay" id="warehouse-lock">
+                        <i class="fa-solid fa-lock"></i> 캐릭터 확정 후 개방
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0;"><i class="fa-solid fa-box-archive"></i> 레이드 전용 창고</h3>
+                        <span style="color: #58a6ff; font-weight: bold; font-size: 0.9rem;">보유: <span id="raid-warehouse-diamonds">0</span> 💎</span>
+                    </div>
+                    <div class="warehouse-tabs">
+                        <button id="tab-items" class="w-tab active" onclick="switchRaidTab('items')">아이템/장비</button>
+                        <button id="tab-pets" class="w-tab" onclick="switchRaidTab('pets')">페트 보관함</button>
+                    </div>
+                    <div id="raid-items-view" class="warehouse-content active">
+                        <div id="raid-item-list" class="warehouse-grid"></div>
+                    </div>
+                    <div id="raid-pets-view" class="warehouse-content">
+                        <div id="raid-pet-list" class="warehouse-grid"></div>
+                    </div>
+                </div>
+
+                <div class="card enchant-card locked-container" id="raid-enchant-card">
+                    <div class="lock-overlay" id="enchant-lock">
+                        <i class="fa-solid fa-lock"></i> 캐릭터 확정 후 개방
+                    </div>
+                    <h3 style="margin-top: 0; color: #ffcc00;"><i class="fa-solid fa-hammer"></i> 장비 공방</h3>
+                    <p style="color: #adbac7; font-size: 0.8rem; margin-bottom: 15px;">부위에 맞는 전용 인챈트석을 소모하여 옵션을 재산정합니다.</p>
+                    
+                    <select id="enchant-slot-select" class="raid-setup-input" style="margin-bottom:10px;">
+                        <option value="" selected disabled>옵션 재산정할 슬롯 선택</option>
+                        <option value="weapon">무기 (홍염석)</option>
+                        <option value="head">투구 (비취석)</option>
+                        <option value="body">갑옷 (비취석)</option>
+                        <option value="acc1">악세서리 1 (심해석)</option>
+                        <option value="acc2">악세서리 2 (심해석)</option>
+                        <option value="acc3">악세서리 3 (심해석)</option>
+                        <option value="acc4">악세서리 4 (심해석)</option>
+                        <option value="collar">목줄 (재감정 가능)</option>
+                        <option value="totem">토템 (홍요석)</option>
+                    </select>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-enchant" style="border: 1px solid #539bf5; color: #539bf5;" onclick="appraiseEquippedItem()">🔍 옵션 재감정</button>
+                        <button class="btn-enchant" style="border: 1px solid #f85149; color: #f85149;" onclick="enchantEquippedItem()">✨ 인챈트 재설정</button>
+                    </div>
+                </div>
+
+                <div class="card shop-card locked-container" id="raid-shop-card">
+                    <div class="lock-overlay" id="shop-lock">
+                        <i class="fa-solid fa-lock"></i> 캐릭터 확정 후 개방
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px;" onclick="toggleRaidShop()">
+                        <h3 style="margin: 0; color: #d2a8ff;"><i class="fa-solid fa-gavel"></i> 옥션 (Auction)</h3>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #58a6ff; font-weight: bold; font-size: 0.9rem;" onclick="event.stopPropagation()">보유: <span id="raid-shop-diamonds">0</span> 💎</span>
+                            <i id="shop-toggle-icon" class="fa-solid fa-chevron-down" style="color: #8b949e;"></i>
+                        </div>
+                    </div>
+                    <p style="color: #8b949e; font-size: 0.8rem; margin-top: 5px; margin-bottom: 10px;">페트의 알 구매 (각 5,000 💎)</p>
+                    <div id="dynamic-egg-shop-container" style="display: none;">
+                        <input type="text" id="shop-search-input" class="raid-setup-input" placeholder="원하는 알 종류 검색..." oninput="filterRaidShop()" style="margin-bottom: 10px;">
+                        <div id="dynamic-egg-shop" class="shop-grid"></div>
+                    </div>
+                </div>
+
+            </div> 
+        </div>
+    </div>
+</div>
+<!-- 1인 레이드 모달 끝 -->
+
+</div>
 
 </div>
     <div class="footer">
@@ -4029,6 +4744,24 @@
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+    id: 19,
+    date: "26년 5월 14일",
+    title: "26년 5월 14일 업데이트 공지사항입니다.",
+    summary: "1. 신규 콘텐츠 '1인 레이드' 출시 안내",
+    content: `
+        <strong>1) 전략적 장비 장착 및 강화 시스템</strong>
+        <span>- 무기, 투구, 갑옷, 악세서리, 목줄, 토템 등 총 9종의 장비 슬롯이 활성화되었습니다.</span>
+        <span>- 재감정 기능을 통해 장비의 옵션을 강화하고, 홍염석·비취석 등 전용 인챈트석으로 추가 능력치를 부여할 수 있습니다.</span>
+        <span>- 아이템에 부여된 능력치가 캐릭터의 스탯에 직접 상속되어 반영됩니다. </span>
+        <strong>2) 페트 알 부화 및 등급 시스템</strong>
+        <span>- 상점에서 획득한 알을 부화시켜 S등급부터 D등급까지 랜덤한 성능의 페트를 획득할 수 있습니다.</span>
+        <span>- 각 페트가 보유한 고유 패시브 스킬과 140레벨 성장 스탯은 캐릭터의 전투력에 직접 상속되어 반영됩니다.</span>   
+        <strong>3) 캐릭터 정보 저장 시스템</strong>
+        <span>- 처음 캐릭터의 정보를 저장하면 이후에는 캐릭터의 스탯정보만 변경 가능하며, 저장한 초기 페트와 초기 지급 아이템의 정보는 저장한 캐릭터에 귀속됩니다.</span>
+    `
+    },
+
     {
     id: 18,
     date: "26년 5월 11일",
@@ -5155,7 +5888,7 @@ function calcAccuracy() {
 
         /* =======================================
     [아이템 시뮬레이터 시스템]
-    ======================================= */
+   ======================================= */
 const EQUIP_DB = {
     "ignos": { 
         name: "이그노스의 활", img: "./images/item1.png", type: "원거리 무기", 
@@ -5206,27 +5939,68 @@ const EQUIP_DB = {
         baseStats: { "공격력": 7, "방어력": 7, "순발력": 7, "체력": 10 }, 
         pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
     },
-    // [수정] 펫 목줄 3종 감정 옵션(pool)에 PVE 공/방 추가
     "hunter_collar": { 
         name: "사냥꾼의 펫 목줄", img: "./images/item11.png", type: "악세서리 / 목줄", 
-        baseStr: "매력 10 / 기본 PVE 공격력 5% 적용 / 야생 펫 출현 확률 +5%", 
+        baseStr: "기본 PVE 공격력 5% 적용 / 야생 펫 출현 확률 +5%", 
         specialBase: "", 
-        baseStats: { "매력": 10, "PVE 공격력 (%)": 5 }, 
+        baseStats: { "PVE 공격력 (%)": 5 }, 
         pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
     },
     "grace_collar": { 
         name: "은혜의 펫 목줄", img: "./images/item12-1.png", type: "악세서리 / 목줄", 
-        baseStr: "매력 10 / 빛의 정령(1회) - 멀티, PVP 미적용", 
+        baseStr: "빛의 정령(1회) - 멀티, PVP 미적용", 
         specialBase: "", 
-        baseStats: { "매력": 10 }, 
+        baseStats: {}, 
         pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
     },
     "devotion_collar": { 
         name: "헌신의 펫 목줄", img: "./images/item13.png", type: "악세서리 / 목줄", 
-        baseStr: "매력 10 / 산책 중 펫 경험치 +5% (상시)", 
+        baseStr: "산책 중 펫 경험치 +5% (상시)", 
         specialBase: "", 
-        baseStats: { "매력": 10 }, 
+        baseStats: {}, 
         pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"] 
+    },
+    "abyssal_wrath": { 
+        name: "심연의 분노", img: "./images/item15.png", type: "악세서리 / 부적", 
+        baseStr: "공격력 5 / PVE 공격력 3% / 고등정화의 정령 Lv2", 
+        specialBase: "고등정화의 정령 Lv2", 
+        baseStats: { "공격력": 5, "PVE 공격력 (%)": 3 }, 
+        pool: ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)"] 
+    },
+    "sky_bracelet_gold": { 
+        name: "창공의 팔찌 金", img: "./images/item16.png", type: "악세서리 / 팔찌", 
+        baseStr: "공격력 10 / 방어력 -10 / 순발력 10", 
+        specialBase: "랜덤 능력치 7 부여", 
+        baseStats: { "공격력": 10, "방어력": -10, "순발력": 10 }, 
+        pool: ["공격력", "방어력", "순발력", "체력"] 
+    },
+    "sky_bracelet_silver": { 
+        name: "창공의 팔찌 銀", img: "./images/item17.png", type: "악세서리 / 팔찌", 
+        baseStr: "공격력 -10 / 방어력 10 / 순발력 10", 
+        specialBase: "랜덤 능력치 7 부여", 
+        baseStats: { "공격력": -10, "방어력": 10, "순발력": 10 }, 
+        pool: ["공격력", "방어력", "순발력", "체력"] 
+    },
+    "sky_bracelet_bronze": { 
+        name: "창공의 팔찌 銅", img: "./images/item18.png", type: "악세서리 / 팔찌", 
+        baseStr: "공격력 10 / 방어력 10 / 순발력 -10", 
+        specialBase: "랜덤 능력치 7 부여", 
+        baseStats: { "공격력": 10, "방어력": 10, "순발력": -10 }, 
+        pool: ["공격력", "방어력", "순발력", "체력"] 
+    },
+    "red_flame_necklace": { 
+        name: "홍염의 여의주 목걸이", img: "./images/item19.png", type: "악세서리 / 목걸이", 
+        baseStr: "공격력 5 / 명중 (%) 3 / 은혜의 정령 Lv6", 
+        specialBase: "은혜의 정령 Lv6", 
+        baseStats: { "공격력": 5, "명중 (%)": 3 }, 
+        pool: ["공격력", "방어력", "순발력", "체력", "명중 (%)"] 
+    },
+    "black_flame_necklace": { 
+        name: "흑염의 여의주 목걸이", img: "./images/item20.png", type: "악세서리 / 목걸이", 
+        baseStr: "행운 (%) 5 / 명중 (%) 3 / 은혜의 정령 Lv6", 
+        specialBase: "은혜의 정령 Lv6", 
+        baseStats: { "행운 (%)": 5, "명중 (%)": 3 }, 
+        pool: ["공격력", "방어력", "순발력", "체력", "행운 (%)", "명중 (%)"] 
     }
 };
 
@@ -8076,14 +8850,2064 @@ document.addEventListener('DOMContentLoaded', () => {
     const slotSelector = document.getElementById('pet-slot-selector');
     if(slotSelector) slotSelector.addEventListener('change', renderSelectedPets);
 });
+
+/* ==========================================
+            1인 레이드 JS 코드 시작
+   ========================================== */
+
+// [추가] 패시브 데이터베이스 정의
+window.RAID_PASSIVE_DATABASE = [
+    { name: "격노", effect: "본인과 펫, 3턴 동안 공격력 증가", values: ["8%", "9%", "10%", "12%", "15%"] },
+    { name: "전투 집중", effect: "본인과 펫, 3턴 동안\n명중률 증가 + 공격력 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
+    { name: "야수의 포효", effect: "본인과 펫, 3턴 동안\n회피율 증가 + 공격력 고정 증가(5%)", values: ["회피 3%", "4%", "5%", "6%", "8%"] },
+    { name: "심장 관통", effect: "본인과 펫, 3턴 동안\n치명타 확률 증가 + 공격력 고정 증가(5%)", values: ["치명 3%", "4%", "5%", "6%", "8%"] },
+    { name: "신속", effect: "본인과 펫, 3턴 동안 순발력 증가", values: ["8%", "9%", "10%", "12%", "15%"] },
+    { name: "질풍의 눈", effect: "본인과 펫, 3턴 동안\n명중률 증가 + 순발력 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
+    { name: "광휘", effect: "본인과 펫, 3턴 동안\n회피율 증가 + 순발력 고정 증가(5%)", values: ["회피 3%", "4%", "5%", "6%", "8%"] },
+    { name: "전광 석화", effect: "본인과 펫, 3턴 동안\n치명타 확률 증가 + 순발력 고정 증가(5%)", values: ["치명 3%", "4%", "5%", "6%", "8%"] },
+    { name: "잔상", effect: "본인과 펫, 3턴 동안 회피율 증가", values: ["10%", "11%", "12%", "13%", "15%"] },
+    { name: "심판", effect: "본인과 펫, 3턴 동안 치명타 확률 증가", values: ["10%", "11%", "12%", "13%", "15%"] },
+    { name: "조준", effect: "본인과 펫, 3턴 동안 명중률 증가", values: ["5%", "6%", "7%", "8%", "10%"] },
+    { name: "불굴의 의지", effect: "팀원 전체, 5턴 동안 상태 이상 저항 증가", values: ["30%", "35%", "40%", "45%", "60%"] },
+    { name: "강철", effect: "본인과 펫, 3턴 동안\n피해 감소 + 치명타 데미지 무효", values: ["감소 40", "50", "60", "70", "100"] },
+    { name: "치유", effect: "본인과 펫, 3턴 동안 HP 회복", values: ["100", "150", "200", "250", "350"] },
+    { name: "질주", effect: "본인과 펫, 3턴 동안\n회피율 증가 + 명중률 고정 증가(3%)", values: ["회피 3%", "4%", "5%", "6%", "8%"] },
+    { name: "파열", effect: "본인과 펫, 3턴 동안\n치명타 확률 증가 + 회피율 고정 증가(3%)", values: ["치명 3%", "4%", "5%", "6%", "8%"] },
+    { name: "암살", effect: "본인과 펫, 3턴 동안\n명중률 증가 + 치명타 확률 고정 증가(3%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
+    { name: "충성", effect: "본인과 펫, 3턴 동안\n피해 감소 + 기본 공격 시 ‘충견진돗개’ 적용", values: ["감소 30", "40", "50", "60", "90"] },
+    { name: "투혼", effect: "본인과 펫, 3턴 동안 공격력 증가\n(방어력 -10% 패널티)", values: ["공 12%", "13%", "14%", "16%", "20%"] },
+    { name: "난무", effect: "캐릭터 전용, 근거리 공격 시 2~4회 공격", values: ["1턴", "2턴", "3턴", "4턴", "5턴"] },
+    { name: "창공의 권능", effect: "팀원 전체, 5턴 동안 HP 회복", values: ["250", "300", "350", "400", "500"] },
+    { name: "철갑의 수호", effect: "팀원 전체, 5턴 동안\n피해 감소 + 치명타 데미지 무효", values: ["감소 60", "70", "80", "90", "120"] },
+    { name: "광휘의 화조", effect: "팀원 전체, 5턴 동안\n치명타 확률 증가 + 공격력 고정 증가(5%)", values: ["치명 3%", "4%", "5%", "6%", "8%"] },
+    { name: "질풍의 포효", effect: "팀원 전체, 5턴 동안\n명중률 증가 + 순발력 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
+    { name: "대지의 심장", effect: "팀원 전체, 5턴 동안\n피해 감소 + 치명타 데미지 무효", values: ["감소 60", "70", "80", "90", "120"] },
+    { name: "서리의 심장", effect: "팀원 전체, 5턴 동안 HP 회복", values: ["250", "300", "350", "400", "500"] },
+    { name: "불타는 날개", effect: "팀원 전체, 5턴 동안\n치명타 확률 증가 + 공격력 고정 증가(5%)", values: ["치명 3%", "4%", "5%", "6%", "8%"] },
+    { name: "폭풍의 날개", effect: "팀원 전체, 5턴 동안\n명중률 증가 + 순발력 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
+    { name: "티아트의 축복", effect: "전투 시작 시, 전장에 대지의 정령 생성", values: ["1턴", "2턴", "3턴", "4턴", "5턴"] },
+    { name: "에니키의 축복", effect: "전투 시작 시, 전장에 물의 정령 생성", values: ["1턴", "2턴", "3턴", "4턴", "5턴"] },
+    { name: "이라의 축복", effect: "전투 시작 시, 전장에 화재의 정령 생성", values: ["1턴", "2턴", "3턴", "4턴", "5턴"] },
+    { name: "윌의 축복", effect: "전투 시작 시, 전장에 질풍의 정령 생성", values: ["1턴", "2턴", "3턴", "4턴", "5턴"] },
+    { name: "폭주", effect: "본인과 펫, 5턴 동안 공격력 증가\n(방어력 -10% 패널티)", values: ["공 12%", "13%", "14%", "16%", "20%"] },
+    { name: "심판의 혼", effect: "본인과 펫, 3턴 동안\n공격력 증가 + 순발력 증가", values: ["3%", "5%", "6%", "8%", "10%"] },
+    { name: "심연의 보주", effect: "본인과 펫, 3턴 동안\n반격률 증가 + 회피율 고정 증가(5%)", values: ["반격 50%", "55%", "60%", "70%", "80%"] },
+    { name: "청영의 화조", effect: "팀원 전체, 5턴 동안\nHP 회복 + 치명타 확률 고정 증가(5%)", values: ["회복 50", "80", "100", "150", "200"] },
+    { name: "광휘의 권능", effect: "팀원 전체, 5턴 동안\n순발력 증가 + 수호의 정령 생성", values: ["3%", "4%", "5%", "6%", "8%"] },
+    { name: "왜곡", effect: "본인과 펫, 5턴 동안\n명중률 증가 + 치명타 확률 고정 증가(5%)", values: ["명중 3%", "4%", "5%", "6%", "8%"] },
+    { name: "황혼의 날개", effect: "팀원 전체, 5턴 동안\n회피율, 명중률, 치명타 확률 증가", values: ["3%", "4%", "5%", "6%", "8%"] }
+];
+
+let raidFloor = 1;
+let raidItems = {}; // { itemName: count or object }
+let raidPets = [];  
+let myRaidData = null;
+let raidSelectedPets = [null, null, null, null, null]; 
+let isRosterLocked = false;
+
+// 장착 아이템 데이터 구조
+let equippedItems = {
+    weapon: null, head: null, body: null,
+    acc1: null, acc2: null, acc3: null, acc4: null,
+    collar: null, totem: null
+};
+
+// [해결] ENCHANT_DB 중복 선언 방지 및 데이터 업데이트
+if (typeof ENCHANT_DB !== 'undefined') {
+    Object.assign(ENCHANT_DB, {
+        "fire": { name: "홍염석", img: "./images/item3.png", target: "무기", fixedStr: "공격력 +2", fixedStat: { "공격력": 2 }, pool: ["공격력", "방어력", "순발력", "명중 (%)", "치명 (%)", "회피 (%)"] },
+        "jade": { name: "비취석", img: "./images/item4.png", target: "방어구", fixedStr: "방어력 +2", fixedStat: { "방어력": 2 }, pool: ["공격력", "방어력", "순발력", "체력", "행운 (%)"] },
+        "deep": { name: "심해석", img: "./images/item5.png", target: "악세서리", fixedStr: "체력 +5", fixedStat: { "체력": 5 }, pool: ["공격력", "방어력", "순발력", "체력"] },
+        "hongyo": { name: "홍요석", img: "./images/item14.png", target: "토템", fixedStr: "없음", fixedStat: {}, pool: ["공격력", "방어력", "순발력", "체력", "명중 (%)", "치명 (%)", "회피 (%)"] }
+    });
+}
+
+let activePetSlotIndex = 0;
+const RAID_INITIAL_POINTS = 637;
+
+if (typeof window.totalDiamonds === 'undefined') {
+    window.totalDiamonds = 0;
+}
+
+// 수동 전투 상태 관리
+let rBattle = {
+    allies: [],
+    enemies: [],
+    turnQueue: [],
+    currentActor: null,
+    isEnd: false,
+    waitingForTarget: false,
+    turnCount: 1
+};
+
+// 층 선택 기능 함수
+function selectRaidFloor(floor) {
+    raidFloor = floor;
+    document.querySelectorAll('.floor-node').forEach(node => node.classList.remove('active'));
+    const selectedNode = document.getElementById(`raid-f${floor}`);
+    if (selectedNode) selectedNode.classList.add('active');
+    
+    const progressBar = document.getElementById('raid-progress-bar');
+    if (progressBar) progressBar.style.width = `${(floor / 3) * 100}%`;
+    console.log(`선택된 층: ${floor}F`);
+}
+
+// 아이템 부위별 옵션 풀 판별 함수
+function getItemStatPool(typeStr) {
+    const t = typeStr || "";
+    
+    // 펫 목줄 (최우선 판별)
+    if (t.includes("목줄")) {
+        return ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"];
+    }
+
+    if (t.includes("근거리")) return ["공격력", "방어력", "순발력", "체력", "관통", "치명 (%)", "PVE 공격력 (%)"];
+    if (t.includes("원거리")) return ["공격력", "방어력", "순발력", "체력", "관통", "명중 (%)", "PVE 공격력 (%)"];
+    if (t.includes("투구") || t.includes("모자")) return ["공격력", "방어력", "순발력", "체력", "쉴드", "PVE 방어력 (%)"];
+    if (t.includes("갑옷") || t.includes("옷")) return ["방어력", "순발력", "체력", "쉴드", "PVE 방어력 (%)"];
+    if (t.includes("팔찌")) return ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"];
+    if (t.includes("악기")) return ["공격력", "방어력", "순발력", "체력", "행운 (%)"];
+    if (t.includes("목걸이")) return ["공격력", "방어력", "순발력", "체력", "명중 (%)"];
+    if (t.includes("반지")) return ["공격력", "방어력", "순발력", "체력", "치명 (%)"];
+    if (t.includes("귀걸이")) return ["공격력", "방어력", "순발력", "체력", "회피 (%)"];
+    if (t.includes("부적")) return ["공격력", "방어력", "순발력", "체력", "행운 (%)"];
+    if (t.includes("토템")) return ["공격력", "방어력", "순발력", "체력", "PVE 공격력 (%)", "PVE 방어력 (%)"];
+    
+    // DB상 타입명이 단순할 경우를 대비한 폴백(Fallback)
+    if (t.includes("무기")) return ["공격력", "방어력", "순발력", "체력", "관통", "치명 (%)", "PVE 공격력 (%)"];
+    if (t.includes("악세서리")) return ["공격력", "방어력", "순발력", "체력", "명중 (%)", "치명 (%)", "회피 (%)"];
+    return ["공격력", "방어력", "순발력", "체력"];
+}
+
+// [수정] 감정 로직 (아이템별 옵션 풀 적용 및 특수 수치 상승 반영)
+function rollIdentify(itemName) {
+    const eqData = getEquipDataByName(itemName);
+    if (!eqData) return null;
+    let newIdentify = {};
+    
+    // 부위별 지정된 옵션 풀 가져오기
+    const pool = getItemStatPool(eqData.type);
+
+    for (let i = 0; i < 7; i++) { // 총 7포인트 분배
+        let stat = getWeightedStat(pool);
+        let val = 1;
+        
+        // 이미지에 명시된 상승치 반영
+        if (stat === "체력") val = 3;
+        else if (stat === "관통") val = 2;
+        else if (stat === "쉴드") val = 2;
+        
+        newIdentify[stat] = (newIdentify[stat] || 0) + val;
+    }
+    return newIdentify;
+}
+
+// 랜덤 등급 및 스탯 산정 로직
+function generateRandomPetStats(basePet, level = 140, forceS = false) {
+    const gradeRoll = Math.random();
+    let grade, gradeMult;
+    
+    if (forceS || gradeRoll > 0.95) { grade = 'S'; gradeMult = 1.0; }
+    else if (gradeRoll > 0.8) { grade = 'A'; gradeMult = 0.95 + (Math.random() * 0.04); }
+    else if (gradeRoll > 0.5) { grade = 'B'; gradeMult = 0.90 + (Math.random() * 0.04); }
+    else if (gradeRoll > 0.2) { grade = 'C'; gradeMult = 0.85 + (Math.random() * 0.04); }
+    else { grade = 'D'; gradeMult = 0.80 + (Math.random() * 0.04); }
+
+    const g = level - 1; // 139레벨 만큼의 성장치 합산
+    
+    // 성장 수치가 없을 경우를 대비해 0 또는 기본값 처리 (|| 0)
+    const sHp = Math.floor((basePet.hp || 0) + ((basePet.ghp || 0) * gradeMult * g));
+    const sAtk = parseFloat(((basePet.atk || 0) + ((basePet.gatk || 0) * gradeMult * g)).toFixed(2));
+    const sDef = parseFloat(((basePet.def || 0) + ((basePet.gdef || 0) * gradeMult * g)).toFixed(2));
+    const sSpd = parseFloat(((basePet.spd || basePet.agi || 0) + ((basePet.gspd || 0) * gradeMult * g)).toFixed(2));
+    
+    return {
+        ...basePet,
+        grade,
+        level,
+        sHp, sAtk, sDef, sSpd, // 계산된 최종 스탯 저장
+        hp: sHp, atk: sAtk, def: sDef, spd: sSpd // 호환성을 위해 기본 필드에도 덮어씌움
+    };
+}
+
+function getEquipDataByName(name) {
+    if (typeof EQUIP_DB === 'undefined') return null;
+    let arr = Object.values(EQUIP_DB);
+    return arr.find(eq => eq.name === name);
+}
+
+// [수정] 1. 속성 표기 동기화 보완 (새로고침 시 자동 갱신 포함)
+function loadRaidUserData() {
+    let userNick = localStorage.getItem('arenaUserNick'); 
+    const nickInput = document.getElementById('rd-nickname');
+    if(userNick && nickInput) nickInput.value = userNick;
+
+    if(!userNick) {
+        checkLockState(); calcRaidPoints(); updateRaidDiamondUI();
+        return;
+    }
+
+    db.ref(`raid_users/${userNick}`).on('value', snap => {
+        const data = snap.val();
+        if (data) {
+            myRaidData = data;
+            isRosterLocked = data.isRosterLocked || false;
+            equippedItems = data.equippedItems || equippedItems;
+            if(data.diamonds !== undefined) window.totalDiamonds = data.diamonds;
+
+            // 1. 캐릭터 기초 스탯 복구
+            if(data.stats) {
+                if(document.getElementById('rd-hp')) document.getElementById('rd-hp').value = data.stats.hp || 0;
+                if(document.getElementById('rd-atk')) document.getElementById('rd-atk').value = data.stats.atk || 0;
+                if(document.getElementById('rd-def')) document.getElementById('rd-def').value = data.stats.def || 0;
+                if(document.getElementById('rd-spd')) document.getElementById('rd-spd').value = data.stats.spd || 0;
+            }
+
+            // 2. 속성 정보 복구 및 UI 강제 업데이트
+            if(data.attr) {
+                const typeEl = document.getElementById('rd-attr1-type');
+                const valEl = document.getElementById('rd-attr1-val');
+                if(typeEl) typeEl.value = data.attr.t1 || "무";
+                if(valEl) valEl.value = data.attr.v1 || 10;
+                
+                // 속성 UI 박스 갱신 함수 호출
+                updateAttrDisplay(); 
+            }
+
+            // 3. 페트 배열 복구
+            let rawPets = data.pets || [];
+            if (rawPets && typeof rawPets === 'object' && !Array.isArray(rawPets)) {
+                rawPets = Object.values(rawPets);
+            }
+            raidSelectedPets = Array.from({ length: 5 }, (_, i) => rawPets[i] || null);
+
+            raidItems = data.raidItems || {};
+            raidPets = data.raidPets || [];
+            
+            updateRaidInfoDisplay(data);
+            renderRaidItems();
+            renderRaidPets();
+        }
+        checkLockState();
+        calcRaidPoints(); // 최종 스탯 계산 및 화면 반영
+        updateRaidDiamondUI();
+    });
+}
+
+function checkLockState() {
+    const locks = ['warehouse-lock', 'enchant-lock', 'shop-lock'];
+    const nickInput = document.getElementById('rd-nickname');
+    
+    locks.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            if(myRaidData) el.classList.add('hidden');
+            else el.classList.remove('hidden');
+        }
+    });
+
+    // 캐릭터 확정 시 닉네임 입력창 잠금
+    if(nickInput) nickInput.disabled = isRosterLocked;
+}
+
+function setPetSlot(idx) {
+    activePetSlotIndex = idx;
+    document.querySelectorAll('.pet-slot-box').forEach((el, i) => {
+        if (i === idx) el.classList.add('active');
+        else el.classList.remove('active');
+    });
+}
+
+// [수정] 장비공방 슬롯 선택 목록에 목줄 추가
+function updateEnchantHighlight() {
+    const slot = document.getElementById('enchant-slot-select').value;
+    document.querySelectorAll('.equip-slot').forEach(el => el.classList.remove('highlight-slot'));
+    
+    if (slot) {
+        const targetSlot = document.getElementById(`slot-${slot}`);
+        if (targetSlot) {
+            targetSlot.classList.add('highlight-slot');
+        }
+    }
+}
+
+// [수정] 3. 페트 패시브 툴팁 (RAID_PASSIVE_DATABASE 연동 및 Lv.5 수치 출력)
+function showPetTooltip(e, pet) {
+    if (!pet) return;
+    const tooltip = document.getElementById('raid-tooltip');
+    if (!tooltip) return;
+
+    // 패시브 데이터베이스에서 일치하는 이름 찾기
+    const pData = RAID_PASSIVE_DATABASE.find(p => p.name === pet.passive);
+    let passiveContent = "";
+
+    if (pData) {
+        // Lv.5 값은 배열의 5번째(인덱스 4) 값
+        const lv5Val = pData.values[4];
+        // 줄바꿈 문자를 HTML <br>로 변환
+        const effectText = pData.effect.replace(/\n/g, '<br>');
+        
+        passiveContent = `
+            <div style="margin-top:10px; padding-top:10px; border-top:1px solid #30363d;">
+                <div style="color:#ffcc00; font-weight:bold; margin-bottom:4px;">
+                    <i class="fa-solid fa-bolt"></i> 패시브: ${pData.name} (Lv.5)
+                </div>
+                <div style="font-size:11px; color:#adbac7; line-height:1.5;">
+                    ${effectText}<br>
+                    <span style="color:#7ee787;">[효과 수치: ${lv5Val}]</span>
+                </div>
+            </div>
+        `;
+    } else {
+        passiveContent = `<div style="margin-top:10px; color:#8b949e; font-size:11px;">패시브 정보가 없습니다.</div>`;
+    }
+
+    let html = `
+        <div class="tooltip-title" style="color:#d2a8ff;">${pet.name} [${pet.grade}등급]</div>
+        <div style="font-size:11px; color:#8b949e; margin-bottom:8px; border-bottom:1px solid #30363d; padding-bottom:5px;">
+            Lv.140 | ${pet.category} | ${pet.elements || '무속성'}
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; font-size:11px; color:#fff;">
+            <div>체: ${Math.floor(pet.sHp || pet.hp)}</div>
+            <div>공: ${pet.sAtk || pet.atk}</div>
+            <div>방: ${pet.sDef || pet.def}</div>
+            <div>순: ${pet.sSpd || pet.spd}</div>
+        </div>
+        ${passiveContent}
+    `;
+
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+    tooltip.style.top = (e.clientY + 15) + 'px';
+}
+
+function showEquipmentTooltip(e, slot) {
+    const item = equippedItems[slot];
+    if(!item) return;
+
+    const eqData = getEquipDataByName(item.name);
+    const tooltip = document.getElementById('raid-tooltip');
+    
+    let html = `<div class="tooltip-title">${item.name}</div>`;
+    const statTypes = ["체력", "공격력", "방어력", "순발력", "PVE 공격력 (%)", "PVE 방어력 (%)", "치명 (%)", "명중 (%)", "회피 (%)", "관통", "쉴드", "행운 (%)"];
+
+    statTypes.forEach(s => {
+        const baseVal = eqData.baseStats[s] || 0;
+        const idenVal = (item.identify && item.identify[s]) ? item.identify[s] : 0;
+        const enchVal = (item.enchantStats && item.enchantStats[s]) ? item.enchantStats[s] : 0;
+
+        // baseVal이 0이 아닌 경우(음수 포함) 표기되도록 수정
+        if (baseVal !== 0 || idenVal > 0 || enchVal > 0) {
+            html += `<div style="margin-bottom:3px;">${s}: `;
+            
+            // 양수일 때만 '+' 기호를 붙이고, 음수면 값 그대로 출력
+            if(baseVal !== 0) html += `<span class="t-base">${baseVal > 0 ? '+' : ''}${baseVal}</span> `;
+            if(idenVal > 0) html += `<span class="t-identify">+${idenVal}</span> `;
+            if(enchVal > 0) html += `<span class="t-enchant">+${enchVal}</span>`;
+            html += `</div>`;
+        }
+    });
+
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+    tooltip.style.top = (e.clientY + 15) + 'px';
+}
+
+function hideTooltip() {
+    const tooltip = document.getElementById('raid-tooltip');
+    if(tooltip) tooltip.style.display = 'none';
+}
+
+function moveTooltip(e) {
+    const tooltip = document.getElementById('raid-tooltip');
+    if (tooltip && tooltip.style.display === 'block') {
+        tooltip.style.left = (e.clientX + 15) + 'px';
+        tooltip.style.top = (e.clientY + 15) + 'px';
+    }
+}
+
+// [추가] 창고 아이템 마우스 오버 시 스탯 및 재료 설명을 표시하는 함수
+function showWarehouseTooltip(e, itemName) {
+    const tooltip = document.getElementById('raid-tooltip');
+    let html = `<div class="tooltip-title">${itemName}</div>`;
+
+    const eqData = getEquipDataByName(itemName);
+    const stoneInfo = Object.values(ENCHANT_DB).find(s => s.name === itemName);
+
+    if (stoneInfo) {
+        // 재료 아이템 설명
+        html += `<div style="font-size:11px; color:#adbac7; margin-top:5px; line-height:1.4;">`;
+        html += `타겟: <span style="color:#ffcc00;">[${stoneInfo.target}]</span><br>`;
+        html += `기본 효과: <span style="color:#7ee787;">${stoneInfo.fixedStr}</span><br>`;
+        if (stoneInfo.pool && stoneInfo.pool.length > 0) {
+            html += `부여 스탯: ${stoneInfo.pool.join(', ')}`;
+        }
+        html += `</div>`;
+    } else if (eqData) {
+        // 장비 아이템 스탯 출력
+        let itemObj = null;
+        if (Array.isArray(raidItems[itemName]) && raidItems[itemName].length > 0) {
+            itemObj = raidItems[itemName][raidItems[itemName].length - 1]; // 창고 내 최상단 장비 기준
+        }
+
+        const statTypes = ["체력", "공격력", "방어력", "순발력", "PVE 공격력 (%)", "PVE 방어력 (%)", "치명 (%)", "명중 (%)", "회피 (%)", "관통", "쉴드", "행운 (%)"];
+
+        statTypes.forEach(s => {
+            const baseVal = eqData.baseStats[s] || 0;
+            const idenVal = (itemObj && itemObj.identify && itemObj.identify[s]) ? itemObj.identify[s] : 0;
+            const enchVal = (itemObj && itemObj.enchantStats && itemObj.enchantStats[s]) ? itemObj.enchantStats[s] : 0;
+
+            if (baseVal !== 0 || idenVal > 0 || enchVal > 0) {
+                html += `<div style="margin-bottom:3px; font-size:11px; color:#fff;">${s}: `;
+                if(baseVal !== 0) html += `<span class="t-base">${baseVal > 0 ? '+' : ''}${baseVal}</span> `;
+                if(idenVal > 0) html += `<span class="t-identify">+${idenVal}</span> `;
+                if(enchVal > 0) html += `<span class="t-enchant">+${enchVal}</span>`;
+                html += `</div>`;
+            }
+        });
+        
+        if (!itemObj) {
+            html += `<div style="margin-top:5px; font-size:10px; color:#8b949e;">(최초 장착 시 옵션이 감정됩니다)</div>`;
+        } else {
+            html += `<div style="margin-top:5px; font-size:10px; color:#8b949e;">(장착 대기 중인 장비의 스탯입니다)</div>`;
+        }
+    } else if (itemName.includes("알")) {
+        html += `<div style="font-size:11px; color:#adbac7; margin-top:5px;">사용 시 랜덤한 페트가 부화합니다.</div>`;
+    }
+
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+    tooltip.style.top = (e.clientY + 15) + 'px';
+}
+
+function toggleStatInputs(disabled) {
+    const ids = ['rd-hp', 'rd-atk', 'rd-def', 'rd-spd', 'rd-attr1-type', 'rd-attr1-val'];
+    ids.forEach(id => {
+        let el = document.getElementById(id);
+        if(el) el.disabled = disabled;
+    });
+}
+
+// [수정] 모든 페트의 패시브와 아이템 스탯이 캐릭터에게 상속되도록 개선
+function calcRaidPoints() {
+    const hpInput  = parseInt(document.getElementById('rd-hp').value)  || 0;
+    const atkInput = parseInt(document.getElementById('rd-atk').value) || 0;
+    const defInput = parseInt(document.getElementById('rd-def').value) || 0;
+    const spdInput = parseInt(document.getElementById('rd-spd').value) || 0;
+    
+    const usedPoints   = hpInput + atkInput + defInput + spdInput;
+    const remainPoints = RAID_INITIAL_POINTS - usedPoints;
+    
+    const displayEl = document.getElementById('rd-remain-points');
+    if (displayEl) {
+        displayEl.innerText = `잔여 포인트: ${remainPoints}`;
+        displayEl.style.color = remainPoints < 0 ? "#ff4d4d" : "#d4af37";
+    }
+
+    // 1. 캐릭터 기본 스탯 분배 (체력 1포인트당 HP 4 증가 공식 유지)
+    let finalStats = {
+        hp:     (hpInput * 4) + atkInput + defInput + spdInput,
+        atk:    parseFloat((hpInput * 0.1 + atkInput + defInput * 0.1 + spdInput * 0.05).toFixed(1)),
+        def:    parseFloat((hpInput * 0.1 + atkInput * 0.1 + defInput + spdInput * 0.05).toFixed(1)),
+        spd:    spdInput,
+        pveAtk: 0, pveDef: 0, crit: 0, hit: 0, eva: 0, pen: 0, shd: 0, luk: 0
+    };
+
+    // 2. [아이템 스탯 상속] - 아이템 체력은 1:1로 가산
+    Object.values(equippedItems).forEach(item => {
+        if(item && item.name) {
+            const eqData = getEquipDataByName(item.name);
+            if(eqData) {
+                const bs = eqData.baseStats;
+                // 아이템 기본 옵션 체력 (1:1 적용)
+                if(bs["체력"])          finalStats.hp  += bs["체력"]; 
+                if(bs["공격력"])        finalStats.atk += bs["공격력"];
+                if(bs["방어력"])        finalStats.def += bs["방어력"];
+                if(bs["순발력"])        finalStats.spd += bs["순발력"];
+                if(bs["PVE 공격력 (%)"]) finalStats.pveAtk += bs["PVE 공격력 (%)"];
+                if(bs["PVE 방어력 (%)"]) finalStats.pveDef += bs["PVE 방어력 (%)"];
+                if(bs["치명 (%)"])      finalStats.crit   += bs["치명 (%)"];
+                if(bs["명중 (%)"])      finalStats.hit    += bs["명중 (%)"];
+                if(bs["회피 (%)"])      finalStats.eva    += bs["회피 (%)"];
+                if(bs["관통"])          finalStats.pen    += bs["관통"];
+                if(bs["쉴드"])          finalStats.shd    += bs["쉴드"];
+                if(bs["행운 (%)"])      finalStats.luk    += bs["행운 (%)"];
+
+                // 감정 및 인챈트 옵션 합산 (1:1 적용)
+                [item.identify, item.enchantStats].forEach(extra => {
+                    if(extra) {
+                        for(let k in extra) {
+                            if(k === "체력")           finalStats.hp  += extra[k]; 
+                            else if(k === "공격력")    finalStats.atk += extra[k];
+                            else if(k === "방어력")    finalStats.def += extra[k];
+                            else if(k === "순발력")    finalStats.spd += extra[k];
+                            else if(k === "PVE 공격력 (%)") finalStats.pveAtk += extra[k];
+                            else if(k === "PVE 방어력 (%)") finalStats.pveDef += extra[k];
+                            else if(k === "치명 (%)")  finalStats.crit += extra[k];
+                            else if(k === "명중 (%)")  finalStats.hit  += extra[k];
+                            else if(k === "회피 (%)")  finalStats.eva  += extra[k];
+                            else if(k === "행운 (%)")  finalStats.luk  += extra[k];
+                            else if(k === "관통")      finalStats.pen  += extra[k];
+                            else if(k === "쉴드")      finalStats.shd  += extra[k];
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    // 3. [페트 패시브 상속] - Lv.5 기준
+    raidSelectedPets.forEach(pet => {
+        if(!pet) return;
+        const pData = RAID_PASSIVE_DATABASE.find(p => p.name === pet.passive);
+        if(pData) {
+            const lv5Val = parseInt(pData.values[4]);
+            if(pData.name === "격노" || pData.name === "투혼" || pData.name === "폭주") {
+                finalStats.atk *= (1 + lv5Val/100);
+            } else if(pData.name === "신속" || pData.name === "심판의 혼") {
+                finalStats.spd *= (1 + lv5Val/100);
+            } else if(pData.name === "잔상" || pData.name === "광휘") {
+                finalStats.eva += lv5Val;
+            } else if(pData.name === "심판" || pData.name === "전광 석화") {
+                finalStats.crit += lv5Val;
+            } else if(pData.name === "조준" || pData.name === "질풍의 눈") {
+                finalStats.hit += lv5Val;
+            }
+        }
+    });
+
+    // 화면 UI 업데이트
+    document.getElementById('fs-hp').innerText      = Math.floor(finalStats.hp);
+    document.getElementById('fs-atk').innerText     = finalStats.atk.toFixed(1);
+    document.getElementById('fs-def').innerText     = finalStats.def.toFixed(1);
+    document.getElementById('fs-spd').innerText     = Math.floor(finalStats.spd);
+    document.getElementById('fs-pve-atk').innerText = finalStats.pveAtk + "%";
+    document.getElementById('fs-pve-def').innerText = finalStats.pveDef + "%";
+    document.getElementById('fs-crit').innerText    = finalStats.crit + "%";
+    document.getElementById('fs-hit').innerText     = finalStats.hit + "%";
+    document.getElementById('fs-eva').innerText     = finalStats.eva + "%";
+    document.getElementById('fs-pen').innerText     = finalStats.pen;
+    document.getElementById('fs-shd').innerText     = finalStats.shd;
+    document.getElementById('fs-luk').innerText     = finalStats.luk + "%";
+
+    renderEquipSlot();
+    return finalStats;
+}
+
+function updateAttrDisplay() {
+    const typeEl = document.getElementById('rd-attr1-type');
+    const valEl = document.getElementById('rd-attr1-val');
+    const display = document.getElementById('fs-attr-display');
+    
+    if (!typeEl || !display) return;
+
+    const type = typeEl.value;
+    const val = valEl ? valEl.value : 10;
+
+    if (type && type !== "무") {
+        display.innerText = `속성: ${type}(${val})`;
+        // 색상 클래스 부여 (color-지, color-수 등)
+        display.className = `fs-attr color-${type}`; 
+    } else {
+        display.innerText = "속성: 미선택";
+        display.className = "fs-attr";
+    }
+    
+    // 속성이 바뀌면 최종 스탯(데미지 등) 계산을 다시 수행
+    if (typeof calcRaidPoints === 'function') calcRaidPoints();
+}
+
+function renderEquipSlot() {
+    const slots = ['weapon', 'head', 'body', 'acc1', 'acc2', 'acc3', 'acc4', 'collar', 'totem'];
+    slots.forEach(slot => {
+        const el = document.getElementById(`slot-${slot}`);
+        if(!el) return;
+
+        el.onmouseenter = (e) => showEquipmentTooltip(e, slot);
+        el.onmousemove = (e) => {
+            const tooltip = document.getElementById('raid-tooltip');
+            if(tooltip) {
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+            }
+        };
+        el.onmouseleave = hideTooltip;
+
+        const item = equippedItems[slot];
+        if(item && item.name) {
+            const data = getEquipDataByName(item.name);
+            el.innerHTML = `<img src="${data.img}" title="${item.name}">`;
+            el.style.borderStyle = "solid";
+        } else {
+            el.innerHTML = `<div class="empty-text">비어있음</div>`;
+            el.style.borderStyle = "dashed";
+        }
+    });
+}
+
+function updateRaidInfoDisplay(data) {
+    const btnSave = document.getElementById('btn-save-raid-info');
+    const btnReset = document.getElementById('btn-reset-raid-info');
+    const petControls = document.getElementById('rd-pet-search-controls');
+    const petLockMsg = document.getElementById('rd-pet-lock-msg');
+
+    if (isRosterLocked) {
+        if(btnSave) btnSave.style.display = 'none';
+        if(btnReset) btnReset.style.display = 'flex';
+    } else {
+        if(btnSave) btnSave.style.display = 'flex';
+        if(btnReset) btnReset.style.display = 'none';
+    }
+    
+    toggleStatInputs(isRosterLocked);
+    if (isRosterLocked) {
+        if(petControls) petControls.style.display = 'none';
+        if(petLockMsg) petLockMsg.style.display = 'block';
+    } else {
+        if(petControls) petControls.style.display = 'flex';
+        if(petLockMsg) petLockMsg.style.display = 'none';
+    }
+    updateAttrDisplay();
+    renderRaidSelectedPets();
+}
+
+/* =======================================
+    [캐릭터 및 토벌대 정보 저장 시스템]
+   ======================================= */
+function saveRaidInfo() {
+  // 1. 기초 데이터 및 입력값 추출
+  const nickInput = document.getElementById('rd-nickname');
+  const userNick  = nickInput ? nickInput.value.trim() : "";
+
+  const hpVal     = parseInt(document.getElementById('rd-hp').value)  || 0;
+  const atkVal    = parseInt(document.getElementById('rd-atk').value) || 0;
+  const defVal    = parseInt(document.getElementById('rd-def').value) || 0;
+  const spdVal    = parseInt(document.getElementById('rd-spd').value) || 0;
+  const used      = hpVal + atkVal + defVal + spdVal;
+
+  // 2. 필수 입력값 및 포인트 검증
+  if (!userNick) {
+    return alert("데이터를 저장할 닉네임을 입력해주세요.");
+  }
+  if (raidSelectedPets.filter(p => p !== null).length === 0) {
+    return alert("동행할 페트를 최소 1마리 선택하세요.");
+  }
+  if (used > RAID_INITIAL_POINTS) {
+    return alert("잔여 포인트가 부족합니다.");
+  }
+
+  // 3. 로스터 확정 및 보상 처리 (잠금 상태가 아닐 때만 실행)
+  if (!isRosterLocked) {
+    const isFirstTime = !myRaidData;
+    const saveMsg     = isFirstTime
+      ? `[${userNick}] 닉네임으로 정보를 저장하시겠습니까?\n\n1. 저장 시 스탯 수정 불가 및 페트 등급 확정\n2. 최초 저장 보상: 20,000 다이아 및 기본 장비`
+      : `캐릭터 스탯 및 페트 편성을 이대로 확정하시겠습니까?`;
+
+    if (!confirm(saveMsg)) return;
+
+    // [최초 가입 보상 지급]
+    if (isFirstTime) {
+      window.totalDiamonds = (window.totalDiamonds || 0) + 20000;
+      Object.values(EQUIP_DB).forEach(eq => { raidItems[eq.name] = 1; });
+      raidItems["홍염석"] = 4; raidItems["비취석"] = 4;
+      raidItems["심해석"] = 4; raidItems["홍요석"] = 3;
+      alert("최초 보상이 지급되었습니다.");
+    } else {
+      alert("캐릭터 편성이 성공적으로 갱신되었습니다.");
+    }
+
+    // [페트 등급 및 Lv.140 스탯 확정]
+    raidSelectedPets = raidSelectedPets.map(p => {
+      if (p) {
+        // 이미 등급이 있는 창고 펫은 유지, 새 펫은 140레벨 스탯 생성
+        return (p.grade && p.sHp) ? p : generateRandomPetStats(p, 140);
+      }
+      return null;
+    });
+
+    isRosterLocked = true;
+  }
+
+  // 4. 저장용 데이터 객체 구성 (세로 정렬)
+  localStorage.setItem('arenaUserNick', userNick);
+
+  const raidData = {
+    nick:           userNick,
+    diamonds:       window.totalDiamonds,
+    stats:          { hp: hpVal, atk: atkVal, def: defVal, spd: spdVal },
+    attr: {
+      t1: document.getElementById('rd-attr1-type').value || "무",
+      v1: parseInt(document.getElementById('rd-attr1-val').value) || 10
+    },
+    pets:           raidSelectedPets,
+    raidItems:      raidItems,
+    raidPets:       raidPets,
+    isRosterLocked: isRosterLocked,
+    equippedItems:  equippedItems
+  };
+
+  // 5. Firebase 동기화 및 UI 갱신
+  db.ref(`raid_users/${userNick}`).set(raidData)
+    .then(() => {
+      myRaidData = raidData;
+      updateRaidInfoDisplay(myRaidData);
+      checkLockState();
+      updateRaidDiamondUI();
+      renderRaidSelectedPets();
+    })
+    .catch(err => {
+      console.error("저장 오류:", err);
+      alert("데이터 저장 중 오류가 발생했습니다.");
+    });
+}
+
+function resetRaidInfo() {
+    if (confirm("캐릭터 편성을 재설정하시겠습니까? (창고 아이템은 유지됩니다)")) {
+        isRosterLocked = false;       
+
+        updateRaidInfoDisplay(myRaidData); 
+        toggleStatInputs(false);
+        checkLockState(); 
+        
+        // 재설정 중 닉네임을 변경하여 새 계정으로 덮어씌우는 것 방지 (닉네임 고정)
+        const nickInput = document.getElementById('rd-nickname');
+        if (nickInput) nickInput.disabled = true;
+    }
+}
+
+function searchRaidPet() {
+    if(isRosterLocked) return;
+    const query = document.getElementById('rd-pet-search').value.toLowerCase();
+    const resultDiv = document.getElementById('rd-pet-results');
+    resultDiv.innerHTML = '';
+    if (!query) return;
+
+    PET_DATABASE.filter(p => p.name.includes(query)).slice(0, 5).forEach(pet => {
+        const div = document.createElement('div');
+        div.className = 'custom-select-option';
+        div.innerHTML = `<img src="${pet.img}" width="20"> ${pet.name}`;
+        div.onclick = () => {
+            raidSelectedPets[activePetSlotIndex] = { ...pet };
+            renderRaidSelectedPets();
+            document.getElementById('rd-pet-search').value = '';
+            resultDiv.innerHTML = '';
+            let next = raidSelectedPets.findIndex(p => p === null);
+            if(next !== -1) setPetSlot(next);
+        };
+        resultDiv.appendChild(div);
+    });
+}
+
+// [수정] 2. 선택된 페트 스탯 한글화 및 3. 패시브 툴팁 이벤트 추가
+function renderRaidSelectedPets() {
+    const container = document.getElementById('rd-selected-pets-container');
+    if (!container) return;
+
+    container.innerHTML = raidSelectedPets.map((pet, idx) => {
+        if (pet) {
+            // 저장된 등급과 계산된 스탯(sHp 등)을 가져오며, 없을 경우 기본값 0 처리
+            const pGrade = pet.grade || "D";
+            const pHp = Math.floor(pet.sHp || pet.hp || 0);
+            const pAtk = (pet.sAtk || pet.atk || 0);
+            const pDef = (pet.sDef || pet.def || 0);
+            const pSpd = (pet.sSpd || pet.spd || 0);
+
+            // 로스터가 잠긴 상태(저장 완료)일 때만 상세 스탯과 등급을 노출
+            let statHtml = isRosterLocked ? 
+                `<div style="font-size:9px; color:#adbac7; margin-top:4px; line-height:1.3;">
+                    <b class="grade-${pGrade}" style="font-size:10px;">[${pGrade}등급]</b><br>
+                    체: ${pHp.toLocaleString()} / 공: ${pAtk}<br>
+                    방: ${pDef} / 순: ${pSpd}
+                </div>` : 
+                `<div style="font-size:9px; color:#888; margin-top:4px;">정보 비공개<br>(저장 시 확정)</div>`;
+
+            return `
+                <div class="item-card" onclick="returnPetToWarehouse(${idx})" 
+                     onmouseenter="showPetTooltip(event, ${JSON.stringify(pet).replace(/"/g, '&quot;')})" 
+                     onmouseleave="hideTooltip()" 
+                     style="cursor:pointer; min-height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <img src="${pet.img}" width="32" style="margin-bottom:2px;">
+                    <div style="font-size:10px; color:#539bf5; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${pet.name}</div>
+                    ${statHtml}
+                </div>`;
+        }
+        // 빈 슬롯 표시
+        return `<div class="item-card" style="opacity:0.3; display:flex; align-items:center; justify-content:center;"><div style="font-size:20px;">+</div></div>`;
+    }).join('');
+}
+
+function returnPetToWarehouse(idx) {
+    if(!isRosterLocked) return;
+    const pet = raidSelectedPets[idx];
+    if(confirm(`[${pet.name}]을 보관함으로 복귀시킵니까?`)) {
+        raidPets.push(pet);
+        raidSelectedPets[idx] = null;
+        renderRaidSelectedPets();
+        renderRaidPets();
+        syncRaidWarehouseToFirebase();
+    }
+}
+
+function syncRaidWarehouseToFirebase() {
+    let userNick = localStorage.getItem('arenaUserNick');
+    if (userNick && myRaidData) {
+        db.ref(`raid_users/${userNick}`).update({
+            diamonds: window.totalDiamonds,
+            raidItems: raidItems,
+            raidPets: raidPets,
+            equippedItems: equippedItems,
+            pets: raidSelectedPets
+        });
+    }
+}
+
+function renderRaidItems() {
+    const list = document.getElementById('raid-item-list');
+    if (!list) return;
+    
+    let keys = Object.keys(raidItems);
+    if (keys.length === 0) {
+        list.innerHTML = '<div style="grid-column:1/-1; color:#888; font-size:12px; text-align:center; padding:20px;">창고가 비어있습니다.</div>';
+        return;
+    }
+
+    // 아이템 정렬 로직
+    keys.sort((a, b) => {
+        const getOrder = (name) => {
+            if (getEquipDataByName(name)) return 1; 
+            if (Object.values(ENCHANT_DB).find(s => s.name === name)) return 2; 
+            if (name.includes("알")) return 3; 
+            return 4; 
+        };
+        const orderA = getOrder(a);
+        const orderB = getOrder(b);
+        if (orderA !== orderB) return orderA - orderB;
+        return a.localeCompare(b); 
+    });
+
+    list.innerHTML = keys.map(name => {
+        const count = raidItems[name];
+        const eqData = getEquipDataByName(name);
+        
+        let iconHtml = "";
+        const stoneInfo = Object.values(ENCHANT_DB).find(s => s.name === name);
+        
+        if (stoneInfo) {
+            iconHtml = `<img src="${stoneInfo.img}" style="width:40px; margin-bottom:4px;">`;
+        } else if (name.includes("알")) {
+            iconHtml = `<div style="font-size:30px; line-height:40px; margin-bottom:4px;">🥚</div>`;
+        } else if (eqData) {
+            iconHtml = `<img src="${eqData.img}" style="width:45px; margin-bottom:4px;">`;
+        } else {
+            iconHtml = `<div style="font-size:30px; line-height:40px; margin-bottom:4px;">🎁</div>`;
+        }
+
+        // 버튼 디자인: 버림 버튼을 제거하고 단일 버튼 구조로 복원
+        const btnAction = name.includes("알") 
+            ? `<button class="btn-use" onclick="useEgg('${name.replace(' 알', '')}')" style="width:100%; background:#388bfd; color:#fff; border:1px solid #1f6feb; border-radius:4px; padding:6px 0; font-size:11px; cursor:pointer; font-weight:bold; text-shadow:1px 1px 1px rgba(0,0,0,0.6);">부화</button>`
+            : eqData ? `<button class="btn-use btn-equip" onclick="equipItem('${name}')" style="width:100%; background:rgba(163, 113, 247, 0.25); color:#d2a8ff; border:1px solid #a371f7; border-radius:4px; padding:6px 0; font-size:11px; cursor:pointer; font-weight:900;">장착</button>`
+            : `<button class="btn-use" style="width:100%; background:#30363d; color:#8b949e; border:1px solid #484f58; border-radius:4px; padding:6px 0; font-size:11px;" disabled>재료</button>`;
+
+        return `
+            <div class="item-card" 
+                 onmouseenter="showWarehouseTooltip(event, '${name}')" 
+                 onmouseleave="hideTooltip()" 
+                 onmousemove="moveTooltip(event)"
+                 style="display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:12px 10px; background:#161b22; border:1px solid #30363d; border-radius:8px; position:relative; min-height:120px; cursor:pointer;">
+                <span class="item-count" style="position:absolute; top:6px; right:8px; font-size:11px; font-weight:bold; color:#ffcc00; background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:10px;">x${(typeof count === 'object' && count.length) ? count.length : count}</span>
+                ${iconHtml}
+                <div style="font-size:11px; color:#adbac7; text-align:center; word-break:keep-all; height:28px; display:flex; align-items:center; margin-bottom:8px; line-height:1.2;">${name}</div>
+                ${btnAction}
+            </div>`;
+    }).join('');
+}
+
+// [수정] 2. 보관함 페트 스탯 한글화 및 3. 패시브 툴팁 이벤트 추가
+function renderRaidPets() {
+    const list = document.getElementById('raid-pet-list');
+    if (!list) return;
+    if (raidPets.length === 0) {
+        list.innerHTML = '<div style="grid-column:1/-1; color:#888; font-size:12px; text-align:center; padding:20px;">보관함이 비어있습니다.</div>';
+        return;
+    }
+    
+    list.innerHTML = raidPets.map((p, i) => `
+        <div class="item-card" 
+             onmouseenter="showPetTooltip(event, ${JSON.stringify(p).replace(/"/g, '&quot;')})" 
+             onmouseleave="hideTooltip()" 
+             style="min-height: 120px;">
+            <img src="${p.img}" style="width:40px;">
+            <div style="font-size:11px; font-weight:bold; color:#d2a8ff;">${p.name}</div>
+            <div class="pet-info-tag grade-${p.grade}">[${p.grade} 등급]</div>
+            <div style="font-size:9px; color:#8b949e; line-height:1.2; margin: 4px 0;">
+                체:${Math.floor(p.sHp)} 공:${p.sAtk}<br>방:${p.sDef} 순:${p.sSpd}
+            </div>
+            <div class="pet-action-btns">
+                <button class="btn-pet-action btn-place" onclick="equipPetFromWarehouse(${i})">배치</button>
+                <button class="btn-pet-action btn-sell" onclick="sellPetFromWarehouse(${i})">판매</button>
+            </div>
+        </div>`).join('');
+}
+
+function sellPetFromWarehouse(index) {
+    const pet = raidPets[index];
+    if (confirm(`[${pet.name} (${pet.grade}등급)]을 판매하시겠습니까?\n판매 대금으로 1,000 💎을 획득합니다.`)) {
+        window.totalDiamonds += 1000;
+        raidPets.splice(index, 1);
+        renderRaidPets();
+        updateRaidDiamondUI();
+        syncRaidWarehouseToFirebase();
+        alert("판매 완료!");
+    }
+}
+
+/* ==========================================
+      [수정] 아이템 장착 및 옵션 유지 로직 (Task 1)
+   ========================================== */
+function equipItem(itemName) {
+    if(!isRosterLocked) return alert("저장을 먼저 완료하세요.");
+    const eqData = getEquipDataByName(itemName);
+    if(!eqData) return;
+
+    let slot = "";
+    if (eqData.type.includes("무기")) slot = 'weapon';
+    else if (eqData.type.includes("투구")) slot = 'head';
+    else if (eqData.type.includes("갑옷")) slot = 'body';
+    else if (eqData.type.includes("목줄")) slot = 'collar';
+    else if (eqData.type.includes("토템")) slot = 'totem';
+    else if (eqData.type.includes("악세서리")) {
+        
+        // 악세서리 슬롯 목록
+        const accSlots = ['acc1', 'acc2', 'acc3', 'acc4'];
+
+        // 1. 단일 착용 제한 악세서리 검사 (팔찌, 목걸이)
+        const restrictedTypes = ["팔찌", "목걸이"];
+        // 현재 장착하려는 아이템이 제한 대상 타입인지 확인
+        const targetType = restrictedTypes.find(t => eqData.type.includes(t));
+
+        if (targetType) {
+            // 이미 해당 타입을 장착하고 있는지 검색
+            const isAlreadyEquipped = accSlots.some(s => {
+                const equippedItem = equippedItems[s];
+                if (!equippedItem) return false;
+                const equippedData = getEquipDataByName(equippedItem.name);
+                return equippedData && equippedData.type.includes(targetType);
+            });
+
+            if (isAlreadyEquipped) {
+                return alert(`${targetType}는(은) 1개만 착용할 수 있습니다. 기존 ${targetType}를 먼저 해제해주세요.`);
+            }
+        }
+
+        // 2. 빈 악세서리 슬롯 탐색 및 풀(Full) 시 교체 여부 확인
+        const emptySlot = accSlots.find(s => !equippedItems[s]);
+        if (emptySlot) {
+            slot = emptySlot;
+        } else {
+            if (!confirm("4개의 악세서리가 모두 착용되어 있습니다. [악세1] 자리와 교체하시겠습니까?")) return;
+            slot = 'acc1';
+        }
+    }
+
+    // 기존 장착 아이템 해제 및 창고 이동
+    if(equippedItems[slot]) {
+        const prevItem = equippedItems[slot];
+        if (!raidItems[prevItem.name] || typeof raidItems[prevItem.name] === 'number') {
+            raidItems[prevItem.name] = [];
+        }
+        if (!Array.isArray(raidItems[prevItem.name])) {
+            let count = raidItems[prevItem.name];
+            raidItems[prevItem.name] = [];
+            for(let i=0; i<count; i++) raidItems[prevItem.name].push({name: prevItem.name});
+        }
+        raidItems[prevItem.name].push(prevItem);
+    }
+
+    // 새 아이템 가져오기
+    let itemToEquip = null;
+    if (Array.isArray(raidItems[itemName]) && raidItems[itemName].length > 0) {
+        // 이미 감정 정보가 있는 객체가 창고에 있는 경우
+        itemToEquip = raidItems[itemName].pop();
+        if(raidItems[itemName].length === 0) delete raidItems[itemName];
+    } else {
+        // 새로 생성해야 하거나 숫자로만 저장된 경우
+        const firstIdentify = rollIdentify(itemName);
+        itemToEquip = { name: itemName, identify: firstIdentify, enchantStats: null };
+        
+        if(typeof raidItems[itemName] === 'number') {
+            raidItems[itemName]--;
+            if(raidItems[itemName] <= 0) delete raidItems[itemName];
+        }
+    }
+
+    equippedItems[slot] = itemToEquip;
+    
+    calcRaidPoints();
+    renderRaidItems();
+    syncRaidWarehouseToFirebase();
+}
+
+function unequipItem(slot) {
+    if(!equippedItems[slot]) return;
+    const item = equippedItems[slot];
+    if(confirm(`[${item.name}]을 해제하시겠습니까? (옵션 정보는 유지됩니다)`)) {
+        if (!raidItems[item.name] || typeof raidItems[item.name] === 'number') {
+            raidItems[item.name] = [];
+        }
+        raidItems[item.name].push(item);
+        equippedItems[slot] = null;
+        calcRaidPoints();
+        renderRaidItems();
+        syncRaidWarehouseToFirebase();
+    }
+}
+
+/* ==========================================
+      [수정] 장비공방 및 목줄 재감정 허용 (Task 2)
+   ========================================== */
+function appraiseEquippedItem() {
+    const slot = document.getElementById('enchant-slot-select').value;
+    if(!equippedItems[slot]) return alert("대상을 선택하세요.");
+    if(window.totalDiamonds < 1000) return alert("1,000 💎이 필요합니다.");
+
+    // 목줄 포함 모든 부위 재감정은 허용
+    if(!confirm("1,000 💎을 소모하여 옵션을 재감정하시겠습니까?")) return;
+    window.totalDiamonds -= 1000;
+    
+    equippedItems[slot].identify = rollIdentify(equippedItems[slot].name);
+    finishUpgrade();
+}
+
+function enchantEquippedItem() {
+    const slot = document.getElementById('enchant-slot-select').value;
+    if(!equippedItems[slot]) return alert("대상을 선택하세요.");
+    if(slot === 'collar') return alert("목줄은 인챈트가 불가능한 부위입니다.");
+
+    const itemName = equippedItems[slot].name;
+    const eqData = getEquipDataByName(itemName);
+    let stoneKey = "";
+    
+    if (slot === 'totem' || eqData.type.includes("토템")) stoneKey = "hongyo";
+    else if (eqData.type.includes("무기")) stoneKey = "fire";
+    else if (eqData.type.includes("갑옷") || eqData.type.includes("투구")) stoneKey = "jade";
+    else if (eqData.type.includes("악세서리")) stoneKey = "deep";
+
+    const stoneInfo = ENCHANT_DB[stoneKey];
+    if (!stoneInfo) return alert("이 부위에 사용할 수 있는 인챈트석이 없습니다.");
+
+    let count = raidItems[stoneInfo.name];
+    if (!count || (Array.isArray(count) && count.length === 0)) {
+        return alert(`필요한 재료가 없습니다: [${stoneInfo.name}]`);
+    }
+
+    if(window.totalDiamonds < 1000) return alert("1,000 💎이 필요합니다.");
+    if(!confirm(`[${stoneInfo.name}] 1개와 1,000 💎을 소모하여 인챈트를 재설정하시겠습니까?`)) return;
+
+    window.totalDiamonds -= 1000;
+    if (Array.isArray(raidItems[stoneInfo.name])) {
+        raidItems[stoneInfo.name].pop();
+        if(raidItems[stoneInfo.name].length === 0) delete raidItems[stoneInfo.name];
+    } else {
+        raidItems[stoneInfo.name]--;
+        if(raidItems[stoneInfo.name] <= 0) delete raidItems[stoneInfo.name];
+    }
+
+    let newEnchant = { ...stoneInfo.fixedStat }; 
+    
+    // 1. 인챈트석 종류별 획득 포인트 확률 계산
+    let points = 0;
+    if (stoneKey === "hongyo") {
+        // 홍요석 (토템): 1~5개 (확률: 70%, 20%, 6%, 3%, 1%)
+        const r = Math.random() * 100;
+        if (r < 70) points = 1;
+        else if (r < 90) points = 2;
+        else if (r < 96) points = 3;
+        else if (r < 99) points = 4;
+        else points = 5;
+    } else if (stoneKey === "deep") {
+        // 심해석 (악세서리): 1~2개 (2개 확률 낮음)
+        points = Math.random() < 0.8 ? 1 : 2; 
+    } else {
+        // 홍염석(무기), 비취석(방어구): 1~3개 (3개 확률 낮음)
+        const r = Math.random();
+        if (r < 0.6) points = 1;
+        else if (r < 0.9) points = 2;
+        else points = 3; 
+    }
+    
+    // 2. 인챈트석 전용 옵션 풀 사용 (ENCHANT_DB에 정의된 배열 사용)
+    const pool = stoneInfo.pool;
+    
+    // 3. 포인트 분배 및 스탯 적용 (체력 3=1, 관통 2=1, 쉴드 2=1)
+    for(let i=0; i<points; i++){
+        let s = getWeightedStat(pool);
+        let val = 1;
+        
+        if (s === "체력") val = 3;
+        else if (s === "관통") val = 2;
+        else if (s === "쉴드") val = 2;
+        
+        newEnchant[s] = (newEnchant[s] || 0) + val; 
+    }
+    
+    equippedItems[slot].enchantStats = newEnchant;
+    finishUpgrade();
+}
+
+function finishUpgrade() {
+    calcRaidPoints();
+    renderRaidItems();
+    syncRaidWarehouseToFirebase();
+    updateRaidDiamondUI();
+    alert("공방 작업이 완료되었습니다!");
+}
+
+function equipPetFromWarehouse(index) {
+    if(!isRosterLocked) return;
+    const empty = raidSelectedPets.findIndex(p => p === null);
+    if(empty === -1) return alert("슬롯이 가득 찼찼습니다.");
+    raidSelectedPets[empty] = raidPets.splice(index, 1)[0];
+    renderRaidSelectedPets();
+    renderRaidPets();
+    syncRaidWarehouseToFirebase();
+}
+
+function initEggShop() {
+    const categories = [...new Set(PET_DATABASE.map(p => p.category))];
+    const shopDiv = document.getElementById('dynamic-egg-shop');
+    if(!shopDiv) return;
+
+    window.eggCategories = categories;
+    renderAuctionEggs(categories);
+}
+
+function renderAuctionEggs(categoryList) {
+    const shopDiv = document.getElementById('dynamic-egg-shop');
+    shopDiv.innerHTML = categoryList.map(cat => `
+        <div class="shop-item" onclick="buyEgg('${cat}')">
+            <div class="egg-icon">🥚</div>
+            <div class="egg-info">
+                <strong>${cat} 알</strong>
+                <span>5,000 💎</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterRaidShop() {
+    const query = document.getElementById('shop-search-input').value.toLowerCase();
+    const filtered = window.eggCategories.filter(cat => cat.toLowerCase().includes(query));
+    renderAuctionEggs(filtered);
+}
+
+function buyEgg(cat) {
+    if (!confirm(`[${cat} 알]을 5,000 💎에 구매하시겠습니까?`)) return;
+    if (window.totalDiamonds < 5000) return alert("다이아가 부족합니다.");
+    window.totalDiamonds -= 5000;
+    raidItems[`${cat} 알`] = (raidItems[`${cat} 알`] || 0) + 1;
+    updateRaidDiamondUI();
+    renderRaidItems();
+    syncRaidWarehouseToFirebase();
+    alert(`[${cat} 알]을 구매하였습니다!`);
+}
+
+function useEgg(cat) {
+    const name = `${cat} 알`;
+    if (!raidItems[name]) return;
+    raidItems[name]--;
+    if (raidItems[name] === 0) delete raidItems[name];
+
+    const candidates = PET_DATABASE.filter(p => p.category === cat);
+    if (candidates.length === 0) return alert("해당 종류의 페트 데이터가 없습니다.");
+
+    const hatched = candidates[Math.floor(Math.random() * candidates.length)];
+    const pet = generateRandomPetStats(hatched, 140);
+    
+    raidPets.push(pet);
+    renderRaidItems();
+    renderRaidPets();
+    syncRaidWarehouseToFirebase();
+    alert(`🥚 [${cat} 알]에서 [${pet.name}]이(가) 부화했습니다!`);
+}
+
+function toggleRaidShop() {
+    const shopContainer = document.getElementById('dynamic-egg-shop-container');
+    const icon = document.getElementById('shop-toggle-icon');
+    if (shopContainer.style.display === 'none') {
+        shopContainer.style.display = 'block';
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+    } else {
+        shopContainer.style.display = 'none';
+        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+    }
+}
+
+function switchRaidTab(type) {
+    document.querySelectorAll('.w-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.warehouse-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`tab-${type}`).classList.add('active');
+    
+    const view = document.getElementById(`raid-${type}-view`);
+    if(view) {
+        view.classList.add('active');
+        if(type === 'items') renderRaidItems();
+        else renderRaidPets();
+    }
+}
+
+function updateRaidDiamondUI() {
+    let d = (window.totalDiamonds || 0).toLocaleString();
+    if(document.getElementById('raid-warehouse-diamonds')) document.getElementById('raid-warehouse-diamonds').innerText = d;
+    if(document.getElementById('raid-shop-diamonds')) document.getElementById('raid-shop-diamonds').innerText = d;
+}
+
+function getWeightedStat(pool) {
+    const weights = pool.map(s => {
+        if (["공격력", "방어력", "순발력", "체력"].includes(s)) return 20; 
+        if (["PVE 공격력 (%)", "PVE 방어력 (%)", "치명 (%)"].includes(s)) return 15; 
+        return 5; 
+    });
+    
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < pool.length; i++) {
+        r -= weights[i];
+        if (r < 0) return pool[i];
+    }
+    return pool[0];
+}
+
+/* ==========================================
+      [수정] 고도화된 수동 레이드 배틀 엔진 (Task 2, 3)
+   ========================================== */
+
+// 1. 배틀용 유닛 생성 함수
+function generateRaidEnemy(base, level, isBoss, floor) {
+    const g = level - 1; 
+    
+    // [난이도 조정] 1층: 1.0 / 2층: 1.1 / 3층: 1.3 (성장 가속)
+    let floorMult = 1.0;
+    if (floor === 2) floorMult = 1.1;
+    else if (floor === 3) floorMult = 1.3; // 3층 난이도 상향
+
+    // 성장률 수치에 층별 배율 적용
+    const baseHp = (base.ghp || 0) * floorMult;
+    const baseAtk = (base.gatk || 0) * floorMult;
+    const baseDef = (base.gdef || 0) * floorMult;
+    const baseSpd = (base.gspd || 0) * floorMult;
+
+    const gHp = (base.ghp || 0) * floorMult;
+    const gAtk = (base.gatk || 0) * floorMult;
+    const gDef = (base.gdef || 0) * floorMult;
+    const gSpd = (base.gspd || 0) * floorMult;
+
+    // 보스는 호위병보다 5% 더 강력한 등급(S급) 성능 발휘
+    const gradeMult = isBoss ? 1.0 : 0.95;
+
+    // 최종 스탯 산출
+    const calcHp = Math.floor(baseHp + (gHp * gradeMult * g));
+    const calcAtk = Math.floor(baseAtk + (gAtk * gradeMult * g));
+    const calcDef = Math.floor(baseDef + (gDef * gradeMult * g));
+    const calcSpd = Math.floor(baseSpd + (gSpd * gradeMult * g));
+
+    // 추가 체력 1000 고정
+    const finalMaxHp = calcHp + 1000; 
+
+    return {
+        ...base,
+        customName: isBoss ? `[${floor}층 보스] ${base.name}` : `[호위병] ${base.name}`,
+        level: level, // 3층 보스는 150레벨, 호위병은 145레벨로 자동 적용됨
+        maxHp: finalMaxHp,
+        curHp: finalMaxHp,
+        atk: calcAtk,
+        def: calcDef,
+        spd: calcSpd,
+        isDead: false,
+        team: 'enemy',
+        status: { isGuarding: false, sacrificing: false, defPenalty: 1 },
+        buffs: []
+    };
+}
+
+// 2. 수동 조작 UI 생성 및 배틀 로그 패널 구축
+function createBattleLogOverlay() {
+    let old = document.getElementById('raid-battle-overlay');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'raid-battle-overlay';
+    overlay.style = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(20, 10, 5, 0.95); backdrop-filter: blur(8px);
+        z-index: 10001; display: flex; align-items: center; justify-content: center;
+        color: #e1d1c1; font-family: 'Malgun Gothic', sans-serif;
+    `;
+
+    overlay.innerHTML = `
+        <div style="width: 920px; height: 650px; background: #1a0a05; border: 3px solid #8b4513; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 60px rgba(0,0,0,0.8);">
+            <div style="padding: 18px 25px; border-bottom: 2px solid #3d2b1f; display: flex; justify-content: space-between; align-items: center; background: #2a1506;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fa-solid fa-fire-flame-curved" style="color: #ffa657; filter: drop-shadow(0 0 5px #ffa657);"></i>
+                    <strong style="color: #ffa657; font-size: 20px; text-shadow: 1px 1px 2px #000;">심연의 사냥터 - ${raidFloor}F</strong>
+                </div>
+                <div id="raid-battle-turn-label" style="font-family: monospace; font-size: 16px; background: #000; padding: 5px 15px; border-radius: 20px; border: 1px solid #8b4513; color: #ffa657;">TURN 1</div>
+            </div>
+            <div style="flex: 1; display: flex; overflow: hidden; background: url('https://www.transparenttextures.com/patterns/dark-leather.png');">
+                <div id="ally-battle-view" style="width: 240px; border-right: 1px solid #3d2b1f; padding: 20px; overflow-y: auto; background: rgba(255, 166, 87, 0.03);">
+                    <div style="font-size: 11px; color: #ffa657; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">나의 토벌대</div>
+                    <div id="ally-list-render"></div>
+                </div>
+                <div id="battle-log-center" style="flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.4);">
+                    <div id="raid-battle-logs" style="flex: 1; padding: 25px; overflow-y: auto; font-size: 14px; line-height: 1.8; color: #e1d1c1;"></div>
+                    <div id="raid-action-panel" style="padding: 25px; background: #2a1506; border-top: 2px solid #3d2b1f; display: flex; gap: 20px; justify-content: center; min-height: 100px;"></div>
+                </div>
+                <div id="enemy-battle-view" style="width: 240px; border-left: 1px solid #3d2b1f; padding: 20px; overflow-y: auto; text-align: right; background: rgba(248, 81, 73, 0.03);">
+                    <div style="font-size: 11px; color: #ff7b72; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">출현한 맹수</div>
+                    <div id="enemy-list-render"></div>
+                </div>
+            </div>
+            <div style="padding: 15px; border-top: 1px solid #3d2b1f; text-align: center; background: #1a0a05;">
+                <button id="btn-exit-raid" onclick="if(confirm('사냥을 포기하고 퇴각하시겠습니까?')) document.getElementById('raid-battle-overlay').remove()" style="background: transparent; color: #8b949e; border: 1px solid #3d2b1f; padding: 8px 25px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight:bold;">사냥 중단</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+/* =======================================
+    [수정] 닉네임 반영 + 정령 패시브 + 턴 관리 통합
+   ======================================= */
+async function startRaidQuest() {
+    if (!isRosterLocked) return alert("토벌대 편성을 완료하고 정보를 저장해주세요.");
+    
+    const charStats = calcRaidPoints();
+    if (!confirm(`${raidFloor}단계 사냥을 시작하시겠습니까?`)) return;
+
+    createBattleLogOverlay();
+    
+    // 1. 닉네임 불러오기 (설정된 닉네임 반영)
+    const userNick = localStorage.getItem('arenaUserNick') || "MASTER";
+
+    // 2. 플레이어 유닛 설정 (buffs 배열 추가)
+    const playerUnit = {
+        name: `${userNick} (캐릭터)`, 
+        team: 'player', 
+        curHp: charStats.hp, 
+        maxHp: charStats.hp, 
+        atk: charStats.atk, 
+        def: charStats.def, 
+        spd: charStats.spd, 
+        pveAtk: charStats.pveAtk, 
+        pveDef: charStats.pveDef, 
+        crit: charStats.crit, 
+        hit: charStats.hit, 
+        eva: charStats.eva, 
+        pen: charStats.pen, 
+        shd: charStats.shd, 
+        luk: charStats.luk,
+        isDead: false, 
+        type: 'character', 
+        status: { isGuarding: false, sacrificing: false, defPenalty: 1 },
+        buffs: [] // 버프/패시브 지속시간 관리용
+    };
+
+    // 3. 아군 페트 설정 (기존 패시브를 buffs 배열에 등록)
+    rBattle.allies = [playerUnit, ...raidSelectedPets.filter(p => p !== null).map(p => ({
+    ...p, 
+    team: 'player', 
+    curHp: p.hp, 
+    maxHp: p.hp, 
+    isDead: false, 
+    type: 'pet', 
+    status: { isGuarding: false, sacrificing: false, defPenalty: 1 },
+    // 페트의 패시브가 있다면 buffs 배열에 이름과 남은 턴(5T) 저장
+    buffs: p.passive ? [{ name: p.passive, remain: 5 }] : [] 
+}))];
+
+    // 4. 적 생성 로직 (호위병 A, B, C, D 구분)
+    const bossBase = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
+    let minionBase;
+    do {
+        minionBase = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
+    } while (bossBase.name === minionBase.name);
+    
+    rBattle.enemies = [generateRaidEnemy(bossBase, 135 + (raidFloor * 5), true, raidFloor)];
+    
+    const minionTags = ['A', 'B', 'C', 'D'];
+    for (let i = 0; i < 4; i++) {
+        let minion = generateRaidEnemy(minionBase, 130 + (raidFloor * 5), false, raidFloor);
+        minion.customName = `[호위병 ${minionTags[i]}] ${minionBase.name}`;
+        rBattle.enemies.push(minion);
+    }
+
+    // 5. 전투 상태 초기화
+    rBattle.isEnd = false;
+    rBattle.turnCount = 1;
+    rBattle.turnQueue = []; 
+    rBattle.fieldEffect = null;
+
+    addBattleLog(`🌋 거친 대지에 발을 들였습니다. (${raidFloor}F)`, "#ffa657");
+
+    // 6. [패시브] 정령 생성 체크 (기존 정령 패시브 로직 유지)
+    const spiritPet = rBattle.allies.find(u => u.passive && ["티아트의 축복", "에니키의 축복", "이라의 축복", "윌의 축복"].includes(u.passive));
+    if (spiritPet) {
+        let pName = spiritPet.passive;
+        let fType = pName.includes("티아트") ? "지" : pName.includes("에니키") ? "수" : pName.includes("이라") ? "화" : "풍";
+        let fName = pName.includes("티아트") ? "대지" : pName.includes("에니키") ? "물" : pName.includes("이라") ? "화재" : "질풍";
+        
+        rBattle.fieldEffect = { type: fType, name: fName, turns: 5 }; // Lv.5 기준 5턴
+        addBattleLog(`✨ [패시브] ${spiritPet.name}의 ${pName}! 전장에 <b style="color:#7ee787;">${fName}의 정령</b>이 5턴간 생성됩니다.`, "#58a6ff");
+    }
+
+    renderBattleUnits();
+    processNextUnitTurn();
+}
+
+// [교체] 매 턴 시작 시 방어 및 보호(충견) 상태 초기화
+function processNextUnitTurn() {
+    if (checkBattleEnd()) return;
+
+    // 모든 유닛의 상태(방어, 보호) 초기화
+    rBattle.allies.forEach(u => { 
+        if(u.status) {
+            u.status.isGuarding = false; 
+            u.status.sacrificing = false; // 충견진돗개 보호 해제
+        }
+    });
+    rBattle.enemies.forEach(u => { if(u.status) u.status.isGuarding = false; });
+
+    rBattle.actions = []; 
+    rBattle.myAliveQueue = rBattle.allies.filter(a => !a.isDead); 
+    rBattle.currentActorIndex = 0; 
+    
+    if (rBattle.fieldEffect && rBattle.fieldEffect.turns > 0) {
+        rBattle.fieldEffect.turns--;
+    }
+
+    updateRaidControlPanel();
+}
+
+// [추가] 투기장 방식: 아군 포커스 이동 및 예약 완료 시 전투 실행
+function updateRaidControlPanel() {
+    rBattle.waitingForTarget = false;
+    
+    // 내 아군 모두에게 명령을 내렸다면 전투 실행!
+    if (rBattle.currentActorIndex >= rBattle.myAliveQueue.length) {
+        clearActionMenu(); 
+        executeRaidTurn(); 
+        return;
+    }
+
+    rBattle.currentActor = rBattle.myAliveQueue[rBattle.currentActorIndex];
+    const actor = rBattle.currentActor;
+
+    addBattleLog(`[ ${rBattle.turnCount} 턴 ] <b style="color:#d2a8ff;">${actor.name}</b>의 행동 대기중...`);
+    renderBattleUnits(); 
+    showActionMenu(actor); 
+}
+
+// [교체] 투기장 방식: 예약된 모든 행동을 속도(순발력+난수)에 따라 동시 재생
+async function executeRaidTurn() {
+    addBattleLog(`<br>⚔️ <b>--- [ ${rBattle.turnCount} 턴 실행 ] ---</b> ⚔️`, "#fca311");
+    
+    const aliveEnemies = rBattle.enemies.filter(e => !e.isDead);
+
+    // 1. 적군 AI 타겟팅
+    aliveEnemies.forEach(enemy => {
+        const targetScore = (target) => {
+            let score = (1 - (target.curHp / target.maxHp)) * 50;
+            score += (500 / (target.def + 10)) * 10;
+            if (getUnitElement(enemy).type !== '무' && getUnitElement(enemy).type === getUnitElement(target).type) score += 30;
+            score += (target.atk / 10);
+            return score;
+        };
+
+        const validTargets = rBattle.allies.filter(a => !a.isDead);
+        if (validTargets.length > 0) {
+            validTargets.sort((a, b) => targetScore(b) - targetScore(a));
+            rBattle.actions.push({ unit: enemy, type: 'attack', target: validTargets[0] });
+        }
+    });
+
+    // 2. 순발력 난수 부여
+    rBattle.actions.forEach(act => {
+        let spdVariance = act.unit.spd * 0.15;
+        act.actionSpd = act.unit.spd + (Math.random() * spdVariance);
+        if (act.type === 'guard') act.actionSpd += 2000; 
+    });
+    rBattle.actions.sort((a, b) => b.actionSpd - a.actionSpd);
+
+    // 2.5 턴 시작 직후: 충견진돗개 즉시 보호 활성화
+    rBattle.actions.forEach(act => {
+        if (act.type === 'sacrifice' && !act.unit.isDead) {
+            act.unit.status.sacrificing = true;
+            addBattleLog(`🐶 [${act.unit.name}] 마스터 보호 태세 돌입!`, "#7ee787");
+        }
+    });
+
+    // 3. 액션 순차 재생 루프
+    for (let act of rBattle.actions) {
+        let attacker = act.unit;
+        if (attacker.isDead || checkBattleEnd()) continue;
+
+        if (act.type === 'guard') {
+            attacker.status.isGuarding = true;
+            addBattleLog(`🛡️ [${attacker.name}] 방어 태세 돌입!`);
+            await new Promise(r => setTimeout(r, 600));
+            continue;
+        }
+
+        let target = act.target;
+        if (target.isDead) {
+            let enemiesOfAttacker = attacker.team === 'player' ? rBattle.enemies : rBattle.allies;
+            let aliveTargets = enemiesOfAttacker.filter(u => !u.isDead);
+            if (aliveTargets.length === 0) break;
+            target = aliveTargets[0];
+        }
+
+        // ★ [수정] 캐릭터 활(광역) 장착 확인 (판별 조건 대폭 완화)
+        let isAoE = false;
+        if (attacker.type === 'character' && attacker.team === 'player') {
+            const weapon = equippedItems.weapon; // 외부 장비 데이터 참조
+            if (weapon && weapon.name) {
+                const weaponData = getEquipDataByName(weapon.name);
+                const wType = weaponData ? weaponData.type : "";
+                
+                // 장비 이름에 '활'이 있거나, DB 분류상 '활', '원거리'일 경우 모두 광역기 발동
+                if (weapon.name.includes("활") || wType.includes("활") || wType.includes("원거리")) {
+                    isAoE = true;
+                }
+            }
+        }
+
+        let mult = 1.0; let ignoreGuard = false;
+        if (act.type === 'berserk') { mult = 1.35; attacker.status.defPenalty = 0.55; addBattleLog(`🔥 ${attacker.name}의 배수의진!`); } 
+        else if (act.type === 'break') { ignoreGuard = true; addBattleLog(`🔨 ${attacker.name}의 가드브레이크!`); } 
+        else if (act.type === 'sacrifice') { mult = 0.8; } 
+
+        if (!isAoE) {
+            let tName = target.customName || target.name;
+            addBattleLog(`⚔️ <b>[${attacker.name}]</b> ➔ <b>[${tName}]</b> 타겟팅!`, "#58a6ff");
+        }
+
+        // [이펙트 적용 및 데미지 계산]
+        if (isAoE) {
+            addBattleLog(`🏹 ${attacker.name}의 활 공격! 적 진영 전체에 화살이 쏟아집니다!`, "#7ee787");
+            
+            for (let en of rBattle.enemies) {
+                if (!en.isDead) {
+                    calculateDamage(attacker, en, mult * 0.8, ignoreGuard);
+                    en.isHit = true; 
+                    renderBattleUnits(); 
+                    await new Promise(r => setTimeout(r, 250)); // 0.25초 스윕
+                    en.isHit = false; 
+                }
+            }
+            renderBattleUnits(); 
+            await new Promise(r => setTimeout(r, 500)); 
+        } else {
+            calculateDamage(attacker, target, mult, ignoreGuard);
+            target.isHit = true; 
+            renderBattleUnits(); 
+            
+            await new Promise(r => setTimeout(r, 1300)); 
+            target.isHit = false;
+        }
+    }
+
+    // 4. 턴 종료 및 패시브/버프 정리
+    rBattle.turnCount++;
+    [...rBattle.allies, ...rBattle.enemies].forEach(u => {
+        if (u.buffs) u.buffs = u.buffs.map(b => ({ ...b, remain: b.remain - 1 })).filter(b => b.remain > 0);
+        if (u.status) u.status.defPenalty = 1.0;
+        u.isHit = false;
+    });
+
+    if (!checkBattleEnd()) {
+        processNextUnitTurn(); 
+    }
+}
+
+function showActionMenu(actor) {
+    const panel = document.getElementById('raid-action-panel');
+    if(!panel) return;
+    
+    let buttons = "";
+    if (actor.type === 'character') {
+        buttons = `
+            <button class="btn-battle-act" onclick="prepareAction('attack')">공격</button>
+            <button class="btn-battle-act" onclick="prepareAction('guard')">방어</button>
+        `;
+    } else {
+        buttons = `
+            <button class="btn-battle-act" onclick="prepareAction('attack')">공격</button>
+            <button class="btn-battle-act" onclick="prepareAction('guard')">방어</button>
+            <button class="btn-battle-act skill" onclick="prepareAction('sacrifice')">충견진돗개</button>
+            <button class="btn-battle-act skill" onclick="prepareAction('berserk')">배수의진</button>
+            <button class="btn-battle-act skill" onclick="prepareAction('break')">가드브레이크</button>
+        `;
+    }
+    panel.innerHTML = buttons;
+    addBattleLog(`[${actor.name}]의 행동을 선택하세요.`, "#ffcc00");
+}
+
+let currentPendingSkill = null;
+// [교체] 충견진돗개(sacrifice) 선택 시 대상을 클릭하도록 분기 수정
+function prepareAction(type) {
+    const actor = rBattle.currentActor;
+    
+    // 오직 '방어'만 타겟팅 없이 즉시 예약 완료
+    if (type === 'guard') {
+        rBattle.actions.push({ unit: actor, type: type, target: actor });
+        addBattleLog(`🛡️ ${actor.name} - 방어 완료`);
+        
+        rBattle.currentActorIndex++; 
+        updateRaidControlPanel();
+    } else {
+        // 공격, 배수의진, 가드브레이크, 충견진돗개 모두 타겟 지정 모드로 진입
+        rBattle.activeSelector = { unit: actor, type: type };
+        rBattle.waitingForTarget = true;
+        
+        if (type === 'sacrifice') {
+            addBattleLog("🎯 [충견진돗개] 대상을 클릭하세요. (공격 후 마스터 보호 태세)", "#58a6ff");
+        } else {
+            addBattleLog("🎯 대상을 클릭하여 공격하세요.", "#58a6ff");
+        }
+        renderBattleUnits(); 
+    }
+}
+
+function executePlayerAction(targetIdx) {
+    if (!rBattle.waitingForTarget || !rBattle.activeSelector) return;
+    
+    const target = rBattle.enemies[targetIdx];
+    if (!target || target.isDead) return;
+
+    rBattle.actions.push({ 
+        unit: rBattle.activeSelector.unit, 
+        type: rBattle.activeSelector.type, 
+        target: target 
+    });
+
+    addBattleLog(`⚔️ ${rBattle.activeSelector.unit.name} - [${target.customName || target.name}] 타겟 지정 완료`);
+
+    rBattle.activeSelector = null;
+    rBattle.waitingForTarget = false;
+    rBattle.currentActorIndex++;
+    updateRaidControlPanel();
+}
+
+// 유닛의 속성 타입과 포인트를 가져오는 헬퍼 함수
+function getUnitElement(unit) {
+    if (unit.type === 'character') {
+        const t = document.getElementById('rd-attr1-type').value || '무';
+        const v = parseInt(document.getElementById('rd-attr1-val').value) || 10;
+        return { type: t, pts: v };
+    } 
+    
+    // 유닛의 el(예: "지1 수9") 데이터를 분석
+    const elStr = unit.el || unit.elements || "";
+    if (!elStr || elStr === "무") return { type: '무', pts: 0 };
+
+    // 정규식을 사용하여 각 속성과 포인트를 추출
+    const matches = elStr.match(/([지수화풍])(\d+)/g); 
+    if (matches) {
+        let bestType = '무';
+        let maxPts = 0;
+        matches.forEach(m => {
+            const type = m[0];
+            const pts = parseInt(m.substring(1));
+            if (pts > maxPts) { maxPts = pts; bestType = type; }
+        });
+        return { type: bestType, pts: maxPts };
+    }
+    return { type: '무', pts: 0 };
+}
+
+function calculateDamage(attacker, target, mult, ignoreGuard = false) {
+    let actualTarget = target;
+    let willIntercept = false;
+    let protector = null;
+
+    if (attacker.team === 'enemy' && target.type === 'character') {
+        protector = rBattle.allies.find(a => a.status.sacrificing && !a.isDead);
+        if (protector) {
+            willIntercept = true;
+        }
+    }
+
+    // 1. 회피 및 명중 판정
+    let hitChance = 90 + (attacker.hit || 0) - (target.eva || 0);
+    if (attacker.spd < target.spd) {
+        let spdDiff = target.spd - attacker.spd;
+        hitChance -= (spdDiff * 0.2); 
+        hitChance -= 5; 
+    } else if (attacker.spd > target.spd) {
+        hitChance += (attacker.spd - target.spd) * 0.05;
+    }
+    hitChance = Math.max(10, Math.min(100, hitChance)); 
+
+    if (Math.random() * 100 > hitChance) {
+        addBattleLog(`💨 ${target.customName || target.name}이(가) 공격을 가볍게 회피했습니다! (명중률: ${Math.floor(hitChance)}%)`, "#8b949e");
+        return; 
+    }
+
+    // 2. 충견진돗개 발동
+    if (willIntercept && protector) {
+        actualTarget = protector;
+        addBattleLog(`📢 충견진돗개! ${protector.name}이(가) 주인을 대신해 나섭니다!`, "#7ee787");
+        let pHitChance = 90 + (attacker.hit || 0) - (protector.eva || 0);
+        if (protector.spd > attacker.spd) {
+            pHitChance -= (protector.spd - attacker.spd) * 0.1;
+        }
+        pHitChance = Math.max(20, Math.min(100, pHitChance));
+        if (Math.random() * 100 > pHitChance) {
+            addBattleLog(`💨 ${protector.name}이(가) 공격을 대신 받아내며 가볍게 회피했습니다!`, "#8b949e");
+            return;
+        }
+    }
+
+    // 3. 데미지 계산 및 스탯 적용
+    let pveAtkBonus = (attacker.team === 'player') ? (attacker.pveAtk || 0) / 100 : 0;
+    let pveDefBonus = (actualTarget.team === 'player') ? (actualTarget.pveDef || 0) / 100 : 0;
+    let finalAtk = attacker.atk * mult * (1 + pveAtkBonus);
+    let finalDef = actualTarget.status.isGuarding && !ignoreGuard ? actualTarget.def * 2 : actualTarget.def;
+    if (actualTarget.status.defPenalty) finalDef *= actualTarget.status.defPenalty;
+    finalDef = finalDef * (1 + pveDefBonus);
+    let penVal = attacker.pen || 0;
+    let shdVal = actualTarget.shd || 0;
+    finalDef = Math.max(0, finalDef - penVal + shdVal);
+
+    let damage = Math.floor((finalAtk * 1.5) - (finalDef * 0.8));
+    let dmgVariance = 0.95 + (Math.random() * 0.1); 
+    damage = Math.floor(damage * dmgVariance);
+    damage = Math.max(1, damage);
+
+    // 4. 치명타 판정
+    let critChance = 5 + (attacker.crit || 0) - (actualTarget.luk || 0); 
+    let isCrit = false;
+    if (Math.random() * 100 < critChance) {
+        isCrit = true;
+        damage = Math.floor(damage * 1.5); 
+    }
+
+    // 5. [수정] 속성 상성 판정 (지 > 수 > 화 > 풍 > 지)
+    let atkEl = getUnitElement(attacker);
+    let defEl = getUnitElement(actualTarget);
+    let advantage = 0; 
+    let attrLabel = ""; // 로그에 표시할 텍스트 변수
+    const eleMatch = { '지': '수', '수': '화', '화': '풍', '풍': '지' }; 
+    
+    if (eleMatch[atkEl.type] === defEl.type) {
+        // 공격자가 상성 우위인 경우
+        advantage += atkEl.pts * 7;
+        // 상성 승자(공격자)의 포인트가 패자보다 6 이상 높아야만 [우세] 표시
+        if (atkEl.pts - defEl.pts >= 6) attrLabel = "우세";
+    } else if (eleMatch[defEl.type] === atkEl.type) {
+        // 방어자가 상성 우위인 경우 (공격자 열세)
+        advantage -= defEl.pts * 7;
+        // 상성 승자(방어자)의 포인트가 패자보다 6 이상 높아야만 [열세] 표시
+        if (defEl.pts - atkEl.pts >= 6) attrLabel = "열세";
+    }
+
+    if (rBattle.fieldEffect && rBattle.fieldEffect.turns > 0) {
+        if (atkEl.type === rBattle.fieldEffect.type) advantage += 70;
+        if (defEl.type === rBattle.fieldEffect.type) advantage -= 70;
+    }
+
+    advantage = Math.max(-100, Math.min(100, advantage)); 
+    let eleMult = 1.0;
+    if (advantage > 0) eleMult = 1 + (1.25 * (advantage / 100));
+    else if (advantage < 0) eleMult = 1 - (0.65 * (-advantage / 100));
+    
+    damage = Math.floor(damage * eleMult); 
+
+    // 6. 전투 로그 출력
+    let logMsg = `➥ ${actualTarget.customName || actualTarget.name}에게 ${damage} 피해!`;
+    if (isCrit) logMsg += ` <span style="font-size:11px; color:#ff5555; font-weight:bold;">[크리티컬!]</span>`;
+    
+    // 포인트 차이 조건(6점 이상)을 만족했을 때만 로그 출력
+    if (attrLabel === "우세") logMsg += ` <span style="font-size:10px; color:#ffcc00;">[속성 우세]</span>`;
+    else if (attrLabel === "열세") logMsg += ` <span style="font-size:10px; color:#8b949e;">[속성 열세]</span>`;
+
+    addBattleLog(logMsg, attacker.team === 'player' ? "#79c0ff" : "#ff7b72");
+    actualTarget.curHp -= damage;
+
+    if (actualTarget.curHp <= 0) {
+        actualTarget.curHp = 0; actualTarget.isDead = true; actualTarget.status = {};
+        addBattleLog(`💀 ${actualTarget.customName || actualTarget.name} 쓰러짐!`, "#8b949e");
+    }
+}
+
+// 캐릭터 사망 시 즉시 레이드 실패 처리
+function checkBattleEnd() {
+    if (rBattle.isEnd) return true; // 중복 실행 방지
+
+    const character = rBattle.allies.find(a => a.type === 'character');
+    const isCharDead = character ? character.isDead : false;
+    const isEnemiesDead = rBattle.enemies.every(e => e.isDead);
+
+    if (isCharDead) {
+        rBattle.isEnd = true;
+        addBattleLog("⚠️ WARNING: 마스터가 쓰러져 토벌대가 궤멸되었습니다.", "#f85149");
+        
+        const exitBtn = document.getElementById('btn-exit-raid');
+        if (exitBtn) {
+            exitBtn.innerText = "전투 나가기 (패배)";
+            exitBtn.style.background = "#da3633";
+            exitBtn.style.color = "#fff";
+            exitBtn.onclick = () => document.getElementById('raid-battle-overlay').remove();
+        }
+        return true;
+    }
+
+    if (isEnemiesDead) {
+        rBattle.isEnd = true;
+        addBattleLog("🏆 작전 성공: 심연의 수호자를 모두 격퇴했습니다.", "#7ee787");
+        
+        const exitBtn = document.getElementById('btn-exit-raid');
+        if (exitBtn) {
+            exitBtn.innerText = "전투 나가기 (승리 보상 받기)";
+            exitBtn.style.background = "#238636";
+            exitBtn.style.color = "#fff";
+            exitBtn.onclick = () => {
+                document.getElementById('raid-battle-overlay').remove();
+                grantRaidRewards(raidFloor);
+            };
+        }
+        return true;
+    }
+
+    return false;
+}
+
+// 텍스트 겹침 방지 및 깔끔한 태그 정렬 적용
+function renderBattleUnits() {
+    const allyDiv = document.getElementById('ally-list-render');
+    const enemyDiv = document.getElementById('enemy-list-render');
+    if (!allyDiv || !enemyDiv) return;
+
+    // 속성별 컬러 정의
+    const eleColors = { '화': '#ff5555', '수': '#539bf5', '지': '#8b4513', '풍': '#7ee787', '무': '#adbac7' };
+
+    // 상세 속성 텍스트 생성 (예: [지1수9])
+    const getElementDetail = (u) => {
+        const elStr = u.el || u.elements;
+        if (elStr && elStr !== "무") return `[${elStr.replace(/\s+/g, '')}]`;
+        if (u.type === 'character') {
+            const elObj = getUnitElement(u);
+            return `[${elObj.type}${elObj.pts}]`;
+        }
+        return "[무]";
+    };
+
+    // 아군 리스트 렌더링
+    allyDiv.innerHTML = rBattle.allies.map(u => {
+        const elText = getElementDetail(u);
+        const elColor = eleColors[getUnitElement(u).type] || eleColors['무'];
+        const buffTags = (u.buffs || []).map(b => 
+            `<span style="font-size:11px; color:#ffa657; border:1px solid #ffa657; padding:1px 4px; border-radius:4px; display:inline-block; margin-right:3px; margin-bottom:4px; background:rgba(255,166,87,0.1); font-weight:bold;">${b.name}:${b.remain}T</span>`
+        ).join('');
+
+        return `
+        <div class="${u.isHit ? 'anim-hit-target' : ''}" style="padding:10px; margin-bottom:10px; border:1px solid ${rBattle.currentActor === u ? '#d2a8ff' : '#30363d'}; background:${u.isDead ? '#161b22' : '#0d1117'}; border-radius:8px; opacity:${u.isDead ? 0.4 : 1}; position:relative; transition: 0.2s;">
+            <div style="font-size:12px; font-weight:bold; color:${u.isDead ? '#484f58' : '#adbac7'}; margin-bottom:5px;">
+                <span style="color:${elColor}; margin-right:4px;">${elText}</span>${u.name}
+            </div>
+            ${buffTags ? `<div style="margin-bottom:4px;">${buffTags}</div>` : ''}
+            <div style="height:6px; background:#21262d; border-radius:3px; margin-top:6px; overflow:hidden;">
+                <div style="height:100%; width:${(u.curHp/u.maxHp)*100}%; background:linear-gradient(to right, #539bf5, #388bfd); transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size:10px; color:#8b949e; margin-top:4px;">HP ${Math.floor(u.curHp)} / ${Math.floor(u.maxHp)}</div>
+        </div>`;
+    }).join('');
+
+    // 적군 리스트 렌더링
+    enemyDiv.innerHTML = rBattle.enemies.map((u, idx) => {
+        const canClick = rBattle.waitingForTarget && !u.isDead;
+        const elText = getElementDetail(u);
+        const elColor = eleColors[getUnitElement(u).type] || eleColors['무'];
+
+        return `
+        <div class="enemy-unit-card ${u.isHit ? 'anim-hit-target' : ''} ${canClick ? 'selectable' : ''}" 
+             ${canClick ? `onclick="executePlayerAction(${idx})"` : ""} 
+             style="padding:10px; margin-bottom:10px; border:1px solid ${canClick ? '#f85149' : (rBattle.currentActor === u ? '#f2cc60' : '#30363d')}; 
+                    background:${u.isDead ? '#161b22' : '#0d1117'}; border-radius:8px; opacity:${u.isDead ? 0.4 : 1}; position:relative; display:flex; flex-direction:column; gap:4px; transition: 0.2s;">
+            <div style="font-size:12px; font-weight:bold; color:${u.isDead ? '#484f58' : '#adbac7'};">
+                <span style="color:${elColor}; margin-right:4px;">${elText}</span> ${u.customName}
+            </div>
+            <div style="height:6px; background:#21262d; border-radius:3px; overflow:hidden;">
+                <div style="height:100%; width:${(u.curHp/u.maxHp)*100}%; background:linear-gradient(to left, #f85149, #da3633); float:right; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size:10px; color:#8b949e;">HP ${Math.floor(u.curHp)}</div>
+        </div>`;
+    }).join('');
+}
+
+function clearActionMenu() {
+    const panel = document.getElementById('raid-action-panel');
+    if(panel) panel.innerHTML = '';
+}
+
+function addBattleLog(msg, color = "#adbac7") {
+    const logBox = document.getElementById('raid-battle-logs');
+    if (!logBox) return;
+    const p = document.createElement('div');
+    p.style.marginBottom = "8px";
+    p.style.color = color;
+    p.style.borderLeft = `3px solid ${color === '#adbac7' ? '#30363d' : color}`;
+    p.style.paddingLeft = "10px";
+    p.innerHTML = msg;
+    logBox.appendChild(p);
+    logBox.scrollTop = logBox.scrollHeight;
+}
+
+/* ==========================================
+      기존 보상 및 유틸리티 함수 유지
+   ========================================== */
+
+function grantRaidRewards(floor) {
+    const stoneNames = ["홍염석", "비취석", "심해석", "홍요석"];
+    const randomStone = stoneNames[Math.floor(Math.random() * stoneNames.length)];
+
+    // 1. 다이아몬드 보상 즉시 합산
+    if (floor === 1) {
+        window.totalDiamonds += 1000;
+    } else if (floor === 2) {
+        window.totalDiamonds += 2000;
+        raidItems[randomStone] = (raidItems[randomStone] || 0) + 1;
+    } else if (floor === 3) {
+        window.totalDiamonds += 5000;
+        raidItems[randomStone] = (raidItems[randomStone] || 0) + 1;
+    }
+
+    // 2. [핵심] 보상 수령 즉시 Firebase 서버 동기화 및 UI 갱신
+    // 알림창(alert) 확인 전에도 데이터는 이미 서버에 저장되도록 순서를 배치했습니다.
+    syncRaidWarehouseToFirebase(); 
+    updateRaidDiamondUI();
+
+    // 3. 사용자 알림 및 추가 보상 처리
+    if (floor === 1) {
+        alert("1층 보상: 1,000 💎이 지급되었습니다.");
+    } else if (floor === 2) {
+        alert(`2층 보상: 2,000 💎 + [${randomStone}]이 지급되었습니다.`);
+    } else if (floor === 3) {
+        // 3층의 경우 S등급 페트 선택 완료 후 최종 저장되도록 유도
+        alert(`3층 보상: 5,000 💎 + [${randomStone}]이 지급되었습니다.\n이어서 S등급 페트를 선택하세요.`);
+        setTimeout(() => chooseSRankPetReward(), 500);
+    }
+}
+
+function chooseSRankPetReward() {
+    const categories = [...new Set(PET_DATABASE.map(p => p.category))];
+    
+    const modal = document.createElement('div');
+    modal.id = 'reward-select-modal';
+    modal.style = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); z-index: 10005; display: flex;
+        align-items: center; justify-content: center; backdrop-filter: blur(5px);
+    `;
+
+    modal.innerHTML = `
+        <div style="width: 500px; background: #0d1117; border: 2px solid #d2a8ff; border-radius: 16px; padding: 25px; box-shadow: 0 0 30px rgba(210,168,255,0.3);">
+            <h3 style="color:#d2a8ff; margin-top:0; text-align:center;">🎁 S등급 페트 보상 선택</h3>
+            
+            <!-- 검색 영역 추가 -->
+            <div style="margin-bottom: 20px; position: relative;">
+                <input type="text" id="reward-search-input" placeholder="페트 종류 검색 (예: 부비, 꼬미...)" 
+                       oninput="filterRewardOptions()"
+                       style="width: 100%; background: #161b22; border: 1px solid #30363d; color: #adbac7; padding: 12px 15px; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 15px; top: 15px; color: #8b949e;"></i>
+            </div>
+
+            <div id="reward-options-container" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; max-height:300px; overflow-y:auto; padding-right:5px; scrollbar-width: thin;">
+                ${categories.map(cat => `
+                    <div class="reward-opt" data-category="${cat}" onclick="confirmPetReward('${cat}')" 
+                         style="background:#1c2128; border:1px solid #444; color:#fff; padding:10px; border-radius:8px; cursor:pointer; text-align:center; transition:0.2s; font-size:13px;">
+                        ${cat}
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div id="no-reward-result" style="display:none; text-align:center; color:#8b949e; padding:20px; font-size:13px;">
+                검색 결과가 없습니다.
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // 모달이 열리자마자 검색창에 포커스
+    setTimeout(() => document.getElementById('reward-search-input').focus(), 100);
+}
+
+// [추가] 실시간 필터링 함수
+function filterRewardOptions() {
+    const query = document.getElementById('reward-search-input').value.toLowerCase();
+    const options = document.querySelectorAll('.reward-opt');
+    const container = document.getElementById('reward-options-container');
+    const noResult = document.getElementById('no-reward-result');
+    let visibleCount = 0;
+
+    options.forEach(opt => {
+        const category = opt.getAttribute('data-category').toLowerCase();
+        if (category.includes(query)) {
+            opt.style.display = 'block';
+            visibleCount++;
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+
+    // 결과가 없을 때 처리
+    if (visibleCount === 0) {
+        container.style.display = 'none';
+        noResult.style.display = 'block';
+    } else {
+        container.style.display = 'grid';
+        noResult.style.display = 'none';
+    }
+}
+
+// [추가] 보상 확정 처리
+function confirmPetReward(cat) {
+    const candidates = PET_DATABASE.filter(p => p.category === cat);
+    const pet = generateRandomPetStats(candidates[Math.floor(Math.random() * candidates.length)], 140, true);
+    
+    raidPets.push(pet);
+    alert(`🎉 S등급 [${pet.name}] 보상이 보관함에 지급되었습니다!`);
+    
+    const modal = document.getElementById('reward-select-modal');
+    if(modal) modal.remove();
+    
+    renderRaidPets();
+    syncRaidWarehouseToFirebase();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initEggShop();
+    calcRaidPoints();
+    setTimeout(loadRaidUserData, 1000); 
+    setInterval(updateRaidDiamondUI, 2000);
+
+    const enchantSelect = document.getElementById('enchant-slot-select');
+    if (enchantSelect) {
+        enchantSelect.addEventListener('change', updateEnchantHighlight);
+    }
+});
+
+/* 1인 레이드 JS 끝 */
+
 </script>
+
 
 <div id="sRankPopup">
     <div class="popup-title">S베이스 "득"!</div>
     <div class="popup-msg">축하합니다! 최상위 등급 페트를 획득했습니다.</div>
     <button class="popup-close-btn" onclick="closeSRankPopup()">확인</button>
 </div>
-
 
 
 </body>
