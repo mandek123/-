@@ -4806,6 +4806,8 @@ const NOTICE_DATABASE = [
         <strong>5) 투기장 전투 로직 변경</strong>
         <span>- 1. AI의 전투 로직 개선 (AI가 전장 상황을 더 잘 인식하고 판단하도록 개선하였습니다.)</span>
         <span>- 2. 랜덤 전투 시스템 도입 (유저 간 랜덤하게 전투 상대를 찾을 수 있는 시스템이 추가되었습니다.)</span>
+        <span>- 3. 밸런스패치 : 가드브레이크의 성능을 높였습니다.</span>
+
     `
     },
 
@@ -8530,6 +8532,7 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     let allies = allyIds.map(id => battleState.units[id]);
     let enemies = enemyIds.map(id => battleState.units[id]);
     let charAlly = allies.find(u => u.type === 'char');
+    let charEnemy = enemies.find(u => u.type === 'char');
     
     let act = { unitId: unit.id, type: 'attack', target: null };
     
@@ -8539,14 +8542,14 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     
     enemies.forEach(enemy => {
         let score = 0;
-        score += (1 - (enemy.hp / enemy.maxHp)) * 100; // 체력이 적은 적 우선
-        score += (enemy.atk * 0.15); // 공격력이 높은 적 견제
+        score += (1 - (enemy.hp / enemy.maxHp)) * 100;
+        score += (enemy.atk * 0.15);
         
         let attrMod = getAttrBonus(unit.attr, enemy.attr);
-        if (attrMod > 1.0) score += 70; // 상성 우위
-        else if (attrMod < 1.0) score -= 30; // 역상성 기피
+        if (attrMod > 1.0) score += 70;
+        else if (attrMod < 1.0) score -= 30;
         
-        score += Math.random() * 60; // 변칙성을 위한 난수
+        score += Math.random() * 60;
         
         if (score > maxScore) {
             maxScore = score;
@@ -8565,7 +8568,36 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     }
 
     if (unit.type === 'pet') {
-        // 유저가 AI의 캐릭터를 타겟으로 지정하여 공격하려는지 확인
+        // [신규] 적(유저) 캐릭터가 이번 턴에 방어(guard)를 선택했는지 확인
+        let isEnemyGuarding = false;
+        if (charEnemy && !charEnemy.isDead) {
+            isEnemyGuarding = battleState.actions.some(userAct => 
+                userAct.unitId === charEnemy.id && userAct.type === 'guard'
+            );
+        }
+
+        // [신규] 유저가 방어 중이라면 가드 브레이크 로직 작동
+        if (isEnemyGuarding) {
+            let aliveAllyPets = allies.filter(u => u.type === 'pet' && !u.isDead);
+            if (aliveAllyPets.length > 0) {
+                // 공격력이 가장 높은 페트 도출
+                let highestAtkPet = aliveAllyPets.reduce((max, p) => p.atk > max.atk ? p : max, aliveAllyPets[0]);
+
+                if (unit.id === highestAtkPet.id) {
+                    // 1. 공격력이 제일 강한 펫은 무조건 가드브레이크
+                    act.type = 'guardbreak';
+                    act.target = charEnemy.id; 
+                    return act;
+                } else if (Math.random() < 0.5) {
+                    // 2. 나머지 펫들은 50% 확률로 가드브레이크
+                    act.type = 'guardbreak';
+                    act.target = charEnemy.id;
+                    return act;
+                }
+            }
+        }
+
+        // AI의 캐릭터를 타겟으로 지정하여 공격하려는지 확인
         let isMasterTargeted = false;
         if (charAlly && !charAlly.isDead) {
             isMasterTargeted = battleState.actions.some(userAct => 
@@ -8577,7 +8609,6 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
         // 주인이 공격 타겟이 되었다면 90% 확률로 충견 발동
         if (isMasterTargeted && Math.random() < 0.9) {
             act.type = 'skill_dog';
-            // [팀킬 버그 해결!] 타겟을 주인이 아닌 적으로 설정해야 합니다.
             act.target = bestTarget.id; 
             return act;
         }
@@ -8585,7 +8616,7 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
         let rand = Math.random();
         if (rand < 0.3 && hpRatio > 0.4) {
             act.type = 'skill_back'; 
-        } else if (rand < 0.55) {
+        } else if (rand < 0.55 && !isEnemyGuarding) {
             act.type = 'guardbreak'; 
         }
     }
@@ -8683,7 +8714,7 @@ async function executeTurn() {
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         act.actionSpd = u.spd;
-        if(act.type === 'guard') act.actionSpd += 2000; // 가드는 전략적으로 확실히 먼저 실행
+        if(act.type === 'guard') act.actionSpd += 2000;
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
@@ -8707,12 +8738,11 @@ async function executeTurn() {
         }
     }
 
-    // [신규 로직] 각 팀별로 이번 턴에 충견을 수행할 '단 한 마리'의 펫을 미리 지정
+    // 각 팀별로 이번 턴에 충견을 수행할 단 한 마리의 펫 지정
     let designatedDog = { my: null, opp: null };
     battleState.actions.forEach(a => {
         let u = battleState.units[a.unitId];
         if (u && u.type === 'pet' && a.type === 'skill_dog' && !u.isDead) {
-            // 팀에 아직 전담 충견이 지정되지 않았다면 첫 번째 펫을 지정
             if (!designatedDog[u.team]) {
                 designatedDog[u.team] = u.id; 
             }
@@ -8744,16 +8774,21 @@ async function executeTurn() {
 
         let currentAtk = isBackToWall ? attacker.atk * 1.35 : (isDogSkill ? attacker.atk * 0.8 : attacker.atk); 
 
-        // [수정] 1. 원래 타겟(캐릭터)의 회피를 먼저 계산합니다.
+        // 1. 회피율 선 연산
         let spdDiffForDodge = target.spd - attacker.spd;
         let dodgeChance = Math.max(5, Math.min(85, 5 + (spdDiffForDodge > 0 ? spdDiffForDodge * 0.45 : 0)));
         let isEvasion = !target.isGuard && !act.isDagul && (Math.random() * 100 < dodgeChance);
         let isDogIntercept = false;
 
-        // [수정] 2. 충견진돗개 발동 체크 (지정된 한 마리만 발동)
+        // 방어 중이 아닌 대상에게 가드 브레이크 사용 시 무조건 MISS (회피 판정)
+        if (isGuardBreak && !target.isGuard) {
+            isEvasion = true;
+        }
+
+        // 2. 충견진돗개 발동 체크 (지정된 1마리만)
+        // 충견진돗개는 가드 브레이크를 대신 맞아주지 못함 (act.type !== 'guardbreak' 조건)
         if(target.type === 'char' && act.type !== 'guardbreak') {
             if (!isEvasion) { 
-                // 캐릭터가 피하지 못할 위기일 때, '이번 턴의 지정된 충견'이 살아있는지 확인
                 let dogId = designatedDog[target.team];
                 if (dogId && !battleState.units[dogId].isDead) {
                     if(act.isDagul) {
@@ -8761,8 +8796,8 @@ async function executeTurn() {
                     } else {
                         target = battleState.units[dogId]; 
                         isDogIntercept = true; 
-                        isEvasion = false; // 충견이 몸으로 막으므로 무조건 명중 처리
-                        addLog(`🐶 <b style="color:#a5d6ff;">[충견]</b> ${target.name}(이)가 주인을 대신해 방어합니다!`);
+                        isEvasion = false; 
+                        addLog(`🐶 <b style="color:#a5d6ff;">[충견]</b> ${target.name}이(가) 주인을 대신해 방어합니다!`);
                     }
                 }
             }
@@ -8778,30 +8813,44 @@ async function executeTurn() {
         if(attackerBox) attackerBox.classList.add(moveClass);
         await delay(300);
 
-        // [수정] 3. 회피 시 연출 및 데미지 로직 처리
+        // 3. 회피 시 연출 및 데미지 로직 처리
         if(isEvasion && !isDogIntercept) {
             showFloatingDmg(target.id, "MISS", "miss"); 
-            addLog(`💨 [${target.name}]의 회피!`);
+            if (isGuardBreak) {
+                addLog(`💨 [${target.name}] 방어 태세가 아닙니다! 가드브레이크 헛스윙!`);
+            } else {
+                addLog(`💨 [${target.name}]의 회피!`);
+            }
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
-            
             let defReductionFactor = (isBackToWall && target.type === 'char') ? 0.5 : 0.85; 
 
-            let skillMultiplier = act.isDagul ? 1.0 : (isBackToWall ? 1.35 : 1.2); 
+            let skillMultiplier = act.isDagul ? 1.0 : (isBackToWall ? 1.35 : (isGuardBreak ? 1.0 : 1.2)); 
             let effectiveDef = target.def * (target.buffs.defPenalty || 1.0);
             
             let baseDmg = ((currentAtk * skillMultiplier) - (effectiveDef * defReductionFactor)) * attrBonus;
-            if(target.isGuard) baseDmg *= 0.5;
+            
+            if(target.isGuard) {
+                if (isGuardBreak) {
+                    // 가드 브레이크 적중시 데미지 1.2배 적용
+                    baseDmg = (currentAtk * 1.2) * attrBonus; 
+                    addLog(`💥 <b style="color:#ff4d4d; font-size:14px;">[가드 브레이크 적중]</b> ${attacker.name}의 일격이 방어 중인 적에게 치명타를 입혔습니다!`);
+                } else {
+                    baseDmg *= 0.5;
+                }
+            }
                         
             let finalDmg = Math.max(Math.floor(currentAtk * 0.1), Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
 
             target.hp -= finalDmg;
             const targetBox = document.getElementById(`unit-${target.id}`);
             if(targetBox) targetBox.classList.add('anim-hit');
-            showFloatingDmg(target.id, finalDmg, "normal");
+            
+            let dmgType = isGuardBreak ? "critical" : "normal";
+            showFloatingDmg(target.id, finalDmg, dmgType);
             addLog(`⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 피해!`);
             
-            updateAllHPUI(); // 데미지를 받고 펫의 HP가 0이 되면 여기서 isDead가 true로 바뀝니다.
+            updateAllHPUI(); 
         }
 
         await delay(600);
