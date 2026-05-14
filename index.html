@@ -8832,8 +8832,8 @@ async function executeTurn() {
             
             if(target.isGuard) {
                 if (isGuardBreak) {
-                    // 가드 브레이크 적중시 데미지 1.2배 적용
-                    baseDmg = (currentAtk * 1.2) * attrBonus; 
+                    // 가드 브레이크 적중시 데미지 0.8배 적용
+                    baseDmg = (currentAtk * 0.8) * attrBonus; 
                     addLog(`💥 <b style="color:#ff4d4d; font-size:14px;">[가드 브레이크 적중]</b> ${attacker.name}의 일격이 방어 중인 적에게 치명타를 입혔습니다!`);
                 } else {
                     baseDmg *= 0.5;
