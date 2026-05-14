@@ -8523,7 +8523,7 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     }
 
     if (unit.type === 'pet') {
-        if (charAlly && !charAlly.isDead && (charAlly.hp / charAlly.maxHp < 0.45) && Math.random() < 0.7) {
+        if (charAlly && !charAlly.isDead && (charAlly.hp / charAlly.maxHp < 0.45) && Math.random() < 0.9) {
             act.type = 'skill_dog';
             act.target = charAlly.id;
             return act;
