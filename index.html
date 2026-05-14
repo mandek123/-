@@ -3307,14 +3307,10 @@ details[open] summary {
                 </div>
                 
                 <div class="arena-section" style="margin-bottom: 20px; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; overflow: hidden;">
-                    <div onclick="toggleArenaSection('user-battle-list')" style="cursor:pointer; background: rgba(110, 84, 148, 0.2); padding: 10px 15px; color:#d2a8ff; font-weight:bold; font-size:13px; display: flex; align-items: center; justify-content: space-between;">
-                        <span><i class="fas fa-users"></i>  실시간 유저 대전 (클릭하여 열기/닫기)</span>
-                        <i id="user-battle-list-arrow" class="fas fa-chevron-down" style="transition: transform 0.3s ease;"></i>
-                    </div>
-                    <div id="user-battle-list" class="user-list-container" style="background:rgba(0,0,0,0.4); padding:10px; max-height:300px; overflow-y:auto;">
-                        </div>
-                </div>
-            </div>
+    <div onclick="findRandomMatch()" style="cursor:pointer; background: rgba(110, 84, 148, 0.4); padding: 15px; color:#d2a8ff; font-weight:bold; font-size:15px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(110, 84, 148, 0.6)'" onmouseout="this.style.background='rgba(110, 84, 148, 0.4)'">
+        <span><i class="fas fa-crosshairs"></i> VS 유저 랜덤 전투 상대 찾기</span>
+    </div>
+</div> </div>
 
             <div class="arena-section" style="margin-bottom: 20px; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; overflow: hidden;">
                 <div onclick="toggleArenaSection('recent-matches-list')" style="cursor:pointer; background: rgba(212, 175, 55, 0.1); padding: 8px 12px; color:var(--royal-gold); font-weight:bold; font-size:13px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); display: flex; align-items: center; justify-content: space-between;">
@@ -4776,7 +4772,7 @@ const NOTICE_DATABASE = [
     id: 19,
     date: "26년 5월 14일",
     title: "26년 5월 14일 업데이트 공지사항입니다.",
-    summary: "1. 신규 콘텐츠 '1인 레이드' 출시 안내 | 2. 주간 육성 페트 변경 ",
+    summary: "1. 신규 콘텐츠 '1인 레이드' 출시 안내 | 2. 주간 육성 페트 변경 | 3. 투기장 전투 로직 변경 ",
     content: `
         <strong>1) 전략적 장비 장착 및 강화 시스템</strong>
         <span>- 무기, 투구, 갑옷, 악세서리, 목줄, 토템 등 총 9종의 장비 슬롯이 활성화되었습니다.</span>
@@ -4789,6 +4785,9 @@ const NOTICE_DATABASE = [
         <span>- 처음 캐릭터의 정보를 저장하면 이후에는 캐릭터의 스탯정보만 변경 가능하며, 저장한 초기 페트와 초기 지급 아이템의 정보는 저장한 캐릭터에 귀속됩니다.</span>
         <strong>4) 주간 육성 페트 변경</strong>
         <span>- 기존 메가고르돈에서 페가수스로 변경하였습니다. 기존 키우던 페트를 전부 육성한 뒤 새롭게 시작하셔야 정상적으로 이용할 수 있습니다.</span>
+        <strong>5) 투기장 전투 로직 변경</strong>
+        <span>- 1. AI의 전투 로직 개선 (AI가 전장 상황을 더 잘 인식하고 판단하도록 개선하였습니다.)</span>
+        <span>- 2. 랜덤 전투 시스템 도입 (유저 간 랜덤하게 전투 상대를 찾을 수 있는 시스템이 추가되었습니다.)</span>
     `
     },
 
@@ -7758,6 +7757,7 @@ function getSeasonNumber(monthLabel) {
     let season = (year - baseYear) * 12 + (month - baseMonth) + 1;
     return season > 0 ? season : 1;
 }
+
 // 대전리스트 열기/닫기 토글
 function toggleArenaSection(sectionId) {
     const section = document.getElementById(sectionId);
@@ -8113,9 +8113,6 @@ function saveArenaInfo() {
 }
 
 function refreshUserList() {
-    const listDiv = document.getElementById('user-battle-list');
-    if (!listDiv) return;
-
     db.ref('arena_users').orderByChild('score').on('value', (snapshot) => {
         let users = [];
         snapshot.forEach(child => { users.push(child.val()); });
@@ -8142,42 +8139,49 @@ function refreshUserList() {
             }
         }
 
-        let html = "";
         const myNick = localStorage.getItem('arenaUserNick');
-        
-        users.slice(0, 15).forEach(user => {
+        users.forEach(user => {
             if (user.nick === myNick) {
                 updateMyInfoDisplay(user);
-                return;
             }
-            
-            const r = user.record || { user: {win:0, lose:0} };
-            const mainPet = (user.pets && user.pets.find(p => p !== null)) || user.pet || { name: '없음', elements: '무' };
-            const pElements = mainPet.elements || "무";
-            const pCount = user.pets ? user.pets.filter(p=>p!==null).length : 1;
-
-            html += `
-        <button onclick="initBattle(false, ${JSON.stringify(user).replace(/"/g, '&quot;')})" class="btn-battle user-pvp">
-            <div class="battle-info">
-                <i class="fas fa-user-ninja"></i>
-                <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                    <span>${user.nick} <small>(${mainPet.name} [${pElements}] 외 ${pCount-1}마리)</small></span>
-                    <small style="margin:0; font-size:10px; color:#8b949e;">전적: ${r.user.win}승 ${r.user.lose}패</small>
-                </div>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span style="color:var(--royal-gold); font-weight:bold;">${user.score} pts</span>
-                <span class="battle-point">PVP</span>
-            </div>
-        </button>`;
         });
-        
-        listDiv.innerHTML = html || '<div style="text-align:center; color:#8b949e; padding:15px; font-size:12px;">대전 가능한 유저가 현재 없습니다.</div>';
+    });
+}
+
+// [신규] 랜덤 유저 매칭 로직
+function findRandomMatch() {
+    if(arenaSelectedPets.filter(p=>p!==null).length === 0) return alert("전투에 참가할 펫이 없습니다. 최소 1마리 이상 설정하세요.");
+    if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 대전이 가능합니다.");
+    if(todayPlayCount >= BATTLE_LIMIT) return alert("일일 대전 횟수를 초과했습니다.");
+
+    const myNick = localStorage.getItem('arenaUserNick');
+
+    db.ref('arena_users').once('value', (snapshot) => {
+        let opponents = [];
+        snapshot.forEach(child => {
+            let user = child.val();
+            // 본인은 제외하고 리스트에 추가
+            if(user.nick !== myNick) {
+                opponents.push(user);
+            }
+        });
+
+        if(opponents.length === 0) {
+            alert("현재 대전 가능한 다른 유저가 없습니다.");
+            return;
+        }
+
+        // 무작위 인덱스 추출
+        const randomIndex = Math.floor(Math.random() * opponents.length);
+        const selectedOpponent = opponents[randomIndex];
+
+        // 전투 시작
+        initBattle(false, selectedOpponent);
     });
 }
 
 // ==========================================
-//    [추가] 최근 경기 실황(LIVE) 시스템 로직
+//    최근 경기 실황(LIVE) 시스템 로직
 // ==========================================
 
 // 1. 경기 로그 기록 함수
@@ -8477,6 +8481,65 @@ function showFloatingDmg(targetId, dmgText, type) {
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
+// ==========================================
+//  고도화된 지능형 AI 결정 엔진
+// ==========================================
+function getSmartAIAction(unit, allyIds, enemyIds) {
+    let allies = allyIds.map(id => battleState.units[id]);
+    let enemies = enemyIds.map(id => battleState.units[id]);
+    let charAlly = allies.find(u => u.type === 'char');
+    
+    let act = { unitId: unit.id, type: 'attack', target: null };
+    
+    // 1. 유닛별 독립적인 변칙 타겟팅
+    let bestTarget = enemies[0];
+    let maxScore = -9999;
+    
+    enemies.forEach(enemy => {
+        let score = 0;
+        score += (1 - (enemy.hp / enemy.maxHp)) * 100; // 체력이 적은 적 우선
+        score += (enemy.atk * 0.15); // 공격력이 높은 적 견제
+        
+        let attrMod = getAttrBonus(unit.attr, enemy.attr);
+        if (attrMod > 1.0) score += 70; // 상성 우위
+        else if (attrMod < 1.0) score -= 30; // 역상성 기피
+        
+        score += Math.random() * 60; // 변칙성을 위한 난수
+        
+        if (score > maxScore) {
+            maxScore = score;
+            bestTarget = enemy;
+        }
+    });
+    act.target = bestTarget.id;
+
+    // 2. 생존 및 스킬 선택 로직
+    let hpRatio = unit.hp / unit.maxHp;
+    
+    if (hpRatio < 0.25 && Math.random() < 0.5) {
+        act.type = 'guard';
+        act.target = unit.id;
+        return act;
+    }
+
+    if (unit.type === 'pet') {
+        if (charAlly && !charAlly.isDead && (charAlly.hp / charAlly.maxHp < 0.45) && Math.random() < 0.7) {
+            act.type = 'skill_dog';
+            act.target = charAlly.id;
+            return act;
+        }
+        
+        let rand = Math.random();
+        if (rand < 0.3 && hpRatio > 0.4) {
+            act.type = 'skill_back'; 
+        } else if (rand < 0.55) {
+            act.type = 'guardbreak'; 
+        }
+    }
+    
+    return act;
+}
+
 function startTurnPhase() {
     if(checkWinCondition()) return;
     Object.values(battleState.units).forEach(u => { u.isGuard = false; });
@@ -8486,6 +8549,7 @@ function startTurnPhase() {
     battleState.myAliveQueue = ALL_MY_IDS.filter(id => battleState.units[id] && !battleState.units[id].isDead);
     battleState.currentActorIndex = 0;
     
+    document.getElementById('battle-control-panel').style.display = 'block'; 
     updateControlPanelForCurrentActor();
 }
 
@@ -8557,71 +8621,15 @@ async function executeTurn() {
     let aliveMy = Object.keys(battleState.units).filter(id => id.startsWith('my-') && !battleState.units[id].isDead);
     let aliveOpp = Object.keys(battleState.units).filter(id => id.startsWith('opp-') && !battleState.units[id].isDead);
     
-    // ==========================================
-    //    지능형 전략 AI (Utility Scoring System)
-    // ==========================================
-    if (aliveMy.length > 0 && aliveOpp.length > 0) {
-        const evaluateTargetScore = (attacker, targetId) => {
-            const target = battleState.units[targetId];
-            let score = 0;
-            score += (1 - (target.hp / target.maxHp)) * 50;
-            score += (500 / (target.def + 10)) * 10;
-            if (getAttrBonus(attacker.attr, target.attr) > 1.0) score += 30;
-            score += (target.atk / 10);
-            if (target.buffs.defPenalty < 1.0) score += 40;
-            return score;
-        };
+    // 상대방(AI)의 지능형 행동 할당
+    aliveOpp.forEach(id => {
+        battleState.actions.push(getSmartAIAction(battleState.units[id], aliveOpp, aliveMy));
+    });
 
-        const masterTargetId = aliveMy.sort((a, b) => {
-            return evaluateTargetScore(battleState.units['opp-char'], b) - evaluateTargetScore(battleState.units['opp-char'], a);
-        })[0];
-
-        aliveOpp.forEach(oppId => {
-            let u = battleState.units[oppId];
-            let act = { unitId: oppId, type: 'attack', target: masterTargetId };
-            const targetObj = battleState.units[masterTargetId];
-            const isEmergency = (u.hp / u.maxHp < 0.3) || (u.id === 'opp-char' && u.hp / u.maxHp < 0.4);
-
-            if (isEmergency) {
-                if (u.type === 'char') {
-                    act.type = 'guard'; act.target = oppId;
-                } else {
-                    let oppChar = battleState.units['opp-char'];
-                    if (!oppChar.isDead) { act.type = 'skill_dog'; act.target = 'opp-char'; }
-                }
-            } else {
-                if (u.type !== 'char') {
-                    const isTargetGuarding = targetObj.isGuard;
-                    const rand = Math.random();
-                    if (targetObj.type === 'char' && targetObj.def > 120) {
-                        act.type = 'skill_back'; 
-                    } else if (isTargetGuarding && rand < 0.7) {
-                        act.type = 'guardbreak'; 
-                    } else {
-                        act.type = 'attack';
-                    }
-                } else {
-                    act.type = 'attack';
-                }
-            }
-            battleState.actions.push(act);
-        });
-
-        battleState.actions.forEach(a => {
-            let attacker = battleState.units[a.unitId];
-            let target = battleState.units[a.target];
-            if (target && target.id === 'my-char' && target.hp < (attacker.atk * 1.5) && attacker.spd > target.spd) {
-                a.type = 'attack'; 
-            }
-        });
-    }
-
-    // ★ 밸런스 패치: 순발력 난수(Variance) 확대
-    // 고정값 대신 유닛 순발력의 15% 정도 변동성을 주어 '선턴 고정' 현상을 완화합니다.
+    // 선턴 고정 유지 (순발력 그대로 적용)
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
-        let spdVariance = u.spd * 0.15; // 15% 난수 범위
-        act.actionSpd = u.spd + (Math.random() * spdVariance);
+        act.actionSpd = u.spd;
         if(act.type === 'guard') act.actionSpd += 2000; // 가드는 전략적으로 확실히 먼저 실행
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
@@ -8711,7 +8719,6 @@ async function executeTurn() {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
             
             // ★ 밸런스 패치: 캐릭터 대상 배수의진 관통력 완화 (0.25 -> 0.5)
-            // 인위적인 데미지 감소가 아닌, 방어력 계산 방식을 조정하여 밸런스를 잡습니다.
             let defReductionFactor = (isBackToWall && target.type === 'char') ? 0.5 : 0.85; 
 
             let skillMultiplier = act.isDagul ? 1.0 : (isBackToWall ? 1.35 : 1.2); 
@@ -8764,7 +8771,7 @@ function checkWinCondition() {
         if(field) field.style.opacity = '0.5';
         
         let scoreSet = battleState.matchType === 'user_pvp' ? {w:20, l:-15} : 
-                      (battleState.matchType.includes('easy') ? {w:5, l:-5} : {w:10, l:-5});
+                       (battleState.matchType.includes('easy') ? {w:5, l:-5} : {w:10, l:-5});
         
         updateMatchScore(isWin, scoreSet.w, scoreSet.l);
         return true;
