@@ -8565,7 +8565,17 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     }
 
     if (unit.type === 'pet') {
-        if (charAlly && !charAlly.isDead && (charAlly.hp / charAlly.maxHp < 0.45) && Math.random() < 0.9) {
+        // [수정된 부분] 유저가 AI의 캐릭터를 타겟으로 지정하여 공격하려는지 확인
+        let isMasterTargeted = false;
+        if (charAlly && !charAlly.isDead) {
+            isMasterTargeted = battleState.actions.some(userAct => 
+                userAct.target === charAlly.id && 
+                (userAct.type === 'attack' || userAct.type === 'skill_back' || userAct.type === 'guardbreak')
+            );
+        }
+
+        // 주인이 공격 타겟이 되었다면 90% 확률로 충견 발동
+        if (isMasterTargeted && Math.random() < 0.9) {
             act.type = 'skill_dog';
             act.target = charAlly.id;
             return act;
