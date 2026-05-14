@@ -8588,8 +8588,8 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
                     act.type = 'guardbreak';
                     act.target = charEnemy.id; 
                     return act;
-                } else if (Math.random() < 0.5) {
-                    // 2. 나머지 펫들은 50% 확률로 가드브레이크
+                } else if (Math.random() < 0.4) {
+                    // 2. 나머지 펫들은 40% 확률로 가드브레이크
                     act.type = 'guardbreak';
                     act.target = charEnemy.id;
                     return act;
