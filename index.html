@@ -8565,7 +8565,7 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     }
 
     if (unit.type === 'pet') {
-        // [수정된 부분] 유저가 AI의 캐릭터를 타겟으로 지정하여 공격하려는지 확인
+        // 유저가 AI의 캐릭터를 타겟으로 지정하여 공격하려는지 확인
         let isMasterTargeted = false;
         if (charAlly && !charAlly.isDead) {
             isMasterTargeted = battleState.actions.some(userAct => 
@@ -8577,7 +8577,8 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
         // 주인이 공격 타겟이 되었다면 90% 확률로 충견 발동
         if (isMasterTargeted && Math.random() < 0.9) {
             act.type = 'skill_dog';
-            act.target = charAlly.id;
+            // [팀킬 버그 해결!] 타겟을 주인이 아닌 적으로 설정해야 합니다.
+            act.target = bestTarget.id; 
             return act;
         }
         
@@ -8706,6 +8707,18 @@ async function executeTurn() {
         }
     }
 
+    // [신규 로직] 각 팀별로 이번 턴에 충견을 수행할 '단 한 마리'의 펫을 미리 지정
+    let designatedDog = { my: null, opp: null };
+    battleState.actions.forEach(a => {
+        let u = battleState.units[a.unitId];
+        if (u && u.type === 'pet' && a.type === 'skill_dog' && !u.isDead) {
+            // 팀에 아직 전담 충견이 지정되지 않았다면 첫 번째 펫을 지정
+            if (!designatedDog[u.team]) {
+                designatedDog[u.team] = u.id; 
+            }
+        }
+    });
+
     // 액션 실행 루프
     for(let act of battleState.actions) {
         let attacker = battleState.units[act.unitId];
@@ -8731,20 +8744,26 @@ async function executeTurn() {
 
         let currentAtk = isBackToWall ? attacker.atk * 1.35 : (isDogSkill ? attacker.atk * 0.8 : attacker.atk); 
 
-        // 충견진돗개 발동 체크
+        // [수정] 1. 원래 타겟(캐릭터)의 회피를 먼저 계산합니다.
+        let spdDiffForDodge = target.spd - attacker.spd;
+        let dodgeChance = Math.max(5, Math.min(85, 5 + (spdDiffForDodge > 0 ? spdDiffForDodge * 0.45 : 0)));
+        let isEvasion = !target.isGuard && !act.isDagul && (Math.random() * 100 < dodgeChance);
         let isDogIntercept = false;
-        if(target.type === 'char' && act.type !== 'guardbreak') {
-            let dogAct = battleState.actions.find(a => 
-                a.unitId.startsWith(`${target.team}-pet`) && a.type === 'skill_dog' && !battleState.units[a.unitId].isDead
-            );
 
-            if(dogAct) {
-                if(act.isDagul) {
-                    addLog(`⚠️ <b style="color:#ff7b72;">[다굴 효과]</b> 너무 거센 연계 공격에 충견이 끼어들 틈이 없습니다!`);
-                } else {
-                    target = battleState.units[dogAct.unitId]; 
-                    isDogIntercept = true; 
-                    addLog(`🐶 <b style="color:#a5d6ff;">[충견]</b> ${target.name}(이)가 주인을 대신해 방어합니다!`);
+        // [수정] 2. 충견진돗개 발동 체크 (지정된 한 마리만 발동)
+        if(target.type === 'char' && act.type !== 'guardbreak') {
+            if (!isEvasion) { 
+                // 캐릭터가 피하지 못할 위기일 때, '이번 턴의 지정된 충견'이 살아있는지 확인
+                let dogId = designatedDog[target.team];
+                if (dogId && !battleState.units[dogId].isDead) {
+                    if(act.isDagul) {
+                        addLog(`⚠️ <b style="color:#ff7b72;">[다굴 효과]</b> 너무 거센 연계 공격에 충견이 끼어들 틈이 없습니다!`);
+                    } else {
+                        target = battleState.units[dogId]; 
+                        isDogIntercept = true; 
+                        isEvasion = false; // 충견이 몸으로 막으므로 무조건 명중 처리
+                        addLog(`🐶 <b style="color:#a5d6ff;">[충견]</b> ${target.name}(이)가 주인을 대신해 방어합니다!`);
+                    }
                 }
             }
         }
@@ -8759,18 +8778,13 @@ async function executeTurn() {
         if(attackerBox) attackerBox.classList.add(moveClass);
         await delay(300);
 
-        // 회피 및 데미지 계산
-        let spdDiffForDodge = target.spd - attacker.spd;
-        let dodgeChance = Math.max(5, Math.min(85, 5 + (spdDiffForDodge > 0 ? spdDiffForDodge * 0.45 : 0)));
-        let isEvasion = !target.isGuard && !act.isDagul && !isDogIntercept && (Math.random() * 100 < dodgeChance);
-
-        if(isEvasion) {
+        // [수정] 3. 회피 시 연출 및 데미지 로직 처리
+        if(isEvasion && !isDogIntercept) {
             showFloatingDmg(target.id, "MISS", "miss"); 
             addLog(`💨 [${target.name}]의 회피!`);
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
             
-            // ★ 밸런스 패치: 캐릭터 대상 배수의진 관통력 완화 (0.25 -> 0.5)
             let defReductionFactor = (isBackToWall && target.type === 'char') ? 0.5 : 0.85; 
 
             let skillMultiplier = act.isDagul ? 1.0 : (isBackToWall ? 1.35 : 1.2); 
@@ -8786,7 +8800,8 @@ async function executeTurn() {
             if(targetBox) targetBox.classList.add('anim-hit');
             showFloatingDmg(target.id, finalDmg, "normal");
             addLog(`⚔️ [${attacker.name}] -> [${target.name}] ${finalDmg} 피해!`);
-            updateAllHPUI();
+            
+            updateAllHPUI(); // 데미지를 받고 펫의 HP가 0이 되면 여기서 isDead가 true로 바뀝니다.
         }
 
         await delay(600);
