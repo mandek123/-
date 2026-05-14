@@ -3444,6 +3444,24 @@ details[open] summary {
     
     <button id="btn-close-battle" onclick="closeBattleUI()" style="display:none; margin-top:15px; padding:15px 40px; background:var(--royal-gold); color:#000; font-size:16px; font-weight:900; border-radius:10px; border:none; cursor:pointer; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);">결과 확인하고 나가기</button>
 </div>
+
+<!-- 투기장 랜덤 매칭 VS 연출 화면 -->
+<div id="vs-screen-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div style="font-size: 24px; color: var(--royal-gold, #d4af37); margin-bottom: 30px; font-weight: bold; text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);">매칭 성사!</div>
+    <div style="display: flex; align-items: center; gap: 40px; font-size: 45px; font-weight: bold;">
+        <div id="vs-my-nick" style="color: #7ee787; text-shadow: 0 0 15px rgba(126, 231, 135, 0.5);">내이름</div>
+        <div style="color: #ff4d4d; font-size: 60px; font-style: italic; text-shadow: 0 0 20px rgba(255, 77, 77, 0.8);">VS</div>
+        <div id="vs-opp-nick" style="color: #ff7b72; text-shadow: 0 0 15px rgba(255, 123, 114, 0.5);">상대이름</div>
+    </div>
+    
+    <div id="vs-countdown" style="margin-top: 50px; font-size: 80px; color: white; font-weight: bold; text-shadow: 0 0 20px rgba(255,255,255,0.5);">3</div>
+    
+    <div style="margin-top: 20px; color: #aaa; font-size: 16px; animation: blink 1s infinite;">곧 전투가 시작됩니다...</div>
+    <style>
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</div>
+
 <!-- 투기장 전투 배틀 모달 끝 -->
 
 <!-- 1인 레이드 모달 시작 -->
@@ -8148,7 +8166,7 @@ function refreshUserList() {
     });
 }
 
-// [신규] 랜덤 유저 매칭 로직
+// 랜덤 유저 매칭 로직 
 function findRandomMatch() {
     if(arenaSelectedPets.filter(p=>p!==null).length === 0) return alert("전투에 참가할 펫이 없습니다. 최소 1마리 이상 설정하세요.");
     if(!myArenaData) return alert("투기장에 '내 정보 저장'을 먼저 진행해야 대전이 가능합니다.");
@@ -8175,8 +8193,32 @@ function findRandomMatch() {
         const randomIndex = Math.floor(Math.random() * opponents.length);
         const selectedOpponent = opponents[randomIndex];
 
-        // 전투 시작
-        initBattle(false, selectedOpponent);
+        // === VS 연출 화면 및 카운트다운 띄우기 ===
+        const vsOverlay = document.getElementById('vs-screen-overlay');
+        if (vsOverlay) {
+            document.getElementById('vs-my-nick').innerText = myNick;
+            document.getElementById('vs-opp-nick').innerText = selectedOpponent.nick;
+            vsOverlay.style.display = 'flex'; // 화면 표시
+
+            let count = 3;
+            const countdownEl = document.getElementById('vs-countdown');
+            if(countdownEl) countdownEl.innerText = count;
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    if(countdownEl) countdownEl.innerText = count;
+                } else {
+                    clearInterval(timer);
+                    vsOverlay.style.display = 'none'; // 연출 화면 숨김
+                    initBattle(false, selectedOpponent); // 전투 진입
+                }
+            }, 1000);
+            
+        } else {
+            // HTML이 누락되었을 경우를 대비해 기존처럼 바로 진입
+            initBattle(false, selectedOpponent);
+        }
     });
 }
 
