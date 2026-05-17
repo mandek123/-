@@ -2034,7 +2034,10 @@ details[open] summary {
             <a href="javascript:void(0);" class="nav-item" id="menu-exp" onclick="showPage('page-exp')">📊 경험치계산기</a>
             <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
             <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
-            <a href="javascript:void(0);" class="nav-item" id="menu-battle" onclick="showPage('page-battle')">⚔️ 종합전투시뮬</a>
+            
+            <a href="javascript:void(0);" class="nav-item" id="menu-raid" onclick="showPage('page-raid')">
+                💀 1인 레이드 <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+            </a>
 
             <div class="dropdown">
                 <a href="javascript:void(0);" class="nav-item" id="menu-ency">📚 도감 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
@@ -2047,47 +2050,53 @@ details[open] summary {
             <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
 
             <div class="dropdown">
-    <a href="javascript:void(0);" class="nav-item" id="menu-etc">
-        ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
-    </a>
-    <div class="dropdown-content">
-        <a href="javascript:void(0);" onclick="showPage('page-raid'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-skull-crossbones" style="color: #f85149; width: 18px;"></i> 
-            <span>1인 레이드</span>
-            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-        </a>
-        <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
-            <span>투기장 (PvP)</span>
-            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-        </a>
+                <a href="javascript:void(0);" class="nav-item" id="menu-etc">
+                    ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
+                </a>
+                <div class="dropdown-content">
+                    <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
+                        <span>투기장 (PvP)</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+                    </a>
 
-        <a href="javascript:void(0);" onclick="showPage('page-weekly-championship'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
-            <span>펫 육성 챔피언십</span>
-            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-        </a>
-        <a href="javascript:void(0);" onclick="showPage('page-item-sim'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-hammer" style="color: #ffcc00; width: 18px;"></i> 
-            <span>아이템 시뮬레이터</span>
-        </a>
+                    <a href="javascript:void(0);" onclick="showPage('page-weekly-championship'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
+                        <span>펫 육성 챔피언십</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+                    </a>
+                    
+                    <a href="javascript:void(0);" onclick="showPage('page-item-sim'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-hammer" style="color: #ffcc00; width: 18px;"></i> 
+                        <span>아이템 시뮬레이터</span>
+                    </a>
 
-        <a href="javascript:void(0);" onclick="showPage('page-levelup-sim'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-arrow-up-right-dots" style="color: #539bf5; width: 18px;"></i> 
-            <span>레벨업 시뮬레이션</span>
-        </a>
-        <a href="javascript:void(0);" onclick="showPage('page-init-sim'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-rotate" style="color: #a5d6ff; width: 18px;"></i> 
-            <span>초기화 시뮬레이션</span>
-        </a>
-        <a href="javascript:void(0);" onclick="showPage('page-raid-guide'); closeDropdown();">
-            <i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 레이드 패시브 안내
-        </a>
-        <a href="javascript:void(0);" onclick="showPage('page-bot'); closeDropdown();">
-            <i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 만득봇 안내
-        </a>
-    </div>
-</div>
+                    <a href="javascript:void(0);" onclick="showPage('page-levelup-sim'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-arrow-up-right-dots" style="color: #539bf5; width: 18px;"></i> 
+                        <span>레벨업 시뮬레이션</span>
+                    </a>
+                    
+                    <a href="javascript:void(0);" onclick="showPage('page-init-sim'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-rotate" style="color: #a5d6ff; width: 18px;"></i> 
+                        <span>초기화 시뮬레이션</span>
+                    </a>
+
+                    <a href="javascript:void(0);" onclick="showPage('page-battle'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-khanda" style="color: #ff7b72; width: 18px;"></i> 
+                        <span>종합전투시뮬</span>
+                    </a>
+
+                    <a href="javascript:void(0);" onclick="showPage('page-raid-guide'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-fire" style="color: #ff7b72; width: 18px;"></i> 
+                        <span>레이드 패시브 안내</span>
+                    </a>
+                    
+                    <a href="javascript:void(0);" onclick="showPage('page-bot'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-brands fa-discord" style="color: #5865F2; width: 18px;"></i> 
+                        <span>만득봇 안내</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
@@ -2136,25 +2145,31 @@ details[open] summary {
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 600px;">
 
     <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #539bf5; box-shadow: 0 0 10px rgba(83, 155, 245, 0.2); background: linear-gradient(145deg, #15191d, #0d1a2a);" onclick="showPage('page-weekly-championship')">
-    <i class="fa-solid fa-trophy" style="font-size: 2rem; color: #539bf5; margin-bottom: 10px;"></i>
-    <div style="font-weight: bold; font-size: 1.1rem; color: #539bf5;">펫 육성 챔피언십</div>
-    <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">주간 실시간 랭킹 대전</div>
-</div>
+        <i class="fa-solid fa-trophy" style="font-size: 2rem; color: #539bf5; margin-bottom: 10px;"></i>
+        <div style="font-weight: bold; font-size: 1.1rem; color: #539bf5;">펫 육성 챔피언십</div>
+        <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">주간 실시간 랭킹 대전</div>
+    </div>
 
-<div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); background: linear-gradient(145deg, #15191d, #2d1212);" onclick="showPage('page-arena')">
-    <i class="fa-solid fa-khanda" style="font-size: 2rem; color: #ff4d4d; margin-bottom: 10px;"></i>
-    <div style="font-weight: bold; font-size: 1.1rem; color: #ffcc00;">투기장 (PvP)</div>
-    <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">월간 실시간 랭킹 대전</div>
-</div>        
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); background: linear-gradient(145deg, #15191d, #2d1212);" onclick="showPage('page-arena')">
+        <i class="fa-solid fa-khanda" style="font-size: 2rem; color: #ff4d4d; margin-bottom: 10px;"></i>
+        <div style="font-weight: bold; font-size: 1.1rem; color: #ffcc00;">투기장 (PvP)</div>
+        <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">월간 실시간 랭킹 대전</div>
+    </div>        
             
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-exp')">
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); background: linear-gradient(145deg, #15191d, #050505);" onclick="showPage('page-raid')">
+        <i class="fa-solid fa-skull" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
+        <div style="font-weight: bold; font-size: 1.1rem; color: #ff7b72;">1인 레이드</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">실시간으로 저장되는 레이드</div>
+    </div>
+
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;" onclick="showPage('page-exp')">
         <i class="fa-solid fa-chart-simple" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 10px;"></i>
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">경험치계산기</div>
     </div>
 
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-battle')">
-        <i class="fa-solid fa-khanda" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">종합전투시뮬</div>
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-ency')">
+        <i class="fa-solid fa-book" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
+        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
     </div>
 
     <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-acc')">
@@ -2176,13 +2191,8 @@ details[open] summary {
         <i class="fa-solid fa-arrow-up-right-dots" style="font-size: 2rem; color: #539bf5; margin-bottom: 10px;"></i>
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">레벨업시뮬</div>
     </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-ency')">
-        <i class="fa-solid fa-book" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
-    </div>
     
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid')">
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
         <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 10px;"></i>
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
     </div>
@@ -4733,7 +4743,7 @@ details[open] summary {
 
             { category: "디어룬류", name: "디어룬[還]", img: "./images/824.gif", elements: "지9 수1", hp: 58.46, atk: 12.82, def: 7.49, spd: 9.55, ghp: 10.17, gatk: 2.23, gdef: 1.30, gspd: 1.66, passive: "심판의 혼", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
             { category: "사신(四神)류", name: "흑풍[還]", img: "./images/825.gif", elements: "지8 풍2", hp: 60.17, atk: 13.46, def: 7.95, spd: 8.32, ghp: 10.47, gatk: 2.34, gdef: 1.38, gspd: 1.45, passive: "왜곡", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
-{ category: "마메르류", name: "마메르[還]", img: "./images/826.gif", elements: "수5 화5", hp: 55.95, atk: 12.48, def: 6.68, spd: 9.38, ghp: 10.14, gatk: 2.26, gdef: 1.21, gspd: 1.70, passive: "심연의 보주", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
+{ category: "마메르류", name: "흑뱀[還]", img: "./images/826.gif", elements: "수5 화5", hp: 55.95, atk: 12.48, def: 6.68, spd: 9.38, ghp: 10.14, gatk: 2.26, gdef: 1.21, gspd: 1.70, passive: "심연의 보주", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
 { category: "사신(四神)류", name: "청주작[還]", img: "./images/827.gif", elements: "수9 화1", hp: 60.67, atk: 12.90, def: 7.06, spd: 9.42, ghp: 10.56, gatk: 2.24, gdef: 1.23, gspd: 1.64, passive: "창영의 화조", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
 { category: "기타류", name: "페가수스[還]", img: "./images/828.gif", elements: "화9 풍1", hp: 60.31, atk: 13.18, def: 6.81, spd: 10.89, ghp: 10.09, gatk: 2.21, gdef: 1.14, gspd: 1.82, passive: "황혼의 날개", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
 { category: "기타류", name: "마스타로[還]", img: "./images/829.gif", elements: "수2 화8", hp: 59.23, atk: 13.55, def: 7.16, spd: 8.80, ghp: 10.31, gatk: 2.36, gdef: 1.24, gspd: 1.53, passive: "왜곡", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
