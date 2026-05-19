@@ -3158,27 +3158,19 @@ details[open] summary {
 <div class="card" style="width: 100%; max-width: 600px; margin: 15px auto 20px auto; border: 1px solid #30363d; background: #0d1117; padding: 0; border-radius: 12px; overflow: hidden;">
     <button onclick="toggleSeasonHistory('weekly-history')" style="width: 100%; background: none; border: none; padding: 15px 20px; color: #539bf5; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;">
         <span><i class="fa-solid fa-clock-rotate-left"></i> 역대 시즌 랭킹 보기</span>
-        <i id="weekly-history-icon" class="fa-solid fa-chevron-down"></i>
+        <i id="weekly-history-icon" class="fa-solid fa-chevron-down" style="transition: transform 0.3s ease;"></i>
     </button>
 
     <div id="weekly-history-content" style="display: none; padding: 0 15px 15px 15px; border-top: 1px solid #30363d;">
-        <!-- 시즌 데이터가 렌더링될 영역 -->
-        <div id="season-list-container">
-            <!-- 예시 시즌 데이터 -->
-            <div style="margin-top: 15px;">
-                <div style="font-size: 0.85rem; color: #8b949e; margin-bottom: 8px;">Season 1 : 메가갈푸스 편</div>
-                <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;">
-                        <span>🥇 1위: 만득7</span> <span style="color: #539bf5;">6.202</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;">
-                        <span>🥈 2위: 테이머A</span> <span style="color: #539bf5;">6.015</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
-                        <span>🥉 3위: 익명</span> <span style="color: #539bf5;">5.988</span>
-                    </div>
-                </div>
-            </div>
+        <div id="season-list-container"></div>
+        
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
+            <button onclick="changeHistoryPage(-1)" id="history-prev-btn" style="background: #1c2128; border: 1px solid #30363d; color: #adbac7; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s;">&lt; 이전</button>
+            <span id="history-page-info" style="color: #8b949e; font-size: 13px; font-weight: bold;">1 / 1</span>
+            <button onclick="changeHistoryPage(1)" id="history-next-btn" style="background: #1c2128; border: 1px solid #30363d; color: #adbac7; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s;">다음 &gt;</button>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -6240,14 +6232,14 @@ let countIdentify = 0;
 let countEnchant = 0;
 let totalDiamonds = 0; 
 
-const PRICE_IDENTIFY_EQUIP = 15000;  
+const PRICE_IDENTIFY_EQUIP = 24900;  
 const PRICE_IDENTIFY_ACC = 125000;   
 
 const PRICE_ENCHANT = {
-    "fire": 7000,  
-    "jade": 7000,  
-    "deep": 7000,
-    "hongyo": 700
+    "fire": 12000,  
+    "jade": 6000,  
+    "deep": 5500,
+    "hongyo": 900
 };
 
 // 유효 옵션 가중치 추가 상향 (기존 2 -> 3)
@@ -6779,74 +6771,122 @@ setInterval(renderWeeklyUI, 1000);
     [수정] Firebase 역대 기록 연동 로직
    ======================================= */
 
+let currentHistoryPage = 1;
+const historyPerPage = 2; // 한 페이지에 노출할 시즌 개수
+let globalSeasonHistoryData = []; // Firebase 데이터를 담을 배열
+
+// Firebase에서 데이터 로드 및 정렬
 async function loadSeasonHistory() {
     const container = document.getElementById('season-list-container');
     if (!container) return;
 
     try {
-        // 데이터 경로 확인 로그
-        console.log("Firebase 데이터를 불러오는 중...");
-        
-        // 올바른 경로 호출 (history/weekly)
         const snapshot = await db.ref('history/weekly').once('value');
         const historyData = snapshot.val();
-
-        console.log("불러온 데이터:", historyData); // 콘솔에서 데이터가 보이는지 확인하세요.
 
         if (!historyData) {
             container.innerHTML = '<div style="color: #8b949e; text-align: center; padding: 15px;">기록된 시즌 데이터가 없습니다.</div>';
             return;
         }
 
-        let html = "";
-        const seasons = Object.keys(historyData)
+        // 객체 데이터를 배열로 변환 후 최신 시즌(내림차순) 정렬
+        globalSeasonHistoryData = Object.keys(historyData)
             .filter(key => key.startsWith('season'))
             .sort((a, b) => {
                 const numA = parseInt(a.replace(/[^0-9]/g, "")) || 0;
                 const numB = parseInt(b.replace(/[^0-9]/g, "")) || 0;
-                return numB - numA;
-            });
+                return numB - numA; // 내림차순
+            })
+            .map(key => ({
+                seasonKey: key,
+                ...historyData[key]
+            }));
 
-        seasons.forEach(seasonKey => {
-            const data = historyData[seasonKey];
-            const winners = data.winners || [];
-            
-            html += `
-                <div style="margin-top: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
-                    <div style="font-size: 0.85rem; color: #8b949e; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                        <span style="font-weight: bold; color: #adbac7;">Season ${seasonKey.replace('season', '')}</span>
-                        <span style="color: #539bf5;">${data.petName || '비공개'} 편</span>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.02); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-                        ${winners.map((w, idx) => `
-                            <div style="display: flex; justify-content: space-between; font-size: 0.95rem;">
-                                <span>${idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} ${w.name || '무명'}</span>
-                                <span style="font-weight: bold; color: #adbac7;">${w.score || '0.000'}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>`;
-        });
+        currentHistoryPage = 1; // 창을 열 때 항상 1페이지로 초기화
+        renderHistoryPage();
 
-        container.innerHTML = html;
     } catch (error) {
         console.error("Firebase 로드 에러:", error);
         container.innerHTML = '<div style="color: #ff7b72; text-align: center; padding: 15px;">연결 오류: Firebase 설정을 확인하세요.</div>';
     }
 }
 
-function toggleSeasonHistory() {
-    const content = document.getElementById('weekly-history-content');
-    const icon = document.getElementById('weekly-history-icon');
+// 2개씩 잘라서 화면에 렌더링하는 함수
+function renderHistoryPage() {
+    const container = document.getElementById('season-list-container');
+    container.innerHTML = "";
+
+    const start = (currentHistoryPage - 1) * historyPerPage;
+    const end = start + historyPerPage;
+    const pagedData = globalSeasonHistoryData.slice(start, end);
+
+    let html = "";
+    pagedData.forEach(data => {
+        const winners = data.winners || [];
+        html += `
+            <div style="margin-top: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+                <div style="font-size: 0.85rem; color: #8b949e; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                    <span style="font-weight: bold; color: #adbac7;">Season ${data.seasonKey.replace('season', '')}</span>
+                    <span style="color: #539bf5;">${data.petName || '비공개'} 편</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                    ${winners.map((w, idx) => `
+                        <div style="display: flex; justify-content: space-between; font-size: 0.95rem;">
+                            <span>${idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} ${w.name || '무명'}</span>
+                            <span style="font-weight: bold; color: #adbac7;">${w.score || '0.000'}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+    });
+    container.innerHTML = html;
+
+    // 페이지 네비게이션 버튼 상태 업데이트
+    const totalPages = Math.ceil(globalSeasonHistoryData.length / historyPerPage) || 1;
+    const pageInfo = document.getElementById('history-page-info');
+    if (pageInfo) pageInfo.innerText = `${currentHistoryPage} / ${totalPages}`;
+    
+    const prevBtn = document.getElementById('history-prev-btn');
+    const nextBtn = document.getElementById('history-next-btn');
+
+    if (prevBtn) {
+        prevBtn.disabled = (currentHistoryPage === 1);
+        prevBtn.style.opacity = (currentHistoryPage === 1) ? '0.3' : '1';
+        prevBtn.style.cursor = (currentHistoryPage === 1) ? 'default' : 'pointer';
+    }
+    if (nextBtn) {
+        nextBtn.disabled = (currentHistoryPage === totalPages);
+        nextBtn.style.opacity = (currentHistoryPage === totalPages) ? '0.3' : '1';
+        nextBtn.style.cursor = (currentHistoryPage === totalPages) ? 'default' : 'pointer';
+    }
+}
+
+// 버튼 클릭 시 페이지 이동
+function changeHistoryPage(dir) {
+    const totalPages = Math.ceil(globalSeasonHistoryData.length / historyPerPage) || 1;
+    currentHistoryPage += dir;
+    
+    if (currentHistoryPage < 1) currentHistoryPage = 1;
+    if (currentHistoryPage > totalPages) currentHistoryPage = totalPages;
+    
+    renderHistoryPage();
+}
+
+// 창 토글 이벤트
+function toggleSeasonHistory(id = 'weekly-history') {
+    const content = document.getElementById(id + '-content');
+    const icon = document.getElementById(id + '-icon');
     if (!content || !icon) return;
 
-    if (content.style.display === 'none') {
+    if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
-        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-        loadSeasonHistory(); 
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+        loadSeasonHistory(); // 열 때 Firebase에서 새로 데이터 호출
     } else {
         content.style.display = 'none';
-        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
     }
 }
 
