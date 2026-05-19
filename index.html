@@ -40,15 +40,36 @@
         }
 
         body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+    /* 기존 레이아웃 설정 유지 */
+    font-family: 'Pretendard', sans-serif;
+    color: var(--text-main);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    
+    /* 우주 배경: 별을 훨씬 풍성하게 + 성운의 중심부(아이콘 형상화) 추가 */
+    background-color: #030409 !important;
+    background-image: 
+        /* 1. 성운의 중심부 (아이콘의 형태를 암시하는 빛나는 밀집 구역) */
+        radial-gradient(circle at 50% 30%, rgba(150, 60, 60, 0.3) 0%, transparent 40%),
+        /* 2. 보라색 성운 효과 (배경) */
+        radial-gradient(circle at 80% 20%, rgba(60, 10, 100, 0.4) 0%, transparent 60%),
+        /* 3. 파란색 성운 효과 (배경) */
+        radial-gradient(circle at 20% 70%, rgba(10, 40, 80, 0.4) 0%, transparent 60%),
+        /* 4. 아주 작은 별들 (밀도 대폭 증가) */
+        radial-gradient(white 0.5px, transparent 0.5px),
+        /* 5. 중간 별들 */
+        radial-gradient(white 1.2px, transparent 1.2px),
+        /* 6. 큰 별들 */
+        radial-gradient(white 2px, transparent 2px);
+    
+    /* 별 패턴 간격 및 크기 조절 (밀도 극대화) */
+    background-size: 100% 100%, 100% 100%, 100% 100%, 200px 200px, 450px 450px, 900px 900px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 150px 200px, 300px 400px;
+    background-attachment: fixed;
+}
 /* 공지사항 내부 줄바꿈 및 간격 최적화 */
 .notice-body {
     font-size: 14px;
@@ -389,8 +410,30 @@
 .btn-calc:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
 .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.res-box { background: var(--inner-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s ease; }
-.res-box:hover { transform: translateY(-2px); }
+.res-box { 
+    background: linear-gradient(145deg, #1c2128, #111418); 
+    border: 1px solid rgba(255,255,255,0.05); 
+    border-radius: 16px; padding: 25px 15px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; overflow: hidden;
+}
+
+/* --- 여기서부터 수정 및 추가 --- */
+.res-box:hover { 
+    transform: translateY(-4px); 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4); 
+}
+
+.res-box i { 
+    font-size: 2.2rem !important; 
+    margin-bottom: 12px !important; 
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    display: block;
+}
+
+.res-box:hover i { 
+    transform: scale(1.15) rotate(10deg); 
+}
 .res-label { font-size: 12px; color: #8b949e; margin-bottom: 8px; font-weight: 500; }
 .res-val { font-size: 1.2rem; font-weight: bold; color: var(--accent-blue); letter-spacing: 0.5px; }
 
@@ -2406,7 +2449,7 @@ details[open] summary {
                 
                 <!-- 탑승 페트 결과 -->
                 <div class="res-box full-width" style="border-left: 4px solid #d2a8ff; background: rgba(210, 168, 255, 0.05);">
-                    <div class="res-label" style="color: #d2a8ff;">탑승 페트 소요시간 <i class="fa-solid fa-mound"></i></div>
+                    <div class="res-label" style="color: #d2a8ff;">탑승 페트 소요시간 🏇 </div>
                     <div id="resPetTime" class="res-val" style="color: #d2a8ff;">-</div>
                 </div>
             </div>
@@ -2550,7 +2593,7 @@ details[open] summary {
 
                 <div class="res-box" style="grid-column: span 2; padding: 15px; border: 1px dashed rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.05); display: flex; flex-direction: column; justify-content: center;">
                     <div style="color: #ff7b72; font-weight: bold; font-size: 0.95rem; margin-bottom: 6px;">
-                        <i class="fa-solid fa-circle-info"></i> 데이터 제보 안내
+                        🚨 데이터 제보 안내
                     </div>
                     <div style="font-size: 0.85rem; color: #8b949e; line-height: 1.5; word-break: keep-all;">
                         평타(기본데미지)에 대한 데이터가 필요합니다. 정보를 주시면 반영해보겠습니다.<br>
@@ -5335,7 +5378,7 @@ const NOTICE_DATABASE = [
                         <span>${pet.ghp} / ${pet.gatk} / ${pet.gdef} / ${pet.gspd}</span>
                     </div>
                     <div class="raid-buff-box">
-                        <span style="color:#539bf5; font-weight:bold; font-size: 11px;"><i class="fa-solid fa-book-open"></i> 도감능력 (140Lv)</span>
+                        <span style="color:#539bf5; font-weight:bold; font-size: 11px;"> 📑 도감능력 (140Lv)</span>
                         <span style="color:#ffffff;">${pet.encyBuff}</span>
                     </div>
                 </div>
