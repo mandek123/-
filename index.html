@@ -4895,6 +4895,24 @@ details[open] summary {
 
 const NOTICE_DATABASE = [
     {
+        id: 21,
+        date: "26년 5월 21일",
+        title: "26년 5월 21일 업데이트 공지사항입니다.",
+        summary: "1. 경험치 계산기 오류 수정 | 2. 주간 육성 페트 갱신(언딘) | 3. 일부 페트 정보 수정",
+        content: `
+            <strong>1) 경험치 계산기 개선</strong>
+            <span>- 월드경험치 버프를 켰을 때 시간당 경험치에 월경 배율이 정상적으로 표기되지 않던 현상을 수정했습니다.</span>
+            
+            <strong>2) 주간 육성 페트 변경</strong>
+            <span>- 이번 주 육성 페트가 '페가수스'에서 '언딘'으로 갱신되었습니다.</span>
+            <span>- 기존에 육성 중이던 페트가 있다면 만렙을 달성하여 육성을 완료한 뒤 새 알을 부화시켜야 정상적으로 이용하실 수 있습니다.</span>
+            
+            <strong>3) 페트 정보 수정</strong>
+            <span>- 도감 내 일부 잘못 기재되어 있던 페트들의 상세 정보를 올바르게 수정 및 반영하였습니다.</span>
+        `
+    },
+
+    {
         id: 20,
         date: "26년 5월 17일",
         title: "26년 5월 17일 업데이트 공지사항입니다.",
@@ -5913,7 +5931,7 @@ function toggleEncyPetList(listId) {
         bPetHours = calcTime(neededBPet, bPetRatio, bPetActive);
         rPetHours = calcTime(neededRPet, rPetRatio, rPetActive);
 
-        finalHourlyChar = (buffs.world && buffs.worldMins === 0) ? (hourlyBase * worldMult) : (hourlyBase * commonMult);
+        finalHourlyChar = buffs.world ? (hourlyBase * worldMult) : (hourlyBase * commonMult);
         finalHourlyBPet = bPetActive ? finalHourlyChar * bPetRatio : 0;
 
     } else {
@@ -5933,7 +5951,7 @@ function toggleEncyPetList(listId) {
     const expStr = (val, active) => {
         if (!active || val <= 0) return "-";
         const isWorld = mode === 'auto' && document.getElementById('buffWorldExp').classList.contains('active') && (parseInt(document.getElementById('worldExpMins')?.value) || 0) > 0;
-        return isWorld ? `${formatNumber(Math.floor(val))} <span style="font-size:11px; color:#8b949e; font-weight:normal;">(월경X)</span>` : formatNumber(Math.floor(val));
+        return isWorld ? `${formatNumber(Math.floor(val))} <span style="font-size:11px; color:#539bf5; font-weight:normal;">(월경 적용)</span>` : formatNumber(Math.floor(val));
     };
 
     // 캐릭터 출력
@@ -6577,7 +6595,7 @@ function resetCounts() {
     [주간 페트 챔피언십 로직 - 종합 가치 반영본]
    ======================================= */
 
-const WEEKLY_PET_NAME = "페가수스"; 
+const WEEKLY_PET_NAME = "언딘"; 
 
 // 1. 알 부화 로직 (종합 가치 비율 적용)
 function startWeeklyChallenge() {
