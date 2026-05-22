@@ -2060,6 +2060,152 @@ details[open] summary {
 }
 /* 1인 레이드 CSS 끝 */
 
+/* =========================================
+   만득이 키우기 2.0 (필드 자동전투) CSS
+   ========================================= */
+
+/* 1. 게임 필드 영역 */
+.idle-field {
+    width: 100%;
+    height: 280px;
+    background: linear-gradient(to bottom, #0a1128 0%, #122919 60%, #1a4223 100%);
+    border-radius: 12px;
+    border: 1px solid #30363d;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+}
+
+/* 필드 바닥 라인 및 그림자 */
+.idle-field::after {
+    content: '';
+    position: absolute;
+    bottom: 30px; left: 0; right: 0; height: 1px;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 20px 20px 20px rgba(10, 30, 15, 0.8);
+}
+
+/* 2. 유닛(펫 & 몬스터) 스타일 */
+.idle-entity {
+    position: absolute;
+    bottom: 30px; 
+    transform-origin: bottom center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: filter 0.2s;
+    z-index: 10;
+}
+
+.idle-entity img {
+    width: 70px; height: 70px;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
+}
+
+.facing-right img { transform: scaleX(-1); }
+
+/* 체력바 */
+.entity-hp-bar-bg {
+    width: 50px; height: 6px; background: rgba(0,0,0,0.6);
+    border-radius: 3px; border: 1px solid #000; margin-bottom: 5px; overflow: hidden;
+}
+.entity-hp-bar { height: 100%; transition: width 0.1s linear; }
+.ally-hp { background: #2ea043; }
+.enemy-hp { background: #ff4d4d; }
+
+/* 보스 스타일 (피격 애니메이션과 충돌 방지 위해 크기 속성 분리) */
+.boss-entity { 
+    width: 150px !important; 
+    height: 150px !important; 
+    filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5)); 
+    transition: all 0.3s ease; 
+}
+.boss-entity img { width: 100%; height: 100%; }
+
+/* 3. 애니메이션 효과 */
+/* 데미지 팝업 */
+@keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+}
+.dmg-text {
+    position: absolute; font-weight: 900; font-size: 1.2rem;
+    text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    pointer-events: none; animation: floatUp 0.6s ease-out forwards; z-index: 100;
+}
+.dmg-ally { color: #ff4d4d; } 
+.dmg-enemy { color: #fff; } 
+
+/* 공격 모션 */
+@keyframes atkLungeRight { 0%{transform: translateX(0);} 50%{transform: translateX(20px);} 100%{transform: translateX(0);} }
+@keyframes atkLungeLeft { 0%{transform: translateX(0);} 50%{transform: translateX(-20px);} 100%{transform: translateX(0);} }
+.anim-atk-right { animation: atkLungeRight 0.2s ease-out; }
+.anim-atk-left { animation: atkLungeLeft 0.2s ease-out; }
+
+/* 피격 모션 */
+@keyframes hitShake { 0%, 100%{filter:brightness(1);} 50%{filter:brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(3);} }
+.anim-hit { animation: hitShake 0.2s ease-in-out; }
+
+/* 4. UI 요소 (탭 및 버튼) */
+.idle-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+.idle-tab-btn {
+    flex: 1; padding: 12px; background: #1e242b; border: 2px solid transparent;
+    color: #8b949e; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s;
+}
+.idle-tab-btn.active { 
+    background: rgba(83, 155, 245, 0.2); 
+    border-color: #539bf5; 
+    color: #fff; 
+    box-shadow: 0 0 10px rgba(83, 155, 245, 0.2);
+}
+
+/* 데이터 초기화 버튼 */
+button[onclick="resetGame()"] {
+    background: linear-gradient(135deg, #dc3545, #a31c29);
+    color: #fff; border: none; padding: 8px 15px; border-radius: 6px;
+    cursor: pointer; font-weight: bold; font-size: 12px;
+    display: flex; align-items: center; gap: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+button[onclick="resetGame()"]:hover {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+}
+/* 활성화된 패시브 목록 스타일 */
+#ui-active-passives {
+    background: rgba(30, 36, 43, 0.6);
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    color: #c9d1d9;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#ui-active-passives strong {
+    color: #539bf5; /* 강조 색상 */
+    margin-right: 5px;
+}
+
+/* 개별 페트 훈련 아이템 레이아웃 보정 */
+/* 기존 renderShop 함수 내의 div와 결합하여 정렬을 맞춥니다 */
+.shop-pet-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e242b;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    margin-bottom: 10px;
+}
+/* =========================================
+   만득이 키우기 2.0 (필드 자동전투) CSS 끝
+   ========================================= */
 </style>
 </head>
 
@@ -2078,10 +2224,6 @@ details[open] summary {
             <a href="javascript:void(0);" class="nav-item" id="menu-acc" onclick="showPage('page-acc')">🎯 명중/회피계산기</a>
             <a href="javascript:void(0);" class="nav-item" id="menu-rev" onclick="showPage('page-rev')">🔄 순발력범위계산기</a>
             
-            <a href="javascript:void(0);" class="nav-item" id="menu-raid" onclick="showPage('page-raid')">
-                💀 1인 레이드 <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-            </a>
-
             <div class="dropdown">
                 <a href="javascript:void(0);" class="nav-item" id="menu-ency">📚 도감 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></a>
                 <div class="dropdown-content">
@@ -2097,18 +2239,29 @@ details[open] summary {
                     ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
                 </a>
                 <div class="dropdown-content">
-                    <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
-                        <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
-                        <span>투기장 (PvP)</span>
+    <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
+        <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
+        <span>투기장 (PvP)</span>
+        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
+    </a>
+
+    <a href="javascript:void(0);" onclick="showPage('page-weekly-championship'); closeDropdown();" style="display: flex; align-items: center;">
+        <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
+        <span>펫 육성 챔피언십</span>
+        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
+    </a>
+                    
+                    <a href="javascript:void(0);" onclick="showPage('page-idle-rpg'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-gamepad" style="color: #2ea043; width: 18px;"></i> 
+                        <span>만득이 키우기</span>
                         <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
                     </a>
 
-                    <a href="javascript:void(0);" onclick="showPage('page-weekly-championship'); closeDropdown();" style="display: flex; align-items: center;">
-                        <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
-                        <span>펫 육성 챔피언십</span>
-                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+                    <a href="javascript:void(0);" onclick="showPage('page-raid'); closeDropdown();" style="display: flex; align-items: center;">
+                        <span style="width: 18px; text-align: center;">💀</span> 
+                        <span>1인 레이드</span>
                     </a>
-                    
+
                     <a href="javascript:void(0);" onclick="showPage('page-item-sim'); closeDropdown();" style="display: flex; align-items: center;">
                         <i class="fa-solid fa-hammer" style="color: #ffcc00; width: 18px;"></i> 
                         <span>아이템 시뮬레이터</span>
@@ -2205,6 +2358,12 @@ details[open] summary {
         <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">실시간으로 저장되는 레이드</div>
     </div>
 
+    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #2ea043; box-shadow: 0 0 10px rgba(46, 160, 67, 0.2); background: linear-gradient(145deg, #15191d, #091a0e);" onclick="showPage('page-idle-rpg')">
+    <i class="fa-solid fa-gamepad" style="font-size: 2rem; color: #2ea043; margin-bottom: 10px;"></i>
+    <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">만득이 키우기</div>
+    <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">방치형 자동사냥 미니게임</div>
+    </div>
+
     <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;" onclick="showPage('page-exp')">
         <i class="fa-solid fa-chart-simple" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 10px;"></i>
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">경험치계산기</div>
@@ -2228,11 +2387,6 @@ details[open] summary {
     <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-init-sim')">
         <i class="fa-solid fa-arrows-rotate" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">초기화시뮬</div>
-    </div>
-    
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-levelup-sim')">
-        <i class="fa-solid fa-arrow-up-right-dots" style="font-size: 2rem; color: #539bf5; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">레벨업시뮬</div>
     </div>
     
     <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
@@ -2864,16 +3018,17 @@ details[open] summary {
             <div class="card-header"><i class="fa-solid fa-fire"></i> 레이드 전투 패시브 가이드</div>
             
             <div class="raid-info-card">
-                <div class="raid-info-title"><i class="fa-solid fa-circle-info"></i> 활성 및 보정 규칙</div>
-                <div style="font-size: 13px; line-height: 1.8;">
-                    • <strong>발동 조건:</strong> 모든 패시브는 <span style="color:var(--accent-orange)">120Lv 이상</span>에서만 발동 (기본 Lv1 적용)<br>
-                    • <strong>랭킹 보정:</strong> 1등(Lv5), 2등(Lv4), 3등(Lv3), 4~5등(Lv2)<br>
-                    • <strong>중첩 규칙:</strong> 서로 다른 종류는 중첩 가능하나, 동일 종류는 중복 불가
-                </div>
-            </div>
+    <div class="raid-info-title"><i class="fa-solid fa-circle-info"></i> 활성 및 보정 규칙</div>
+    <div style="font-size: 13px; line-height: 1.8;">
+        • <strong>발동 조건:</strong> 모든 패시브는 <span style="color:var(--accent-orange)">120Lv 이상</span>에서만 발동 (기본 Lv1 적용)<br>
+        • <strong>랭킹 보정:</strong> 1등(Lv5), 2등(Lv4), 3등(Lv3), 4~5등(Lv2)<br>
+        • <strong>중첩 규칙:</strong> 서로 다른 종류는 중첩 가능하나, 동일 종류는 중복 불가<br>
+        • <strong>검색 안내:</strong> 이름 외에 <span style="color:var(--accent-blue)">효과 내용</span>도 검색되며, 쉼표(,) 구분 시 다중 조건(AND) 검색이 가능합니다.
+    </div>
+</div>
 
             <div class="filter-row" style="margin-bottom: 20px;">
-                <input type="text" id="passiveSearch" placeholder="패시브 이름 검색..." onkeyup="filterRaidPassives()">
+                <input type="text" id="passiveSearch" placeholder="이름 또는 내용 검색 (ex: 명중, 치명)" onkeyup="filterRaidPassives()">
             </div>
 
             <div class="passive-list-grid" id="raid-passive-list">
@@ -3801,6 +3956,132 @@ details[open] summary {
 <!-- 1인 레이드 모달 끝 -->
 
 </div>
+
+<!-- 만득이 키우기 -->
+<div class="main-container" id="page-idle-rpg">
+    <div class="card" style="grid-column: span 2;">
+        
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 15px; margin-bottom: 15px;">
+            <div style="font-weight: bold; font-size: 1.1rem;"><i class="fa-solid fa-gamepad"></i> 만득이 키우기</div>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div id="idle-top-stats" style="display: none; font-size: 13px; font-weight: bold; gap: 15px;">
+                    <span style="color: #fca311;"><i class="fa-solid fa-coins"></i> 스톤: <span id="ui-stone" style="color: #fff;">0</span></span>
+                    <span style="color: #a5d6ff;"><i class="fa-solid fa-gem"></i> 다이아: <span id="ui-diamond" style="color: #fff;">0</span></span>
+                </div>
+                <button onclick="resetGame()" style="background: linear-gradient(135deg, #dc3545, #a31c29); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                    <i class="fa-solid fa-rotate-left"></i> 데이터 초기화
+                </button>
+            </div>
+        </div>
+
+        <details class="input-group-box" style="border-left: 4px solid var(--accent-blue); background: rgba(83, 155, 245, 0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px; cursor: pointer;">
+    <summary style="color: var(--accent-blue); font-weight: bold; outline: none; list-style: none; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-circle-info"></i> 만득이 키우기 가이드 <span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">(클릭하여 펼치기 🔽)</span>
+    </summary>
+    <div style="margin-top: 15px; font-size: 14px; line-height: 1.8; color: #d1d5da; cursor: default; display: flex; flex-direction: column; gap: 14px;">
+        
+        <p style="margin: 0; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            ⚔️ <strong style="color: var(--text-highlight);">어떻게 플레이하나요?</strong><br>
+            필드에 출전한 내 페트들이 자동으로 전진하며 몰려오는 적들을 공격합니다. 화면 하단의 <strong>[수동 공격]</strong> 버튼을 누르면 화면 전체의 적에게 강력한 광역 피해(10초 쿨타임)를 직접 입힐 수도 있습니다.
+        </p>
+
+        <p style="margin: 0; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            🛡️ <strong style="color: var(--text-highlight);">전투에서 패배하면 어떻게 되나요?</strong><br>
+            적이 아군 진영(화면 왼쪽 끝)에 도달하면 유저의 '팀 체력'이 깎입니다. 체력이 0이 되면 전투에서 패배하지만, 처음부터 다시 시작하는 것이 아니라 <strong>현재 머물고 있는 단계(판수)만 딱 1단계 차감</strong>되어 부담 없이 언제든 재도전할 수 있습니다.
+        </p>
+
+        <p style="margin: 0; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            😈 <strong style="color: var(--text-highlight);">스테이지는 어떻게 넘어가나요?</strong><br>
+            한 스테이지는 총 10판으로 구성되어 있습니다. 1번째부터 9번째 판까지 일반 몬스터를 모두 물리치면, <strong>마지막 10번째 판(9/10)에 강력한 [BOSS]가 출현</strong>합니다. 이 보스를 처치해야만 다음 스테이지로 넘어갑니다.
+        </p>
+
+        <p style="margin: 0; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            🏋️ <strong style="color: var(--text-highlight);">페트는 어떻게 성장시키나요?</strong><br>
+            적을 잡고 얻은 '스톤'을 모아 상점 탭의 <strong>[개별 페트 훈련]</strong>에서 페트들을 레벨업시킬 수 있습니다. 페트마다 가진 고유의 <strong>공격력, 방어력, 순발력(공격속도)</strong> 스탯과 성장치가 다르니 나만의 전략으로 육성해 보세요!
+        </p>
+
+        <p style="margin: 0;">
+            📦 <strong style="color: var(--text-highlight);">뽑은 펫과 무기는 어디로 가나요?</strong><br>
+            상점에서 획득한 신규 페트나 강력한 무기 장비들은 <strong>모두 [창고] 탭으로 먼저 저장</strong>됩니다. 게임 화면이 커지면 창고 탭으로 이동한 뒤, 상단 버튼을 눌러 <strong>[🐾 페트 창고]에서 출전</strong>을 시키거나 <strong>[📦 장비 창고]에서 무기를 장착</strong>하여 팀을 정비하세요!
+        </p>
+
+    </div>
+</details>
+
+        <div id="idle-start-screen" style="text-align: center; padding: 10px 0 20px 0;">
+            <h3 style="color: var(--accent-blue); margin-bottom: 10px;"><i class="fa-solid fa-magnifying-glass"></i> 함께할 스타팅 페트를 선택하세요</h3>
+            <div style="font-size: 12px; color: #8b949e; margin-bottom: 20px;">검색하지 않으면 추천 페트가 무작위로 표시됩니다.</div>
+            
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <input type="text" id="starterPetSearch" placeholder="페트 이름 검색 (예: 얀기로)" onkeyup="searchStarterPet()" style="max-width: 300px; text-align: center; font-size: 15px;">
+            </div>
+
+            <div id="starter-search-results" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-height: 280px; overflow-y: auto; padding: 10px;">
+            </div>
+        </div>
+
+        <div id="idle-main-screen" style="display: none;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <div style="font-size: 12px; color: #2ea043; font-weight: bold; margin-bottom: 3px;">유저(팀) 체력 <span id="ui-team-hp-text">100/100</span></div>
+                    <div style="width: 200px; height: 10px; background: rgba(0,0,0,0.5); border-radius: 5px; border: 1px solid #30363d; overflow: hidden;">
+                        <div id="ui-team-hp-bar" style="width: 100%; height: 100%; background: #2ea043; transition: width 0.2s;"></div>
+                    </div>
+                </div>
+                <div style="text-align: right; flex: 1;">
+                    <div style="font-weight: bold; font-size: 1.3rem; color: #ff7b72;">STAGE <span id="ui-stage">1</span></div>
+                    <div id="ui-progress" style="font-size: 0.9rem; color: #8b949e;">(0/10)</div>
+                </div>
+            </div>
+
+            <div class="idle-field" id="idle-field"></div>
+
+            <div class="idle-tabs">
+                <button class="idle-tab-btn active" onclick="switchIdleTab('battle')">⚔️ 전투 상황</button>
+                <button class="idle-tab-btn" onclick="switchIdleTab('shop')">🛒 상점 (강화/뽑기)</button>
+                <button class="idle-tab-btn" onclick="switchIdleTab('warehouse')">📦 창고 (페트 관리)</button>
+            </div>
+
+            <div id="tab-battle" class="idle-tab-content">
+    <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #30363d;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-size: 13px; color: #8b949e;">
+                <div style="margin-bottom: 5px;">출전 중인 페트: <span id="ui-field-count" style="color: #fff; font-weight: bold;">1</span> / 5</div>
+                <div>팀 총 공격력: <span id="ui-team-atk" style="color: #539bf5; font-weight:bold;">0</span></div>
+            </div>
+            <div>
+                <button onclick="manualFieldAttack(event)" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3); transition: transform 0.1s;">
+                    수동 공격 (Click)
+                </button>
+            </div>
+        </div>
+
+        <div id="ui-active-passives" style="font-size: 12px; color: #aaa; margin-top: 10px; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 4px;">
+    적용 중인 패시브: 없음
+</div>
+    </div>
+</div>
+
+            <div id="tab-shop" class="idle-tab-content" style="display: none;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;" id="shop-container">
+    </div>
+</div>
+
+            <div id="tab-warehouse" class="idle-tab-content" style="display: none;">
+                <div style="font-size: 12px; color: #8b949e; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #30363d;">
+                    💡 필드에는 스타팅 페트를 포함해 <strong>최대 5마리</strong>만 출전 가능합니다.
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;" id="warehouse-container">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<!-- 만득이 키우기 끝 -->
 
 </div>
     <div class="footer">
@@ -4895,6 +5176,22 @@ details[open] summary {
 
 const NOTICE_DATABASE = [
     {
+        id: 22,
+        date: "26년 5월 22일",
+        title: "26년 5월 22일 업데이트 공지사항입니다.",
+        summary: "1. 레이드 패시브 다중 검색 추가 | 2. 미니게임(만득이 키우기) 출시",
+        content: `
+            <strong>1) 레이드 패시브 기능 개선</strong>
+            <span>- 레이드 패시브 내용 다중 검색 기능이 새롭게 추가되었습니다.</span>
+            <span>- 새롭게 추가된 기능을 일일 퀴즈에 적극적으로 활용해 보세요!</span>
+            
+            <strong>2) 신규 미니게임 '만득이 키우기' 출시</strong>
+            <span>- 나만의 페트를 육성하여 몬스터를 처치하는 미니게임 '만득이 키우기'가 출시되었습니다.</span>
+            <span>- 페트 훈련, 무기 장착, 패시브 시너지를 활용하여 더 높은 스테이지에 도전해 보세요.</span>
+        `
+    },
+
+    {
         id: 21,
         date: "26년 5월 21일",
         title: "26년 5월 21일 업데이트 공지사항입니다.",
@@ -5765,10 +6062,24 @@ function toggleEncyPetList(listId) {
         }
 
         function filterRaidPassives() {
-            const query = document.getElementById('passiveSearch').value.toLowerCase();
-            const filtered = RAID_PASSIVE_DATABASE.filter(p => p.name.toLowerCase().includes(query));
-            renderRaidPassives(filtered);
-        }
+    // 1. 검색창 입력값 가져오기 (소문자 변환)
+    const query = document.getElementById('passiveSearch').value.toLowerCase();
+    
+    // 2. 쉼표(,)를 기준으로 검색어를 나누고 앞뒤 공백 제거 (빈 문자열은 제외)
+    const keywords = query.split(',').map(k => k.trim()).filter(k => k !== '');
+    
+    // 3. 모든 키워드를 만족하는 데이터만 필터링
+    const filtered = RAID_PASSIVE_DATABASE.filter(p => {
+        // 이름과 효과(설명)를 합친 하나의 문자열 생성
+        const combinedText = (p.name + " " + p.effect).toLowerCase();
+        
+        // 입력된 모든 키워드가 combinedText에 포함되어 있는지 확인 (AND 조건)
+        return keywords.every(keyword => combinedText.includes(keyword));
+    });
+    
+    // 4. 필터링된 결과를 기존 렌더링 함수로 전달하여 화면 갱신
+    renderRaidPassives(filtered);
+}
 
         function updateSelectColor(selectId) {
             const el = document.getElementById(selectId);
@@ -11283,8 +11594,1255 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* 1인 레이드 JS 끝 */
 
-</script>
+/* =======================================
+   [만득이 키우기 2.0 - 자동전투 엔진]
+   ======================================= */
+const ITEM_DATABASE = {
+    "ignos": { name: "이그노스의 활", img: "./images/item1.png", type: "원거리 무기", atkMult: 0.7, cdMult: 1.5, price: 3000 },
+    "spirit": { name: "봉인된 정령왕의 창", img: "./images/item2.png", type: "근거리 무기", atkMult: 1.2, cdMult: 1.0, price: 3000 }
+};
 
+let idGame = {
+    started: false,
+    stage: 1,
+    mobsKilled: 0,
+    stone: 0,
+    diamond: 0,
+    
+    upgrades: { hpLv: 1 },
+    teamMaxHp: 100,
+    teamCurHp: 100,
+    manualAtk: 10,
+    
+    fieldPets: [],
+    warehouse: [],
+    monsters: [],
+    
+    loop: null,
+    lastTime: 0
+    
+};
+
+idGame.ownedItems = [];    // 구매한 아이템 저장용
+idGame.equippedItem = null; // 현재 장착 중인 아이템
+
+function searchStarterPet() {
+    const searchInput = document.getElementById('starterPetSearch');
+    if (!searchInput) return;
+    const query = searchInput.value.toLowerCase().trim();
+    const container = document.getElementById('starter-search-results');
+    if (!container) return;
+    container.innerHTML = ''; 
+    
+    if (typeof PET_DATABASE === 'undefined') return;
+
+    let targetPets = query.length === 0 
+        ? [...PET_DATABASE].sort(() => 0.5 - Math.random()).slice(0, 4)
+        : PET_DATABASE.filter(p => p.name.toLowerCase().includes(query)).slice(0, 12);
+
+    targetPets.forEach(pet => {
+        const baseAtk = pet.atk ? Math.max(5, Math.floor(pet.atk)) : 10;
+        
+        let pot = baseAtk <= 8 ? "S" : baseAtk <= 11 ? "A" : "B";
+        let potCol = baseAtk <= 8 ? "#ff7b72" : baseAtk <= 11 ? "#fca311" : "#2ea043";
+        let growthBonus = baseAtk <= 8 ? 1.5 : baseAtk <= 11 ? 1.3 : 1.15;
+
+        const btn = document.createElement('button');
+        btn.style.cssText = "padding: 15px 10px; background: #1e242b; border: 1px solid #3d4550; border-radius: 12px; cursor: pointer; color: #fff; width: 120px;";
+        
+        btn.onclick = () => startGameWithPet(pet, growthBonus);
+        
+        btn.innerHTML = `
+            <div style="font-size: 10px; color: ${potCol}; border: 1px solid ${potCol}; border-radius: 4px; padding: 2px; margin-bottom: 5px;">잠재력 ${pot}</div>
+            <img src="${pet.img || './images/A1.png'}" style="width: 60px; height: 60px; object-fit: contain;">
+            <div style="font-size: 13px; font-weight: bold; margin-top: 5px;">${pet.name}</div>
+        `;
+        container.appendChild(btn);
+    });
+}
+
+function startGameWithPet(petData, growthBonus) {
+    document.getElementById('idle-start-screen').style.display = 'none';
+    const guideTab = document.querySelector('#page-idle-rpg details');
+    if (guideTab) guideTab.style.display = 'none';
+    
+    document.getElementById('idle-top-stats').style.display = 'flex';
+    document.getElementById('idle-main-screen').style.display = 'block';
+    
+    idGame.fieldPets.push(createPetEntity(petData, growthBonus, true));
+    
+    calcTeamStats();
+    idGame.teamCurHp = idGame.teamMaxHp;
+    idGame.started = true;
+    
+    spawnWave();
+    
+    idGame.lastTime = performance.now();
+    idGame.loop = requestAnimationFrame(gameLoop);
+    setInterval(updateUI, 200); 
+    saveGame(); // [추가] 스타팅 선택 직후 상태를 스토리지에 최초 기록
+}
+
+let entityIdCounter = 0;
+function createPetEntity(petData, growthBonus = 1, isStarter = false) {
+    // gspd(성장률) 참조를 제거하고 기본 순발력(spd) 수치를 최우선으로 가져오도록 수정
+    let spdStat = petData.spd || 10;
+    let atkMaxCd = 2.5 - (spdStat * 0.05); 
+    if (atkMaxCd < 0.4) atkMaxCd = 0.4;
+
+    return {
+        id: 'pet_' + Math.random().toString(36).substr(2, 9),
+        name: petData.name,
+        img: petData.img,
+        level: 1,
+        baseAtk: petData.atk || 10,
+        gatk: petData.gatk || 1,  
+        baseDef: petData.def || 5,
+        gdef: petData.gdef || 0.5, 
+        baseHp: petData.hp || 100,
+        ghp: petData.ghp || 10,
+        
+        // 레벨업 연산을 위한 순발력 원본 데이터 저장
+        baseSpd: petData.spd || 10,
+        gspd: petData.gspd || 0,
+        
+        atkRange: petData.atkRange || 50, 
+        passiveName: petData.passive || null, 
+        atkCooldown: 0, 
+        growthBonus: growthBonus,
+        isStarter: isStarter,
+        x: 30 + Math.random() * 20,
+        y: 110 + Math.random() * 5, 
+        el: null
+    };
+}
+function spawnWave() {
+    // 이전 몬스터 DOM 삭제 처리 (재시작 시 더미 방지)
+    idGame.monsters.forEach(m => { if(m.el) m.el.remove(); });
+    idGame.monsters = [];
+    
+    // [수정] 10스테이지 마다가 아니라, 매 스테이지의 10번째 판(9마리 잡은 상태)에 보스 등장
+    const isBoss = (idGame.mobsKilled === 9);
+    
+    // 보스면 1마리, 일반 판이면 1~2마리 무작위 생성
+    const count = isBoss ? 1 : Math.floor(Math.random() * 2) + 1;
+    
+    let hpScale = Math.pow(1.18, idGame.stage - 1);
+    let atkScale = Math.pow(1.12, idGame.stage - 1);
+    
+    let baseHp = Math.floor(20 * hpScale);
+    let baseAtk = Math.floor(2 * atkScale);
+
+    // 보스일 경우 스펙 대폭 상승
+    if(isBoss) { baseHp *= 6; baseAtk *= 4; }
+
+    for(let i=0; i<count; i++) {
+        let rPet = typeof PET_DATABASE !== 'undefined' ? PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)] : {name: "야생 펫"};
+        idGame.monsters.push({
+            id: 'mon_' + entityIdCounter++,
+            name: isBoss ? `[BOSS] ${rPet.name}` : rPet.name,
+            img: rPet.img || './images/A1.png',
+            x: 600 + (i * 50), 
+            y: 110,
+            hp: baseHp,
+            maxHp: baseHp,
+            atk: baseAtk,
+            spd: 50 + (idGame.stage * 1.5), 
+            atkRange: 50,
+            atkCooldown: 0.5, 
+            atkMaxCd: 1.5,
+            isBoss: isBoss,
+            el: null
+        });
+    }
+    syncDOM();
+}
+
+function gameLoop(time) {
+    if(!idGame.started) return;
+    let dt = Math.min((time - idGame.lastTime) / 1000, 0.1);
+    idGame.lastTime = time;
+    if(dt > 0.1) dt = 0.1; 
+    
+    // 수동 공격 쿨타임 감소
+    if (idGame.manualAtkCooldown > 0) idGame.manualAtkCooldown -= dt;
+    const field = document.getElementById('idle-field');
+    if(!field) return requestAnimationFrame(gameLoop);
+
+    // 아군 로직
+    // --- 아군(페트) 이동 및 공격 ---
+    idGame.fieldPets.forEach(pet => {
+        if (!pet.el) return;
+        
+        let target = idGame.monsters[0]; 
+        
+        if (target) {
+            // [복구됨] 적과의 거리를 계산하는 필수 코드
+            let dist = Math.abs(target.x - pet.x); 
+            
+            // 개별 페트가 장착한 아이템 데이터를 불러옴
+            let eqItem = null;
+            if (pet.equippedItemUid && idGame.ownedItems) {
+                let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+                if (foundItem && typeof ITEM_DATABASE !== 'undefined') {
+                    eqItem = ITEM_DATABASE[foundItem.itemKey];
+                }
+            }
+            
+            let isRanged = (eqItem && eqItem.type === "원거리 무기");
+            let range = isRanged ? 400 : (pet.atkRange || 50);
+
+            if (dist > range) {
+                pet.x += 120 * dt; 
+            } else {
+                if(pet.atkCooldown <= 0) {
+                    let cdMult = eqItem ? (eqItem.cdMult || 1.0) : 1.0;
+                    pet.atkCooldown = getPetAtkMaxCd(pet) * cdMult; 
+                    
+                    triggerAnim(pet.el, 'anim-atk-right');
+                    triggerAnim(target.el, 'anim-hit');
+                    
+                    let bonus = getPassiveBonus(pet);
+                    let atkMult = eqItem ? (eqItem.atkMult || 1.0) : 1.0;
+                    let dmg = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 3 * (pet.growthBonus || 1)));
+                    
+                    dmg = Math.floor(dmg * atkMult); 
+                    if (bonus.type === 'atk') dmg = Math.floor(dmg * (1 + bonus.val)); 
+                    
+                    target.hp -= dmg;
+                    showDmgText(dmg, target.x, target.y, 'dmg-enemy');
+                }
+            }
+        }
+        
+        if (pet.atkCooldown > 0) pet.atkCooldown -= dt;
+        pet.el.style.left = pet.x + 'px';
+        pet.el.style.top = pet.y + 'px';
+    });
+
+    // 적군 로직
+    for(let i = idGame.monsters.length - 1; i >= 0; i--) {
+        let mon = idGame.monsters[i];
+        mon.atkCooldown -= dt;
+
+        let target = idGame.fieldPets.reduce((prev, curr) => curr.x > prev.x ? curr : prev, idGame.fieldPets[0]);
+
+        if (target) {
+            let dist = Math.abs(mon.x - target.x);
+            if (dist > mon.atkRange) {
+                mon.x -= mon.spd * dt; 
+            } else {
+                if (mon.atkCooldown <= 0) {
+                    mon.atkCooldown = mon.atkMaxCd;
+                    triggerAnim(mon.el, 'anim-atk-left');
+                    triggerAnim(target.el, 'anim-hit');
+                    
+                    // ================= [방어력 시스템 전투 반영] =================
+                    // 1. 현재 출전 중인 아군 페트들의 방어력 총합 계산
+                    let teamTotalDef = 0;
+                    idGame.fieldPets.forEach(p => {
+                        // 레벨과 성장률(growthBonus)이 반영된 실시간 방어력 합산
+                        let petDef = (p.baseDef || 5) + ((p.gdef || 0.5) * (p.level - 1) * p.growthBonus);
+                        teamTotalDef += petDef;
+                    });
+
+                    // 2. 최종 데미지 공식: 몬스터 공격력 - (아군 방어력 총합 * 0.1)
+                    // (최소 1 데미지는 입도록 방어 한계선 설정)
+                    let finalDamage = Math.floor(mon.atk - (teamTotalDef * 0.1));
+                    if (finalDamage < 1) finalDamage = 1;
+
+                    // 3. 체력 차감 및 텍스트 출력
+                    idGame.teamCurHp -= finalDamage;
+                    showDmgText(finalDamage, target.x, target.y, 'dmg-ally');
+                    
+                    if (idGame.teamCurHp <= 0) {
+                        handleGameOver();
+                        break; // 게임오버 시 루프 탈출
+                    }
+                }
+            }
+        }
+
+        // 몬스터 사망
+        if (mon.hp <= 0) {
+            let reward = Math.floor(15 + 3 * idGame.stage * Math.pow(1.10, idGame.stage - 1));
+            
+            if(mon.isBoss) {
+                reward *= 10;
+                if(Math.random() < 0.7) {
+                    idGame.diamond += 100;
+                    // [버그 수정] 몬스터 이미지가 지워진 찰나의 순간에 좌표를 읽으려다 스크립트가 멈추는 현상 완벽 방지
+                    let dropY = mon.y - 30;
+                    showDmgText("💎+100", mon.x, dropY, 'dmg-enemy');
+                }
+            }
+            idGame.stone += reward;
+            
+            if(mon.el) mon.el.remove();
+            idGame.monsters.splice(i, 1);
+            
+            // 모든 몬스터가 전멸했을 때 다음 판 진행 판정
+            if(idGame.monsters.length === 0) {
+                if(mon.isBoss) {
+                    idGame.stage++;
+                    idGame.mobsKilled = 0;
+                    saveGame();
+                } else {
+                    idGame.mobsKilled++;
+                }
+                spawnWave();
+            }
+        }
+    }
+    
+    renderEntities();
+    requestAnimationFrame(gameLoop);
+}
+
+function handleGameOver() {
+    // [추가] 패배 시 필드에 남아있는 모든 몬스터의 HTML 요소를 강제로 완전히 지웁니다.
+    idGame.monsters.forEach(m => {
+        if (m.el) {
+            m.el.remove();
+            m.el = null;
+        }
+    });
+    // 혹시 모를 더미 엘리먼트 제거를 위해 클래스명으로도 한 번 더 청소합니다.
+    document.querySelectorAll('.idle-entity:not(.facing-right)').forEach(el => el.remove());
+
+    // 몬스터 처치 단계(0~9단계)가 0보다 크면 단계만 감소
+    if (idGame.mobsKilled > 0) {
+        idGame.mobsKilled--;
+    } 
+    // 0단계라면 스테이지를 낮춤
+    else if (idGame.stage > 1) {
+        idGame.stage--;
+        idGame.mobsKilled = 9; 
+    }
+    
+    idGame.teamCurHp = idGame.teamMaxHp;
+    updateFormation(); 
+    document.querySelectorAll('.dmg-text').forEach(el => el.remove());
+    
+    const field = document.getElementById('idle-field');
+    field.style.background = "#4a0b0b"; 
+    setTimeout(() => field.style.background = "", 200);
+    
+    // 데이터 구조 초기화 후 새롭게 생성
+    idGame.monsters = []; 
+    spawnWave();
+    saveGame(); // 페널티 적용 후 저장
+}
+
+function manualFieldAttack(e) {
+    if(!idGame.started || idGame.monsters.length === 0 || idGame.manualAtkCooldown > 0) return; 
+    
+    idGame.manualAtkCooldown = 10; 
+    
+    // 스테이지에 비례하여 수동 공격 데미지 증가 (기본 데미지 10 * 1.18^스테이지)
+    let stageDmg = Math.floor(10 * Math.pow(1.18, idGame.stage - 1));
+    
+    idGame.monsters.forEach(mon => {
+        mon.hp -= stageDmg;
+        triggerAnim(mon.el, 'anim-hit');
+        showDmgText(stageDmg, mon.x, mon.y, 'dmg-enemy');
+    });
+}
+
+function syncDOM() {
+    const field = document.getElementById('idle-field');
+    const updateDOM = (entity, isAlly) => {
+        if (!entity.el) {
+            entity.el = document.createElement('div');
+            entity.el.className = `idle-entity ${isAlly ? 'facing-right' : ''} ${entity.isBoss ? 'boss-entity' : ''}`;
+            
+            // [핵심 수정] CSS 충돌을 막기 위해 가로/세로 64px 크기와 절대 좌표를 인라인으로 강제 지정
+            entity.el.style.cssText = `position: absolute; width: 64px; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; left: ${entity.x}px; top: ${entity.y}px;`;
+            
+            let hpBarHTML = isAlly ? '' : `
+                <div style="position: absolute; top: -12px; width: 46px; height: 6px; background: #1e242b; border: 1px solid #000; border-radius: 3px; z-index: 100; overflow: hidden;">
+                    <div id="hp_${entity.id}" style="width: 100%; height: 100%; background: #ff4d4d; transition: width 0.1s linear;"></div>
+                </div>`;
+                
+            // 이름표(Bottom)가 바닥 경계선에 잘리지 않도록 위치(-18px) 조정
+            entity.el.innerHTML = `
+                ${hpBarHTML}
+                <img src="${entity.img}" style="width: 64px; height: 64px; object-fit: contain; position: relative; z-index: 10;">
+                <div style="position: absolute; bottom: -18px; font-size: 11px; color:#fff; font-weight:bold; background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px; white-space: nowrap; z-index: 20; text-align: center;">${entity.name}</div>
+            `;
+            field.appendChild(entity.el);
+        }
+    };
+    
+    idGame.fieldPets.forEach(p => updateDOM(p, true));
+    idGame.monsters.forEach(m => updateDOM(m, false));
+}
+
+function renderEntities() {
+    idGame.fieldPets.forEach(p => { 
+        if(p.el) { 
+            p.el.style.left = p.x + 'px'; 
+            p.el.style.top = p.y + 'px'; 
+        } 
+    });
+    idGame.monsters.forEach(m => {
+        if(m.el) {
+            m.el.style.left = m.x + 'px';
+            m.el.style.top = m.y + 'px';
+            const hpBar = document.getElementById(`hp_${m.id}`);
+            if(hpBar && m.maxHp > 0) {
+                let hpPercent = Math.max(0, (m.hp / m.maxHp) * 100);
+                hpBar.style.width = hpPercent + '%';
+            }
+        }
+    });
+}
+
+function updateUI() {
+    // 1. 기본 정보 업데이트
+    document.getElementById('ui-stone').innerText = idGame.stone.toLocaleString();
+    document.getElementById('ui-diamond').innerText = idGame.diamond.toLocaleString();
+    document.getElementById('ui-stage').innerText = idGame.stage;
+    document.getElementById('ui-progress').innerText = idGame.mobsKilled === 9 ? "(BOSS)" : `(${idGame.mobsKilled}/10)`;
+    document.getElementById('ui-team-hp-text').innerText = `${Math.floor(idGame.teamCurHp)} / ${idGame.teamMaxHp}`;
+    document.getElementById('ui-team-hp-bar').style.width = Math.max(0, (idGame.teamCurHp / idGame.teamMaxHp) * 100) + '%';
+    document.getElementById('ui-field-count').innerText = idGame.fieldPets.length;
+
+    // 2. 패시브 합산 및 전체 스탯 계산 구역
+    let totalTeamAtk = 0;
+    let activePassives = [];
+
+    idGame.fieldPets.forEach(pet => {
+        let petLevel = pet.level || 1;
+        let atk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 3 * (pet.growthBonus || 1)));
+        
+        // [패시브 자동 복구 로직] 세이브 데이터에 패시브가 누락되었어도 원본 PET_DATABASE에서 이름을 찾아 강제로 주입합니다.
+        let pName = pet.passiveName || pet.passive;
+        if (!pName && typeof PET_DATABASE !== 'undefined') {
+            const originPet = PET_DATABASE.find(p => p.name === pet.name);
+            if (originPet && originPet.passive) {
+                pet.passiveName = originPet.passive;
+                pName = originPet.passive;
+            }
+        }
+        
+        // 패시브가 확인되면 무조건 UI 배열에 밀어 넣습니다.
+        if (pName) {
+            let pLevelIdx = Math.floor((petLevel - 1) / 10);
+            activePassives.push(`<span style="color:#a5d6ff;">${pet.name}</span>: ${pName}(Lv.${pLevelIdx + 1})`);
+            
+            // 데미지 뻥튀기 로직 연동
+            if (typeof RAID_PASSIVE_DATABASE !== 'undefined') {
+                const db = RAID_PASSIVE_DATABASE.find(d => d.name === pName);
+                if (db) {
+                    let bonus = getPassiveBonus(pet);
+                    if (bonus.type === 'atk') atk = Math.floor(atk * (1 + bonus.val));
+                }
+            }
+        }
+        totalTeamAtk += atk;
+    });
+
+    // 팀 총 공격력 텍스트 갱신
+    const teamAtkEl = document.getElementById('ui-team-atk');
+    if(teamAtkEl) teamAtkEl.innerText = totalTeamAtk.toLocaleString();
+
+    // [출력 연동] 5마리 전부 줄바꿈이나 간격을 두어 깔끔하게 노출합니다.
+    const passiveUI = document.getElementById('ui-active-passives');
+    if (passiveUI) {
+        passiveUI.innerHTML = `<strong>적용 중인 패시브 (${activePassives.length}명) :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px;">${activePassives.length > 0 ? activePassives.join(' &nbsp;|&nbsp; ') : '없음'}</div>`;
+    }
+    
+    // 3. 수동 공격 버튼 쿨타임 (기존 로직 유지)
+    const manualBtn = document.querySelector('[onclick="manualFieldAttack(event)"]');
+    if(manualBtn) {
+        if(idGame.manualAtkCooldown > 0) {
+            let pct = (idGame.manualAtkCooldown / 10) * 100;
+            manualBtn.style.background = `linear-gradient(to right, #666 ${pct}%, #dc3545 ${pct}%)`;
+            manualBtn.innerText = `대기중 (${Math.ceil(idGame.manualAtkCooldown)}초)`;
+            manualBtn.disabled = true;
+        } else {
+            manualBtn.style.background = "#dc3545";
+            manualBtn.innerText = "수동 공격 (Click)";
+            manualBtn.disabled = false;
+        }
+    }
+    
+    renderWarehouse();
+    const shopTab = document.getElementById('tab-shop');
+    if (shopTab && shopTab.style.display !== 'none') {
+        renderShop();
+        updateDynamicShopElements();
+    }
+}
+
+function switchIdleTab(tabName) {
+    document.querySelectorAll('.idle-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.idle-tab-content').forEach(c => c.style.display = 'none');
+    
+    // 클릭된 버튼 처리
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+    
+    const targetTab = document.getElementById(`tab-${tabName}`);
+    if (targetTab) {
+        targetTab.style.display = 'block';
+    }
+    
+    // 상점 탭을 열 때 즉시 한 번 렌더링을 쳐서 반응 속도를 유지합니다.
+    if (tabName === 'shop') {
+        renderShop();
+    }
+    
+    updateUI();
+}
+
+function calcTeamStats() {
+    let oldMaxHp = idGame.teamMaxHp;
+    idGame.teamMaxHp = Math.floor(100 * Math.pow(1.2, idGame.upgrades.hpLv - 1));
+    idGame.teamCurHp += (idGame.teamMaxHp - oldMaxHp); 
+}
+
+// 상점 렌더링 (UI 간격 및 정렬 개선)
+function renderShop() {
+    const container = document.getElementById('shop-container');
+    if(!container) return; 
+    
+    // [핵심] 상점 틀이 이미 그려져 있다면 중복해서 innerHTML을 실행하지 않고 튕겨냅니다.
+    if (container.children.length > 0) return;
+    
+    let hpCost = Math.floor(50 * Math.pow(1.5, idGame.upgrades.hpLv - 1));
+    
+    let html = `
+        <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+                <div style="color:#2ea043; font-weight:bold; margin-bottom: 5px;"><i class="fa-solid fa-heart"></i> 체력 단련 (<span id="shop-hp-lv">Lv.${idGame.upgrades.hpLv}</span>)</div>
+                <div style="font-size:12px; color:#8b949e; margin-bottom:10px;">팀 최대 체력 상승</div>
+            </div>
+            <button id="shop-hp-btn" onclick="buyTeamHp(${hpCost})" style="width:100%; padding:8px; background:${idGame.stone >= hpCost ? '#2ea043' : '#30363d'}; border:none; border-radius:6px; color:#fff; cursor:pointer; font-weight:bold;">스톤 ${hpCost.toLocaleString()}</button>
+        </div>
+        
+        <div style="background:#2d1a1a; padding:15px; border-radius:8px; border:1px solid #ff4d4d; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+                <div style="color:#ff7b72; font-weight:bold; margin-bottom: 5px;">✨ 고급 펫 소환</div>
+                <div style="font-size:12px; color:#8b949e; margin-bottom:10px;">다이아로 무작위 펫 소환</div>
+            </div>
+            <button id="shop-pet-btn" onclick="buyPet()" style="width:100%; padding:8px; background:${idGame.diamond >= 500 ? '#ff4d4d' : '#30363d'}; border:none; border-radius:6px; color:#fff; cursor:pointer; font-weight:bold;">다이아 500</button>
+        </div>
+        
+        <div style="background:#1d1830; padding:15px; border-radius:8px; border:1px solid #8a2be2; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+                <div style="color:#a370f7; font-weight:bold; margin-bottom: 5px;">🎟️ 페트 프리미엄 선택권</div>
+                <div style="font-size:12px; color:#8b949e; margin-bottom:10px;">원하는 페트의 이름을 검색하여 즉시 영입</div>
+            </div>
+            <button id="shop-ticket-btn" onclick="petSummonTicket()" style="width:100%; padding:8px; background:${idGame.diamond >= 5000 ? '#8a2be2' : '#30363d'}; border:none; border-radius:6px; color:#fff; cursor:pointer; font-weight:bold;">다이아 5000</button>
+        </div>
+        
+        <div style="grid-column: 1 / -1; margin-top: 10px; padding-top: 10px; border-top: 1px solid #30363d; font-size: 14px; color: var(--accent-blue); font-weight: bold;">
+            <i class="fa-solid fa-dumbbell"></i> 개별 페트 훈련
+        </div>
+        
+        <div id="shop-pet-train-list" style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;"></div>
+    `;
+
+    html += `
+        <div style="grid-column: 1 / -1; margin-top: 15px; color: #fff; font-weight: bold;">⚔️ 아이템 상점</div>
+        ${Object.keys(ITEM_DATABASE).map(key => {
+            let item = ITEM_DATABASE[key];
+            return `
+            <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <img src="${item.img}" style="width:45px; height:45px; object-fit:contain; background:rgba(0,0,0,0.3); border-radius:8px; padding:2px;">
+                    <div>
+                        <div style="font-size:14px; font-weight:bold; color:#fff;">${item.name}</div>
+                        <div style="font-size:12px; color:#8b949e;">구분: ${item.type} | 가격: <span style="color:#a5d6ff;">${item.price} 다이아</span></div>
+                    </div>
+                </div>
+                <button id="shop-item-btn-${key}" onclick="buyItem('${key}')" style="background:${idGame.diamond >= item.price ? '#d29922' : '#30363d'}; border:none; padding:10px 16px; border-radius:6px; color:#fff; font-weight:bold; cursor:pointer;">구매</button>
+            </div>`;
+        }).join('')}
+    `;
+
+    container.innerHTML = html;
+    updateDynamicShopElements(); // 틀을 찍어낸 직후 스탯값과 리스트를 실시간으로 최초 강제 매핑합니다.
+}
+// [파일 하단에 추가] 실시간 스톤/다이아 변동에 따라 버튼 색상 및 페트 훈련 리스트만 흔들림 없이 변경해주는 함수
+function updateDynamicShopElements() {
+    const trainListContainer = document.getElementById('shop-pet-train-list');
+    if (!trainListContainer) return;
+
+    // 1. 체력 단련 데이터 정밀 갱신 및 속성 재매핑
+    let hpCost = Math.floor(50 * Math.pow(1.5, idGame.upgrades.hpLv - 1));
+    const hpLvEl = document.getElementById('shop-hp-lv');
+    const hpBtnEl = document.getElementById('shop-hp-btn');
+    if(hpLvEl) hpLvEl.innerText = `Lv.${idGame.upgrades.hpLv}`;
+    if(hpBtnEl) {
+        hpBtnEl.innerText = `스톤 ${hpCost.toLocaleString()}`;
+        hpBtnEl.style.background = idGame.stone >= hpCost ? '#2ea043' : '#30363d';
+        hpBtnEl.setAttribute('onclick', `buyTeamHp(${hpCost})`);
+    }
+
+    // 2. 상단 뽑기/선택권 버튼 다이아 잔액 연동 활성/비활성화 색상 제어
+    const petBtn = document.getElementById('shop-pet-btn');
+    if(petBtn) petBtn.style.background = idGame.diamond >= 500 ? '#ff4d4d' : '#30363d';
+    
+    const ticketBtn = document.getElementById('shop-ticket-btn');
+    if(ticketBtn) ticketBtn.style.background = idGame.diamond >= 5000 ? '#8a2be2' : '#30363d';
+
+    // 3. 아이템 상점 다이아 보유량 연동 실시간 색상 제어
+    Object.keys(ITEM_DATABASE).forEach(key => {
+        const itemBtn = document.getElementById(`shop-item-btn-${key}`);
+        if(itemBtn) itemBtn.style.background = idGame.diamond >= ITEM_DATABASE[key].price ? '#d29922' : '#30363d';
+    });
+
+    // 데이터 누락 방지 안전장치가 추가된 페트 훈련 리스트 갱신 구역
+    let fieldPetsSafe = Array.isArray(idGame.fieldPets) ? idGame.fieldPets : [];
+    let warehouseSafe = Array.isArray(idGame.warehouse) ? idGame.warehouse : [];
+    let allPets = [...fieldPetsSafe, ...warehouseSafe];
+    
+    let trainHtml = '';
+    allPets.forEach(pet => {
+        let petLevel = pet.level || 1;
+        let petBaseAtk = pet.baseAtk || 10;
+        let petGatk = pet.gatk || 1;
+        let petGrowthBonus = pet.growthBonus || 1;
+        // 동적 계산된 공격 속도를 UI에 반영
+        let petAtkMaxCd = getPetAtkMaxCd(pet).toFixed(2);
+        
+        let cost = Math.floor(50 * Math.pow(1.3, petLevel - 1));
+        let curAtk = Math.floor(petBaseAtk + (petGatk * (petLevel - 1) * 3 * petGrowthBonus));
+        let nextAtk = Math.floor(petBaseAtk + (petGatk * petLevel * 3 * petGrowthBonus));
+        
+        trainHtml += `
+        <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <img src="${pet.img || './images/A1.png'}" style="width:45px; height:45px; object-fit:contain; background:rgba(0,0,0,0.3); border-radius:8px; padding:2px;">
+                <div>
+                    <div style="font-size:14px; font-weight:bold; color:#fff; margin-bottom: 5px;">${pet.name || '무명 페트'} <span style="color:#fca311;">Lv.${petLevel}</span></div>
+                    <div style="font-size:12px; color:#8b949e; display:flex; gap:10px;">
+                        <span>공격력: <b style="color:#fff;">${curAtk}</b> <span style="color:#2ea043;">(→${nextAtk})</span></span>
+                        <span>공격속도: <b style="color:#539bf5;">${petAtkMaxCd}초</b></span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="buyPetLevel('${pet.id}', ${cost})" style="padding:10px 16px; background:${idGame.stone >= cost ? '#539bf5' : '#30363d'}; border:none; border-radius:6px; color:#fff; cursor:pointer; font-weight:bold;">
+                스톤 ${cost.toLocaleString()}
+            </button>
+        </div>`;
+    });
+    
+    // [수정 핵심] 기존 HTML과 새로 공백을 제거한 문자열을 정밀 비교하여, "변경사항이 있을 때만" innerHTML을 실행합니다.
+    let cleanOldHtml = trainListContainer.innerHTML.replace(/\s+/g, '');
+    let cleanNewHtml = trainHtml.replace(/\s+/g, '');
+
+    if (cleanOldHtml !== cleanNewHtml) {
+        trainListContainer.innerHTML = trainHtml;
+    }
+}
+
+function buyTeamHp(cost) {
+    if(idGame.stone >= cost) {
+        idGame.stone -= cost;
+        idGame.upgrades.hpLv++;
+        calcTeamStats();
+        updateUI();
+        saveGame(); 
+    }
+}
+
+function buyPetLevel(id, cost) {
+    if(idGame.stone >= cost) {
+        let pet = idGame.fieldPets.find(p => p.id === id) || idGame.warehouse.find(p => p.id === id);
+        if(pet) {
+            idGame.stone -= cost;
+            pet.level++;
+            // [수정] 순발력 성장 (공격속도 빨라짐)
+            pet.gspd = Math.min(2.0, pet.gspd + 0.05); 
+            // [수정] 즉시 공속 반영 (쿨타임 단축)
+            pet.atkMaxCd = Math.max(0.4, 2.5 - pet.gspd); 
+            updateUI();
+            saveGame();
+        }
+    }
+}
+
+function buyPet() {
+    if (idGame.diamond < 500) {
+        alert("다이아가 부족합니다.");
+        return;
+    }
+    idGame.diamond -= 500;
+    
+    // 무작위 펫 데이터 가져오기 (기존에 정의된 PET_DATABASE 사용)
+    const keys = Object.keys(PET_DATABASE);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    const petData = PET_DATABASE[randomKey];
+    
+    // 성장률 등급 무작위 결정 (예시)
+    const growth = 1.0 + Math.random() * 0.5; 
+    
+    const newPet = createPetEntity(petData, growth, false);
+    
+    // [수정] 필드가 아닌 창고(warehouse)로 무조건 이동
+    idGame.warehouse.push(newPet);
+    
+    alert(`[${petData.name}]을(를) 획득하여 창고로 보냈습니다!`);
+    saveGame();
+    renderShop();
+}
+
+// 창고 내부 탭 상태 저장을 위한 전역 변수 (함수 밖에 선언하거나 없으면 자동 생성)
+if (typeof currentWarehouseTab === 'undefined') window.currentWarehouseTab = 'pet'; 
+
+function renderWarehouse() {
+    const container = document.getElementById('warehouse-container');
+    if(!container || container.offsetParent === null) return;
+    container.innerHTML = '';
+
+    // [구형 세이브 데이터 마이그레이션] 기존에 문자열로 저장된 아이템을 UID 객체로 변환
+    if (idGame.ownedItems && idGame.ownedItems.length > 0 && typeof idGame.ownedItems[0] === 'string') {
+        idGame.ownedItems = idGame.ownedItems.map(itemKey => ({
+            uid: 'item_' + Math.random().toString(36).substr(2, 9),
+            itemKey: itemKey
+        }));
+        idGame.equippedItem = null; 
+        saveGame();
+    }
+    
+    let tabHtml = `
+        <div style="grid-column: 1 / -1; display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #30363d; padding-bottom: 10px;">
+            <button onclick="window.currentWarehouseTab='pet'; renderWarehouse();" style="flex: 1; padding: 10px; background: ${window.currentWarehouseTab === 'pet' ? '#539bf5' : '#21262d'}; color: white; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;">
+                🐾 페트 창고 (${idGame.warehouse.length}마리 대기중)
+            </button>
+            <button onclick="window.currentWarehouseTab='item'; renderWarehouse();" style="flex: 1; padding: 10px; background: ${window.currentWarehouseTab === 'item' ? '#d29922' : '#21262d'}; color: white; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;">
+                📦 장비 창고 (${(idGame.ownedItems || []).length}개 보유중)
+            </button>
+        </div>
+    `;
+    container.innerHTML = tabHtml;
+
+    if (window.currentWarehouseTab === 'pet') {
+        container.innerHTML += `<div style="grid-column: 1 / -1; color: #539bf5; font-weight: bold; font-size: 13px; margin-bottom: 5px;">현재 출전 중인 페트 (${idGame.fieldPets.length}/5)</div>`;
+        
+        idGame.fieldPets.forEach((pet) => {
+            let itemHtml = '';
+            if (pet.equippedItemUid && idGame.ownedItems) {
+                let eqObj = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+                if(eqObj && ITEM_DATABASE[eqObj.itemKey]) {
+                    itemHtml = `<div style="font-size:10px; color:#1e242b; background:#d29922; padding:2px 4px; border-radius:3px; margin-bottom:5px; font-weight:bold;">장착: ${ITEM_DATABASE[eqObj.itemKey].name}</div>`;
+                }
+            }
+            
+            container.innerHTML += `
+                <div style="background:rgba(83, 155, 245, 0.1); border:1px solid #539bf5; padding:10px; border-radius:8px; text-align:center;">
+                    <img src="${pet.img}" style="width:40px; height:40px; object-fit:contain;">
+                    <div style="font-size:12px; font-weight:bold; margin:5px 0; color:#fff;">${pet.name}</div>
+                    ${itemHtml}
+                    ${pet.isStarter 
+                        ? `<button disabled style="font-size:11px; padding:4px 8px; border-radius:4px; background:#30363d; color:#8b949e; border:none;">고정됨</button>` 
+                        : `<button onclick="unequipPet('${pet.id}')" style="font-size:11px; padding:4px 8px; border-radius:4px; background:#dc3545; color:#fff; border:none; cursor:pointer;">대기실로 보냄</button>`}
+                </div>
+            `;
+        });
+
+        container.innerHTML += `<div style="grid-column: 1 / -1; margin-top: 15px; color: #8b949e; font-weight: bold; font-size: 13px; border-top: 1px solid #30363d; padding-top: 10px;">창고에서 대기 중인 페트 목록</div>`;
+        
+        if (idGame.warehouse.length === 0) {
+            container.innerHTML += `<div style="grid-column: 1 / -1; color: #8b949e; text-align: center; padding: 20px; font-size: 12px;">창고에 대기 중인 페트가 없습니다.</div>`;
+        } else {
+            idGame.warehouse.forEach((pet, idx) => {
+                let canEquip = idGame.fieldPets.length < 5;
+                let curAtk = Math.floor(pet.baseAtk + (pet.gatk * (pet.level - 1) * 3 * pet.growthBonus));
+                let speedText = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet).toFixed(1) : "2.0";
+                
+                let itemHtml = '';
+                if (pet.equippedItemUid && idGame.ownedItems) {
+                    let eqObj = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+                    if(eqObj && ITEM_DATABASE[eqObj.itemKey]) {
+                        itemHtml = `<div style="font-size:10px; color:#1e242b; background:#d29922; padding:2px 4px; border-radius:3px; margin-bottom:5px; font-weight:bold;">장착: ${ITEM_DATABASE[eqObj.itemKey].name}</div>`;
+                    }
+                }
+                
+                container.innerHTML += `
+                    <div style="background:#1e242b; border:1px solid #30363d; padding:10px; border-radius:8px; text-align:center; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+                        <img src="${pet.img}" style="width:40px; height:40px; object-fit:contain; filter:grayscale(0.5);">
+                        <div style="font-size:12px; margin:5px 0; font-weight:bold; color:#fff;">${pet.name}</div>
+                        ${itemHtml}
+                        <div style="font-size:10px; color:#8b949e; margin-bottom:8px;">Atk: ${curAtk} | 속도: ${speedText}초</div>
+                        <button onclick="equipPet(${idx})" ${!canEquip ? 'disabled' : ''} style="width:100%; font-size:11px; padding:4px 0; border-radius:4px; background:${canEquip ? '#2ea043' : '#30363d'}; color:#fff; border:none; cursor:${canEquip ? 'pointer' : 'not-allowed'}; font-weight:bold;">출전</button>
+                    </div>
+                `;
+            });
+        }
+    } 
+    else if (window.currentWarehouseTab === 'item') {
+        container.innerHTML += `<div style="grid-column: 1 / -1; color: #d29922; font-weight: bold; font-size: 13px; margin-bottom: 5px;">보유 중인 개별 장비 목록</div>`;
+
+        if (!idGame.ownedItems || idGame.ownedItems.length === 0) {
+            container.innerHTML += `<div style="grid-column: 1 / -1; color: #8b949e; text-align: center; padding: 20px; font-size: 12px;">창고에 보유 중인 무기가 없습니다.</div>`;
+        } else {
+            idGame.ownedItems.forEach((itemObj) => {
+                let item = ITEM_DATABASE[itemObj.itemKey];
+                if(!item) return;
+                
+                // 해당 아이템을 장착하고 있는 페트 검색
+                let eqOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemObj.uid) || idGame.warehouse.find(p => p.equippedItemUid === itemObj.uid);
+                
+                let btnHtml = eqOwner 
+                    ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
+                    : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
+
+                container.innerHTML += `
+                <div style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; justify-content: space-between; gap:8px;">
+                    <img src="${item.img}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.2); border-radius:6px; padding:2px;">
+                    <div style="font-size:12px; font-weight:bold; color:#fff;">${item.name}</div>
+                    <div style="font-size:10px; color:#8b949e;">공 x${item.atkMult} / 쿨 x${item.cdMult}</div>
+                    ${btnHtml}
+                </div>`;
+            });
+        }
+    }
+}
+
+function equipPet(wIndex) {
+    if(idGame.fieldPets.length < 5) {
+        let pet = idGame.warehouse.splice(wIndex, 1)[0];
+        idGame.fieldPets.push(pet);
+        updateFormation(); // [추가] 출전 즉시 방어력 기준 위치 재정렬
+        syncDOM(); updateUI();
+        saveGame();
+    }
+}
+
+function unequipPet(id) {
+    let idx = idGame.fieldPets.findIndex(p => p.id === id);
+    if(idx > -1 && !idGame.fieldPets[idx].isStarter) {
+        let pet = idGame.fieldPets.splice(idx, 1)[0];
+        if(pet.el) { pet.el.remove(); pet.el = null; } 
+        idGame.warehouse.push(pet);
+        updateUI();
+    }
+}
+
+function triggerAnim(el, animClass) {
+    if(!el) return;
+    el.classList.remove(animClass);
+    void el.offsetWidth;
+    el.classList.add(animClass);
+}
+
+function showDmgText(text, x, y, className) {
+    const field = document.getElementById('idle-field');
+    if(!field) return;
+    
+    const div = document.createElement('div');
+    div.className = `dmg-text ${className}`;
+    div.innerText = typeof text === 'number' ? `-${text.toLocaleString()}` : text;
+    
+    // [수정] 텍스트가 허공을 맴돌지 않도록 64px 캐릭터 정중앙을 기준으로 좌표 자동 보정
+    div.style.left = `${x + 32}px`; 
+    div.style.top = `${y - 10}px`;
+    
+    field.appendChild(div);
+    
+    setTimeout(() => {
+        if (div && div.parentNode) div.remove();
+    }, 600);
+}
+
+// [저장 로직] 핵심 데이터만 추출하여 저장
+function saveGame() {
+    const saveData = {
+        stage: idGame.stage,
+        mobsKilled: idGame.mobsKilled,
+        stone: idGame.stone,
+        diamond: idGame.diamond,
+        upgrades: idGame.upgrades,
+        fieldPets: idGame.fieldPets.map(p => ({...p, el: null})), 
+        warehouse: idGame.warehouse.map(p => ({...p, el: null})),
+        ownedItems: idGame.ownedItems || [],       // [누락 보정] 소유 아이템 배열 저장
+        equippedItem: idGame.equippedItem || null  // [누락 보정] 장착 무기 상태 저장
+    };
+    localStorage.setItem('idleGameSave', JSON.stringify(saveData));
+}
+
+// [불러오기 로직]
+function loadGame() {
+    const saved = localStorage.getItem('idleGameSave');
+    if (!saved) return false;
+
+    const data = JSON.parse(saved);
+    idGame.stage = data.stage || 1;
+    
+    // [추가] 누락되었던 세부 진행도(몬스터 처치 수) 불러오기
+    idGame.mobsKilled = data.mobsKilled || 0; 
+    
+    idGame.stone = data.stone || 0;
+    idGame.diamond = data.diamond || 0;
+    idGame.upgrades = data.upgrades || { hpLv: 1 };
+    idGame.fieldPets = data.fieldPets || [];
+    idGame.warehouse = data.warehouse || [];
+    idGame.ownedItems = data.ownedItems || []; 
+    idGame.equippedItem = data.equippedItem || null;
+    
+    // [중요 1] 구형 세이브 데이터에 누락된 필수 스탯 강제 주입
+    idGame.fieldPets.forEach(pet => {
+        if (!pet.spd) pet.spd = 60;
+        if (!pet.atkRange) pet.atkRange = 50;
+    });
+
+    calcTeamStats();
+    idGame.teamCurHp = idGame.teamMaxHp;
+    
+    // [중요 2] 세이브에 저장된 옛날 X좌표를 무시하고, 현재 코드의 포메이션 공식으로 덮어씀
+    if (typeof updateFormation === 'function') {
+        updateFormation(); 
+    }
+    
+    return true;
+}
+
+// [초기화 로직]
+function resetGame() {
+    if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
+        localStorage.removeItem('idleGameSave');
+        location.reload(); // 페이지를 새로고침하여 리셋
+    }
+}
+// 기존 searchStarterPet 호출 부분을 아래와 같이 수정하세요
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. 저장된 데이터가 있는지 확인
+    if (loadGame()) {
+        console.log("저장된 게임 데이터를 불러왔습니다.");
+        
+        // UI 전환: 시작 화면 숨기고 게임 화면 표시
+        document.getElementById('idle-start-screen').style.display = 'none';
+        document.getElementById('idle-top-stats').style.display = 'flex';
+        document.getElementById('idle-main-screen').style.display = 'block';
+        
+        // 게임 루프 시작
+        idGame.started = true;
+        spawnWave(); 
+        idGame.lastTime = performance.now();
+        idGame.loop = requestAnimationFrame(gameLoop);
+        setInterval(updateUI, 200);
+    } else {
+        // 저장된 데이터가 없으면 기존처럼 시작 펫 검색 화면 표시
+        searchStarterPet();
+    }
+});
+
+// [추가] 패시브 관련 헬퍼 함수들
+function getPassiveDb(name) {
+    return RAID_PASSIVE_DATABASE.find(p => p.name === name);
+}
+
+function getPassiveBonus(pet) {
+    // pet.passiveName이나 pet.passive 중 존재하는 것을 참조합니다.
+    let pName = pet.passiveName || pet.passive;
+    if (!pName || typeof RAID_PASSIVE_DATABASE === 'undefined') return { val: 0, type: 'none' };
+    
+    const db = RAID_PASSIVE_DATABASE.find(p => p.name === pName);
+    if (!db) return { val: 0, type: 'none' };
+    
+    // 10레벨마다 패시브 레벨 1 증가 (인덱스 처리)
+    let pLevel = Math.floor((pet.level - 1) / 10);
+    let valStr = db.values[Math.min(pLevel, db.values.length - 1)];
+    
+    // [버그 수정] 한글 문자가 섞여있어도 숫자와 마침표만 정밀 추출
+    let numMatch = valStr.match(/[0-9.]+/);
+    let num = numMatch ? parseFloat(numMatch[0]) : 0;
+    let isPercent = valStr.includes('%') || db.effect.includes('%');
+    
+    // 패시브 효과 식별 기준 정밀화
+    let effectType = 'etc';
+    if (db.name === '격노' || db.name === '투혼' || db.name === '폭주' || db.effect.includes('공격력 증가')) {
+        effectType = 'atk';
+    } else if (db.name === '신속' || db.effect.includes('순발력 증가')) {
+        effectType = 'spd';
+    }
+    
+    return { 
+        val: isPercent ? num / 100 : num, 
+        type: effectType,
+        level: pLevel + 1
+    };
+}
+function equipItem(key) {
+    idGame.equippedItem = ITEM_DATABASE[key];
+    alert(ITEM_DATABASE[key].name + " 장착 완료!");
+    updateUI();
+}
+// [추가] 구매 로직
+function buyItem(itemKey) {
+    let item = ITEM_DATABASE[itemKey];
+    
+    // [추가] 구매 전 확인 팝업창 (취소 버튼을 누르면 즉시 종료)
+    if (!confirm(`[${item.name}]을(를) ${item.price} 다이아에 구매하시겠습니까?`)) {
+        return;
+    }
+
+    if (idGame.diamond < item.price) {
+        alert("다이아가 부족합니다.");
+        return;
+    }
+    idGame.diamond -= item.price;
+    
+    // 단순 문자열이 아닌 고유 UID를 가진 객체로 저장하여 중복 구매 지원
+    if (!idGame.ownedItems) idGame.ownedItems = [];
+    idGame.ownedItems.push({
+        uid: 'item_' + Math.random().toString(36).substr(2, 9),
+        itemKey: itemKey
+    });
+    
+    // 아이템 구매 완료 알림창
+    alert(`[${item.name}]을(를) 구매하여 장비 창고에 보관했습니다!`);
+    
+    saveGame();
+    updateDynamicShopElements();
+    if (typeof renderWarehouse === 'function') renderWarehouse();
+}
+
+// [추가] 장착 로직
+function equipItem(key) {
+    idGame.equippedItem = ITEM_DATABASE[key];
+    alert(ITEM_DATABASE[key].name + " 장착 완료!");
+    updateUI(); saveGame();
+}
+
+// [추가] 페트 선택권 로직
+function petSummonTicket() {
+    if (idGame.diamond < 5000) {
+        alert("다이아가 부족합니다.");
+        return;
+    }
+
+    // 검색 UI 모달 생성
+    const overlay = document.createElement('div');
+    overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center;";
+    
+    const modal = document.createElement('div');
+    // [수정] height: 650px; 속성을 추가하여 검색 시 창이 흔들리거나 작아지는 현상을 완벽히 고정합니다.
+    modal.style.cssText = "background:#1e242b; border:1px solid #8a2be2; border-radius:8px; padding:20px; width:400px; height:650px; max-height:80vh; display:flex; flex-direction:column;";
+    
+    // [수정] 실시간 검색이므로 검색 버튼 제거 및 레이아웃 정리
+    modal.innerHTML = `
+        <h3 style="color:#a370f7; margin-top:0; font-size:16px;">🎟️ 페트 프리미엄 선택권</h3>
+        <div style="display:flex; margin-bottom:15px;">
+            <input type="text" id="premium-search-input" placeholder="페트 이름 검색" style="flex:1; padding:8px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:4px; outline:none;">
+        </div>
+        <div id="premium-result-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:5px;"></div>
+        <button id="premium-close-btn" style="margin-top:15px; background:#dc3545; border:none; padding:10px; color:#fff; border-radius:4px; cursor:pointer; font-weight:bold;">취소 (다이아 미차감)</button>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    const searchInput = document.getElementById('premium-search-input');
+    const resultList = document.getElementById('premium-result-list');
+    const closeBtn = document.getElementById('premium-close-btn');
+    
+    const renderResults = (keyword) => {
+        resultList.innerHTML = '';
+        let results = PET_DATABASE.filter(p => p.name.includes(keyword));
+        
+        if(results.length === 0) {
+            resultList.innerHTML = '<div style="color:#8b949e; text-align:center; padding:20px 0;">검색 결과가 없습니다.</div>';
+            return;
+        }
+        
+        results.forEach((pet) => {
+            const item = document.createElement('div');
+            item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#21262d; padding:10px; border-radius:6px; border:1px solid #30363d;";
+            
+            // [수정] 순발력(spd) 데이터 표기 추가
+            item.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${pet.img || './images/A1.png'}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.3); border-radius:4px;">
+                    <div>
+                        <div style="color:#fff; font-weight:bold; font-size:13px;">${pet.name}</div>
+                        <div style="color:#8b949e; font-size:11px;">기본스탯: 공${pet.atk || 10} / 방${pet.def || 5} / 순발력${pet.spd || 10}</div>
+                    </div>
+                </div>
+                <button class="select-pet-btn" data-name="${pet.name}" style="background:#8a2be2; border:none; padding:6px 12px; color:#fff; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">선택</button>
+            `;
+            resultList.appendChild(item);
+        });
+        
+        document.querySelectorAll('.select-pet-btn').forEach(btn => {
+            btn.onclick = function() {
+                const petName = this.getAttribute('data-name');
+                const selectedPetData = PET_DATABASE.find(p => p.name === petName);
+                
+                if(selectedPetData) {
+                    idGame.diamond -= 5000;
+                    
+                    const growth = 1.0 + Math.random() * 0.5; 
+                    const newPet = createPetEntity(selectedPetData, growth, false);
+                    idGame.warehouse.push(newPet);
+                    
+                    alert(`[${selectedPetData.name}] 영입 완료! 창고로 이동되었습니다.`);
+                    document.body.removeChild(overlay);
+                    
+                    saveGame();
+                    if(typeof renderWarehouse === 'function') renderWarehouse();
+                    if(typeof updateDynamicShopElements === 'function') updateDynamicShopElements();
+                }
+            };
+        });
+    };
+    
+    // [수정] 키보드 입력 시마다 실시간으로 renderResults 함수를 호출하여 목록을 갱신합니다.
+    searchInput.oninput = (e) => renderResults(e.target.value);
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+    
+    // 최초 실행 시 전체 목록 출력
+    renderResults("");
+}
+function updateFormation() {
+    if (idGame.fieldPets.length === 0) return;
+
+    // 1. 현재 스탯 기준 공격력이 가장 높은 페트 찾기
+    let maxAtkIdx = 0;
+    let maxAtk = -1;
+
+    idGame.fieldPets.forEach((pet, idx) => {
+        let curAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 3 * (pet.growthBonus || 1)));
+        if (curAtk > maxAtk) {
+            maxAtk = curAtk;
+            maxAtkIdx = idx;
+        }
+    });
+
+    // 2. 최고 공격력 페트(메인 딜러)를 따로 빼냅니다.
+    let mainDealer = idGame.fieldPets[maxAtkIdx];
+    let remainingPets = idGame.fieldPets.filter((_, idx) => idx !== maxAtkIdx);
+
+    // 3. 남은 페트들은 방어력(탱커) 순서대로 정렬합니다.
+    remainingPets.sort((a, b) => {
+        let defA = a.baseDef || 5;
+        let defB = b.baseDef || 5;
+        if (defB === defA) {
+            let gdefA = a.gdef || 0.5;
+            let gdefB = b.gdef || 0.5;
+            return gdefB - gdefA;
+        }
+        return defB - defA;
+    });
+
+    // [핵심 버그 수정] finalFormation 변수가 누락되어 출전 시 게임이 멈추던 현상 수정
+    let finalFormation = [...remainingPets, mainDealer];
+
+    // 4. 정렬된 탱커들을 앞세우고, 메인 딜러를 맨 뒤에 배치합니다.
+    finalFormation.forEach((pet, idx) => {
+        pet.x = 150 - (idx * 30);
+        pet.y = 110 - (idx * 3); 
+    });
+}
+
+// 페트의 현재 레벨과 순발력 성장률을 비례하여 공격 속도를 실시간 계산
+function getPetAtkMaxCd(pet) {
+    let baseSpd = pet.baseSpd || 10;
+    let gspd = pet.gspd || 0;
+    
+    // 세이브 데이터에 순발력 정보가 없으면 원본 데이터베이스에서 복구
+    if (typeof PET_DATABASE !== 'undefined' && !pet.hasOwnProperty('baseSpd')) {
+        const origin = PET_DATABASE.find(p => p.name === pet.name);
+        if (origin) {
+            baseSpd = origin.spd || 10;
+            gspd = origin.gspd || 0;
+            pet.baseSpd = baseSpd;
+            pet.gspd = gspd;
+        }
+    }
+    
+    // 현재 순발력 = 기본 순발력 + (성장률 * (레벨 - 1) * 성장 보너스)
+    let currentSpd = baseSpd + (gspd * (pet.level - 1) * (pet.growthBonus || 1));
+    
+    let cd;
+    if (currentSpd <= 30) {
+        // [1단계] 순발력 30 이하: 기본 감소폭 (스탯 1당 0.05초 감소)
+        // 최대 2.5초에서 1.0초까지 빠르게 감소
+        cd = 2.5 - (currentSpd * 0.05);
+    } else {
+        // [2단계] 순발력 30 초과: 하향된 감소폭 (스탯 1당 0.005초 감소)
+        // 1.0초 미만부터는 감소 속도가 10% 수준으로 둔화됨
+        cd = 1.0 - ((currentSpd - 30) * 0.005);
+    }
+    
+    // 절대 하한선: 0.4초 이하로는 내려가지 않음
+    return cd < 0.4 ? 0.4 : cd;
+}
+
+// 특정 무기를 출전 페트에게 장착하는 모달
+function openEquipModal(itemUid) {
+    let foundItem = idGame.ownedItems.find(i => i.uid === itemUid);
+    if(!foundItem) return;
+    let itemDef = ITEM_DATABASE[foundItem.itemKey];
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center;";
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = "background:#1e242b; border:1px solid #d29922; border-radius:8px; padding:20px; width:350px; display:flex; flex-direction:column;";
+    
+    let html = `<h3 style="color:#d29922; margin-top:0;">${itemDef.name} 장착</h3>`;
+    html += `<div style="color:#8b949e; margin-bottom:15px; font-size:12px;">장착할 출전 페트를 선택하세요.</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:10px;">`;
+    
+    idGame.fieldPets.forEach(pet => {
+        let currentEqText = "";
+        if (pet.equippedItemUid) {
+            let curItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+            if(curItem && ITEM_DATABASE[curItem.itemKey]) currentEqText = `<span style="color:#d29922;">(현재: ${ITEM_DATABASE[curItem.itemKey].name})</span>`;
+        }
+        html += `
+            <button class="equip-select-btn" data-petid="${pet.id}" style="background:#21262d; border:1px solid #30363d; padding:10px; border-radius:6px; color:#fff; cursor:pointer; text-align:left; display:flex; justify-content:space-between;">
+                <span>${pet.name}</span> <span style="font-size:11px;">${currentEqText}</span>
+            </button>`;
+    });
+    
+    html += `</div><button id="equip-cancel-btn" style="margin-top:15px; background:#dc3545; border:none; padding:10px; color:#fff; border-radius:4px; cursor:pointer; font-weight:bold;">취소</button>`;
+    
+    modal.innerHTML = html;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    document.querySelectorAll('.equip-select-btn').forEach(btn => {
+        btn.onclick = function() {
+            let targetPetId = this.getAttribute('data-petid');
+            let targetPet = idGame.fieldPets.find(p => p.id === targetPetId);
+            
+            // 기존에 이 무기를 끼고 있던 페트가 있다면 해제
+            let previousOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemUid);
+            if(previousOwner) previousOwner.equippedItemUid = null;
+            
+            if(targetPet) {
+                targetPet.equippedItemUid = itemUid;
+                alert(`${targetPet.name}에게 ${itemDef.name}을(를) 장착했습니다!`);
+            }
+            
+            document.body.removeChild(overlay);
+            saveGame();
+            renderWarehouse();
+        }
+    });
+    document.getElementById('equip-cancel-btn').onclick = () => document.body.removeChild(overlay);
+}
+
+// 무기 장착 해제 함수
+function unequipItemFromPet(petId) {
+    let pet = idGame.fieldPets.find(p => p.id === petId) || idGame.warehouse.find(p => p.id === petId);
+    if (pet) {
+        pet.equippedItemUid = null;
+        saveGame();
+        renderWarehouse();
+    }
+}
+/* 만득이 키우기 JS 코드 끝 */
+
+</script>
 
 <div id="sRankPopup">
     <div class="popup-title">S베이스 "득"!</div>
