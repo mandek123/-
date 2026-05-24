@@ -11819,15 +11819,13 @@ function gameLoop(time) {
     idGame.fieldPets.forEach(pet => {
         if (!pet.el) return;
         
-        // [핵심 수정] 0번째 몬스터만 보지 않고, 현재 살아있는 몬스터 중 가장 가까운 대상을 매 프레임 재탐색
+        // 1. 가장 가까운 몬스터 탐색
         let target = idGame.monsters.reduce((prev, curr) => {
             if (!prev) return curr;
             return Math.abs(curr.x - pet.x) < Math.abs(prev.x - pet.x) ? curr : prev;
         }, null);
         
         if (target) {
-            let dist = target.x - pet.x; // signed distance
-            
             let eqItem = null;
             if (pet.equippedItemUid && idGame.ownedItems) {
                 let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
@@ -11837,17 +11835,23 @@ function gameLoop(time) {
             let isRanged = (eqItem && eqItem.type === "원거리 무기");
             let range = isRanged ? 350 : (pet.atkRange || 50);
 
-            // [핵심 수정] 이동 및 공격 판정 로직
-            // 1. 거리가 range보다 멀면 전진
-            if (dist > range) {
+            // [핵심] 절대 방어선(벽) 계산: 타겟의 앞쪽(타겟X - 사거리)
+            let stopX = target.x - range;
+
+            // 2. 이동 로직: 현재 위치가 벽보다 앞에 있을 때만 전진
+            if (pet.x < stopX) {
                 pet.x += 120 * dt; 
+                // 이동 후 벽을 넘어버렸다면 강제로 벽에 고정 (오버슈트 방지)
+                if (pet.x > stopX) pet.x = stopX;
             } 
-            // 2. 이미 몬스터를 지나쳤거나(dist < 0) range 안에 들어왔다면 이동 정지 후 공격
-            else if (dist < -50) {
-                // 이미 지나쳤으므로 이동하지 않음 (제자리 대기)
-            } 
+            // 3. 고정 및 공격 로직: 이미 벽에 도달했거나 적 뒤로 넘어간 경우
             else {
-                // 공격 로직
+                // 적의 뒤로 넘어갔다면 강제로 벽으로 복귀
+                if (pet.x > target.x) {
+                    pet.x = stopX;
+                }
+                
+                // 공격 쿨타임 처리
                 if(pet.atkCooldown <= 0) {
                     let cdMult = eqItem ? (eqItem.cdMult || 1.0) : 1.0;
                     pet.atkCooldown = getPetAtkMaxCd(pet) * cdMult; 
@@ -11865,11 +11869,8 @@ function gameLoop(time) {
                     
                     target.hp -= dmg;
                     
-                    if (isCrit) {
-                        showDmgText(`💥${dmg}`, target.x, target.y, 'dmg-crit');
-                    } else {
-                        showDmgText(dmg, target.x, target.y, 'dmg-enemy');
-                    }
+                    if (isCrit) showDmgText(`💥${dmg}`, target.x, target.y, 'dmg-crit');
+                    else showDmgText(dmg, target.x, target.y, 'dmg-enemy');
                     
                     let healAmount = 0;
                     if (bonus.heal > 0) healAmount += bonus.heal;
