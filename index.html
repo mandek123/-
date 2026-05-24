@@ -11943,6 +11943,9 @@ function gameLoop(time) {
                 
                 let bossDiamond = Math.floor(Math.random() * 401) + 100; 
                 idGame.diamond += bossDiamond;
+
+                // [추가] 보스 처치 보상 로그 출력
+                addGameLog(`💎 보스를 처치하고 ${bossDiamond} 다이아를 획득했습니다!`, '#fca311');
                 
                 let dropY = mon.y - 30;
                 showDmgText(`💎+${bossDiamond}`, mon.x, dropY, 'dmg-enemy');
@@ -12789,7 +12792,10 @@ function getDetailedPassiveBonus(pet) {
 
         // 5. 체력 회복(힐) 버프 그룹
         if (['치유', '창공의 권능', '서리의 심장', '청영의 화조'].includes(db.name)) {
-            bonus.heal += val; 
+            // [너프 적용] 20레벨 미만은 효율 20%로 대폭 하향, 20레벨 이상은 30%로 상향 조정
+            let healNerfFactor = (pet.level < 20) ? 0.2 : 0.3;
+            bonus.heal += Math.floor(val * healNerfFactor); 
+            
             if (db.name === '청영의 화조') bonus.crit += 0.05;
         }
     };
