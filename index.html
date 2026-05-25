@@ -4007,9 +4007,9 @@ button[onclick="resetGame()"]:hover {
         </p>
 
         <p style="margin: 0; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            📦 <strong style="color: #a5d6ff;">창고 관리 (출전 및 장비 장착)</strong><br>
-            상점에서 획득한 신규 페트와 장비는 즉시 적용되지 않고 <strong>모두 [창고] 탭에 보관</strong>됩니다. 꼭 창고로 이동하여 <strong>[🐾 페트 창고]에서 전장에 출전</strong>시키거나, <strong>[📦 장비 창고]에서 무기를 장착</strong>해 주세요!
-        </p>
+    📦 <strong style="color: #a5d6ff;">창고 관리 (출전, 장착 및 판매)</strong><br>
+    상점에서 획득한 신규 페트와 장비는 즉시 적용되지 않고 <strong>모두 [창고] 탭에 보관</strong>됩니다. 창고로 이동하여 <strong>[🐾 페트 창고]에서 전장에 출전</strong>시키거나 사용하지 않는 페트를 <strong style="color:#ff4d4d;">판매하여 100 다이아를 획득</strong>할 수 있습니다. 또한 <strong>[📦 장비 창고]에서는 무기를 장착</strong>할 수 있습니다!
+</p>
         
         <p style="margin: 0;">
             📜 <strong style="color: #a5d6ff;">실시간 시스템 로그</strong><br>
@@ -12479,7 +12479,7 @@ function buyPet() {
     renderShop();
 }
 
-// 창고 내부 탭 상태 저장을 위한 전역 변수 (함수 밖에 선언하거나 없으면 자동 생성)
+// 창고 내부 탭 상태 저장을 위한 전역 변수
 if (typeof currentWarehouseTab === 'undefined') window.currentWarehouseTab = 'pet'; 
 
 function renderWarehouse() {
@@ -12557,7 +12557,11 @@ function renderWarehouse() {
                         <div style="font-size:12px; margin:5px 0; font-weight:bold; color:#fff;">${pet.name}</div>
                         ${itemHtml}
                         <div style="font-size:10px; color:#8b949e; margin-bottom:8px;">Atk: ${curAtk} | 속도: ${speedText}초</div>
-                        <button onclick="equipPet(${idx})" ${!canEquip ? 'disabled' : ''} style="width:100%; font-size:11px; padding:4px 0; border-radius:4px; background:${canEquip ? '#2ea043' : '#30363d'}; color:#fff; border:none; cursor:${canEquip ? 'pointer' : 'not-allowed'}; font-weight:bold;">출전</button>
+                        
+                        <div style="display: flex; gap: 5px; width: 100%;">
+                            <button onclick="equipPet(${idx})" ${!canEquip ? 'disabled' : ''} style="flex:1; font-size:11px; padding:4px 0; border-radius:4px; background:${canEquip ? '#2ea043' : '#30363d'}; color:#fff; border:none; cursor:${canEquip ? 'pointer' : 'not-allowed'}; font-weight:bold;">출전</button>
+                            <button onclick="sellPet('${pet.id}')" style="flex:1; font-size:11px; padding:4px 0; border-radius:4px; background:#dc3545; color:#fff; border:none; cursor:pointer; font-weight:bold;">판매</button>
+                        </div>
                     </div>
                 `;
             });
@@ -13177,6 +13181,31 @@ function renderLogs() {
         });
     }
     logBox.scrollTop = 0;
+}
+// [추가] 페트 판매 로직
+function sellPet(petId) {
+    let idx = idGame.warehouse.findIndex(p => p.id === petId);
+    if (idx > -1) {
+        let pet = idGame.warehouse[idx];
+        
+        // 실수 방지용 확인 알림창
+        if (confirm(`정말 [${pet.name}]을(를) 판매하시겠습니까?\n(판매 시 100 다이아 획득)`)) {
+            idGame.warehouse.splice(idx, 1); // 창고에서 페트 삭제
+            idGame.diamond += 100; // 100 다이아 지급
+            
+            // 판매 완료 로그 출력
+            if (typeof addGameLog === 'function') {
+                addGameLog(`💎 [${pet.name}] 판매 완료! 100 다이아를 획득했습니다.`, '#fca311');
+            }
+            
+            saveGame();
+            renderWarehouse(); // 창고 UI 즉시 갱신
+            updateUI(); // 상단 다이아몬드 UI 즉시 갱신
+            if (typeof updateDynamicShopElements === 'function') {
+                updateDynamicShopElements();
+            }
+        }
+    }
 }
 /* 만득이 키우기 JS 코드 끝 */
 
