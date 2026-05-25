@@ -12397,11 +12397,10 @@ function renderShop() {
     const container = document.getElementById('shop-container');
     if(!container) return; 
     
-    // [핵심] 상점 틀이 이미 그려져 있다면 중복해서 innerHTML을 실행하지 않고 튕겨냅니다.
     if (container.children.length > 0) return;
     
-    // [수정] renderShop에서도 1.1배 배율을 사용하도록 변경
-    let hpCost = Math.floor(50 * Math.pow(1.1, idGame.upgrades.hpLv - 1));
+    // [수정] 체력 단련 비용 배율 1.4배 적용
+    let hpCost = Math.floor(50 * Math.pow(1.4, idGame.upgrades.hpLv - 1));
     
     let html = `
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; flex-direction:column; justify-content:space-between;">
@@ -12461,8 +12460,8 @@ function updateDynamicShopElements() {
     const trainListContainer = document.getElementById('shop-pet-train-list');
     if (!trainListContainer) return;
 
-    // [수정] 체력 단련 비용 배율 1.1배 적용
-    let hpCost = Math.floor(50 * Math.pow(1.1, idGame.upgrades.hpLv - 1));
+    // [수정] 체력 단련 비용 배율 1.4배 적용
+    let hpCost = Math.floor(50 * Math.pow(1.4, idGame.upgrades.hpLv - 1));
     const hpLvEl = document.getElementById('shop-hp-lv');
     const hpBtnEl = document.getElementById('shop-hp-btn');
     if(hpLvEl) hpLvEl.innerText = `Lv.${idGame.upgrades.hpLv}`;
@@ -12496,8 +12495,8 @@ function updateDynamicShopElements() {
             let petGrowthBonus = pet.growthBonus || 1;
             let petAtkMaxCd = getPetAtkMaxCd(pet).toFixed(2);
             
-            // [수정] 페트 훈련 비용 배율 1.1배 적용
-            let cost = Math.floor(50 * Math.pow(1.1, petLevel - 1));
+            // [수정] 페트 훈련 비용 배율 1.3배 적용
+            let cost = Math.floor(50 * Math.pow(1.3, petLevel - 1));
             let curAtk = Math.floor(petBaseAtk + (petGatk * (petLevel - 1) * 3 * petGrowthBonus));
             let nextAtk = Math.floor(petBaseAtk + (petGatk * petLevel * 3 * petGrowthBonus));
             
