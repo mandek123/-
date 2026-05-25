@@ -11757,33 +11757,31 @@ function spawnWave() {
     // 매 스테이지의 10번째 판(9마리 잡은 상태)에 보스 등장
     const isBoss = (idGame.mobsKilled === 9);
     
-    // 보스면 1마리, 일반 판이면 2~5마리 무작위 생성
     const count = isBoss ? 1 : Math.floor(Math.random() * 4) + 2; 
     
-    // 체력은 기존대로 일정하게 상승
     let hpScale = Math.pow(1.18, idGame.stage - 1);
     let baseHp = Math.floor(20 * hpScale);
 
-    // [핵심] 스테이지 구간별 몬스터 공격력 차등(가속) 스케일링
+    // [정밀 조정] 30스테이지 기준 몬스터 공격력이 약 250 전후가 되도록 배율 하향 조정
     let atkScale = 1.0;
     if (idGame.stage <= 10) {
-        // 1~10 구간: 매 스테이지 14% 상승 (무난한 초반)
-        atkScale = Math.pow(1.14, idGame.stage - 1);
+        // 1~10 구간: 매 스테이지 15% 상승
+        atkScale = Math.pow(1.15, idGame.stage - 1);
     } else if (idGame.stage <= 20) {
-        // 11~20 구간: 매 스테이지 20% 상승 (난이도 상승)
-        atkScale = Math.pow(1.14, 9) * Math.pow(1.20, idGame.stage - 10);
+        // 11~20 구간: 매 스테이지 18% 상승
+        atkScale = Math.pow(1.15, 9) * Math.pow(1.18, idGame.stage - 10);
     } else {
-        // 21 구간 이상: 매 스테이지 30% 상승 (극악의 난이도 체감)
-        atkScale = Math.pow(1.14, 9) * Math.pow(1.20, 10) * Math.pow(1.30, idGame.stage - 20);
+        // 21 구간 이상: 매 스테이지 21% 상승 (기존 30%에서 대폭 하향)
+        atkScale = Math.pow(1.15, 9) * Math.pow(1.18, 10) * Math.pow(1.21, idGame.stage - 20);
     }
     
-    // 기본 공격력 2에 스케일링 배율 곱하기
+    // 계산된 스케일링을 기본 공격력 2에 곱합
     let baseAtk = Math.floor(2 * atkScale);
 
-    // 보스일 경우 스펙 대폭 상승 (보스도 덩달아 초강력해짐)
+    // 보스일 경우 스펙 상승
     if(isBoss) { baseHp *= 6; baseAtk *= 4; }
 
-    const baseY = 110; // 아군과 맞춘 기준 높이
+    const baseY = 110; 
 
     for(let i=0; i<count; i++) {
         let rPet = typeof PET_DATABASE !== 'undefined' ? PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)] : {name: "야생 펫"};
