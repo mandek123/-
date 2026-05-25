@@ -11762,23 +11762,13 @@ function spawnWave() {
     let hpScale = Math.pow(1.18, idGame.stage - 1);
     let baseHp = Math.floor(20 * hpScale);
 
-    // [3차 정밀 조정] 상승폭을 더 부드럽게 완화했습니다.
-    let atkScale = 1.0;
-    if (idGame.stage <= 10) {
-        // 1~10 구간: 14% 상승 
-        atkScale = Math.pow(1.14, idGame.stage - 1);
-    } else if (idGame.stage <= 20) {
-        // 11~20 구간: 16% 상승 
-        atkScale = Math.pow(1.14, 9) * Math.pow(1.16, idGame.stage - 10);
-    } else {
-        // 21 구간 이상: 18% 상승 
-        atkScale = Math.pow(1.14, 9) * Math.pow(1.16, 10) * Math.pow(1.18, idGame.stage - 20);
-    }
+    // [최종 완화] 복잡한 구간을 없애고 가장 완만한 13% 단일 곡선으로 고정
+    let atkScale = Math.pow(1.13, idGame.stage - 1);
     
-    // 기본 공격력을 3으로 시작하여 스케일링을 부드럽게 적용
+    // 30스테이지 기준 몬스터 공격력이 약 100~105 정도가 됩니다.
     let baseAtk = Math.floor(3 * atkScale);
 
-    // [핵심 너프] 보스의 공격력 배수를 3배에서 2배로 대폭 낮췄습니다.
+    // 보스 공격력 배수는 2배 유지 (일반 몹의 딜이 낮아져서 보스도 적당해집니다)
     if(isBoss) { baseHp *= 5; baseAtk *= 2; }
 
     const baseY = 110; 
