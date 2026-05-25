@@ -12046,24 +12046,53 @@ function manualFieldAttack(e) {
 
 function syncDOM() {
     const field = document.getElementById('idle-field');
+    
+    // 1. 배틀필드 배경 고급화 (밤하늘에서 이어지는 입체적인 대지 느낌)
+    if(field) {
+        field.style.background = "linear-gradient(to bottom, #0d1117 0%, #161b22 45%, #1a2a24 50%, #0d1612 100%)";
+        field.style.boxShadow = "inset 0 0 40px rgba(0,0,0,0.8)";
+        field.style.border = "1px solid #30363d";
+        field.style.borderRadius = "8px";
+    }
+
     const updateDOM = (entity, isAlly) => {
         if (!entity.el) {
             entity.el = document.createElement('div');
             entity.el.className = `idle-entity ${isAlly ? 'facing-right' : ''} ${entity.isBoss ? 'boss-entity' : ''}`;
             
-            // [핵심 수정] CSS 충돌을 막기 위해 가로/세로 64px 크기와 절대 좌표를 인라인으로 강제 지정
-            entity.el.style.cssText = `position: absolute; width: 64px; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; left: ${entity.x}px; top: ${entity.y}px;`;
+            // [개선 1] 하얀색 테두리 완전 제거 및 트랜지션(부드러운 이동) 추가
+            entity.el.style.cssText = `
+                position: absolute; 
+                width: 70px; 
+                height: 70px; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: flex-end; 
+                left: ${entity.x}px; 
+                top: ${entity.y}px;
+            `;
             
+            // [개선 2] 페트가 땅에 서 있는 듯한 타원형 바닥 그림자 추가
+            let shadowHTML = `<div style="position: absolute; bottom: 0px; width: 40px; height: 10px; background: rgba(0,0,0,0.6); border-radius: 50%; z-index: 5; filter: blur(2px);"></div>`;
+            
+            // [개선 3] 체력바 디자인 고급화 (둥근 모서리와 그라데이션)
             let hpBarHTML = isAlly ? '' : `
-                <div style="position: absolute; top: -12px; width: 46px; height: 6px; background: #1e242b; border: 1px solid #000; border-radius: 3px; z-index: 100; overflow: hidden;">
-                    <div id="hp_${entity.id}" style="width: 100%; height: 100%; background: #ff4d4d; transition: width 0.1s linear;"></div>
+                <div style="position: absolute; top: -12px; width: 46px; height: 6px; background: #0d1117; border: 1px solid #30363d; border-radius: 4px; z-index: 100; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    <div id="hp_${entity.id}" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ff4d4d, #ff7b72); transition: width 0.1s linear;"></div>
                 </div>`;
                 
-            // 이름표(Bottom)가 바닥 경계선에 잘리지 않도록 위치(-18px) 조정
+            // [개선 4] 이름표 디자인 (진영별 색상 부여, 둥근 배지 형태)
+            let nameBorderColor = isAlly ? '#539bf5' : '#ff7b72'; // 아군은 파란색, 적군은 붉은색 테두리
+            if (entity.isBoss) nameBorderColor = '#fca311'; // 보스는 황금색
+            
             entity.el.innerHTML = `
+                ${shadowHTML}
                 ${hpBarHTML}
-                <img src="${entity.img}" style="width: 64px; height: 64px; object-fit: contain; position: relative; z-index: 10;">
-                <div style="position: absolute; bottom: -18px; font-size: 11px; color:#fff; font-weight:bold; background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px; white-space: nowrap; z-index: 20; text-align: center;">${entity.name}</div>
+                <img src="${entity.img}" style="width: 60px; height: 60px; object-fit: contain; position: relative; z-index: 10; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4));">
+                <div style="position: absolute; bottom: -20px; font-size: 11px; color: #fff; font-weight: bold; background: rgba(13, 17, 23, 0.85); padding: 3px 8px; border-radius: 12px; border: 1px solid ${nameBorderColor}; white-space: nowrap; z-index: 20; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    ${entity.name}
+                </div>
             `;
             field.appendChild(entity.el);
         }
