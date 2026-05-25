@@ -11762,24 +11762,24 @@ function spawnWave() {
     let hpScale = Math.pow(1.18, idGame.stage - 1);
     let baseHp = Math.floor(20 * hpScale);
 
-    // [정밀 조정] 30스테이지 기준 몬스터 공격력이 약 250 전후가 되도록 배율 하향 조정
+    // [2차 정밀 조정] 다굴(집단 공격)과 보스 4배수를 감안하여 배율을 더 낮췄습니다.
     let atkScale = 1.0;
     if (idGame.stage <= 10) {
-        // 1~10 구간: 매 스테이지 15% 상승
+        // 1~10 구간: 15% 상승 
         atkScale = Math.pow(1.15, idGame.stage - 1);
     } else if (idGame.stage <= 20) {
-        // 11~20 구간: 매 스테이지 18% 상승
-        atkScale = Math.pow(1.15, 9) * Math.pow(1.18, idGame.stage - 10);
+        // 11~20 구간: 17% 상승 (이전 18%에서 하향)
+        atkScale = Math.pow(1.15, 9) * Math.pow(1.17, idGame.stage - 10);
     } else {
-        // 21 구간 이상: 매 스테이지 21% 상승 (기존 30%에서 대폭 하향)
-        atkScale = Math.pow(1.15, 9) * Math.pow(1.18, 10) * Math.pow(1.21, idGame.stage - 20);
+        // 21 구간 이상: 20% 상승 (이전 21%에서 하향)
+        atkScale = Math.pow(1.15, 9) * Math.pow(1.17, 10) * Math.pow(1.20, idGame.stage - 20);
     }
     
-    // 계산된 스케일링을 기본 공격력 2에 곱합
+    // 계산된 스케일링을 기본 공격력 2에 곱함 (30스테이지 기준 약 208)
     let baseAtk = Math.floor(2 * atkScale);
 
-    // 보스일 경우 스펙 상승
-    if(isBoss) { baseHp *= 6; baseAtk *= 4; }
+    // 보스일 경우 스펙 상승 
+    if(isBoss) { baseHp *= 5; baseAtk *= 3; }
 
     const baseY = 110; 
 
