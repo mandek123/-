@@ -5189,6 +5189,23 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+    id: 24,
+    date: "26년 5월 25일(2)",
+    title: "26년 5월 25일(2) 업데이트 공지사항입니다.",
+    summary: "1. 만득이 키우기 밸런스 조정 및 시스템 어뷰징 방지 업데이트",
+    content: `
+        <strong>1) 만득이 키우기 밸런스 조정 및 시스템 개선</strong>
+        <span>- 체력 단련 및 페트 훈련 시 소모되는 비용의 상승 곡선을 1.1배율로 대폭 완화하여 성장이 더욱 수월해졌습니다.</span>
+        <span>- 방어 및 피해 감소 관련 패시브 밸런스 조정 (어스드래곤을 포함하여 팀 전체 보호 효과를 가졌던 방어 패시브들을 '강철' 패시브 로직으로 통일 및 효율 하향).</span>
+        <span>- 스테이지 0단계에서 전멸하여 보상을 반복 획득하는 어뷰징 행위를 원천 차단하였습니다. 이제 0단계에서 전멸 시 해당 단계에서 바로 재시작됩니다.</span>
+        <span>- 기존 1~9단계에서 전멸 시에는 기존 방식(전 단계 시작)이 적용됩니다.</span>
+        <strong>2) 기타 사항</strong>
+        <span>- 1인 레이드와 만득이 키우기 간의 데이터 충돌을 방지하기 위해 장비 시스템 로직을 분리하였습니다.</span>
+        <span>- 시스템 안정성을 위한 코드 최적화 및 기타 버그가 수정되었습니다.</span>
+    `
+    },
+
+    {
         id: 23,
         date: "26년 5월 25일",
         title: "26년 5월 25일 업데이트 공지사항입니다.",
@@ -9758,7 +9775,8 @@ function generateRandomPetStats(basePet, level = 140, forceS = false) {
 function getEquipDataByName(name) {
     if (typeof EQUIP_DB === 'undefined') return null;
     let arr = Object.values(EQUIP_DB);
-    return arr.find(eq => eq.name === name);
+    // [수정] eq가 undefined일 때 나는 에러 완벽 방어
+    return arr.find(eq => eq && eq.name === name);
 }
 
 // [수정] 1. 속성 표기 동기화 보완 (새로고침 시 자동 갱신 포함)
@@ -10430,10 +10448,10 @@ function renderRaidItems() {
             iconHtml = `<div style="font-size:30px; line-height:40px; margin-bottom:4px;">🎁</div>`;
         }
 
-        // 버튼 디자인: 버림 버튼을 제거하고 단일 버튼 구조로 복원
+        // [핵심 변경] onclick="equipItem"을 onclick="equipRaidItem"으로 변경하여 충돌 원천 차단
         const btnAction = name.includes("알") 
             ? `<button class="btn-use" onclick="useEgg('${name.replace(' 알', '')}')" style="width:100%; background:#388bfd; color:#fff; border:1px solid #1f6feb; border-radius:4px; padding:6px 0; font-size:11px; cursor:pointer; font-weight:bold; text-shadow:1px 1px 1px rgba(0,0,0,0.6);">부화</button>`
-            : eqData ? `<button class="btn-use btn-equip" onclick="equipItem('${name}')" style="width:100%; background:rgba(163, 113, 247, 0.25); color:#d2a8ff; border:1px solid #a371f7; border-radius:4px; padding:6px 0; font-size:11px; cursor:pointer; font-weight:900;">장착</button>`
+            : eqData ? `<button class="btn-use btn-equip" onclick="equipRaidItem('${name}')" style="width:100%; background:rgba(163, 113, 247, 0.25); color:#d2a8ff; border:1px solid #a371f7; border-radius:4px; padding:6px 0; font-size:11px; cursor:pointer; font-weight:900;">장착</button>`
             : `<button class="btn-use" style="width:100%; background:#30363d; color:#8b949e; border:1px solid #484f58; border-radius:4px; padding:6px 0; font-size:11px;" disabled>재료</button>`;
 
         return `
@@ -10498,20 +10516,22 @@ function equipItem(itemName) {
     if(!eqData) return;
 
     let slot = "";
-    if (eqData.type.includes("무기")) slot = 'weapon';
-    else if (eqData.type.includes("투구")) slot = 'head';
-    else if (eqData.type.includes("갑옷")) slot = 'body';
-    else if (eqData.type.includes("목줄")) slot = 'collar';
-    else if (eqData.type.includes("토템")) slot = 'totem';
-    else if (eqData.type.includes("악세서리")) {
+    const t = eqData.type || "";
+    
+    // [수정] 누락되었던 반지, 목걸이, 옷 등의 타입을 모두 각 슬롯에 완벽하게 매핑
+    if (t.includes("무기") || t.includes("근거리") || t.includes("원거리")) slot = 'weapon';
+    else if (t.includes("투구") || t.includes("모자")) slot = 'head';
+    else if (t.includes("갑옷") || t.includes("옷")) slot = 'body';
+    else if (t.includes("목줄")) slot = 'collar';
+    else if (t.includes("토템")) slot = 'totem';
+    else if (t.includes("악세서리") || t.includes("반지") || t.includes("목걸이") || t.includes("귀걸이") || t.includes("팔찌") || t.includes("부적") || t.includes("악기")) {
         
         // 악세서리 슬롯 목록
         const accSlots = ['acc1', 'acc2', 'acc3', 'acc4'];
 
         // 1. 단일 착용 제한 악세서리 검사 (팔찌, 목걸이)
         const restrictedTypes = ["팔찌", "목걸이"];
-        // 현재 장착하려는 아이템이 제한 대상 타입인지 확인
-        const targetType = restrictedTypes.find(t => eqData.type.includes(t));
+        const targetType = restrictedTypes.find(type => t.includes(type));
 
         if (targetType) {
             // 이미 해당 타입을 장착하고 있는지 검색
@@ -10535,6 +10555,11 @@ function equipItem(itemName) {
             if (!confirm("4개의 악세서리가 모두 착용되어 있습니다. [악세1] 자리와 교체하시겠습니까?")) return;
             slot = 'acc1';
         }
+    }
+
+    // 예외 처리: 타입이 매핑되지 않았을 때 아이템이 증발하는 것 방지
+    if (!slot) {
+        return alert(`알 수 없는 장비 타입입니다: [${t}]\n관리자에게 문의하세요.`);
     }
 
     // 기존 장착 아이템 해제 및 창고 이동
@@ -10574,7 +10599,91 @@ function equipItem(itemName) {
     renderRaidItems();
     syncRaidWarehouseToFirebase();
 }
+// [핵심 변경] 함수명을 equipItem -> equipRaidItem으로 변경하여 만득이 엔진과 충돌 방지
+function equipRaidItem(itemName) {
+    if(!isRosterLocked) return alert("저장을 먼저 완료하세요.");
+    const eqData = getEquipDataByName(itemName);
+    if(!eqData) return alert("해당 장비의 데이터가 존재하지 않습니다.");
 
+    let slot = "";
+    const t = eqData.type || "";
+    
+    if (t.includes("무기") || t.includes("근거리") || t.includes("원거리")) slot = 'weapon';
+    else if (t.includes("투구") || t.includes("모자")) slot = 'head';
+    else if (t.includes("갑옷") || t.includes("옷")) slot = 'body';
+    else if (t.includes("목줄")) slot = 'collar';
+    else if (t.includes("토템")) slot = 'totem';
+    else if (t.includes("악세서리") || t.includes("반지") || t.includes("목걸이") || t.includes("귀걸이") || t.includes("팔찌") || t.includes("부적") || t.includes("악기")) {
+        
+        const accSlots = ['acc1', 'acc2', 'acc3', 'acc4'];
+        const restrictedTypes = ["팔찌", "목걸이"];
+        const targetType = restrictedTypes.find(type => t.includes(type));
+
+        if (targetType) {
+            const isAlreadyEquipped = accSlots.some(s => {
+                const eqItem = equippedItems[s];
+                if (!eqItem || typeof eqItem !== 'object' || !eqItem.name) return false;
+                const eData = getEquipDataByName(eqItem.name); 
+                return eData && eData.type && eData.type.includes(targetType);
+            });
+
+            if (isAlreadyEquipped) {
+                return alert(`${targetType}는(은) 1개만 착용할 수 있습니다. 기존 장비를 먼저 해제해주세요.`);
+            }
+        }
+
+        const emptySlot = accSlots.find(s => !equippedItems[s]);
+        if (emptySlot) {
+            slot = emptySlot;
+        } else {
+            if (!confirm("4개의 악세서리가 모두 착용되어 있습니다. [악세1] 자리와 교체하시겠습니까?")) return;
+            slot = 'acc1';
+        }
+    }
+
+    if (!slot) {
+        return alert(`알 수 없는 장비 타입입니다: [${t}]\n관리자에게 문의하세요.`);
+    }
+
+    // 기존 장착 아이템 해제 및 창고 이동
+    if (equippedItems[slot]) {
+        const prevItem = equippedItems[slot];
+        const prevName = (typeof prevItem === 'object' && prevItem.name) ? prevItem.name : prevItem;
+        
+        if (prevName && typeof prevName === 'string') {
+            if (!raidItems[prevName] || typeof raidItems[prevName] === 'number') {
+                raidItems[prevName] = [];
+            }
+            if (!Array.isArray(raidItems[prevName])) {
+                let count = raidItems[prevName];
+                raidItems[prevName] = [];
+                for(let i=0; i<count; i++) raidItems[prevName].push({name: prevName});
+            }
+            raidItems[prevName].push(typeof prevItem === 'object' ? prevItem : {name: prevName});
+        }
+    }
+
+    // 새 아이템 가져오기
+    let itemToEquip = null;
+    if (Array.isArray(raidItems[itemName]) && raidItems[itemName].length > 0) {
+        itemToEquip = raidItems[itemName].pop();
+        if(raidItems[itemName].length === 0) delete raidItems[itemName];
+    } else {
+        const firstIdentify = rollIdentify(itemName);
+        itemToEquip = { name: itemName, identify: firstIdentify, enchantStats: null };
+        
+        if(typeof raidItems[itemName] === 'number') {
+            raidItems[itemName]--;
+            if(raidItems[itemName] <= 0) delete raidItems[itemName];
+        }
+    }
+
+    equippedItems[slot] = itemToEquip;
+    
+    calcRaidPoints();
+    renderRaidItems();
+    syncRaidWarehouseToFirebase();
+}
 function unequipItem(slot) {
     if(!equippedItems[slot]) return;
     const item = equippedItems[slot];
@@ -11629,8 +11738,8 @@ document.addEventListener('DOMContentLoaded', () => {
    [만득이 키우기 2.0 - 자동전투 엔진]
    ======================================= */
 const ITEM_DATABASE = {
-    "ignos": { name: "이그노스의 활", img: "./images/item1.png", type: "원거리 무기", atkMult: 0.7, cdMult: 1.5, price: 3000 },
-    "spirit": { name: "봉인된 정령왕의 창", img: "./images/item2.png", type: "근거리 무기", atkMult: 1.2, cdMult: 1.0, price: 3000 }
+    "ignos": { name: "이그노스의 활M", img: "./images/item1.png", type: "원거리 무기", atkMult: 0.7, cdMult: 1.5, price: 3000 },
+    "spirit": { name: "봉인된 정령왕의 창M", img: "./images/item2.png", type: "근거리 무기", atkMult: 1.2, cdMult: 1.0, price: 3000 }
 };
 
 let idGame = {
@@ -11991,29 +12100,25 @@ function gameLoop(time) {
 }
 
 function handleGameOver() {
-    // [추가] 이번 스테이지에서 사망했음을 기록
+    // 이번 스테이지에서 사망했음을 기록
     idGame.diedThisStage = true;
-    // [추가] 아군 전멸 및 패배 로그 출력
     addGameLog(`💀 아군 전멸... STAGE ${idGame.stage}의 진행도가 초기화됩니다.`, '#ff4d4d');
-    // [추가] 패배 시 필드에 남아있는 모든 몬스터의 HTML 요소를 강제로 완전히 지웁니다.
+    
+    // 패배 시 필드에 남아있는 모든 몬스터의 HTML 요소를 강제로 완전히 지웁니다.
     idGame.monsters.forEach(m => {
         if (m.el) {
             m.el.remove();
             m.el = null;
         }
     });
-    // 혹시 모를 더미 엘리먼트 제거를 위해 클래스명으로도 한 번 더 청소합니다.
     document.querySelectorAll('.idle-entity:not(.facing-right)').forEach(el => el.remove());
 
-    // 몬스터 처치 단계(0~9단계)가 0보다 크면 단계만 감소
+    // [핵심 수정] 몬스터 처치 단계(1~9단계)가 0보다 크면 단계만 감소
     if (idGame.mobsKilled > 0) {
         idGame.mobsKilled--;
     } 
-    // 0단계라면 스테이지를 낮춤
-    else if (idGame.stage > 1) {
-        idGame.stage--;
-        idGame.mobsKilled = 9; 
-    }
+    // 기존에 있던 0단계 롤백 로직(else if)을 완전히 삭제했습니다. 
+    // 이제 0단계에서 전멸해도 이전 보스로 돌아가지 않고 0단계로 유지됩니다.
     
     idGame.teamCurHp = idGame.teamMaxHp;
     updateFormation(); 
@@ -12295,7 +12400,8 @@ function renderShop() {
     // [핵심] 상점 틀이 이미 그려져 있다면 중복해서 innerHTML을 실행하지 않고 튕겨냅니다.
     if (container.children.length > 0) return;
     
-    let hpCost = Math.floor(50 * Math.pow(1.5, idGame.upgrades.hpLv - 1));
+    // [수정] renderShop에서도 1.1배 배율을 사용하도록 변경
+    let hpCost = Math.floor(50 * Math.pow(1.1, idGame.upgrades.hpLv - 1));
     
     let html = `
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; flex-direction:column; justify-content:space-between;">
@@ -12348,15 +12454,15 @@ function renderShop() {
     `;
 
     container.innerHTML = html;
-    updateDynamicShopElements(); // 틀을 찍어낸 직후 스탯값과 리스트를 실시간으로 최초 강제 매핑합니다.
+    updateDynamicShopElements();
 }
 // [파일 하단에 추가] 실시간 스톤/다이아 변동에 따라 버튼 색상 및 페트 훈련 리스트만 흔들림 없이 변경해주는 함수
 function updateDynamicShopElements() {
     const trainListContainer = document.getElementById('shop-pet-train-list');
     if (!trainListContainer) return;
 
-    // 1. 체력 단련 데이터 정밀 갱신 및 속성 재매핑 (기존 유지)
-    let hpCost = Math.floor(50 * Math.pow(1.5, idGame.upgrades.hpLv - 1));
+    // [수정] 체력 단련 비용 배율 1.1배 적용
+    let hpCost = Math.floor(50 * Math.pow(1.1, idGame.upgrades.hpLv - 1));
     const hpLvEl = document.getElementById('shop-hp-lv');
     const hpBtnEl = document.getElementById('shop-hp-btn');
     if(hpLvEl) hpLvEl.innerText = `Lv.${idGame.upgrades.hpLv}`;
@@ -12366,7 +12472,6 @@ function updateDynamicShopElements() {
         hpBtnEl.setAttribute('onclick', `buyTeamHp(${hpCost})`);
     }
 
-    // 2. 상단 버튼 다이아 잔액 연동 제어 (기존 유지)
     const petBtn = document.getElementById('shop-pet-btn');
     if(petBtn) petBtn.style.background = idGame.diamond >= 500 ? '#ff4d4d' : '#30363d';
     
@@ -12378,7 +12483,6 @@ function updateDynamicShopElements() {
         if(itemBtn) itemBtn.style.background = idGame.diamond >= ITEM_DATABASE[key].price ? '#d29922' : '#30363d';
     });
 
-    // [핵심 수정] 배틀 상태인 펫(fieldPets)만 훈련 리스트에 출력
     let battlePets = Array.isArray(idGame.fieldPets) ? idGame.fieldPets : [];
     
     let trainHtml = '';
@@ -12392,7 +12496,8 @@ function updateDynamicShopElements() {
             let petGrowthBonus = pet.growthBonus || 1;
             let petAtkMaxCd = getPetAtkMaxCd(pet).toFixed(2);
             
-            let cost = Math.floor(50 * Math.pow(1.3, petLevel - 1));
+            // [수정] 페트 훈련 비용 배율 1.1배 적용
+            let cost = Math.floor(50 * Math.pow(1.1, petLevel - 1));
             let curAtk = Math.floor(petBaseAtk + (petGatk * (petLevel - 1) * 3 * petGrowthBonus));
             let nextAtk = Math.floor(petBaseAtk + (petGatk * petLevel * 3 * petGrowthBonus));
             
@@ -12775,10 +12880,19 @@ function getDetailedPassiveBonus(pet) {
         let pName = p.passiveName || p.passive;
         if (!pName || typeof RAID_PASSIVE_DATABASE === 'undefined') return;
         pName = String(pName).trim();
-        const db = RAID_PASSIVE_DATABASE.find(d => d.name.trim() === pName);
+        let db = RAID_PASSIVE_DATABASE.find(d => d.name.trim() === pName);
         if (!db) return;
         
-        // [핵심] "팀원 전체" 효과인지 확인
+        // [핵심 수정] 방어력(피해 감소) 관련 모든 패시브를 '강철'로 강제 변환
+        const defensePassives = ['충성', '철갑의 수호', '대지의 심장'];
+        if (defensePassives.includes(db.name) || p.name === '어스드래곤') {
+            const steelDb = RAID_PASSIVE_DATABASE.find(d => d.name.trim() === '강철');
+            if (steelDb) {
+                db = steelDb; // 패시브 효과를 '강철' 데이터로 완전히 덮어씌움 (팀 버프 상실, 개인 방어막으로 전락)
+            }
+        }
+
+        // "팀원 전체" 효과인지 확인
         let isTeamBuff = db.effect && db.effect.includes("팀원 전체");
         // 계산 대상이 본인이 아니고, 팀 버프도 아니라면 적용하지 않고 패스
         if (!isOwner && !isTeamBuff) return; 
@@ -12824,18 +12938,16 @@ function getDetailedPassiveBonus(pet) {
         if (['암살'].includes(db.name)) { bonus.hit += val; bonus.crit += 0.03; }
         if (['심연의 보주'].includes(db.name)) { bonus.dodge += 0.05; } 
 
-        // 4. 방어력 / 피해 감소 버프 그룹 (강철 등 고정 피해 감소는 유지)
+        // 4. 방어력 / 피해 감소 버프 그룹 (이제 팀 보호막들은 모두 '강철'로 취급됨)
         if (['강철', '충성', '철갑의 수호', '대지의 심장'].includes(db.name)) {
             bonus.dmgRed += val; 
         }
         if (db.name === '칠흑의 방벽') {
-            // [너프] 흡혈율을 기존의 20% 수준으로 대폭 축소 (예: 50% 흡혈 -> 10% 적용)
             bonus.lifeSteal += (val * 0.2); 
         }
 
         // 5. 체력 회복(힐) 버프 그룹
         if (['치유', '창공의 권능', '서리의 심장', '청영의 화조'].includes(db.name)) {
-            // [너프] 기존보다 더 낮게 조정: 20레벨 미만 10%, 이상 20% 효율로 초강력 너프
             let healNerfFactor = (pet.level < 20) ? 0.1 : 0.2;
             bonus.heal += Math.floor(val * healNerfFactor); 
             
