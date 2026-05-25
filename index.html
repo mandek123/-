@@ -11760,13 +11760,27 @@ function spawnWave() {
     // 보스면 1마리, 일반 판이면 2~5마리 무작위 생성
     const count = isBoss ? 1 : Math.floor(Math.random() * 4) + 2; 
     
+    // 체력은 기존대로 일정하게 상승
     let hpScale = Math.pow(1.18, idGame.stage - 1);
-    let atkScale = Math.pow(1.12, idGame.stage - 1);
-    
     let baseHp = Math.floor(20 * hpScale);
+
+    // [핵심] 스테이지 구간별 몬스터 공격력 차등(가속) 스케일링
+    let atkScale = 1.0;
+    if (idGame.stage <= 10) {
+        // 1~10 구간: 매 스테이지 14% 상승 (무난한 초반)
+        atkScale = Math.pow(1.14, idGame.stage - 1);
+    } else if (idGame.stage <= 20) {
+        // 11~20 구간: 매 스테이지 20% 상승 (난이도 상승)
+        atkScale = Math.pow(1.14, 9) * Math.pow(1.20, idGame.stage - 10);
+    } else {
+        // 21 구간 이상: 매 스테이지 30% 상승 (극악의 난이도 체감)
+        atkScale = Math.pow(1.14, 9) * Math.pow(1.20, 10) * Math.pow(1.30, idGame.stage - 20);
+    }
+    
+    // 기본 공격력 2에 스케일링 배율 곱하기
     let baseAtk = Math.floor(2 * atkScale);
 
-    // 보스일 경우 스펙 대폭 상승
+    // 보스일 경우 스펙 대폭 상승 (보스도 덩달아 초강력해짐)
     if(isBoss) { baseHp *= 6; baseAtk *= 4; }
 
     const baseY = 110; // 아군과 맞춘 기준 높이
@@ -11774,12 +11788,10 @@ function spawnWave() {
     for(let i=0; i<count; i++) {
         let rPet = typeof PET_DATABASE !== 'undefined' ? PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)] : {name: "야생 펫"};
         
-        // [수정] 적군 X 간격을 55px로 대폭 늘려 가로 겹침 방지
         let spawnX = 600 + (i * 55); 
         let spawnY = baseY;
         
         if (i % 2 !== 0) {
-            // [수정] 적군 Y 간격도 45px로 늘려 세로 겹침 방지
             spawnY = baseY + 45;
             spawnX -= 15;
         }
