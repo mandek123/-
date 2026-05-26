@@ -2203,6 +2203,10 @@ button[onclick="resetGame()"]:hover {
     border: 1px solid #30363d;
     margin-bottom: 10px;
 }
+@keyframes countPop {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2); }
+}
 /* =========================================
    만득이 키우기 2.0 (필드 자동전투) CSS 끝
    ========================================= */
@@ -12275,9 +12279,15 @@ function renderEntities() {
         }
     });
 }
-
+let offlineRewardProcessed = false; // 전역 변수로 선언
 function updateUI() {
-    // 1. 기본 정보 업데이트
+    // 게임이 시작된 상태이고, 아직 보상을 처리하지 않았다면 실행
+    if (idGame.started && !offlineRewardProcessed) {
+        processOfflineReward();
+        offlineRewardProcessed = true; // 이후로는 다시 실행되지 않음
+    }
+
+    // 1. 기본 정보 업데이트 (기존 코드 시작 지점)
     const stoneEl = document.getElementById('ui-stone');
     const diamondEl = document.getElementById('ui-diamond');
     if (stoneEl) stoneEl.innerText = idGame.stone.toLocaleString();
@@ -12462,6 +12472,29 @@ function switchIdleTab(tabName) {
     }
     
     updateUI();
+}
+
+function processOfflineReward() {
+    const saved = localStorage.getItem('idleGameSave_v2');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    
+    if (data.lastSaveTime) {
+        let offlineMs = Date.now() - data.lastSaveTime;
+        let offlineSeconds = Math.floor(offlineMs / 1000);
+        
+        // 60초 이상 방치했을 때만 보상 지급
+        if (offlineSeconds > 60) {
+            let stoneReward = Math.floor(idGame.stage * 1.5 * offlineSeconds);
+            // 최대 24시간 보상 제한
+            if (offlineSeconds > 86400) stoneReward = Math.floor(idGame.stage * 1.5 * 86400);
+
+            // 화면이 그려진 후 모달 호출
+            setTimeout(() => {
+                showOfflineRewardModal(stoneReward, offlineSeconds);
+            }, 1000);
+        }
+    }
 }
 
 function calcTeamStats() {
@@ -12926,26 +12959,6 @@ function loadGame() {
     }
     
     if (typeof renderLogs === 'function') renderLogs(); 
-
-    // 오프라인 방치 보상 계산 로직
-    if (data.lastSaveTime) {
-        let offlineMs = Date.now() - data.lastSaveTime;
-        let offlineSeconds = Math.floor(offlineMs / 1000);
-        
-        if (offlineSeconds > 60) {
-            let stoneReward = Math.floor(idGame.stage * 1.5 * offlineSeconds);
-            if (offlineSeconds > 86400) {
-                offlineSeconds = 86400;
-                stoneReward = Math.floor(idGame.stage * 1.5 * 86400);
-            }
-
-            setTimeout(() => {
-                if(typeof showOfflineRewardModal === 'function') {
-                    showOfflineRewardModal(stoneReward, offlineSeconds);
-                }
-            }, 500);
-        }
-    }
 
     return true;
 }
