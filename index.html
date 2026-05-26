@@ -13008,18 +13008,13 @@ function showOfflineRewardModal(reward, seconds) {
     claimBtn.onmouseover = () => claimBtn.style.transform = "scale(1.03)";
     claimBtn.onmouseout = () => claimBtn.style.transform = "scale(1)";
 }
-// [최종 수정] 페이지가 다시 보일 때(탭 이동 후 복귀) 오프라인 보상 체크
+// [핵심] 탭 이동 시 게임 일시정지 및 복귀 시 보상 체크
 document.addEventListener('visibilitychange', () => {
-    // 1. 페이지가 다시 활성화되었을 때만 실행
+    // 사용자가 다시 탭으로 돌아왔을 때
     if (document.visibilityState === 'visible') {
-        
-        // 2. [중요] 게임이 이미 시작된 상태일 때만 보상을 체크함
-        // (페트 선택 전이라면 idGame.started는 false이므로 작동하지 않음)
         if (idGame.started) {
-            console.log("게임으로 복귀했습니다. 오프라인 보상을 확인합니다.");
-            
-            // 3. 보상 처리 함수 실행
-            // (함수 내부에서 이미 '오버레이가 떠있는지' 체크하므로 중복 실행 방지됨)
+            console.log("탭 복귀 감지: 오프라인 보상 확인");
+            // 페이지가 다시 보일 때마다 보상을 체크합니다.
             processOfflineReward();
         }
     }
