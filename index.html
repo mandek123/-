@@ -4030,7 +4030,7 @@ button[onclick="resetGame()"]:hover {
 
         <div style="background: rgba(0,0,0,0.25); padding: 14px; border-radius: 8px; border: 1px solid #30363d;">
             <div style="color: #a5d6ff; font-weight: bold; margin-bottom: 6px; font-size: 13px;">💤 오프라인 방치 보상</div>
-            <div style="color: #d1d5da; font-size: 12px; line-height: 1.5;">게임을 종료하거나 백그라운드에 두어도 시간에 비례하여 스톤이 자동 누적됩니다. (최대 24시간)</div>
+            <div style="color: #d1d5da; font-size: 12px; line-height: 1.5;">게임을 종료하여도 시간에 비례하여 스톤이 자동 누적됩니다. (최대 24시간)</div>
         </div>
     </div>
 </details>
@@ -5204,9 +5204,9 @@ const NOTICE_DATABASE = [
         <strong>2) 신규 콘텐츠: 던전 시스템 추가</strong>
         <span><strong>- 골드 던전:</strong> 무제한 입장 가능, 처치 시 대량의 스톤을 획득할 수 있습니다.</span>
         <span><strong>- 다이아 던전:</strong> 일일 5회 입장 가능, 처치 시 다이아를 추가 보상으로 획득합니다.</span>
-        <span><strong>- 잭팟 던전:</strong> 보스 처치 시 룰렛을 통해 골드/다이아/아이템을 획득할 수 있는 고수익 던전입니다.</span>
+        <span><strong>- 잭팟 던전:</strong> 무제한 입장 가능, 보스 처치 시 룰렛을 통해 골드/다이아/아이템을 획득할 수 있는 고수익 던전입니다.</span>
         <strong>3) 상점 및 편의성 대폭 개선</strong>
-        <span>- 오프라인 모드가 추가되었습니다. 이제 화면을 벗어나고(백그라운드or종료) 60초 이후부터 오프라인 보상을 받을 수 있습니다. (자동적용)</span>
+        <span>- 오프라인 모드가 추가되었습니다. 이제 만득월드를 종료한 후 60초 이후부터 오프라인 보상을 받을 수 있습니다. (자동적용)</span>
         <span>- 상점 UI가 개편되었습니다. 체력 단련, 페트 소환, 아이템 상점의 레이아웃이 정리되어 가독성이 향상되었습니다.</span>
         <span>- 장비 판매 기능이 추가되었습니다. 이제 창고에서 불필요한 장비를 다이아로 환원할 수 있습니다.</span>
         <span>- 랭킹 보기 토글 기능 추가 등 시스템 최적화가 진행되었습니다.</span>
@@ -13564,7 +13564,7 @@ function openDungeonMenu() {
                 💎 <b>다이아 던전 (${idGame.dungeon.diamondEntries}/5)</b><br><span style="font-size:11px;">처치 시 500 다이아 (50% 확률로 500 다이아 추가)</span>
             </button>
             <button onclick="enterDungeon('jackpot')" style="width:100%; padding:12px; margin:5px 0; background:#d29922; color:#fff; border:none; border-radius:6px; cursor:pointer;">
-                🎰 <b>잭팟 던전 </b><br><span style="font-size:11px;">보스 처치 시 룰렛 보상 (골드/다이아/아이템/꽝)</span>
+                🎰 <b>잭팟 던전 (무한)</b><br><span style="font-size:11px;">보스 처치 시 룰렛 보상 (골드/다이아/아이템/꽝)</span>
             </button>
             <button onclick="document.getElementById('dungeon-modal-overlay').remove()" style="margin-top:10px; background:none; border:1px solid #444; color:#8b949e; padding:5px 15px; cursor:pointer;">닫기</button>
         </div>
