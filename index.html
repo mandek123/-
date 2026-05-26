@@ -11892,10 +11892,22 @@ function spawnWave() {
     const count = isBoss ? 1 : Math.floor(Math.random() * 4) + 2; 
     let currentDifficulty = idGame.stage;
     
-    let hpScale = Math.pow(1.18, currentDifficulty - 1);
-    let baseHp = Math.floor(20 * hpScale);
+    let hpScale, atkScale;
 
-    let atkScale = Math.pow(1.13, currentDifficulty - 1);
+    // [수정] 40스테이지 이후 난이도 상승폭 완화
+    if (currentDifficulty <= 40) {
+        // 40스테이지 이하: 기존 배율 유지 (체력 18%, 공격력 13% 증가)
+        hpScale = Math.pow(1.18, currentDifficulty - 1);
+        atkScale = Math.pow(1.13, currentDifficulty - 1);
+    } else {
+        // 41스테이지 이상: 40스테이지의 수치를 기준으로 완만하게 증가 (체력 4%, 공격력 2% 증가)
+        let hpScaleAt40 = Math.pow(1.18, 39);
+        let atkScaleAt40 = Math.pow(1.13, 39);
+        hpScale = hpScaleAt40 * Math.pow(1.04, currentDifficulty - 40);
+        atkScale = atkScaleAt40 * Math.pow(1.02, currentDifficulty - 40);
+    }
+
+    let baseHp = Math.floor(20 * hpScale);
     let baseAtk = Math.floor(3 * atkScale);
 
     if(isBoss) { baseHp *= 5; baseAtk *= 3; }
@@ -13101,8 +13113,11 @@ function getDetailedPassiveBonus(pet) {
         if (['강철', '충성', '철갑의 수호', '대지의 심장'].includes(db.name)) {
             bonus.dmgRed += val; 
         }
-        if (db.name === '칠흑의 방벽') {
-            bonus.lifeSteal += (val * 0.2); 
+        
+        // [수정] 흡혈 계열 패시브 처리 (3레벨 이상일 때 효율 대폭 증가)
+        if (db.name === '칠흑의 방벽' || db.name === '흡혈') {
+            let stealMult = pLevel >= 2 ? 0.5 : 0.2; // 3레벨(인덱스 2)부터 0.5배율 적용
+            bonus.lifeSteal += (val * stealMult); 
         }
 
         if (['치유', '창공의 권능', '서리의 심장', '청영의 화조'].includes(db.name)) {
