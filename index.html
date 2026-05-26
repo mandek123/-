@@ -11762,7 +11762,7 @@ const ITEM_DATABASE = {
     "ignos": { name: "이그노스의 활M", img: "./images/item1.png", type: "원거리 무기", atkMult: 0.7, cdMult: 1.5, price: 3000 },
     "spirit": { name: "봉인된 정령왕의 창M", img: "./images/item2.png", type: "근거리 무기", atkMult: 1.2, cdMult: 1.0, defBonus: 15, price: 3000 }
 };
-
+let autoSaveInterval; // 자동 저장을 관리할 변수
 let idGame = {
     started: false,
     stage: 1,
@@ -13035,15 +13035,24 @@ function showOfflineRewardModal(reward, seconds) {
     claimBtn.onmouseover = () => claimBtn.style.transform = "scale(1.03)";
     claimBtn.onmouseout = () => claimBtn.style.transform = "scale(1)";
 }
-// [핵심] 탭 이동 시 게임 일시정지 및 복귀 시 보상 체크
+// [핵심] 탭 이동 시 자동 저장 중지/재개 및 보상 체크
 document.addEventListener('visibilitychange', () => {
-    // 사용자가 다시 탭으로 돌아왔을 때
-    if (document.visibilityState === 'visible') {
+    if (document.hidden) {
+        // 1. 탭을 나갔을 때: 자동 저장 중지
+        clearInterval(autoSaveInterval);
+        console.log("탭 이동: 자동 저장 중지");
+    } else {
+        // 2. 탭으로 돌아왔을 때: 자동 저장 재시작 및 보상 체크
+        console.log("탭 복귀: 자동 저장 재시작 및 보상 확인");
+        
         if (idGame.started) {
-            console.log("탭 복귀 감지: 오프라인 보상 확인");
-            // 페이지가 다시 보일 때마다 보상을 체크합니다.
             processOfflineReward();
         }
+        
+        // 자동 저장 다시 시작
+        autoSaveInterval = setInterval(() => {
+            if (idGame.started) saveGame();
+        }, 30000);
     }
 });
 // [초기화 로직]
@@ -13071,16 +13080,15 @@ document.addEventListener('DOMContentLoaded', () => {
         idGame.loop = requestAnimationFrame(gameLoop);
         setInterval(updateUI, 200);
     } else {
-        // 2. 저장 데이터가 없을 때 실행
         console.log("저장된 데이터 없음 - 시작 화면 표시");
-        document.getElementById('idle-start-screen').style.display = 'block'; // 화면 강제 표시
+        document.getElementById('idle-start-screen').style.display = 'block';
         document.getElementById('idle-top-stats').style.display = 'none';
         document.getElementById('idle-main-screen').style.display = 'none';
         searchStarterPet();
     }
 
-    // 자동 저장
-    setInterval(() => {
+    // [수정] 변수에 할당하여 나중에 껐다 켤 수 있게 함
+    autoSaveInterval = setInterval(() => {
         if (idGame.started) saveGame();
     }, 30000);
 });
