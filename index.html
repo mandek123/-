@@ -13594,10 +13594,10 @@ function enterDungeon(type) {
         idGame.teamCurHp = idGame.teamMaxHp; // 풀피 회복
         updateUI();
 
-        // [핵심] 난이도 설정 로직
+        // [수정된 난이도 설정 로직]
         if (type === 'jackpot') {
-            // 잭팟은 기존대로 현재 스테이지 + 1
-            idGame.stage = idGame.dungeon.originalStage + 1;
+            // 잭팟은 현재 스테이지 + 5로 수정
+            idGame.stage = idGame.dungeon.originalStage + 5;
             idGame.mobsKilled = 9; // 보스전 시작
         } else {
             // 골드/다이아 던전은 현재 스테이지의 0.1배 (최소 1스테이지)
