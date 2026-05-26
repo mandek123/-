@@ -12970,24 +12970,28 @@ function showOfflineRewardModal(reward, seconds) {
     claimBtn.onmouseout = () => claimBtn.style.transform = "scale(1)";
 }
 
-// [핵심] 탭 이동 시 게임 완전 중지 및 복귀 시 보상 체크 (시간차 계산 해결)
+// [핵심] 탭 이동 시 게임 완전 중지 및 복귀 시 보상 체크 (시간차 계산 완벽 해결)
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        console.log("탭 이동: 게임 루프 정지");
-        idGame.started = false;
-        clearInterval(autoSaveInterval);
-        // [추가] 탭 나갈 때 강제 저장 금지 (lastSaveTime 유지 목적)
-    } else {
-        console.log("탭 복귀: 방치 보상 계산");
+        // 1. 탭을 나갈 때
+        if (idGame.started) saveGame(); // [추가] 나가기 직전의 시간을 0.1초의 오차도 없이 저장!
         
-        // 보상 계산 (마지막 저장 시간과 현재 시간 차이)
-        if (idGame.started === false) { // 게임이 정지되어 있던 경우에만
+        idGame.started = false; // 게임 일시정지 (여기서 자물쇠가 잠김)
+        clearInterval(autoSaveInterval);
+        console.log("탭 이동: 게임 정지 및 방치 시간 기록 완료");
+    } else {
+        // 2. 탭으로 돌아왔을 때
+        console.log("탭 복귀: 게임 재개 및 보상 확인");
+        
+        idGame.started = true; // [핵심 수정] 자물쇠부터 먼저 엽니다!
+        idGame.lastTime = performance.now(); 
+        
+        // 이제 자물쇠가 열렸으므로 보상 함수가 정상적으로 끝까지 실행됩니다.
+        if (idGame.warehouse.length > 0 || idGame.fieldPets.length > 0) {
             processOfflineReward();
         }
         
-        idGame.started = true;
-        idGame.lastTime = performance.now();
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(gameLoop); // 전투 애니메이션 재개
         
         autoSaveInterval = setInterval(() => {
             if (idGame.started) saveGame();
