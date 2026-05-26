@@ -12488,8 +12488,8 @@ function processOfflineReward() {
         
         // 60초 이상 방치했을 때만 보상 지급
         if (offlineSeconds > 60) {
-            let stoneReward = Math.floor(idGame.stage * 1.5 * offlineSeconds);
-            if (offlineSeconds > 86400) stoneReward = Math.floor(idGame.stage * 1.5 * 86400);
+            let stoneReward = Math.floor(idGame.stage * 0.5 * offlineSeconds);
+            if (offlineSeconds > 86400) stoneReward = Math.floor(idGame.stage * 0.5 * 86400);
 
             // 바로 모달 호출
             showOfflineRewardModal(stoneReward, offlineSeconds);
