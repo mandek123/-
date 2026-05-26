@@ -13518,14 +13518,14 @@ function enterDungeon(type) {
         idGame.teamCurHp = idGame.teamMaxHp; 
         updateUI();
 
-        // 3. 던전 난이도 적용 (요청하신 난이도로 상향)
+        // 3. 변경된 던전 난이도 적용
         if (type === 'jackpot') {
-            // 잭팟 던전: 현재 스테이지 + 15단계
-            idGame.stage = idGame.dungeon.originalStage + 15;
+            // 잭팟 던전: 현재 스테이지 + 25단계
+            idGame.stage = idGame.dungeon.originalStage + 25;
             idGame.mobsKilled = 9; 
         } else {
-            // 골드, 다이아 던전: 현재 스테이지 + 1단계
-            idGame.stage = idGame.dungeon.originalStage + 1;
+            // 골드, 다이아 던전: 현재 스테이지 - 1단계 (최소 1스테이지 보정)
+            idGame.stage = Math.max(1, idGame.dungeon.originalStage - 1);
             idGame.mobsKilled = 0; 
         }
         
