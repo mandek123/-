@@ -12154,26 +12154,37 @@ else {
 function handleGameOver() {
     idGame.diedThisStage = true;
     
-    idGame.monsters.forEach(m => {
-        if (m.el) { m.el.remove(); m.el = null; }
+    // 몬스터 삭제
+    idGame.monsters.forEach(m => { 
+        if (m.el) { m.el.remove(); m.el = null; } 
     });
     document.querySelectorAll('.idle-entity:not(.facing-right)').forEach(el => el.remove());
 
-    // [핵심 4] 던전 실패 알림창 및 복귀 로직 추가
+    // [수정된 던전 복귀 로직]
     if (idGame.dungeon && idGame.dungeon.active) {
         alert("던전 공략에 실패하여 기존 스테이지로 복귀합니다.");
-        addGameLog(`⚠️ 던전 공략에 실패했습니다. 원래 스테이지로 복귀합니다.`, '#ff4d4d');
         
+        // 1. 복구할 스테이지 데이터가 정상적인지 확인 (0이나 undefined 방지)
+        if (idGame.dungeon.originalStage !== undefined) {
+            idGame.stage = idGame.dungeon.originalStage;
+            idGame.mobsKilled = idGame.dungeon.originalMobs || 0;
+            addGameLog(`⚠️ 던전 실패. 복귀 스테이지: ${idGame.stage}`, '#ff4d4d');
+        } else {
+            // 비상시 현재 스테이지를 유지
+            addGameLog(`⚠️ 던전 복구 데이터 없음. 현재 스테이지(${idGame.stage}) 유지.`, '#ff4d4d');
+        }
+        
+        // 2. 던전 비활성화 처리
         idGame.dungeon.active = false;
-        idGame.stage = idGame.dungeon.originalStage || idGame.stage; 
-        idGame.mobsKilled = idGame.dungeon.originalMobs || 0; 
     } else {
+        // [일반 스테이지 실패 로직]
         addGameLog(`💀 아군 전멸... STAGE ${idGame.stage}의 진행도가 초기화됩니다.`, '#ff4d4d');
         if (idGame.mobsKilled > 0) {
             idGame.mobsKilled--;
         } 
     }
     
+    // 공통 초기화 및 복구
     idGame.teamCurHp = idGame.teamMaxHp;
     updateFormation(); 
     document.querySelectorAll('.dmg-text').forEach(el => el.remove());
@@ -12483,7 +12494,7 @@ function switchIdleTab(tabName) {
 }
 
 function processOfflineReward() {
-    // [중요 수정] 게임이 시작되지 않았거나, 이미 모달창이 떠 있다면 중단
+    // 1. 안전장치: 게임 미시작 혹은 모달창 중복 방지
     if (!idGame.started || document.getElementById('offline-reward-overlay')) return;
 
     const saved = localStorage.getItem('idleGameSave_v2');
@@ -12494,12 +12505,17 @@ function processOfflineReward() {
         let offlineMs = Date.now() - data.lastSaveTime;
         let offlineSeconds = Math.floor(offlineMs / 1000);
         
+        // [디버그 추가] 현재 계산된 방치 시간을 로그로 확인
+        console.log(`방치 시간 체크: ${offlineSeconds}초 지남`);
+        
         // 60초 이상 방치했을 때만 보상 지급
         if (offlineSeconds > 60) {
             let stoneReward = Math.floor(idGame.stage * 0.5 * offlineSeconds);
             if (offlineSeconds > 86400) stoneReward = Math.floor(idGame.stage * 0.5 * 86400);
 
             showOfflineRewardModal(stoneReward, offlineSeconds);
+        } else {
+            console.log("60초 미만 방치라 보상을 지급하지 않습니다.");
         }
     }
 }
@@ -12916,7 +12932,7 @@ function saveGame() {
     };
     localStorage.setItem('idleGameSave_v2', JSON.stringify(saveData));
 }
-// [세이브로드 로직] [세이브파일변경지점]
+// [세이브로드 로직]
 function loadGame() {
     const saved = localStorage.getItem('idleGameSave_v2');
     if (!saved) return false;
@@ -12926,6 +12942,8 @@ function loadGame() {
     if (field) field.innerHTML = '';
 
     const data = JSON.parse(saved);
+    
+    // 1. 기본 데이터 로드
     idGame.stage = data.stage || 1;
     idGame.mobsKilled = data.mobsKilled || 0; 
     idGame.stone = data.stone || 0;
@@ -12938,12 +12956,20 @@ function loadGame() {
     idGame.equippedItem = data.equippedItem || null;
     idGame.logs = data.logs || []; 
     
-    // 던전 정보 불러오기 및 중간에 끊겼을 시 강제 퇴출 로직
+    // 2. 던전 정보 로드
     idGame.dungeon = data.dungeon || { diamondEntries: 0, lastReset: new Date().toDateString(), active: false, originalStage: 1, originalMobs: 0 };
+    
+    // [안전장치 추가] 던전 강제 복귀 로직
     if (idGame.dungeon.active) {
-        idGame.dungeon.active = false;
-        idGame.stage = idGame.dungeon.originalStage || 1;
-        idGame.mobsKilled = idGame.dungeon.originalMobs || 0;
+        // 복구할 데이터가 실제로 존재하는지 확인 (없으면 현재 스테이지 유지)
+        if (idGame.dungeon.originalStage !== undefined && idGame.dungeon.originalStage > 0) {
+            console.log("던전 복구: 스테이지 복원", idGame.dungeon.originalStage);
+            idGame.stage = idGame.dungeon.originalStage;
+            idGame.mobsKilled = idGame.dungeon.originalMobs || 0;
+        } else {
+            console.warn("던전 복구 데이터가 올바르지 않아 스테이지를 유지합니다.");
+        }
+        idGame.dungeon.active = false; // 무조건 비활성화
     }
     
     idGame.fieldPets.forEach(pet => {
@@ -13613,31 +13639,43 @@ function enterDungeon(type) {
 }
 
 function winDungeon() {
-    // [안전장치] 던전이 활성화 중이 아니거나, 잭팟 던전인데 보스가 안 죽었으면 보상 금지
-    if (!idGame.dungeon.active) return;
+    // 안전장치
+    if (!idGame.dungeon || !idGame.dungeon.active) return;
     if (idGame.dungeon.type === 'jackpot' && idGame.mobsKilled < 9) return; 
 
     let type = idGame.dungeon.type;
-    idGame.dungeon.active = false;
     
+    // 1. 보상 로직
     if (type === 'jackpot') {
-        spinRoulette(); // 애니메이션 포함된 룰렛으로 실행
+        spinRoulette();
     } else if (type === 'gold') {
-        // ... 기존 골드 보상 코드 ...
         idGame.stone += 30000;
         addGameLog(`💰 던전 클리어! 30,000 스톤 획득!`, '#fca311');
         if (Math.random() < 0.5) { idGame.stone += 50000; addGameLog(`🎉 [행운] 50,000 스톤 추가!`, '#ffcc00'); }
     } else if (type === 'diamond') {
-        // ... 기존 다이아 보상 코드 ...
         idGame.diamond += 500;
         addGameLog(`💎 던전 클리어! 500 다이아 획득!`, '#8a2be2');
         if (Math.random() < 0.5) { idGame.diamond += 500; addGameLog(`🎉 [행운] 500 다이아 추가!`, '#ffcc00'); }
     }
+
+    // 2. 던전 종료 및 복귀 (통합 로직)
+    exitDungeonProcess();
+}
+
+// [핵심] 던전 복귀 로직을 별도 함수로 분리하여 관리 (버그 방지)
+function exitDungeonProcess() {
+    console.log("복귀 전 스테이지:", idGame.stage, "복원할 스테이지:", idGame.dungeon.originalStage);
     
+    // 데이터 복원
     idGame.stage = idGame.dungeon.originalStage || 1; 
     idGame.mobsKilled = idGame.dungeon.originalMobs || 0;
+    
+    // 던전 비활성화
+    idGame.dungeon.active = false;
+    
     spawnWave();
     saveGame();
+    updateUI();
 }
 
 function startCountdown(callback) {
