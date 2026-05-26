@@ -13508,7 +13508,7 @@ function enterDungeon(type) {
         updateUI();
 
         if (type === 'jackpot') {
-            idGame.stage = idGame.dungeon.originalStage + 5;
+            idGame.stage = idGame.dungeon.originalStage + 10;
             idGame.mobsKilled = 9; 
         } else {
             idGame.stage = Math.max(1, Math.floor(idGame.dungeon.originalStage * 0.1));
