@@ -4025,8 +4025,8 @@ button[onclick="resetGame()"]:hover {
         </div>
 
         <div style="background: rgba(0,0,0,0.25); padding: 14px; border-radius: 8px; border: 1px solid #30363d;">
-            <div style="color: #a5d6ff; font-weight: bold; margin-bottom: 6px; font-size: 13px;">📜 시스템 로그</div>
-            <div style="color: #d1d5da; font-size: 12px; line-height: 1.5;">전투 및 획득 보상을 실시간으로 확인하세요.</div>
+            <div style="color: #a5d6ff; font-weight: bold; margin-bottom: 6px; font-size: 13px;">💤 오프라인 방치 보상</div>
+            <div style="color: #d1d5da; font-size: 12px; line-height: 1.5;">게임을 종료하거나 백그라운드에 두어도 시간에 비례하여 스톤이 자동 누적됩니다. (최대 24시간)</div>
         </div>
     </div>
 </details>
@@ -5198,10 +5198,11 @@ const NOTICE_DATABASE = [
         <span>- 경쟁의 공정성을 위해 랭킹 시스템이 도입되었습니다. 이에 따라 기존 게임 데이터가 초기화되었습니다.</span>
         <span>- 이제 자신의 스테이지와 몬스터 처치 수를 바탕으로 전 서버 유저와 순위 경쟁을 할 수 있습니다.</span>
         <strong>2) 신규 콘텐츠: 던전 시스템 추가</strong>
-        <span>- <strong>골드 던전:</strong> 무제한 입장 가능, 처치 시 대량의 스톤을 획득할 수 있습니다.</span>
-        <span>- <strong>다이아 던전:</strong> 일일 5회 입장 가능, 처치 시 다이아를 추가 보상으로 획득합니다.</span>
-        <span>- <strong>잭팟 던전:</strong> 보스 처치 시 룰렛을 통해 골드/다이아/아이템을 획득할 수 있는 고수익 던전입니다.</span>
+        <span><strong>- 골드 던전:</strong> 무제한 입장 가능, 처치 시 대량의 스톤을 획득할 수 있습니다.</span>
+        <span><strong>- 다이아 던전:</strong> 일일 5회 입장 가능, 처치 시 다이아를 추가 보상으로 획득합니다.</span>
+        <span><strong>- 잭팟 던전:</strong> 보스 처치 시 룰렛을 통해 골드/다이아/아이템을 획득할 수 있는 고수익 던전입니다.</span>
         <strong>3) 상점 및 편의성 대폭 개선</strong>
+        <span>- 오프라인 모드가 추가되었습니다. 이제 화면을 벗어나고(백그라운드or종료) 60초 이후부터 오프라인 보상을 받을 수 있습니다. (자동적용)</span>
         <span>- 상점 UI가 개편되었습니다. 체력 단련, 페트 소환, 아이템 상점의 레이아웃이 정리되어 가독성이 향상되었습니다.</span>
         <span>- 장비 판매 기능이 추가되었습니다. 이제 창고에서 불필요한 장비를 다이아로 환원할 수 있습니다.</span>
         <span>- 랭킹 보기 토글 기능 추가 등 시스템 최적화가 진행되었습니다.</span>
@@ -12872,7 +12873,9 @@ function saveGame() {
         ownedItems: idGame.ownedItems || [],        
         equippedItem: idGame.equippedItem || null,
         logs: idGame.logs || [],
-        dungeon: idGame.dungeon // [추가] 던전 상태 및 입장 횟수 저장
+        dungeon: idGame.dungeon,
+        // [추가] 오프라인 보상을 위한 마지막 저장 시간 기록
+        lastSaveTime: Date.now() 
     };
     localStorage.setItem('idleGameSave_v2', JSON.stringify(saveData));
 }
@@ -12915,10 +12918,80 @@ function loadGame() {
     }
     
     if (typeof renderLogs === 'function') renderLogs(); 
+    if (typeof updateFormation === 'function') {
+        updateFormation(); 
+    }
     
+    if (typeof renderLogs === 'function') renderLogs(); 
+
+    // [수정] 오프라인 방치 보상 계산 로직
+    if (data.lastSaveTime) {
+        let offlineMs = Date.now() - data.lastSaveTime;
+        let offlineSeconds = Math.floor(offlineMs / 1000);
+        
+        // 60초 이상 꺼뒀을 때만 보상 지급
+        if (offlineSeconds > 60) {
+            let stoneReward = Math.floor(idGame.stage * 1.5 * offlineSeconds);
+            if (offlineSeconds > 86400) {
+                offlineSeconds = 86400;
+                stoneReward = Math.floor(idGame.stage * 1.5 * 86400);
+            }
+
+            // 스톤을 즉시 주지 않고, 화면이 다 그려진 후 수령 모달창 띄우기
+            setTimeout(() => {
+                showOfflineRewardModal(stoneReward, offlineSeconds);
+            }, 500);
+        }
+    }
     return true;
 }
+// [새로 추가] 오프라인 보상 수령 모달창 함수
+function showOfflineRewardModal(reward, seconds) {
+    const overlay = document.createElement('div');
+    overlay.id = 'offline-reward-overlay';
+    overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; display:flex; justify-content:center; align-items:center; backdrop-filter: blur(3px);";
 
+    let mins = Math.floor(seconds / 60);
+    let hours = Math.floor(mins / 60);
+    let timeText = hours > 0 ? `${hours}시간 ${mins % 60}분` : `${mins}분`;
+
+    overlay.innerHTML = `
+        <div style="background:#1e242b; border:1px solid #539bf5; border-radius:12px; padding:30px; width:320px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="font-size:45px; margin-bottom:10px; animation: countPop 1s ease-in-out infinite alternate;">💤</div>
+            <h3 style="color:#539bf5; margin-top:0; margin-bottom:15px; font-size:20px;">오프라인 방치 보상</h3>
+            <div style="color:#d1d5da; font-size:14px; margin-bottom:25px; line-height:1.6;">
+                만득이들이 묵묵히<br>사냥을 진행했습니다!<br><br>
+                <span style="color:#8b949e; font-size:13px;">자리 비운 시간: ${timeText}</span><br>
+                <div style="margin-top:10px; padding:10px; background:#0d1117; border-radius:8px; border:1px solid #30363d;">
+                    <span style="color:#fca311; font-size:22px; font-weight:bold;">${reward.toLocaleString()}</span> <span style="color:#8b949e;">스톤</span>
+                </div>
+            </div>
+            <button id="btn-claim-offline" style="width:100%; padding:14px; background:linear-gradient(135deg, #539bf5, #2ea043); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition: transform 0.1s;">
+                보상 수령하기
+            </button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // 수령 버튼 클릭 이벤트
+    const claimBtn = document.getElementById('btn-claim-offline');
+    claimBtn.onclick = function() {
+        // 이때 스톤을 실제로 지급
+        idGame.stone += reward;
+        addGameLog(`💤 오프라인 보상 수령 완료! (${reward.toLocaleString()} 스톤)`, '#539bf5');
+        updateUI();
+        saveGame();
+        
+        // 창 닫기 애니메이션 효과
+        overlay.style.transition = "opacity 0.3s";
+        overlay.style.opacity = "0";
+        setTimeout(() => overlay.remove(), 300);
+    };
+    
+    // 버튼 호버 효과 (선택사항)
+    claimBtn.onmouseover = () => claimBtn.style.transform = "scale(1.03)";
+    claimBtn.onmouseout = () => claimBtn.style.transform = "scale(1)";
+}
 // [초기화 로직]
 function resetGame() {
     if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
