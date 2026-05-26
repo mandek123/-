@@ -11828,6 +11828,10 @@ function startGameWithPet(petData, growthBonus) {
     document.getElementById('idle-top-stats').style.display = 'flex';
     document.getElementById('idle-main-screen').style.display = 'block';
     
+    // [버그 수정 핵심] 새로 시작할 때도 필드 깨끗하게 청소
+    const field = document.getElementById('idle-field');
+    if (field) field.innerHTML = '';
+    
     idGame.fieldPets.push(createPetEntity(petData, growthBonus, true));
     
     calcTeamStats();
@@ -11839,7 +11843,7 @@ function startGameWithPet(petData, growthBonus) {
     idGame.lastTime = performance.now();
     idGame.loop = requestAnimationFrame(gameLoop);
     setInterval(updateUI, 200); 
-    saveGame(); // [추가] 스타팅 선택 직후 상태를 스토리지에 최초 기록
+    saveGame(); 
 }
 
 let entityIdCounter = 0;
@@ -12884,6 +12888,10 @@ function loadGame() {
     const saved = localStorage.getItem('idleGameSave_v2');
     if (!saved) return false;
 
+    // [버그 수정 핵심] 새로고침 시 남아있는 더미(좀비) 요소 강제 청소
+    const field = document.getElementById('idle-field');
+    if (field) field.innerHTML = '';
+
     const data = JSON.parse(saved);
     idGame.stage = data.stage || 1;
     idGame.mobsKilled = data.mobsKilled || 0; 
@@ -12897,7 +12905,7 @@ function loadGame() {
     idGame.equippedItem = data.equippedItem || null;
     idGame.logs = data.logs || []; 
     
-    // [핵심 6] 던전 정보 불러오기 및 중간에 끊겼을 시 강제 퇴출 로직
+    // 던전 정보 불러오기 및 중간에 끊겼을 시 강제 퇴출 로직
     idGame.dungeon = data.dungeon || { diamondEntries: 0, lastReset: new Date().toDateString(), active: false, originalStage: 1, originalMobs: 0 };
     if (idGame.dungeon.active) {
         idGame.dungeon.active = false;
@@ -12918,18 +12926,12 @@ function loadGame() {
     }
     
     if (typeof renderLogs === 'function') renderLogs(); 
-    if (typeof updateFormation === 'function') {
-        updateFormation(); 
-    }
-    
-    if (typeof renderLogs === 'function') renderLogs(); 
 
-    // [수정] 오프라인 방치 보상 계산 로직
+    // 오프라인 방치 보상 계산 로직
     if (data.lastSaveTime) {
         let offlineMs = Date.now() - data.lastSaveTime;
         let offlineSeconds = Math.floor(offlineMs / 1000);
         
-        // 60초 이상 꺼뒀을 때만 보상 지급
         if (offlineSeconds > 60) {
             let stoneReward = Math.floor(idGame.stage * 1.5 * offlineSeconds);
             if (offlineSeconds > 86400) {
@@ -12937,12 +12939,14 @@ function loadGame() {
                 stoneReward = Math.floor(idGame.stage * 1.5 * 86400);
             }
 
-            // 스톤을 즉시 주지 않고, 화면이 다 그려진 후 수령 모달창 띄우기
             setTimeout(() => {
-                showOfflineRewardModal(stoneReward, offlineSeconds);
+                if(typeof showOfflineRewardModal === 'function') {
+                    showOfflineRewardModal(stoneReward, offlineSeconds);
+                }
             }, 500);
         }
     }
+
     return true;
 }
 // [새로 추가] 오프라인 보상 수령 모달창 함수
