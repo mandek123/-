@@ -13501,7 +13501,7 @@ function enterDungeon(type) {
         idGame.dungeon.diamondEntries++;
     }
 
-    // 1. [핵심] 던전 입장 전, 현재 스테이지를 확실하게 백업
+    // 1. [핵심] 던전 입장 전, 현재 스테이지(진행 중이던 스테이지)를 확실하게 백업
     idGame.dungeon.originalStage = idGame.stage;
     idGame.dungeon.originalMobs = idGame.mobsKilled;
     idGame.dungeon.type = type;
@@ -13512,17 +13512,20 @@ function enterDungeon(type) {
     document.getElementById('dungeon-modal-overlay').remove(); 
     
     startCountdown(() => {
+        // [버그 방지] 카운트다운이 끝난 직후에 던전을 활성화하여, 대기시간 중 죽는 사고를 막습니다.
         idGame.dungeon.active = true; 
         
         idGame.teamCurHp = idGame.teamMaxHp; 
         updateUI();
 
-        // 3. 던전 난이도 적용
+        // 3. 던전 난이도 적용 (요청하신 난이도로 상향)
         if (type === 'jackpot') {
-            idGame.stage = idGame.dungeon.originalStage + 2;
+            // 잭팟 던전: 현재 스테이지 + 15단계
+            idGame.stage = idGame.dungeon.originalStage + 15;
             idGame.mobsKilled = 9; 
         } else {
-            idGame.stage = Math.max(1, Math.floor(idGame.dungeon.originalStage * 0.1));
+            // 골드, 다이아 던전: 현재 스테이지 + 1단계
+            idGame.stage = idGame.dungeon.originalStage + 1;
             idGame.mobsKilled = 0; 
         }
         
