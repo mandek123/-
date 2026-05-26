@@ -11894,13 +11894,11 @@ function spawnWave() {
     
     let hpScale, atkScale;
 
-    // [수정] 40스테이지 이후 난이도 상승폭 완화
+    // 40스테이지 이후 난이도 상승폭 완화 (기존 코드 유지)
     if (currentDifficulty <= 40) {
-        // 40스테이지 이하: 기존 배율 유지 (체력 18%, 공격력 13% 증가)
         hpScale = Math.pow(1.18, currentDifficulty - 1);
         atkScale = Math.pow(1.13, currentDifficulty - 1);
     } else {
-        // 41스테이지 이상: 40스테이지의 수치를 기준으로 완만하게 증가 (체력 4%, 공격력 2% 증가)
         let hpScaleAt40 = Math.pow(1.18, 39);
         let atkScaleAt40 = Math.pow(1.13, 39);
         hpScale = hpScaleAt40 * Math.pow(1.04, currentDifficulty - 40);
@@ -11925,6 +11923,12 @@ function spawnWave() {
             spawnX -= 15;
         }
 
+        // [추가] 40스테이지부터 보스의 공격 속도를 0.8초로 고정 버프
+        let finalAtkMaxCd = 1.5; // 기본 몬스터 공격 쿨타임
+        if (isBoss && currentDifficulty >= 40) {
+            finalAtkMaxCd = 0.8; // 40스테이지 이상 보스 한정 공속 버프
+        }
+
         idGame.monsters.push({
             id: 'mon_' + entityIdCounter++,
             name: isBoss ? `[BOSS] ${rPet.name}` : rPet.name,
@@ -11937,13 +11941,14 @@ function spawnWave() {
             spd: 50 + (currentDifficulty * 1.5), 
             atkRange: 50,
             atkCooldown: 0.5, 
-            atkMaxCd: 1.5,
+            atkMaxCd: finalAtkMaxCd, // [적용] 계산된 공속 적용
             isBoss: isBoss,
             el: null
         });
     }
     syncDOM();
 }
+
 function winDungeon() {
     // [안전장치] 던전이 활성화 중이 아니거나, 잭팟 던전인데 보스가 안 죽었으면 보상 금지
     if (!idGame.dungeon || !idGame.dungeon.active) return;
