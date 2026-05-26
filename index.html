@@ -6212,13 +6212,7 @@ function toggleEncyPetList(listId) {
             const val = document.getElementById('huntingGround').value;
             if (val !== "0" && val !== "none") document.getElementById('hourlyExp').value = val;
         }
-
-        function formatNumber(num) {
-            if (num >= 100000000) return (num / 100000000).toFixed(2) + "억";
-            if (num >= 10000) return Math.floor(num / 10000).toLocaleString() + "만";
-            return num.toLocaleString();
-        }
-
+        
         function animateResults(containerId) {
             const container = document.getElementById(containerId);
             container.classList.remove('animate-result');
