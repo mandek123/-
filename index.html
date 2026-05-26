@@ -12475,6 +12475,9 @@ function switchIdleTab(tabName) {
 }
 
 function processOfflineReward() {
+    // [보안] 이미 모달창이 떠 있다면 중복 실행하지 않음
+    if (document.getElementById('offline-reward-overlay')) return;
+
     const saved = localStorage.getItem('idleGameSave_v2');
     if (!saved) return;
     const data = JSON.parse(saved);
@@ -12486,13 +12489,10 @@ function processOfflineReward() {
         // 60초 이상 방치했을 때만 보상 지급
         if (offlineSeconds > 60) {
             let stoneReward = Math.floor(idGame.stage * 1.5 * offlineSeconds);
-            // 최대 24시간 보상 제한
             if (offlineSeconds > 86400) stoneReward = Math.floor(idGame.stage * 1.5 * 86400);
 
-            // 화면이 그려진 후 모달 호출
-            setTimeout(() => {
-                showOfflineRewardModal(stoneReward, offlineSeconds);
-            }, 1000);
+            // 바로 모달 호출
+            showOfflineRewardModal(stoneReward, offlineSeconds);
         }
     }
 }
@@ -13009,6 +13009,22 @@ function showOfflineRewardModal(reward, seconds) {
     claimBtn.onmouseover = () => claimBtn.style.transform = "scale(1.03)";
     claimBtn.onmouseout = () => claimBtn.style.transform = "scale(1)";
 }
+// [새로 추가] 페이지가 다시 보일 때(탭 이동 후 복귀) 오프라인 보상 체크
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        console.log("게임 탭으로 복귀했습니다. 오프라인 보상을 확인합니다.");
+        
+        // 보상을 다시 받을 수 있도록 초기화
+        offlineRewardProcessed = false; 
+        
+        // 이미 보상을 받았는지 체크하여 중복 지급 방지
+        processOfflineReward();
+        
+        // 보상 처리가 되었다면 다시 true로 변경
+        offlineRewardProcessed = true;
+    }
+});
+
 // [초기화 로직]
 function resetGame() {
     if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
