@@ -6212,7 +6212,13 @@ function toggleEncyPetList(listId) {
             const val = document.getElementById('huntingGround').value;
             if (val !== "0" && val !== "none") document.getElementById('hourlyExp').value = val;
         }
-        
+
+        function formatNumber(num) {
+            if (num >= 100000000) return (num / 100000000).toFixed(2) + "억";
+            if (num >= 10000) return Math.floor(num / 10000).toLocaleString() + "만";
+            return num.toLocaleString();
+        }
+
         function animateResults(containerId) {
             const container = document.getElementById(containerId);
             container.classList.remove('animate-result');
@@ -11754,7 +11760,7 @@ document.addEventListener('DOMContentLoaded', () => {
    ======================================= */
 const ITEM_DATABASE = {
     "ignos": { name: "이그노스의 활M", img: "./images/item1.png", type: "원거리 무기", atkMult: 0.7, cdMult: 1.5, price: 3000 },
-    "spirit": { name: "봉인된 정령왕의 창M", img: "./images/item2.png", type: "근거리 무기", atkMult: 1.2, cdMult: 1.0, price: 3000 }
+    "spirit": { name: "봉인된 정령왕의 창M", img: "./images/item2.png", type: "근거리 무기", atkMult: 1.2, cdMult: 1.0, defBonus: 15, price: 3000 }
 };
 
 let idGame = {
@@ -12050,12 +12056,20 @@ function gameLoop(time) {
                     let teamDodgeChance = 0;
                     
                     idGame.fieldPets.forEach(p => {
-                        let petDef = (p.baseDef || 5) + ((p.gdef || 0.5) * (p.level - 1) * p.growthBonus);
-                        let b = getDetailedPassiveBonus(p);
-                        
-                        petDef = Math.floor(petDef * b.defMult); // 방어력 감소/증가 적용
-                        teamTotalDef += petDef;
-                        totalDmgRed += b.dmgRed; // 고정 피해 감소치 (강철 등) 누적
+    let petDef = (p.baseDef || 5) + ((p.gdef || 0.5) * (p.level - 1) * p.growthBonus);
+    let b = getDetailedPassiveBonus(p);
+
+    // [추가] 장착한 아이템의 defBonus 적용
+    if (p.equippedItemUid) {
+        let foundItem = idGame.ownedItems.find(i => i.uid === p.equippedItemUid);
+        if (foundItem && ITEM_DATABASE[foundItem.itemKey] && ITEM_DATABASE[foundItem.itemKey].defBonus) {
+            totalDmgRed += ITEM_DATABASE[foundItem.itemKey].defBonus;
+        }
+    }
+
+    petDef = Math.floor(petDef * b.defMult); 
+    teamTotalDef += petDef;
+    totalDmgRed += b.dmgRed;
                         
                         // 가장 높은 회피율 수치를 팀 대표 회피율로 사용 (최대 70% 제한)
                         if (b.dodge > teamDodgeChance) teamDodgeChance = b.dodge;
@@ -12632,13 +12646,6 @@ function updateDynamicShopElements() {
     if (trainListContainer.innerHTML.replace(/\s+/g, '') !== trainHtml.replace(/\s+/g, '')) {
         trainListContainer.innerHTML = trainHtml;
     }
-}
-
-function formatNumber(num) {
-    if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
-    if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toLocaleString();
 }
 
 function buyTeamHp(cost) {
@@ -13573,23 +13580,30 @@ function enterDungeon(type) {
         idGame.dungeon.diamondEntries++;
     }
 
-    // 1. 현재 진행 상황 백업 (스테이지와 처치 마릿수)
+    // 1. 현재 진행 상황 백업
     idGame.dungeon.originalStage = idGame.stage;
     idGame.dungeon.originalMobs = idGame.mobsKilled;
     
     // 2. 던전 타입과 활성화 상태 설정
-    idGame.dungeon.type = type; // 'gold', 'diamond', 'jackpot' 중 하나로 정확히 설정
+    idGame.dungeon.type = type;
     idGame.dungeon.active = true;
     
-    // 3. 카운트다운 진행 (시작 직전에 보스판인지 일반 던전인지 결정)
+    // 3. 카운트다운 진행
     document.getElementById('dungeon-modal-overlay').remove(); 
     startCountdown(() => {
         idGame.teamCurHp = idGame.teamMaxHp; // 풀피 회복
         updateUI();
 
-        // [핵심] 잭팟은 35, 골드/다이아는 30
-        idGame.stage = (type === 'jackpot') ? 35 : 30; 
-        idGame.mobsKilled = (type === 'jackpot') ? 9 : 0; // 잭팟이면 바로 보스(9)로 시작
+        // [핵심] 난이도 설정 로직
+        if (type === 'jackpot') {
+            // 잭팟은 기존대로 현재 스테이지 + 1
+            idGame.stage = idGame.dungeon.originalStage + 1;
+            idGame.mobsKilled = 9; // 보스전 시작
+        } else {
+            // 골드/다이아 던전은 현재 스테이지의 0.1배 (최소 1스테이지)
+            idGame.stage = Math.max(1, Math.floor(idGame.dungeon.originalStage * 0.1));
+            idGame.mobsKilled = 0; // 일반 몬스터부터 시작
+        }
         
         addGameLog(`⚔️ ${type === 'jackpot' ? '🎰 잭팟' : (type === 'gold' ? '💰 골드' : '💎 다이아')} 던전에 입장했습니다!`, '#539bf5');
         
