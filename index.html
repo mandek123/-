@@ -11923,10 +11923,10 @@ function spawnWave() {
             spawnX -= 15;
         }
 
-        // [추가] 40스테이지부터 보스의 공격 속도를 0.8초로 고정 버프
-        let finalAtkMaxCd = 1.5; // 기본 몬스터 공격 쿨타임
+        // [추가] 40스테이지부터 보스의 공격 속도를 0.7초로 고정 버프
+        let finalAtkMaxCd = 1.2; // 기본 몬스터 공격 쿨타임
         if (isBoss && currentDifficulty >= 40) {
-            finalAtkMaxCd = 0.8; // 40스테이지 이상 보스 한정 공속 버프
+            finalAtkMaxCd = 0.7; // 40스테이지 이상 보스 한정 공속 버프
         }
 
         idGame.monsters.push({
@@ -13119,15 +13119,14 @@ function getDetailedPassiveBonus(pet) {
             bonus.dmgRed += val; 
         }
         
-        // [수정] 흡혈 계열 패시브 처리 (3레벨 이상일 때 효율 대폭 증가)
+        // [수정 1] 흡혈 계열 패시브 무조건 10% 고정 (레벨 비례 삭제)
         if (db.name === '칠흑의 방벽' || db.name === '흡혈') {
-            let stealMult = pLevel >= 2 ? 0.5 : 0.2; // 3레벨(인덱스 2)부터 0.5배율 적용
-            bonus.lifeSteal += (val * stealMult); 
+            bonus.lifeSteal += 0.1; 
         }
 
+        // [수정 2] 타격당 체력 회복 계열 무조건 10% 고정 (팀 최대 체력의 10% 회복)
         if (['치유', '창공의 권능', '서리의 심장', '청영의 화조'].includes(db.name)) {
-            let healNerfFactor = (pet.level < 20) ? 0.1 : 0.2;
-            bonus.heal += Math.floor(val * healNerfFactor); 
+            bonus.heal += Math.floor(idGame.teamMaxHp * 0.1); 
             
             if (db.name === '청영의 화조') bonus.crit += 0.05;
         }
