@@ -13078,7 +13078,19 @@ function getDetailedPassiveBonus(pet) {
         if (!isOwner && !isTeamBuff) return; 
 
         let pLevel = Math.floor(((p.level || 1) - 1) / 10);
-        let valStr = (db.values && db.values.length > 0) ? db.values[Math.min(pLevel, db.values.length - 1)] : "0";
+        
+        // 5레벨(인덱스 4) 이후 성장 로직 적용
+        let maxIdx = db.values.length - 1;
+        let valStr;
+        
+        if (pLevel <= maxIdx) {
+            valStr = db.values[pLevel];
+        } else {
+            let baseVal = parseFloat(db.values[maxIdx]);
+            let extra = (pLevel - maxIdx) * 1; 
+            valStr = (baseVal + extra) + "%";
+        }
+
         let numMatch = String(valStr).match(/[0-9.]+/);
         let num = numMatch ? parseFloat(numMatch[0]) : 0;
         let isPercent = String(valStr).includes('%') || (db.effect && String(db.effect).includes('%'));
@@ -13119,16 +13131,22 @@ function getDetailedPassiveBonus(pet) {
             bonus.dmgRed += val; 
         }
         
-        // [수정 1] 흡혈 계열 패시브 무조건 10% 고정 (레벨 비례 삭제)
-        if (db.name === '칠흑의 방벽' || db.name === '흡혈') {
-            bonus.lifeSteal += 0.1; 
+        // 1. 흡혈류 (타격 데미지의 15% 회복 고정)
+        const lifestealPassives = ['칠흑의 방벽', '흡혈'];
+        if (lifestealPassives.includes(db.name)) {
+            bonus.lifeSteal += 0.15;
         }
-
-        // [수정 2] 타격당 체력 회복 계열 무조건 10% 고정 (팀 최대 체력의 10% 회복)
-        if (['치유', '창공의 권능', '서리의 심장', '청영의 화조'].includes(db.name)) {
-            bonus.heal += Math.floor(idGame.teamMaxHp * 0.1); 
+        
+        // 2. 타격 회복류 (팀 전체 최대 체력의 0.5% 회복 고정)
+        const healPassives = ['치유', '창공의 권능', '서리의 심장', '청영의 화조'];
+        if (healPassives.includes(db.name)) {
+            // idGame.teamMaxHp의 0.5% 회복 (최소 1 보장)
+            bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.005));
             
-            if (db.name === '청영의 화조') bonus.crit += 0.05;
+            // 청영의 화조는 추가 치명타 보너스 유지
+            if (db.name === '청영의 화조') {
+                bonus.crit += 0.05;
+            }
         }
     };
 
