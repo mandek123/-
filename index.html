@@ -13539,8 +13539,8 @@ function enterDungeon(type) {
 
         // 3. 변경된 던전 난이도 적용
         if (type === 'jackpot') {
-            // 잭팟 던전: 현재 스테이지 + 15단계
-            idGame.stage = idGame.dungeon.originalStage + 15;
+            // 잭팟 던전: 현재 스테이지 + 5단계
+            idGame.stage = idGame.dungeon.originalStage + 5;
             idGame.mobsKilled = 9; 
         } else {
             // 골드, 다이아 던전: 현재 스테이지 - 1단계 (최소 1스테이지 보정)
