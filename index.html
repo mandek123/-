@@ -5076,10 +5076,10 @@ button[onclick="resetGame()"]:hover {
             { category: "디어룬류", name: "디어룬[還]", img: "./images/824.gif", elements: "지9 수1", hp: 58.46, atk: 12.82, def: 7.49, spd: 9.55, ghp: 10.17, gatk: 2.23, gdef: 1.30, gspd: 1.66, passive: "심판의 혼", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
             { category: "사신(四神)류", name: "흑풍[還]", img: "./images/825.gif", elements: "지8 풍2", hp: 60.17, atk: 13.46, def: 7.95, spd: 8.32, ghp: 10.47, gatk: 2.34, gdef: 1.38, gspd: 1.45, passive: "왜곡", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
 { category: "마메르류", name: "흑뱀[還]", img: "./images/826.gif", elements: "수5 화5", hp: 55.95, atk: 12.48, def: 6.68, spd: 9.38, ghp: 10.14, gatk: 2.26, gdef: 1.21, gspd: 1.70, passive: "심연의 보주", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
-{ category: "사신(四神)류", name: "청주작[還]", img: "./images/827.gif", elements: "수9 화1", hp: 60.67, atk: 12.90, def: 7.06, spd: 9.42, ghp: 10.56, gatk: 2.24, gdef: 1.23, gspd: 1.64, passive: "창영의 화조", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
+{ category: "사신(四神)류", name: "청주작[還]", img: "./images/827.gif", elements: "수9 화1", hp: 60.67, atk: 12.90, def: 7.06, spd: 9.42, ghp: 10.56, gatk: 2.24, gdef: 1.23, gspd: 1.64, passive: "청영의 화조", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
 { category: "기타류", name: "페가수스[還]", img: "./images/828.gif", elements: "화9 풍1", hp: 60.31, atk: 13.18, def: 6.81, spd: 10.89, ghp: 10.09, gatk: 2.21, gdef: 1.14, gspd: 1.82, passive: "황혼의 날개", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
 { category: "기타류", name: "마스타로[還]", img: "./images/829.gif", elements: "수2 화8", hp: 59.23, atk: 13.55, def: 7.16, spd: 8.80, ghp: 10.31, gatk: 2.36, gdef: 1.24, gspd: 1.53, passive: "왜곡", grade: "일반", encyBuff: "레이드 펫 공격력 1% 증가" },
-{ category: "사신(四神)류", name: "흑주작[還]", img: "./images/830.gif", elements: "화2 풍8", hp: 60.93, atk: 13.50, def: 7.07, spd: 10.24, ghp: 10.19, gatk: 2.26, gdef: 1.18, gspd: 1.71, passive: "창영의 화조", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
+{ category: "사신(四神)류", name: "흑주작[還]", img: "./images/830.gif", elements: "화2 풍8", hp: 60.93, atk: 13.50, def: 7.07, spd: 10.24, ghp: 10.19, gatk: 2.26, gdef: 1.18, gspd: 1.71, passive: "청영의 화조", grade: "일반", encyBuff: "레이드 펫 순발력 1% 증가" },
 { category: "사신(四神)류", name: "황룡[還]", img: "./images/831.gif", elements: "화1 풍9", hp: 59.49, atk: 13.53, def: 7.72, spd: 8.45, ghp: 10.35, gatk: 2.35, gdef: 1.34, gspd: 1.47, passive: "광휘의 권능", grade: "일반", encyBuff: "레이드 캐릭터 순발력 1% 증가" },
 { category: "샤크론류", name: "아크론[還]", img: "./images/832.gif", elements: "지8 수2", hp: 55.84, atk: 12.14, def: 7.35, spd: 7.63, ghp: 10.56, gatk: 2.30, gdef: 1.39, gspd: 1.44, passive: "전투 집중", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
 { category: "메가로돈류", name: "메가로돈[還]", img: "./images/833.gif", elements: "수10", hp: 59.39, atk: 13.20, def: 7.96, spd: 6.69, ghp: 10.76, gatk: 2.39, gdef: 1.44, gspd: 1.21, passive: "암살", grade: "일반", encyBuff: "레이드 매턴 펫 HP 5 회복" },
@@ -13140,8 +13140,8 @@ function getDetailedPassiveBonus(pet) {
         // 2. 타격 회복류 (팀 전체 최대 체력의 0.5% 회복 고정)
         const healPassives = ['치유', '창공의 권능', '서리의 심장', '청영의 화조'];
         if (healPassives.includes(db.name)) {
-            // idGame.teamMaxHp의 0.5% 회복 (최소 1 보장)
-            bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.005));
+            // idGame.teamMaxHp의 0.25% 회복 (최소 1 보장)
+            bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.0025));
             
             // 청영의 화조는 추가 치명타 보너스 유지
             if (db.name === '청영의 화조') {
