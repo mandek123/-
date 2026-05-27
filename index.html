@@ -5193,6 +5193,26 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 27,
+        date: "26년 5월 28일",
+        title: "26년 5월 28일 업데이트 공지사항입니다.",
+        summary: "만득이 키우기 페트 각성 시스템 도입 및 다이아 상점 추가",
+        content: `
+            <strong>1) 신규 콘텐츠: 페트 각성 시스템</strong>
+            <span>- 50레벨 이상 도달한 페트를 다이아 10,000개를 사용하여 각성할 수 있습니다.</span>
+            <span>- 각성 시 페트의 기본 공격력, 방어력, 체력이 20% 영구적으로 상승합니다.</span>
+            <strong>2) 팀 특수 버프 기능(다이아 상점)</strong>
+            <span>- 상점 내 '다이아 상점' 탭이 추가되어 30분간 지속되는 팀 버프를 구매할 수 있습니다.</span>
+            <span>- 스톤 획득량 1.5배 증가 및 공격력 증가 버프가 추가되었습니다. (구매 비용: 각 1,000 다이아)</span>
+            <span>- 버프 활성화 시 해당 항목은 30분간 대기 모드로 전환되어 중복 구매가 제한됩니다.</span>
+            <strong>3) 시스템 및 버그 수정</strong>
+            <span>- '강철' 등 고정 수치(Flat) 적용 패시브가 퍼센트로 잘못 계산되던 수치 오류를 수정하였습니다.</span>
+            <span>- 게임 재접속(새로고침) 시 버프 데이터가 초기화되던 현상을 수정하여 유지되도록 개선하였습니다.</span>
+            <span>- 창고 및 출전 페트 상세 UI를 개선하여 각성 여부를 즉시 확인할 수 있도록 적용하였습니다.</span>
+        `
+    },
+
+    {
         id: 26,
         date: "26년 5월 27일",
         title: "26년 5월 27일 업데이트 공지사항입니다.",
@@ -5213,7 +5233,7 @@ const NOTICE_DATABASE = [
             <span>- 일부 원거리 장비(이그노스의 활)의 기본 공격력 및 공격 속도 페널티가 상향 조정되었습니다.</span>
         `
     },
-    
+
     {
     id: 25,
     date: "26년 5월 26일",
@@ -11805,7 +11825,12 @@ let idGame = {
     lastTime: 0,
     
     // [추가] 이번 스테이지에서 죽었는지 여부를 기록하는 변수
-    diedThisStage: false 
+    diedThisStage: false,
+    // [추가] 버프 상태 관리 변수
+    buffs: {
+        goldMultiplier: { active: false, endTime: 0 },
+        atkMultiplier: { active: false, endTime: 0 }
+    }
 };
 
 idGame.ownedItems = [];    // 구매한 아이템 저장용
@@ -12051,9 +12076,11 @@ function gameLoop(time) {
                     
                     let bonus = getDetailedPassiveBonus(pet);
                     let atkMult = eqItem ? (eqItem.atkMult || 1.0) : 1.0;
+                    // [수정] 공격력 버프 적용
+                    let atkBuffMult = (idGame.buffs.atkMultiplier.active && Date.now() < idGame.buffs.atkMultiplier.endTime) ? 1.5 : 1.0;
                     let baseDmg = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 3 * (pet.growthBonus || 1)));
-                    
-                    let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult); 
+
+                    let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult); 
                     let isCrit = Math.random() < bonus.crit;
                     if (isCrit) dmg = Math.floor(dmg * 1.5);
                     
@@ -12141,7 +12168,10 @@ function gameLoop(time) {
         // 몬스터 사망
         if (mon.hp <= 0) {
             let reward = Math.floor(15 + 3 * idGame.stage * Math.pow(1.10, idGame.stage - 1));
-            
+            // [수정] 스톤 획득량 버프 적용
+            if (idGame.buffs.goldMultiplier.active && Date.now() < idGame.buffs.goldMultiplier.endTime) {
+            reward = Math.floor(reward * 1.5);
+            }
             if(mon.isBoss) {
                 reward *= 10;
                 let bossDiamond = Math.floor(Math.random() * 101) + 100;
@@ -12546,9 +12576,15 @@ function renderShop() {
     const container = document.getElementById('shop-container');
     if(!container) return; 
     
-    if (container.children.length > 0) return;
+    // [수정] 상점이 이미 그려져 있어도 갱신될 수 있도록 return 구문 삭제 및 내부 비우기
+    container.innerHTML = ''; 
     
     let hpCost = Math.floor(50 * Math.pow(1.4, idGame.upgrades.hpLv - 1));
+    
+    // [수정] 변수 선언 추가 (이게 없어서 상점이 안 떴던 겁니다)
+    let now = Date.now();
+    let goldLeft = (idGame.buffs && idGame.buffs.goldMultiplier.endTime > now) ? Math.ceil((idGame.buffs.goldMultiplier.endTime - now) / 60000) : 0;
+    let atkLeft = (idGame.buffs && idGame.buffs.atkMultiplier.endTime > now) ? Math.ceil((idGame.buffs.atkMultiplier.endTime - now) / 60000) : 0;
     
     let html = `
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; flex-direction:column; justify-content:space-between;">
@@ -12580,6 +12616,26 @@ function renderShop() {
         </div>
         
         <div id="shop-pet-train-list" style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;"></div>
+    `;
+
+    html += `
+    <div style="grid-column: 1 / -1; margin-top: 20px; color: #fff; font-weight: bold;">💎 다이아 상점 (버프)</div>
+    <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px;">
+        <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #fca311; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:14px; font-weight:bold; color:#fca311;">스톤 1.5배 증가 (30분)</div>
+            <div style="font-size:12px; color:#8b949e;">사냥 시 획득 스톤 50% 증가</div>
+            <button onclick="activateBuff('goldBoost')" ${goldLeft > 0 ? 'disabled' : ''} style="width:100%; padding:8px; background:${goldLeft > 0 ? '#30363d' : '#fca311'}; border:none; border-radius:6px; color:${goldLeft > 0 ? '#8b949e' : '#000'}; font-weight:bold; cursor:${goldLeft > 0 ? 'not-allowed' : 'pointer'};">
+                ${goldLeft > 0 ? `대기중 (${goldLeft}분)` : '1,000 다이아'}
+            </button>
+        </div>
+        <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #ff4d4d; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:14px; font-weight:bold; color:#ff4d4d;">공격력 증가 (30분)</div>
+            <div style="font-size:12px; color:#8b949e;">모든 페트 공격력 50% 증가</div>
+            <button onclick="activateBuff('atkBoost')" ${atkLeft > 0 ? 'disabled' : ''} style="width:100%; padding:8px; background:${atkLeft > 0 ? '#30363d' : '#ff4d4d'}; border:none; border-radius:6px; color:${atkLeft > 0 ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${atkLeft > 0 ? 'not-allowed' : 'pointer'};">
+                ${atkLeft > 0 ? `대기중 (${atkLeft}분)` : '1,000 다이아'}
+            </button>
+        </div>
+    </div>
     `;
 
     html += `
@@ -12762,14 +12818,20 @@ function renderWarehouse() {
             let itemHtml = pet.equippedItemUid && idGame.ownedItems.find(i => i.uid === pet.equippedItemUid) 
                 ? `<div style="font-size:9px; color:#1e242b; background:#d29922; padding:1px 6px; border-radius:3px; margin:4px 0; font-weight:bold;">장착중</div>` : '<div style="height:17px;"></div>';
             
+            // [수정] 출전 중인 페트도 각성 버튼 노출되도록 조건 추가
+            let awakenStatus = (!pet.isAwakened && pet.level >= 50) 
+                ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (5,000 다이아)</button>` 
+                : (pet.isAwakened ? `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★각성 완료★</div>` : '');
+
             grid.innerHTML += `
                 <div style="background:rgba(83, 155, 245, 0.1); border:1px solid #539bf5; padding:10px; border-radius:8px; text-align:center; display:flex; flex-direction:column; align-items:center;">
                     <img src="${pet.img}" style="width:40px; height:40px; object-fit:contain; margin-bottom:5px;">
                     <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom:2px;">${pet.name}</div>
                     ${itemHtml}
+                    ${awakenStatus}
                     ${pet.isStarter 
-                        ? `<button disabled style="width:100%; font-size:11px; padding:4px; background:#30363d; color:#8b949e; border:none; border-radius:4px;">고정</button>` 
-                        : `<button onclick="unequipPet('${pet.id}')" style="width:100%; font-size:11px; padding:4px; background:#dc3545; color:#fff; border:none; border-radius:4px; cursor:pointer;">대기실로</button>`}
+                        ? `<button disabled style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#30363d; color:#8b949e; border:none; border-radius:4px;">고정</button>` 
+                        : `<button onclick="unequipPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#dc3545; color:#fff; border:none; border-radius:4px; cursor:pointer;">대기실로</button>`}
                 </div>
             `;
         });
@@ -12784,12 +12846,17 @@ function renderWarehouse() {
                 let curAtk = Math.floor(pet.baseAtk + (pet.gatk * (pet.level - 1) * 3 * pet.growthBonus));
                 let speedText = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet).toFixed(1) : "2.0";
                 
+                let awakenBtn = (!pet.isAwakened && pet.level >= 50) 
+                    ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (5,000 다이아)</button>` 
+                    : (pet.isAwakened ? `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★각성 완료★</div>` : '');
+
                 grid.innerHTML += `
                     <div style="background:#1e242b; border:1px solid #30363d; padding:10px; border-radius:8px; text-align:center; display:flex; flex-direction:column; align-items:center;">
                         <img src="${pet.img}" style="width:40px; height:40px; object-fit:contain; margin-bottom:5px; filter:grayscale(0.5);">
                         <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom:2px;">${pet.name}</div>
                         <div style="font-size:10px; color:#8b949e; margin-bottom:8px;">Atk: ${curAtk} | 속도: ${speedText}초</div>
-                        <div style="display: flex; gap: 4px; width: 100%;">
+                        ${awakenBtn} 
+                        <div style="display: flex; gap: 4px; width: 100%; margin-top:5px;">
                             <button onclick="equipPet(${idx})" ${!canEquip ? 'disabled' : ''} style="flex:1; font-size:11px; padding:4px 0; border-radius:4px; background:${canEquip ? '#2ea043' : '#30363d'}; color:#fff; border:none; cursor:${canEquip ? 'pointer' : 'not-allowed'}; font-weight:bold;">출전</button>
                             <button onclick="sellPet('${pet.id}')" style="flex:1; font-size:11px; padding:4px 0; border-radius:4px; background:#dc3545; color:#fff; border:none; cursor:pointer; font-weight:bold;">판매</button>
                         </div>
@@ -12797,32 +12864,30 @@ function renderWarehouse() {
                 `;
             });
         }
-    } 
-    else if (window.currentWarehouseTab === 'item') {
+    } else if (window.currentWarehouseTab === 'item') {
         grid.innerHTML += `<div style="grid-column: 1 / -1; color: #d29922; font-weight: bold; font-size: 13px; margin-top: 5px;">📦 보유 장비</div>`;
-
         if (!idGame.ownedItems || idGame.ownedItems.length === 0) {
             grid.innerHTML += `<div style="grid-column: 1 / -1; color: #8b949e; text-align: center; padding: 20px; font-size: 12px;">보유한 장비가 없습니다.</div>`;
         } else {
             idGame.ownedItems.forEach((itemObj) => {
-    let item = ITEM_DATABASE[itemObj.itemKey];
-    if(!item) return;
-    
-    let eqOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemObj.uid) || idGame.warehouse.find(p => p.equippedItemUid === itemObj.uid);
-    
-    let actionBtn = eqOwner 
-        ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
-        : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
+                let item = ITEM_DATABASE[itemObj.itemKey];
+                if(!item) return;
+                
+                let eqOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemObj.uid) || idGame.warehouse.find(p => p.equippedItemUid === itemObj.uid);
+                
+                let actionBtn = eqOwner 
+                    ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
+                    : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
 
-    grid.innerHTML += `
-        <div style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;">
-            <img src="${item.img}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.2); border-radius:6px; padding:2px;">
-            <div style="font-size:12px; font-weight:bold; color:#fff;">${item.name}</div>
-            <div style="font-size:10px; color:#8b949e;">공x${item.atkMult} / 쿨x${item.cdMult}</div>
-            ${actionBtn}
-            <button onclick="sellItem('${itemObj.uid}')" style="width:100%; background:#8b949e; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">판매 (1000 다이아)</button>
-        </div>`;
-});
+                grid.innerHTML += `
+                    <div style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;">
+                        <img src="${item.img}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.2); border-radius:6px; padding:2px;">
+                        <div style="font-size:12px; font-weight:bold; color:#fff;">${item.name}</div>
+                        <div style="font-size:10px; color:#8b949e;">공x${item.atkMult} / 쿨x${item.cdMult}</div>
+                        ${actionBtn}
+                        <button onclick="sellItem('${itemObj.uid}')" style="width:100%; background:#8b949e; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">판매 (1000 다이아)</button>
+                    </div>`;
+            });
         }
     }
 }
@@ -12918,6 +12983,7 @@ function saveGame() {
         equippedItem: idGame.equippedItem || null,
         logs: idGame.logs || [],
         dungeon: idGame.dungeon,
+        buffs: idGame.buffs, 
         lastSaveTime: Date.now() 
     };
     localStorage.setItem('idleGameSave_v2', JSON.stringify(saveData));
@@ -12938,6 +13004,11 @@ function loadGame() {
     idGame.diamond = data.diamond || 0;
     idGame.upgrades = data.upgrades || { hpLv: 1 };
     idGame.diedThisStage = data.diedThisStage || false;
+    // 추가: 저장된 데이터에서 버프 정보를 가져오거나 없으면 초기값 할당
+    idGame.buffs = data.buffs || { 
+        goldMultiplier: { active: false, endTime: 0 }, 
+        atkMultiplier: { active: false, endTime: 0 } 
+    };
     idGame.fieldPets = data.fieldPets || [];
     idGame.warehouse = data.warehouse || [];
     idGame.ownedItems = data.ownedItems || []; 
@@ -13099,33 +13170,33 @@ function getDetailedPassiveBonus(pet) {
         const defensePassives = ['충성', '철갑의 수호', '대지의 심장'];
         if (defensePassives.includes(db.name) || p.name === '어스드래곤') {
             const steelDb = RAID_PASSIVE_DATABASE.find(d => d.name.trim() === '강철');
-            if (steelDb) {
-                db = steelDb; 
-            }
+            if (steelDb) db = steelDb; 
         }
 
         let isTeamBuff = db.effect && db.effect.includes("팀원 전체");
         if (!isOwner && !isTeamBuff) return; 
 
+        // 1. 성장 수치 계산 (문자열 변환 없이 숫자 계산)
         let pLevel = Math.floor(((p.level || 1) - 1) / 10);
-        
-        // 5레벨(인덱스 4) 이후 성장 로직 적용
         let maxIdx = db.values.length - 1;
-        let valStr;
+        let baseVal = parseFloat(db.values[maxIdx]);
+        let rawVal;
         
         if (pLevel <= maxIdx) {
-            valStr = db.values[pLevel];
+            rawVal = parseFloat(db.values[pLevel]);
         } else {
-            let baseVal = parseFloat(db.values[maxIdx]);
-            let extra = (pLevel - maxIdx) * 1; 
-            valStr = (baseVal + extra) + "%";
+            let diff = pLevel - maxIdx;
+            rawVal = (baseVal < 0 ? (baseVal - diff) : (baseVal + diff));
         }
 
-        let numMatch = String(valStr).match(/[0-9.]+/);
-        let num = numMatch ? parseFloat(numMatch[0]) : 0;
-        let isPercent = String(valStr).includes('%') || (db.effect && String(db.effect).includes('%'));
-        let val = isPercent ? num / 100 : num;
+        // 2. 퍼센트 패시브인지 판별
+        const isPercent = String(db.values[0]).includes('%') || (db.effect && String(db.effect).includes('%'));
+        
+        // [수정] 강철류(피해감소)는 퍼센트가 아니므로 100으로 나누지 않음
+        const isFlatStat = ['강철', '충성', '철갑의 수호', '대지의 심장'].includes(db.name);
+        let val = (isPercent && !isFlatStat) ? rawVal / 100 : rawVal;
 
+        // 3. 패시브 효과 적용
         if (['격노', '폭주', '투혼'].includes(db.name)) {
             bonus.atkMult += val;
             if (['폭주', '투혼'].includes(db.name) && isOwner) bonus.defMult -= 0.1; 
@@ -13136,15 +13207,16 @@ function getDetailedPassiveBonus(pet) {
             if (['심장 관통', '불타는 날개', '광휘의 화조'].includes(db.name)) bonus.crit += val;
         } else if (['심판의 혼'].includes(db.name)) {
             bonus.atkMult += val; bonus.spdMult += val;
-        }
-
-        if (['신속', '광휘의 권능'].includes(db.name)) {
+        } else if (['신속', '광휘의 권능'].includes(db.name)) {
             bonus.spdMult += val;
         } else if (['질풍의 눈', '광휘', '전광 석화', '폭풍의 날개'].includes(db.name)) {
             bonus.spdMult += 0.05;
             if (['질풍의 눈', '폭풍의 날개'].includes(db.name)) bonus.hit += val;
             if (db.name === '광휘') bonus.dodge += val;
             if (db.name === '전광 석화') bonus.crit += val;
+        } else if (isFlatStat) {
+            // [수정] 고정 수치(Flat) 적용 (음수값은 절대값으로 변환하여 더함)
+            bonus.dmgRed += Math.abs(val); 
         }
 
         if (db.name === '심판') bonus.crit += val;
@@ -13156,50 +13228,26 @@ function getDetailedPassiveBonus(pet) {
         if (['질주'].includes(db.name)) { bonus.dodge += val; bonus.hit += 0.03; }
         if (['암살'].includes(db.name)) { bonus.hit += val; bonus.crit += 0.03; }
         if (['심연의 보주'].includes(db.name)) { bonus.dodge += 0.05; } 
-
-        if (['강철', '충성', '철갑의 수호', '대지의 심장'].includes(db.name)) {
-            bonus.dmgRed += val; 
-        }
         
-        // 1. 흡혈류 (타격 데미지의 15% 회복 고정)
         const lifestealPassives = ['칠흑의 방벽', '흡혈'];
-        if (lifestealPassives.includes(db.name)) {
-            bonus.lifeSteal += 0.15;
-        }
+        if (lifestealPassives.includes(db.name)) bonus.lifeSteal += 0.15;
         
-        // 2. 타격 회복류 (팀 전체 최대 체력의 0.5% 회복 고정)
         const healPassives = ['치유', '창공의 권능', '서리의 심장', '청영의 화조'];
         if (healPassives.includes(db.name)) {
-            // idGame.teamMaxHp의 0.25% 회복 (최소 1 보장)
             bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.0025));
-            
-            // 청영의 화조는 추가 치명타 보너스 유지
-            if (db.name === '청영의 화조') {
-                bonus.crit += 0.05;
-            }
+            if (db.name === '청영의 화조') bonus.crit += 0.05;
         }
     };
 
     try {
         if (idGame.fieldPets && idGame.fieldPets.length > 0) {
-            idGame.fieldPets.forEach(p => {
-                let isOwner = (p.id === pet.id);
-                applyStats(p, isOwner);
-            });
+            idGame.fieldPets.forEach(p => applyStats(p, (p.id === pet.id)));
         } else {
             applyStats(pet, true); 
         }
-    } catch (e) {
-        console.error("패시브 계산 중 에러:", e);
-    }
+    } catch (e) { console.error("패시브 계산 에러:", e); }
 
     return bonus;
-}
-
-function equipItem(key) {
-    idGame.equippedItem = ITEM_DATABASE[key];
-    alert(ITEM_DATABASE[key].name + " 장착 완료!"); 
-    updateUI(); saveGame();
 }
 
 function buyItem(itemKey) {
@@ -13517,6 +13565,46 @@ function sellItem(uid) {
             updateUI(); 
         }
     }
+}
+// 페트 각성 로직
+function awakenPet(petId) {
+    let pet = idGame.fieldPets.find(p => p.id === petId) || idGame.warehouse.find(p => p.id === petId);
+    if (!pet) return;
+    if (pet.level < 50) return alert("50레벨 이상만 각성 가능합니다!");
+    if (pet.isAwakened) return alert("이미 각성한 페트입니다.");
+    if (idGame.diamond < 10000) return alert("다이아가 부족합니다 (10,000 필요)");
+
+    idGame.diamond -= 10000;
+    pet.isAwakened = true;
+    // 능력치 영구 20% 상승
+    pet.baseAtk = Math.floor(pet.baseAtk * 1.2);
+    pet.baseDef = Math.floor(pet.baseDef * 1.2);
+    pet.baseHp = Math.floor(pet.baseHp * 1.2);
+    
+    addGameLog(`✨ [${pet.name}] 각성 성공! 능력치가 영구적으로 20% 상승했습니다.`, '#ffcc00');
+    saveGame();
+    renderWarehouse();
+    updateUI();
+}
+
+// [추가] 버프 활성화 로직
+function activateBuff(type) {
+    if (idGame.diamond < 1000) return alert("다이아가 부족합니다 (1,000 필요)");
+    idGame.diamond -= 1000;
+    
+    let duration = 30 * 60 * 1000; // 30분
+    let now = Date.now();
+
+    if (type === 'goldBoost') {
+        idGame.buffs.goldMultiplier = { active: true, endTime: now + duration };
+        addGameLog("💰 스톤 획득량 1.5배 버프 적용 (30분)", "#fca311");
+    } else if (type === 'atkBoost') {
+        idGame.buffs.atkMultiplier = { active: true, endTime: now + duration };
+        addGameLog("⚔️ 공격력 증가 버프 적용 (30분)", "#ff4d4d");
+    }
+    
+    updateUI();
+    saveGame();
 }
 
 /* 던전 코드 시작 */
