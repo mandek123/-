@@ -12014,24 +12014,36 @@ function winDungeon() {
     let type = idGame.dungeon.type;
     let origStage = idGame.dungeon.originalStage || 1; // 스테이지 스케일링용
     
+    // [추가] 스테이지 구간별 보상 배율 설정
+    let multiplier = 1.0;
+    if (origStage >= 31 && origStage <= 50) multiplier = 1.5;
+    else if (origStage >= 51 && origStage <= 70) multiplier = 1.7;
+    else if (origStage >= 71) multiplier = 2.0;
+    
     // 1. 보상 로직
     if (type === 'jackpot') {
         spinRoulette(); // 애니메이션 포함된 룰렛으로 실행
     } else if (type === 'gold') {
-        // [수정] 스테이지 비례 골드 보상
-        let rewardStone = Math.floor(30000 + (origStage * 3000));
+        // [수정] 스테이지 비례 골드 보상 (multiplier 적용)
+        let rewardStone = Math.floor((30000 + (origStage * 3000)) * multiplier);
         idGame.stone += rewardStone;
         addGameLog(`💰 던전 클리어! ${rewardStone.toLocaleString()} 스톤 획득!`, '#fca311');
         
         if (Math.random() < 0.5) { 
-            let bonusStone = Math.floor(50000 + (origStage * 5000));
+            let bonusStone = Math.floor((50000 + (origStage * 5000)) * multiplier);
             idGame.stone += bonusStone; 
             addGameLog(`🎉 [행운] ${bonusStone.toLocaleString()} 스톤 추가!`, '#ffcc00'); 
         }
     } else if (type === 'diamond') {
-        idGame.diamond += 500;
-        addGameLog(`💎 던전 클리어! 500 다이아 획득!`, '#8a2be2');
-        if (Math.random() < 0.5) { idGame.diamond += 500; addGameLog(`🎉 [행운] 500 다이아 추가!`, '#ffcc00'); }
+        // [수정] 스테이지 비례 다이아 보상 (multiplier 적용)
+        let rewardDia = Math.floor(500 * multiplier);
+        idGame.diamond += rewardDia;
+        addGameLog(`💎 던전 클리어! ${rewardDia} 다이아 획득!`, '#8a2be2');
+        
+        if (Math.random() < 0.5) { 
+            idGame.diamond += rewardDia; 
+            addGameLog(`🎉 [행운] ${rewardDia} 다이아 추가!`, '#ffcc00'); 
+        }
     }
 
     // 2. 던전 종료 및 복귀 (통합 로직 적용됨)
@@ -12581,7 +12593,7 @@ function processOfflineReward() {
             // 방치 시간 최대 24시간(86,400초) 제한
             let applySeconds = offlineSeconds > 86400 ? 86400 : offlineSeconds;
             
-            // 보상 배율 
+            // 보상 배율
             let rewardPerSec = Math.floor((15 + 3 * idGame.stage * Math.pow(1.10, idGame.stage - 1)) * 0.01);
             if (rewardPerSec < 1) rewardPerSec = 1; // 최소 1 보장
             
@@ -13774,7 +13786,7 @@ function startCountdown(callback) {
     updateCount();
 }
 
-function spinRoulette() {
+function spinRoulette(multiplier) {
     const overlay = document.createElement('div');
     overlay.id = 'roulette-overlay';
     overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center; backdrop-filter: blur(5px);";
@@ -13793,18 +13805,32 @@ function spinRoulette() {
         const rand = Math.random() * 100;
         let resultMsg = "";
         
-        if (rand < 20) {
-            idGame.stone += 100000;
-            resultMsg = "🎉 100,000 스톤 당첨!";
-        } else if (rand < 35) {
-            idGame.diamond += 2000;
-            resultMsg = "🎉 2,000 다이아 당첨!";
-        } else if (rand < 50) {
-            const keys = Object.keys(ITEM_DATABASE);
-            const itemKey = keys[Math.floor(Math.random() * keys.length)];
-            idGame.ownedItems.push({ uid: 'item_' + Math.random().toString(36).substr(2, 9), itemKey: itemKey });
-            resultMsg = `🎉 [${ITEM_DATABASE[itemKey].name}] 획득!`;
-        } else {
+        // 꽝 40%, 나머지 60%를 재화 보상으로 분배
+        if (rand < 5) { // 5% 확률: 5,000 다이아
+            let reward = Math.floor(5000 * multiplier);
+            idGame.diamond += reward;
+            resultMsg = `🎉 ${reward.toLocaleString()} 다이아 당첨!`;
+        } else if (rand < 12) { // 7% 확률: 3,000 다이아
+            let reward = Math.floor(3000 * multiplier);
+            idGame.diamond += reward;
+            resultMsg = `🎉 ${reward.toLocaleString()} 다이아 당첨!`;
+        } else if (rand < 20) { // 8% 확률: 1,000 다이아
+            let reward = Math.floor(1000 * multiplier);
+            idGame.diamond += reward;
+            resultMsg = `🎉 ${reward.toLocaleString()} 다이아 당첨!`;
+        } else if (rand < 30) { // 10% 확률: 1,000,000 스톤
+            let reward = Math.floor(1000000 * multiplier);
+            idGame.stone += reward;
+            resultMsg = `🎉 1,000,000 스톤 당첨!`;
+        } else if (rand < 45) { // 15% 확률: 500,000 스톤
+            let reward = Math.floor(50000 * multiplier);
+            idGame.stone += reward;
+            resultMsg = `🎉 500,000 스톤 당첨!`;
+        } else if (rand < 60) { // 15% 확률: 100,000 스톤
+            let reward = Math.floor(100000 * multiplier);
+            idGame.stone += reward;
+            resultMsg = `🎉 100,000 스톤 당첨!`;
+        } else { // 40% 확률: 꽝
             resultMsg = "꽝! 다음 기회에...";
         }
 
@@ -13814,12 +13840,12 @@ function spinRoulette() {
         if (icon) icon.innerText = resultMsg.includes("꽝") ? "❌" : "🎁";
         
         const resultCard = document.createElement('div');
-        resultCard.style.cssText = "margin-top:20px; background:#1e242b; padding:30px; border-radius:15px; border:1px solid #539bf5; text-align:center; min-width:320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);";
+        resultCard.style.cssText = "margin-top:20px; background:#1e242b; padding:30px; border-radius:15px; border:1px solid #d29922; text-align:center; min-width:320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);";
         resultCard.innerHTML = `
-            <div style="font-size:26px; color:#fff; font-weight:bold; margin-bottom:25px; text-shadow:0 0 10px rgba(83, 155, 245, 0.5);">${resultMsg}</div>
+            <div style="font-size:26px; color:#fff; font-weight:bold; margin-bottom:25px; text-shadow:0 0 10px rgba(210, 153, 34, 0.5);">${resultMsg}</div>
             <div style="display:flex; justify-content:center;">
                 <button onclick="document.getElementById('roulette-overlay').remove();" 
-                    style="padding:12px 50px; cursor:pointer; background:linear-gradient(135deg, #539bf5, #2ea043); border:none; color:white; font-weight:bold; border-radius:30px; font-size:16px; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                    style="padding:12px 50px; cursor:pointer; background:linear-gradient(135deg, #d29922, #fca311); border:none; color:white; font-weight:bold; border-radius:30px; font-size:16px; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;">
                     확인
                 </button>
             </div>
