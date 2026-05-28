@@ -12581,8 +12581,8 @@ function processOfflineReward() {
             // 방치 시간 최대 24시간(86,400초) 제한
             let applySeconds = offlineSeconds > 86400 ? 86400 : offlineSeconds;
             
-            // 보상 배율 50% 감소 (0.4 -> 0.2)
-            let rewardPerSec = Math.floor((15 + 3 * idGame.stage * Math.pow(1.10, idGame.stage - 1)) * 0.2);
+            // 보상 배율 
+            let rewardPerSec = Math.floor((15 + 3 * idGame.stage * Math.pow(1.10, idGame.stage - 1)) * 0.01);
             if (rewardPerSec < 1) rewardPerSec = 1; // 최소 1 보장
             
             let stoneReward = rewardPerSec * applySeconds;
