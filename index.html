@@ -12016,32 +12016,33 @@ function winDungeon() {
     
     // [추가] 스테이지 구간별 보상 배율 설정
     let multiplier = 1.0;
-    if (origStage >= 31 && origStage <= 50) multiplier = 1.5;
-    else if (origStage >= 51 && origStage <= 70) multiplier = 1.7;
-    else if (origStage >= 71) multiplier = 2.0;
+if (origStage >= 31 && origStage <= 50) multiplier = 1.5;
+else if (origStage >= 51 && origStage <= 70) multiplier = 1.7;
+else if (origStage >= 71) multiplier = 2.0;
+// 혹시라도 계산이 꼬이지 않게 명시적 변환
+multiplier = Number(multiplier);
     
-    // 1. 보상 로직
+    // 1. 보상 로직 (안전한 더하기 처리)
     if (type === 'jackpot') {
-        spinRoulette(); // 애니메이션 포함된 룰렛으로 실행
+        spinRoulette(multiplier); 
     } else if (type === 'gold') {
-        // [수정] 스테이지 비례 골드 보상 (multiplier 적용)
         let rewardStone = Math.floor((30000 + (origStage * 3000)) * multiplier);
-        idGame.stone += rewardStone;
+        // 안전 더하기: 값이 없거나 NaN이면 0으로 간주
+        idGame.stone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone) ? idGame.stone : 0) + rewardStone;
         addGameLog(`💰 던전 클리어! ${rewardStone.toLocaleString()} 스톤 획득!`, '#fca311');
         
         if (Math.random() < 0.5) { 
             let bonusStone = Math.floor((50000 + (origStage * 5000)) * multiplier);
-            idGame.stone += bonusStone; 
+            idGame.stone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone) ? idGame.stone : 0) + bonusStone;
             addGameLog(`🎉 [행운] ${bonusStone.toLocaleString()} 스톤 추가!`, '#ffcc00'); 
         }
     } else if (type === 'diamond') {
-        // [수정] 스테이지 비례 다이아 보상 (multiplier 적용)
         let rewardDia = Math.floor(500 * multiplier);
-        idGame.diamond += rewardDia;
+        idGame.diamond = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond) ? idGame.diamond : 0) + rewardDia;
         addGameLog(`💎 던전 클리어! ${rewardDia} 다이아 획득!`, '#8a2be2');
         
         if (Math.random() < 0.5) { 
-            idGame.diamond += rewardDia; 
+            idGame.diamond = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond) ? idGame.diamond : 0) + rewardDia;
             addGameLog(`🎉 [행운] ${rewardDia} 다이아 추가!`, '#ffcc00'); 
         }
     }
@@ -12403,8 +12404,16 @@ function updateUI() {
 
     const stoneEl = document.getElementById('ui-stone');
     const diamondEl = document.getElementById('ui-diamond');
-    if (stoneEl) stoneEl.innerText = idGame.stone.toLocaleString();
-    if (diamondEl) diamondEl.innerText = idGame.diamond.toLocaleString();
+
+    // [수정] 스톤과 다이아값이 NaN이 되지 않도록 안전하게 처리
+    if (stoneEl) {
+        let valStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
+        stoneEl.innerText = valStone.toLocaleString();
+    }
+    if (diamondEl) {
+        let valDia = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond)) ? idGame.diamond : 0;
+        diamondEl.innerText = valDia.toLocaleString();
+    }
     
     const uiStage = document.getElementById('ui-stage');
     if (!uiStage) return; 
@@ -13678,7 +13687,7 @@ function openDungeonMenu() {
                 💰 <b>골드 던전 (무한)</b><br><span style="font-size:11px;">처치 시 기본 스톤 + 스테이지 비례 스톤 (50% 확률로 대박 추가)</span>
             </button>
             <button onclick="enterDungeon('diamond')" style="width:100%; padding:12px; margin:5px 0; background:#8a2be2; color:#fff; border:none; border-radius:6px; cursor:pointer;">
-                💎 <b>다이아 던전 (${idGame.dungeon.diamondEntries}/5)</b><br><span style="font-size:11px;">처치 시 스테이지 배율 적용 다이아 획득 (50% 확률로 2배)</span>
+                💎 <b>다이아 던전 (${idGame.dungeon.diamondEntries}/5)</b><br>                <span style="font-size:11px;">처치 시 스테이지 배율 적용 다이아 획득 (50% 확률로 2배)</span>
             </button>
             <button onclick="enterDungeon('jackpot')" style="width:100%; padding:12px; margin:5px 0; background:#d29922; color:#fff; border:none; border-radius:6px; cursor:pointer;">
                 🎰 <b>잭팟 던전 (무한)</b><br><span style="font-size:11px;">보스 처치 시 룰렛 보상 (골드/다이아/꽝)</span>
@@ -13805,56 +13814,50 @@ function spinRoulette(multiplier) {
         const rand = Math.random() * 100;
         let resultMsg = "";
         
-        // 꽝 40%, 나머지 60%를 재화 보상으로 분배
+        // 안전한 더하기를 위한 헬퍼 함수
+        const addStone = (val) => { idGame.stone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone) ? idGame.stone : 0) + val; };
+        const addDiamond = (val) => { idGame.diamond = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond) ? idGame.diamond : 0) + val; };
+        
         if (rand < 5) { // 5% 확률: 5,000 다이아
             let reward = Math.floor(5000 * multiplier);
-            idGame.diamond += reward;
+            addDiamond(reward);
             resultMsg = `🎉 ${reward.toLocaleString()} 다이아 당첨!`;
         } else if (rand < 12) { // 7% 확률: 3,000 다이아
             let reward = Math.floor(3000 * multiplier);
-            idGame.diamond += reward;
+            addDiamond(reward);
             resultMsg = `🎉 ${reward.toLocaleString()} 다이아 당첨!`;
         } else if (rand < 20) { // 8% 확률: 1,000 다이아
             let reward = Math.floor(1000 * multiplier);
-            idGame.diamond += reward;
+            addDiamond(reward);
             resultMsg = `🎉 ${reward.toLocaleString()} 다이아 당첨!`;
         } else if (rand < 30) { // 10% 확률: 1,000,000 스톤
             let reward = Math.floor(1000000 * multiplier);
-            idGame.stone += reward;
+            addStone(reward);
             resultMsg = `🎉 1,000,000 스톤 당첨!`;
         } else if (rand < 45) { // 15% 확률: 500,000 스톤
-            let reward = Math.floor(50000 * multiplier);
-            idGame.stone += reward;
+            let reward = Math.floor(500000 * multiplier);
+            addStone(reward);
             resultMsg = `🎉 500,000 스톤 당첨!`;
         } else if (rand < 60) { // 15% 확률: 100,000 스톤
             let reward = Math.floor(100000 * multiplier);
-            idGame.stone += reward;
+            addStone(reward);
             resultMsg = `🎉 100,000 스톤 당첨!`;
         } else { // 40% 확률: 꽝
             resultMsg = "꽝! 다음 기회에...";
         }
 
+        // 결과창 표시 로직 (기존 동일)
         const icon = document.getElementById('roulette-icon');
         const text = document.getElementById('roulette-text');
-        
         if (icon) icon.innerText = resultMsg.includes("꽝") ? "❌" : "🎁";
         
         const resultCard = document.createElement('div');
         resultCard.style.cssText = "margin-top:20px; background:#1e242b; padding:30px; border-radius:15px; border:1px solid #d29922; text-align:center; min-width:320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);";
         resultCard.innerHTML = `
-            <div style="font-size:26px; color:#fff; font-weight:bold; margin-bottom:25px; text-shadow:0 0 10px rgba(210, 153, 34, 0.5);">${resultMsg}</div>
-            <div style="display:flex; justify-content:center;">
-                <button onclick="document.getElementById('roulette-overlay').remove();" 
-                    style="padding:12px 50px; cursor:pointer; background:linear-gradient(135deg, #d29922, #fca311); border:none; color:white; font-weight:bold; border-radius:30px; font-size:16px; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;">
-                    확인
-                </button>
-            </div>
+            <div style="font-size:26px; color:#fff; font-weight:bold; margin-bottom:25px;">${resultMsg}</div>
+            <button onclick="document.getElementById('roulette-overlay').remove();" style="padding:12px 50px; cursor:pointer; background:linear-gradient(135deg, #d29922, #fca311); border:none; color:white; font-weight:bold; border-radius:30px;">확인</button>
         `;
-        
-        if (text) {
-            text.innerHTML = '';
-            text.appendChild(resultCard);
-        }
+        if (text) { text.innerHTML = ''; text.appendChild(resultCard); }
         
         addGameLog(`🎰 잭팟 룰렛 결과: ${resultMsg}`, '#d29922');
         updateUI();
