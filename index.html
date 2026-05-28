@@ -12284,10 +12284,22 @@ function manualFieldAttack(e) {
     if(!idGame.started || idGame.monsters.length === 0 || idGame.manualAtkCooldown > 0) return; 
     idGame.manualAtkCooldown = 10; 
     
-    let currentDifficulty = (idGame.dungeon && idGame.dungeon.active) ? 30 : idGame.stage;
-    let stageDmg = Math.floor(10 * Math.pow(1.18, currentDifficulty - 1));
-    
+    // 던전 진행 중인지 확인
+    let isDungeon = idGame.dungeon && idGame.dungeon.active;
+
     idGame.monsters.forEach(mon => {
+        let stageDmg;
+        
+        if (isDungeon) {
+            // 던전: 몬스터의 '현재 체력' 기준 50% 데미지
+            stageDmg = Math.floor(mon.hp * 0.5);
+        } else {
+            // 일반 스테이지: 몬스터의 '최대 체력' 기준 50% 데미지
+            stageDmg = Math.floor(mon.maxHp * 0.5);
+        }
+        
+        if (stageDmg < 1) stageDmg = 1;
+        
         mon.hp -= stageDmg;
         triggerAnim(mon.el, 'anim-hit');
         showDmgText(stageDmg, mon.x, mon.y, 'dmg-enemy');
