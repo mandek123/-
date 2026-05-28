@@ -5208,6 +5208,18 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 28,
+        date: "26년 5월 29일",
+        title: "26년 5월 29일 업데이트 공지사항입니다.",
+        summary: "만득이 키우기 데이터 초기화 버그 수정 및 주간 육성 펫 교체",
+        content: `
+            <strong>1) 시스템 및 버그 수정</strong>
+            <span>- [만득이 키우기] '데이터 초기화' 진행 시 자동 저장 기능과 충돌하여 초기화가 정상적으로 반영되지 않던 현상을 수정하였습니다.</span>
+            <strong>2) 주간 콘텐츠 업데이트</strong>
+            <span>- [주간펫육성] 금주의 육성 페트가 '언딘'에서 '그리프스'(으)로 교체되었습니다.</span>
+        `
+    },
+    {
         id: 27,
         date: "26년 5월 28일",
         title: "26년 5월 28일 업데이트 공지사항입니다.",
@@ -5309,18 +5321,17 @@ const NOTICE_DATABASE = [
     },
 
     {
-        id: 22,
-        date: "26년 5월 22일",
-        title: "26년 5월 22일 업데이트 공지사항입니다.",
-        summary: "1. 레이드 패시브 다중 검색 추가 | 2. 미니게임(만득이 키우기) 출시",
+        id: 28,
+        date: "26년 5월 29일",
+        title: "26년 5월 29일 업데이트 공지사항입니다.",
+        summary: "1. 만득이 키우기 수정사항 | 2. 주간 펫 육성 교체",
         content: `
-            <strong>1) 레이드 패시브 기능 개선</strong>
-            <span>- 레이드 패시브 내용 다중 검색 기능이 새롭게 추가되었습니다.</span>
-            <span>- 새롭게 추가된 기능을 일일 퀴즈에 적극적으로 활용해 보세요!</span>
+            <strong>1) 시스템 및 버그 수정</strong>
+            <span>- 데이터 초기화 진행 시 자동 저장 기능과 충돌하여 초기화가 반영되지 않던 현상을 수정하였습니다.</span>
             
-            <strong>2) 신규 미니게임 '만득이 키우기' 출시</strong>
-            <span>- 나만의 페트를 육성하여 몬스터를 처치하는 미니게임 '만득이 키우기'가 출시되었습니다.</span>
-            <span>- 페트 훈련, 무기 장착, 패시브 시너지를 활용하여 더 높은 스테이지에 도전해 보세요.</span>
+            <strong>2) 주간 펫 육성 교체</strong>
+            <span>- 이번 주 육성 펫이 '언딘'에서 '그리프스'로 교체되었습니다.</span>
+            <span>- 기존 육성 중인 페트를 140레벨까지 육성한 뒤 새로운 알을 부화시켜야 정상적으로 진행됩니다.</span>
         `
     },
 
@@ -7039,7 +7050,7 @@ function resetCounts() {
     [주간 페트 챔피언십 로직 - 종합 가치 반영본]
    ======================================= */
 
-const WEEKLY_PET_NAME = "언딘"; 
+const WEEKLY_PET_NAME = "그리프스"; 
 
 // 1. 알 부화 로직 (종합 가치 비율 적용)
 function startWeeklyChallenge() {
@@ -13204,8 +13215,15 @@ document.addEventListener('visibilitychange', () => {
 
 function resetGame() {
     if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
+        // [핵심 수정] 새로고침 시 자동 저장이 발동하지 않도록 게임 진행 상태를 먼저 끕니다.
+        idGame.started = false; 
+        if (typeof autoSaveInterval !== 'undefined') clearInterval(autoSaveInterval);
+        
+        // 데이터 삭제
         localStorage.removeItem('idleGameSave_v2'); 
         localStorage.removeItem('game_user_id'); 
+        
+        // 새로고침
         location.reload(); 
     }
 }
