@@ -4013,6 +4013,11 @@ button[onclick="resetGame()"]:hover {
             <div style="color: #d1d5da; font-size: 12px; line-height: 1.5;">스톤으로 훈련하여 스탯업. 고유 패시브가 팀 전투력에 자동 합산됩니다.</div>
         </div>
 
+        <div style="background: rgba(0,0,0,0.25); padding: 14px; border-radius: 8px; border: 1px solid #fca311;">
+            <div style="color: #fca311; font-weight: bold; margin-bottom: 6px; font-size: 13px;">⚔️ 장비 각성 시스템</div>
+            <div style="color: #d1d5da; font-size: 12px; line-height: 1.5;">1억 스톤으로 장비 각성 가능. 활 공격력 1.5배, 창은 최대 공속 0.3s 돌파 부여!</div>
+        </div>
+
         <div style="background: rgba(0,0,0,0.25); padding: 14px; border-radius: 8px; border: 1px solid #ffcc00;">
             <div style="color: #ffcc00; font-weight: bold; margin-bottom: 6px; font-size: 13px;">✨ 페트 각성 시스템</div>
             <div style="color: #d1d5da; font-size: 12px; line-height: 1.5;">50레벨을 달성한 페트는 10,000 다이아를 소모해 모든 능력치 20% 영구 상승이 가능합니다.</div>
@@ -5208,9 +5213,12 @@ const NOTICE_DATABASE = [
         title: "26년 5월 28일 업데이트 공지사항입니다.",
         summary: "만득이 키우기 페트 각성 시스템 도입 및 다이아 상점 추가",
         content: `
-            <strong>1) 신규 콘텐츠: 페트 각성 시스템</strong>
+            <strong>1) 신규 콘텐츠: 페트/아이템 각성 시스템</strong>
             <span>- 50레벨 이상 도달한 페트를 다이아 10,000개를 사용하여 각성할 수 있습니다.</span>
             <span>- 각성 시 페트의 기본 공격력, 방어력, 체력이 20% 영구적으로 상승합니다.</span>
+            <span>- 창고의 '장비 창고' 탭에서 1억 스톤을 사용하여 보유 중인 아이템을 각성할 수 있습니다.</span>
+            <span>- [이그노스의 활M] 각성 시: 공격력 배율이 1.5배로 증가하며, 공격 속도 페널티가 사라집니다.</span>
+            <span>- [봉인된 정령왕의 창M] 각성 시: 장착 페트의 공격 속도 한계가 0.3초까지 돌파 적용됩니다.</span>
             <strong>2) 팀 특수 버프 기능(다이아 상점)</strong>
             <span>- 상점 내 '다이아 상점' 탭이 추가되어 30분간 지속되는 팀 버프를 구매할 수 있습니다.</span>
             <span>- 스톤 획득량 1.5배 증가 및 공격력 증가 버프가 추가되었습니다. (구매 비용: 각 1,000 다이아)</span>
@@ -11811,8 +11819,16 @@ document.addEventListener('DOMContentLoaded', () => {
    [만득이 키우기 2.0 - 자동전투 엔진]
    ======================================= */
 const ITEM_DATABASE = {
-    "ignos": { name: "이그노스의 활M", img: "./images/item1.png", type: "원거리 무기", atkMult: 1.0, cdMult: 1.2, price: 3000 },
-    "spirit": { name: "봉인된 정령왕의 창M", img: "./images/item2.png", type: "근거리 무기", atkMult: 1.2, cdMult: 1.0, defBonus: 15, price: 3000 }
+    "ignos": { 
+        name: "이그노스의 활M", img: "./images/item1.png", type: "원거리 무기", 
+        atkMult: 1.0, cdMult: 1.2, price: 3000,
+        awakened: { atkMult: 1.5, cdMult: 1.0 } // 활 각성: 공 1.5배, 공속 페널티 없음
+    },
+    "spirit": { 
+        name: "봉인된 정령왕의 창M", img: "./images/item2.png", type: "근거리 무기", 
+        atkMult: 1.2, cdMult: 1.0, defBonus: 15, price: 3000,
+        awakened: { atkMult: 1.2, cdMult: 0.3 } // 창 각성: 공 그대로, 공속 0.3으로 돌파
+    }
 };
 let autoSaveInterval; // 자동 저장을 관리할 변수
 let idGame = {
@@ -12867,7 +12883,6 @@ function renderWarehouse() {
             let itemHtml = pet.equippedItemUid && idGame.ownedItems.find(i => i.uid === pet.equippedItemUid) 
                 ? `<div style="font-size:9px; color:#1e242b; background:#d29922; padding:1px 6px; border-radius:3px; margin:4px 0; font-weight:bold;">장착중</div>` : '<div style="height:17px;"></div>';
             
-            // [수정] 출전 중인 페트도 각성 버튼 노출되도록 조건 추가
             let awakenStatus = (!pet.isAwakened && pet.level >= 50) 
                 ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (10,000 다이아)</button>` 
                 : (pet.isAwakened ? `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★각성 완료★</div>` : '');
@@ -12896,7 +12911,7 @@ function renderWarehouse() {
                 let speedText = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet).toFixed(1) : "2.0";
                 
                 let awakenBtn = (!pet.isAwakened && pet.level >= 50) 
-                    ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (5,000 다이아)</button>` 
+                    ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (10,000 다이아)</button>` 
                     : (pet.isAwakened ? `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★각성 완료★</div>` : '');
 
                 grid.innerHTML += `
@@ -12919,24 +12934,45 @@ function renderWarehouse() {
             grid.innerHTML += `<div style="grid-column: 1 / -1; color: #8b949e; text-align: center; padding: 20px; font-size: 12px;">보유한 장비가 없습니다.</div>`;
         } else {
             idGame.ownedItems.forEach((itemObj) => {
-                let item = ITEM_DATABASE[itemObj.itemKey];
-                if(!item) return;
-                
-                let eqOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemObj.uid) || idGame.warehouse.find(p => p.equippedItemUid === itemObj.uid);
-                
-                let actionBtn = eqOwner 
-                    ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
-                    : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
+    let item = ITEM_DATABASE[itemObj.itemKey];
+    if(!item) return;
 
-                grid.innerHTML += `
-                    <div style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;">
-                        <img src="${item.img}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.2); border-radius:6px; padding:2px;">
-                        <div style="font-size:12px; font-weight:bold; color:#fff;">${item.name}</div>
-                        <div style="font-size:10px; color:#8b949e;">공x${item.atkMult} / 쿨x${item.cdMult}</div>
-                        ${actionBtn}
-                        <button onclick="sellItem('${itemObj.uid}')" style="width:100%; background:#8b949e; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">판매 (1000 다이아)</button>
-                    </div>`;
-            });
+    let eqOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemObj.uid) || idGame.warehouse.find(p => p.equippedItemUid === itemObj.uid);
+    let actionBtn = eqOwner 
+        ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
+        : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
+
+    // [수정] 각성 상태에 따른 능력치 문자열 생성
+    let statsText = "";
+    if (itemObj.isAwakened && item.awakened) {
+        let atk = item.awakened.atkMult || item.atkMult;
+        let cd = item.awakened.cdMult || item.cdMult;
+        let def = item.defBonus || 0;
+        
+        // 활처럼 공속 1.0(배율)인 경우 '공속 1.0'으로 명시
+        let cdText = (cd <= 0.3) ? "최대공속 0.3s" : `공속 ${cd}s`;
+        
+        statsText = `공x${atk} / ${cdText}${def > 0 ? ' / 방+' + def : ''}`;
+    } else {
+        let def = item.defBonus || 0;
+        // 기존 쿨타임 배율 표기 (1.0도 생략 없이 출력)
+        statsText = `공x${item.atkMult} / 쿨x${item.cdMult}${def > 0 ? ' / 방+' + def : ''}`;
+    }
+
+    let awakenItemBtn = !itemObj.isAwakened 
+        ? `<button onclick="awakenItem('${itemObj.uid}')" style="width:100%; background:#fca311; border:none; padding:4px 0; border-radius:4px; color:#000; font-weight:bold; cursor:pointer; font-size:10px;">아이템 각성 (1억 스톤)</button>`
+        : `<div style="color:#fca311; font-size:10px; font-weight:bold; margin-top:4px;">★각성 완료★</div>`;
+
+    grid.innerHTML += `
+        <div style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;">
+            <img src="${item.img}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.2); border-radius:6px; padding:2px;">
+            <div style="font-size:12px; font-weight:bold; color:#fff;">${item.name}</div>
+            <div style="font-size:10px; color:#8b949e;">${statsText}</div>
+            ${actionBtn}
+            ${awakenItemBtn}
+            <button onclick="sellItem('${itemObj.uid}')" style="width:100%; background:#8b949e; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">판매 (1000 다이아)</button>
+        </div>`;
+});
         }
     }
 }
@@ -13478,8 +13514,20 @@ function getPetAtkMaxCd(pet) {
     } else {
         cd = 1.0 - ((currentSpd - 30) * 0.005);
     }
+
+    // 아이템 각성 여부 및 장착 아이템 확인
+    let isSpiritAwakened = false;
+    if (pet.equippedItemUid) {
+        let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+        if (foundItem && foundItem.isAwakened && foundItem.itemKey === 'spirit') {
+            isSpiritAwakened = true;
+        }
+    }
+
+    // [수정] 각성된 'spirit(창)' 장착 시 제한 0.3, 일반적으론 0.4 제한 적용
+    let limit = isSpiritAwakened ? 0.3 : 0.4;
     
-    return cd < 0.4 ? 0.4 : cd;
+    return cd < limit ? limit : cd;
 }
 
 function openEquipModal(itemUid) {
@@ -13939,7 +13987,28 @@ function toggleRankingView() {
         board.style.display = "none";
     }
 }
-
+function awakenItem(uid) {
+    let itemObj = idGame.ownedItems.find(i => i.uid === uid);
+    if (!itemObj || itemObj.isAwakened) return;
+    
+    const AWAKEN_COST = 100000000;
+    let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
+    
+    if (currentStone < AWAKEN_COST) return alert("스톤이 부족합니다 (1억 스톤 필요)");
+    
+    idGame.stone = currentStone - AWAKEN_COST;
+    itemObj.isAwakened = true;
+    
+    // 장착 중인 페트에게 상태 전파
+    idGame.fieldPets.forEach(p => {
+        if (p.equippedItemUid === uid) p.isItemAwakened = true;
+    });
+    
+    addGameLog(`✨ [${ITEM_DATABASE[itemObj.itemKey].name}] 각성 완료!`, '#fca311');
+    saveGame();
+    renderWarehouse();
+    updateUI();
+}
 /* 만득이 키우기 JS 코드 끝 */
 
 </script>
