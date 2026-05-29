@@ -5213,15 +5213,16 @@ const NOTICE_DATABASE = [
         title: "26년 5월 29일 업데이트 공지사항입니다.",
         summary: "1. 만득이 키우기 수정 | 2. 주간 펫 육성 교체",
         content: `
-            <strong>1) 시스템 및 버그 수정</strong>
+            <strong>1) 만득이 키우기 시스템 및 버그 수정</strong>
             <span>- 데이터 초기화 진행 시 자동 저장 기능과 충돌하여 초기화가 반영되지 않던 현상을 수정하였습니다.</span>
-            
+            <span>- 스테이지 별 상대 몬스터들의 체력 및 공격력 증가율이 조정되었습니다.</span>
             <strong>2) 주간 펫 육성 교체</strong>
             <span>- 이번 주 육성 펫이 '언딘'에서 '그리프스'로 교체되었습니다.</span>
             <span>- 기존 육성 중인 페트를 140레벨까지 육성한 뒤 새로운 알을 부화시켜야 정상적으로 진행됩니다.</span>
+            <span>- 새롭게 교체된 '그리프스'를 훈련하여 더 강력한 팀을 구성해 보세요!</span>
         `
     },
-    
+
     {
         id: 27,
         date: "26년 5월 28일",
@@ -5335,7 +5336,6 @@ const NOTICE_DATABASE = [
             
             <strong>2) 신규 미니게임 '만득이 키우기' 출시</strong>
             <span>- 나만의 페트를 육성하여 몬스터를 처치하는 미니게임 '만득이 키우기'가 출시되었습니다.</span>
-            <span>- 페트 훈련, 무기 장착, 패시브 시너지를 활용하여 더 높은 스테이지에 도전해 보세요.</span>
         `
     },
 
@@ -11982,15 +11982,24 @@ function spawnWave() {
     
     let hpScale, atkScale;
 
-    // 40스테이지 이후 난이도 상승폭 완화 (기존 코드 유지)
+    // [수정] 40스테이지 전후 몬스터 체력/공격력 밸런스 스케일링
     if (currentDifficulty <= 40) {
-        hpScale = Math.pow(1.18, currentDifficulty - 1);
-        atkScale = Math.pow(1.13, currentDifficulty - 1);
+        hpScale = Math.pow(1.14, currentDifficulty - 1);
+        atkScale = Math.pow(1.18, currentDifficulty - 1);
+    } else if (currentDifficulty <= 60) {
+        let hpScaleAt40 = Math.pow(1.14, 39);
+        let atkScaleAt40 = Math.pow(1.18, 39);
+        hpScale = hpScaleAt40 * Math.pow(1.02, currentDifficulty - 40);
+        atkScale = atkScaleAt40 * Math.pow(1.05, currentDifficulty - 40);
     } else {
-        let hpScaleAt40 = Math.pow(1.18, 39);
-        let atkScaleAt40 = Math.pow(1.13, 39);
-        hpScale = hpScaleAt40 * Math.pow(1.04, currentDifficulty - 40);
-        atkScale = atkScaleAt40 * Math.pow(1.02, currentDifficulty - 40);
+        let hpScaleAt40 = Math.pow(1.14, 39);
+        let atkScaleAt40 = Math.pow(1.18, 39);
+        let hpScaleAt60 = hpScaleAt40 * Math.pow(1.02, 20);
+        let atkScaleAt60 = atkScaleAt40 * Math.pow(1.05, 20);
+        
+        // 60스테이지 이후: 공격력 증가폭을 1.015로 완화
+        hpScale = hpScaleAt60 * Math.pow(1.02, currentDifficulty - 60);
+        atkScale = atkScaleAt60 * Math.pow(1.015, currentDifficulty - 60); 
     }
 
     let baseHp = Math.floor(20 * hpScale);
@@ -12130,14 +12139,35 @@ function gameLoop(time) {
                     
                     let bonus = getDetailedPassiveBonus(pet);
                     let atkMult = eqItem ? (eqItem.atkMult || 1.0) : 1.0;
-                    // [수정] 공격력 버프 적용
+                    
+                    // [버그 수정] 무기 각성 데미지 실제 적용
+                    if (eqItem && pet.equippedItemUid) {
+                        let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+                        if (foundItem && foundItem.isAwakened && eqItem.awakened && eqItem.awakened.atkMult) {
+                            atkMult = eqItem.awakened.atkMult;
+                        }
+                    }
+
+                    // 공격력 버프 적용
                     let atkBuffMult = (idGame.buffs.atkMultiplier.active && Date.now() < idGame.buffs.atkMultiplier.endTime) ? 1.5 : 1.0;
-                    let baseDmg = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 3 * (pet.growthBonus || 1)));
+                    
+                    let baseDmg = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 6 * (pet.growthBonus || 1)));
+
+                    // [핵심 해결] 계산된 수치 중 하나라도 NaN일 경우 강제 보정하여 오염 원천 차단
+                    if (isNaN(baseDmg)) baseDmg = 10;
+                    if (isNaN(bonus.atkMult)) bonus.atkMult = 1.0;
 
                     let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult); 
-                    let isCrit = Math.random() < bonus.crit;
-                    if (isCrit) dmg = Math.floor(dmg * 1.5);
                     
+                    // 데미지가 여전히 비정상적이라면 최소 데미지 1로 고정
+                    if (isNaN(dmg) || dmg < 1) dmg = 1;
+
+                    let isCrit = Math.random() < (bonus.crit || 0);
+                    if (isCrit) dmg = Math.floor(dmg * 2.0);
+                    
+                    // [핵심 해결] 몬스터의 체력이 이전 타격으로 인해 이미 NaN으로 오염되었다면 즉시 최대 체력으로 복구
+                    if (isNaN(target.hp)) target.hp = target.maxHp;
+
                     target.hp -= dmg;
                     
                     if (isCrit) showDmgText(`💥${dmg}`, target.x, target.y, 'dmg-crit');
@@ -12145,9 +12175,10 @@ function gameLoop(time) {
                     
                     let healAmount = 0;
                     if (bonus.heal > 0) healAmount += bonus.heal;
-                    if (bonus.lifeSteal > 0) healAmount += Math.floor(dmg * bonus.lifeSteal);
+                    if (bonus.lifeSteal > 0) healAmount += Math.floor(dmg * (bonus.lifeSteal || 0));
                     
                     if (healAmount > 0 && idGame.teamCurHp < idGame.teamMaxHp) {
+                        if (isNaN(healAmount)) healAmount = 1; // 힐량 NaN 방지
                         idGame.teamCurHp = Math.min(idGame.teamMaxHp, idGame.teamCurHp + healAmount);
                         showDmgText(healAmount, pet.x, pet.y - 20, 'dmg-heal');
                     }
@@ -12182,10 +12213,12 @@ function gameLoop(time) {
                     let teamDodgeChance = 0;
                     
                     idGame.fieldPets.forEach(p => {
-                        let petDef = (p.baseDef || 5) + ((p.gdef || 0.5) * (p.level - 1) * p.growthBonus);
+                        // [수정] p.level이 없을 경우(undefined)를 완벽히 대비
+                        let pLevel = p.level || 1;
+                        let petDef = (p.baseDef || 5) + ((p.gdef || 0.5) * (pLevel - 1) * (p.growthBonus || 1));
                         let b = getDetailedPassiveBonus(p);
 
-                        // [추가] 장착한 아이템의 defBonus 적용
+                        // 장착한 아이템의 defBonus 적용
                         if (p.equippedItemUid) {
                             let foundItem = idGame.ownedItems.find(i => i.uid === p.equippedItemUid);
                             if (foundItem && ITEM_DATABASE[foundItem.itemKey] && ITEM_DATABASE[foundItem.itemKey].defBonus) {
@@ -12193,9 +12226,11 @@ function gameLoop(time) {
                             }
                         }
 
-                        petDef = Math.floor(petDef * b.defMult); 
-                        teamTotalDef += petDef;
-                        totalDmgRed += b.dmgRed;
+                        petDef = Math.floor(petDef * (b.defMult || 1)); 
+                        
+                        // [핵심] 계산 결과가 NaN일 경우 0으로 처리하여 전체 수치 오염 방지
+                        if (!isNaN(petDef)) teamTotalDef += petDef;
+                        if (!isNaN(b.dmgRed)) totalDmgRed += b.dmgRed;
                         
                         if (b.dodge > teamDodgeChance) teamDodgeChance = b.dodge;
                     });
@@ -12205,7 +12240,9 @@ function gameLoop(time) {
                         showDmgText("회피!", target.x, target.y, 'dmg-dodge');
                     } else {
                         let finalDamage = Math.floor(mon.atk - (teamTotalDef * 0.1) - totalDmgRed);
-                        if (finalDamage < 1) finalDamage = 1;
+                        
+                        // [핵심] 최종 데미지가 NaN이거나 1보다 작으면 무조건 1로 고정
+                        if (isNaN(finalDamage) || finalDamage < 1) finalDamage = 1;
 
                         idGame.teamCurHp -= finalDamage;
                         showDmgText(finalDamage, target.x, target.y, 'dmg-ally');
@@ -12461,6 +12498,11 @@ function updateUI() {
     const progressEl = document.getElementById('ui-progress');
     if (progressEl) progressEl.innerText = idGame.mobsKilled === 9 ? "(BOSS)" : `(${idGame.mobsKilled}/10)`;
     
+    // [추가] 체력이 NaN으로 오염된 경우 최대 체력으로 자동 복구
+    if (isNaN(idGame.teamCurHp)) {
+        idGame.teamCurHp = idGame.teamMaxHp;
+    }
+
     const hpTextEl = document.getElementById('ui-team-hp-text');
     if (hpTextEl) hpTextEl.innerText = `${Math.floor(idGame.teamCurHp)} / ${idGame.teamMaxHp}`;
     
@@ -12481,7 +12523,7 @@ function updateUI() {
 
     idGame.fieldPets.forEach(pet => {
         let petLevel = pet.level || 1;
-        let baseAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 3 * (pet.growthBonus || 1)));
+        let baseAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1)));
         let baseDef = Math.floor((pet.baseDef || 5) + ((pet.gdef || 0.5) * (petLevel - 1) * (pet.growthBonus || 1)));
         
         let pName = pet.passiveName || pet.passive;
@@ -12779,8 +12821,8 @@ function updateDynamicShopElements() {
         battlePets.forEach(pet => {
             let petLevel = pet.level || 1;
             let cost = Math.floor(50 * Math.pow(1.3, petLevel - 1));
-            let curAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 3 * (pet.growthBonus || 1)));
-            let nextAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * petLevel * 3 * (pet.growthBonus || 1)));
+            let curAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1)));
+            let nextAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * petLevel * 6 * (pet.growthBonus || 1)));
             let petAtkMaxCd = getPetAtkMaxCd(pet).toFixed(2);
             
             trainHtml += `
@@ -12922,7 +12964,7 @@ function renderWarehouse() {
         } else {
             idGame.warehouse.forEach((pet, idx) => {
                 let canEquip = idGame.fieldPets.length < 5;
-                let curAtk = Math.floor(pet.baseAtk + (pet.gatk * (pet.level - 1) * 3 * pet.growthBonus));
+                let curAtk = Math.floor(pet.baseAtk + (pet.gatk * (pet.level - 1) * 6 * pet.growthBonus));
                 let speedText = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet).toFixed(1) : "2.0";
                 
                 let awakenBtn = (!pet.isAwakened && pet.level >= 50) 
@@ -13267,6 +13309,9 @@ function getDetailedPassiveBonus(pet) {
         crit: 0.0, dodge: 0.0, hit: 0.0, heal: 0, lifeSteal: 0.0
     };
     
+    // [추가] 60스테이지 이상일 경우 적용할 패시브 버프 배율 (2배)
+    let lateGameBuff = (typeof idGame !== 'undefined' && idGame.stage >= 60) ? 2.0 : 1.0;
+
     const applyStats = (p, isOwner) => {
         let pName = p.passiveName || p.passive;
         if (!pName || typeof RAID_PASSIVE_DATABASE === 'undefined') return;
@@ -13322,8 +13367,8 @@ function getDetailedPassiveBonus(pet) {
             if (db.name === '광휘') bonus.dodge += val;
             if (db.name === '전광 석화') bonus.crit += val;
         } else if (isFlatStat) {
-            // [수정] 고정 수치(Flat) 적용 (음수값은 절대값으로 변환하여 더함)
-            bonus.dmgRed += Math.abs(val); 
+            // [수정] 고정 수치(Flat) 적용 (음수값은 절대값으로 변환하여 더함) + 60스테이지 이상 배율 적용
+            bonus.dmgRed += (Math.abs(val) * lateGameBuff); 
         }
 
         if (db.name === '심판') bonus.crit += val;
@@ -13337,11 +13382,13 @@ function getDetailedPassiveBonus(pet) {
         if (['심연의 보주'].includes(db.name)) { bonus.dodge += 0.05; } 
         
         const lifestealPassives = ['칠흑의 방벽', '흡혈'];
-        if (lifestealPassives.includes(db.name)) bonus.lifeSteal += 0.15;
+        // [수정] 60스테이지 이상 흡혈 배율 적용
+        if (lifestealPassives.includes(db.name)) bonus.lifeSteal += (0.15 * lateGameBuff); 
         
         const healPassives = ['치유', '창공의 권능', '서리의 심장', '청영의 화조'];
         if (healPassives.includes(db.name)) {
-            bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.0025));
+            // [수정] 60스테이지 이상 타격회복 배율 적용
+            bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.0025 * lateGameBuff));
             if (db.name === '청영의 화조') bonus.crit += 0.05;
         }
     };
@@ -13474,7 +13521,7 @@ function updateFormation() {
     let maxAtk = -1;
 
     idGame.fieldPets.forEach((pet, idx) => {
-        let curAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 3 * (pet.growthBonus || 1)));
+        let curAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 6 * (pet.growthBonus || 1)));
         if (curAtk > maxAtk) {
             maxAtk = curAtk;
             maxAtkIdx = idx;
