@@ -5215,11 +5215,13 @@ const NOTICE_DATABASE = [
         content: `
             <strong>1) 만득이 키우기 시스템 및 버그 수정</strong>
             <span>- 데이터 초기화 진행 시 자동 저장 기능과 충돌하여 초기화가 반영되지 않던 현상을 수정하였습니다.</span>
-            <span>- 스테이지 별 상대 몬스터들의 체력 및 공격력 증가율이 조정되었습니다.</span>
+            <span>- 게임 내 보유 스톤, 다이아 및 훈련 비용의 표기 단위가 한국어(만, 억, 조) 축약 형태로 개선되었습니다.</span>
+            <span>- 상점 버프(스톤/공격력) 구매 시 상단 재화 및 전체 공격력 옆에 남은 시간이 실시간으로 표시됩니다.</span>
+            <span>- 60 스테이지 이후 난이도가 조정되었으며, 이에 맞춰 후반부 방어형 패시브(강철, 흡혈, 타격회복)의 성능이 강화되었습니다.</span>
+            <span>- 체력 단련 수치의 증가 곡선이 조정되어, 후반부 스테이지에서 보다 균형 잡힌 탱킹 능력을 갖추도록 개선되었습니다.</span>
             <strong>2) 주간 펫 육성 교체</strong>
             <span>- 이번 주 육성 펫이 '언딘'에서 '그리프스'로 교체되었습니다.</span>
             <span>- 기존 육성 중인 페트를 140레벨까지 육성한 뒤 새로운 알을 부화시켜야 정상적으로 진행됩니다.</span>
-            <span>- 새롭게 교체된 '그리프스'를 훈련하여 더 강력한 팀을 구성해 보세요!</span>
         `
     },
 
@@ -11912,6 +11914,24 @@ function searchStarterPet() {
     });
 }
 
+// 숫자를 한국어 단위(만, 억, 조, 경)로 축약해주는 함수
+function formatKoreanNumber(num) {
+    if (typeof num !== 'number' || isNaN(num)) return '0';
+    if (num < 10000) return Math.floor(num).toLocaleString(); // 1만 미만은 그대로 콤마 표기
+
+    const units = ['만', '억', '조', '경', '해'];
+    let unitIndex = -1;
+    let scaledNum = num;
+
+    while (scaledNum >= 10000 && unitIndex < units.length - 1) {
+        scaledNum /= 10000;
+        unitIndex++;
+    }
+
+    // 소수점 둘째 자리까지 표시하되, 끝이 0이면 자연스럽게 생략 (예: 14.48조)
+    return parseFloat(scaledNum.toFixed(2)) + units[unitIndex];
+}
+
 function startGameWithPet(petData, growthBonus) {
     document.getElementById('idle-start-screen').style.display = 'none';
     const guideTab = document.querySelector('#page-idle-rpg details');
@@ -12476,11 +12496,25 @@ function updateUI() {
     // [수정] 스톤과 다이아값이 NaN이 되지 않도록 안전하게 처리
     if (stoneEl) {
         let valStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
-        stoneEl.innerText = valStone.toLocaleString();
+        let stoneDisplay = formatKoreanNumber(valStone);
+        
+        // 골드 버프 실시간 카운트다운 (이전 기능 유지)
+        if (idGame.buffs && idGame.buffs.goldMultiplier && idGame.buffs.goldMultiplier.active) {
+            let remain = idGame.buffs.goldMultiplier.endTime - Date.now();
+            if (remain > 0) {
+                let m = Math.floor(remain / 60000);
+                let s = Math.floor((remain % 60000) / 1000);
+                stoneDisplay += ` <span style="color:#fca311; font-size:14px; font-weight:bold; margin-left:8px; text-shadow:0 0 5px rgba(252,163,17,0.5);">[스톤 1.5배 ${m}:${s.toString().padStart(2, '0')}]</span>`;
+            } else {
+                idGame.buffs.goldMultiplier.active = false;
+            }
+        }
+        stoneEl.innerHTML = stoneDisplay; // innerText 대신 innerHTML 사용
     }
     if (diamondEl) {
         let valDia = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond)) ? idGame.diamond : 0;
-        diamondEl.innerText = valDia.toLocaleString();
+        // toLocaleString() 대신 formatKoreanNumber() 적용
+        diamondEl.innerText = formatKoreanNumber(valDia);
     }
     
     const uiStage = document.getElementById('ui-stage');
@@ -12573,6 +12607,18 @@ function updateUI() {
         if (totalBonusAtk > 0) atkText += ` <span style="color:#ffcc00; font-size:12px;">(+${totalBonusAtk.toLocaleString()})</span>`;
         else if (totalBonusAtk < 0) atkText += ` <span style="color:#ff4d4d; font-size:12px;">(${totalBonusAtk.toLocaleString()})</span>`;
 
+        // [추가] 공격력 버프 실시간 카운트다운
+        if (idGame.buffs && idGame.buffs.atkMultiplier && idGame.buffs.atkMultiplier.active) {
+            let remain = idGame.buffs.atkMultiplier.endTime - Date.now();
+            if (remain > 0) {
+                let m = Math.floor(remain / 60000);
+                let s = Math.floor((remain % 60000) / 1000);
+                atkText += ` <span style="color:#ff4d4d; font-size:13px; font-weight:bold; margin-left:8px; text-shadow:0 0 5px rgba(255,77,77,0.5);">[공격력 1.5배 ${m}:${s.toString().padStart(2, '0')}]</span>`;
+            } else {
+                idGame.buffs.atkMultiplier.active = false;
+            }
+        }
+
         let defText = `${totalTeamDef.toLocaleString()}`;
         if (totalBonusDef > 0) defText += ` <span style="color:#ffcc00; font-size:12px;">(+${totalBonusDef.toLocaleString()})</span>`;
         else if (totalBonusDef < 0) defText += ` <span style="color:#ff4d4d; font-size:12px;">(${totalBonusDef.toLocaleString()})</span>`;
@@ -12591,15 +12637,6 @@ function updateUI() {
             : '';
 
         teamAtkEl.innerHTML = `${atkText} <span style="color:#8b949e; font-size:12px; margin-left:15px; font-weight:normal;">| 팀 총 방어력: <b style="color:#2ea043;">${defText}</b></span>${dmgRedText}${specialStatsRow}`;
-    }
-    
-    const passiveUI = document.getElementById('ui-active-passives');
-    if (passiveUI) {
-        if (activePassives.length > 0) {
-            passiveUI.innerHTML = `<strong>적용 중인 패시브 (${activePassives.length}명) :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px;">${activePassives.join(' &nbsp;|&nbsp; ')}</div>`;
-        } else {
-            passiveUI.innerHTML = `<strong>적용 중인 패시브 :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px; color:#8b949e;">없음</div>`;
-        }
     }
     
     const manualBtn = document.querySelector('[onclick="manualFieldAttack(event)"]');
@@ -12737,7 +12774,7 @@ function renderShop() {
                 <div style="color:#2ea043; font-weight:bold; margin-bottom: 5px;"><i class="fa-solid fa-heart"></i> 체력 단련 (<span id="shop-hp-lv">Lv.${idGame.upgrades.hpLv}</span>)</div>
                 <div style="font-size:12px; color:#8b949e; margin-bottom:10px;">팀 최대 체력 상승</div>
             </div>
-            <button id="shop-hp-btn" onclick="buyTeamHp(${hpCost})" style="width:100%; padding:8px; background:${idGame.stone >= hpCost ? '#2ea043' : '#30363d'}; border:none; border-radius:6px; color:#fff; cursor:pointer; font-weight:bold;">스톤 ${hpCost.toLocaleString()}</button>
+            <button id="shop-hp-btn" onclick="buyTeamHp(${hpCost})" style="width:100%; padding:8px; background:${idGame.stone >= hpCost ? '#2ea043' : '#30363d'}; border:none; border-radius:6px; color:#fff; cursor:pointer; font-weight:bold;">스톤 ${formatKoreanNumber(hpCost)}</button>
         </div>
         
         <div style="background:#2d1a1a; padding:15px; border-radius:8px; border:1px solid #ff4d4d; display:flex; flex-direction:column; justify-content:space-between;">
@@ -12819,7 +12856,7 @@ function updateDynamicShopElements() {
     const hpBtnEl = document.getElementById('shop-hp-btn');
     if(hpLvEl) hpLvEl.innerText = `Lv.${idGame.upgrades.hpLv}`;
     if(hpBtnEl) {
-        hpBtnEl.innerText = `스톤 ${hpCost.toLocaleString()}`;
+        hpBtnEl.innerText = `스톤 ${formatKoreanNumber(hpCost)}`;
         hpBtnEl.style.background = idGame.stone >= hpCost ? '#2ea043' : '#30363d';
         hpBtnEl.setAttribute('onclick', `buyTeamHp(${hpCost})`);
     }
@@ -12862,7 +12899,7 @@ function updateDynamicShopElements() {
                     <div style="display:flex; justify-content:space-between;"><span>공격속도</span> <span style="color:#539bf5;">${petAtkMaxCd}초</span></div>
                 </div>
                 <button onclick="buyPetLevel('${pet.id}', ${cost})" style="margin-top:auto; padding:10px; background:${idGame.stone >= cost ? '#539bf5' : '#30363d'}; border:none; border-radius:6px; color:#fff; cursor:pointer; font-weight:bold; font-size:12px;">
-                    스톤 ${cost.toLocaleString()}
+                    스톤 ${formatKoreanNumber(cost)}
                 </button>
             </div>`;
         });
@@ -13227,7 +13264,7 @@ function showOfflineRewardModal(reward, seconds) {
                 만득이들이 묵묵히<br>사냥을 진행했습니다!<br><br>
                 <span style="color:#8b949e; font-size:13px;">자리 비운 시간: ${timeText}</span><br>
                 <div style="margin-top:10px; padding:10px; background:#0d1117; border-radius:8px; border:1px solid #30363d;">
-                    <span style="color:#fca311; font-size:22px; font-weight:bold;">${reward.toLocaleString()}</span> <span style="color:#8b949e;">스톤</span>
+                    <span style="color:#fca311; font-size:22px; font-weight:bold;">${formatKoreanNumber(reward)}</span> <span style="color:#8b949e;">스톤</span>
                 </div>
             </div>
             <button id="btn-claim-offline" style="width:100%; padding:14px; background:linear-gradient(135deg, #539bf5, #2ea043); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition: transform 0.1s;">
