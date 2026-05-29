@@ -12690,8 +12690,31 @@ function processOfflineReward() {
 
 function calcTeamStats() {
     let oldMaxHp = idGame.teamMaxHp;
-    idGame.teamMaxHp = Math.floor(100 * Math.pow(1.2, idGame.upgrades.hpLv - 1));
+    
+    // [수정] 체력 증가 배율 상향 조정 (생존력 강화)
+    let newHp = 100;
+    let lv = idGame.upgrades.hpLv;
+    
+    if (lv <= 30) {
+        // 1~30레벨: 18%씩 증가 (기존 15% -> 18%)
+        newHp = Math.floor(100 * Math.pow(1.18, lv - 1));
+    } else if (lv <= 60) {
+        // 31~60레벨: 12%씩 증가 (기존 8% -> 12%)
+        let hpAt30 = 100 * Math.pow(1.18, 29);
+        newHp = Math.floor(hpAt30 * Math.pow(1.12, lv - 30));
+    } else {
+        // 61레벨 이상: 5%씩 증가 (기존 3% -> 5%)
+        let hpAt30 = 100 * Math.pow(1.18, 29);
+        let hpAt60 = hpAt30 * Math.pow(1.12, 30);
+        newHp = Math.floor(hpAt60 * Math.pow(1.05, lv - 60));
+    }
+    
+    idGame.teamMaxHp = newHp;
     idGame.teamCurHp += (idGame.teamMaxHp - oldMaxHp); 
+    
+    if (idGame.teamCurHp > idGame.teamMaxHp) {
+        idGame.teamCurHp = idGame.teamMaxHp;
+    }
 }
 
 function renderShop() {
@@ -13382,13 +13405,13 @@ function getDetailedPassiveBonus(pet) {
         if (['심연의 보주'].includes(db.name)) { bonus.dodge += 0.05; } 
         
         const lifestealPassives = ['칠흑의 방벽', '흡혈'];
-        // [수정] 60스테이지 이상 흡혈 배율 적용
-        if (lifestealPassives.includes(db.name)) bonus.lifeSteal += (0.15 * lateGameBuff); 
+        // [수정] 흡혈 수치 너프 (기본 15% -> 8%) : 60스테이지 이상 배율(2배) 적용 시 최종 16%
+        if (lifestealPassives.includes(db.name)) bonus.lifeSteal += (0.08 * lateGameBuff); 
         
         const healPassives = ['치유', '창공의 권능', '서리의 심장', '청영의 화조'];
         if (healPassives.includes(db.name)) {
-            // [수정] 60스테이지 이상 타격회복 배율 적용
-            bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.0025 * lateGameBuff));
+            // [수정] 타격회복 수치 너프 (기본 체력의 0.25% -> 0.15%)
+            bonus.heal += Math.max(1, Math.floor(idGame.teamMaxHp * 0.0015 * lateGameBuff));
             if (db.name === '청영의 화조') bonus.crit += 0.05;
         }
     };
