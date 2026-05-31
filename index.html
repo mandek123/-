@@ -2315,7 +2315,7 @@ button[onclick="resetGame()"]:hover {
     <div style="display: flex; align-items: stretch; min-height: 140px;">
         <div style="flex: 0 0 130px; background: rgba(212, 175, 55, 0.05); border-right: 1px solid var(--border-gold); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
             <i class="fas fa-swords" style="font-size: 3rem; color: var(--royal-gold); margin-bottom: 10px; filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));"></i>
-            <div style="margin-top: 5px; font-size: 0.85rem; color: var(--royal-gold); font-weight: bold; text-align: center; word-break: keep-all;">시즌 1</div>
+            <div id="home-arena-season-text" style="margin-top: 5px; font-size: 0.85rem; color: var(--royal-gold); font-weight: bold; text-align: center; word-break: keep-all;">시즌 1</div>
         </div>
         
         <div id="homeArenaRankingBoard" style="flex: 1; padding: 15px 20px; background: #0d0202; display: flex; flex-direction: column; justify-content: center; color: #c9d1d9; line-height: 1.8; font-size: 1rem;">
@@ -3421,7 +3421,7 @@ button[onclick="resetGame()"]:hover {
 <!-- 투기장 컨테이너 시작 -->
 <div class="main-container" id="page-arena">
     <div class="arena-top-rank">
-        <h3>🏆 월간 투기장 명예의 전당 (시즌 1)</h3>
+        <h3 id="arena-page-title">🏆 월간 투기장 명예의 전당 (시즌 1)</h3>
         <div class="rank-display">
             <span>🥇 <span id="rank-1">-</span></span>
             <span>🥈 <span id="rank-2">-</span></span>
@@ -5207,6 +5207,19 @@ button[onclick="resetGame()"]:hover {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+        id: 29,
+        date: "26년 6월 1일",
+        title: "26년 6월 1일 업데이트 공지사항입니다.",
+        summary: "1. 투기장 시즌 2 시작 및 랭킹 초기화",
+        content: `
+            <strong>1) 투기장 정규 시즌 2 시작 및 랭킹 초기화</strong>
+            <span>- 6월 1일을 맞이하여 투기장 정규 시즌 2가 새롭게 시작됩니다.</span>
+            <span>- 이에 따라 랭킹이 초기화되었으며, 모든 유저의 투기장 점수가 1000점으로 일괄 리셋되었습니다.</span>
+            <span>- 지난 5월(시즌 1)의 랭킹 기록은 투기장 하단의 '역대 시즌 랭킹 확인하기'를 통해 언제든 열람하실 수 있습니다.</span>
+        `
+    },
+
     {
         id: 28,
         date: "26년 5월 29일",
@@ -8455,12 +8468,12 @@ const BATTLE_LIMIT = 10; // 1일 대전 횟수 제한
 // 실제 값은 Firebase(내 정보)에서 불러와 동기화합니다.
 let todayPlayCount = 0;
 
-// 연도와 월을 기반으로 시즌 번호 계산 (시즌 1 = 26년 4월 기준)
+// 연도와 월을 기반으로 시즌 번호 계산 (시즌 1 = 26년 5월 기준)
 function getSeasonNumber(monthLabel) {
     if (!monthLabel) return 1;
     const [year, month] = monthLabel.split('-').map(Number);
     const baseYear = 2026;
-    const baseMonth = 4; 
+    const baseMonth = 5; 
     let season = (year - baseYear) * 12 + (month - baseMonth) + 1;
     return season > 0 ? season : 1;
 }
@@ -9655,6 +9668,13 @@ function loadHomeArenaRanking() {
     const now = new Date();
     const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
     const currentSeason = getSeasonNumber(currentMonthLabel);
+
+    // [추가] 매월 HTML을 직접 수정할 필요 없이, 접속 시 자동으로 시즌 숫자를 업데이트!
+    const homeSeasonEl = document.getElementById('home-arena-season-text');
+    if (homeSeasonEl) homeSeasonEl.innerText = `시즌 ${currentSeason}`;
+    
+    const pageTitleEl = document.getElementById('arena-page-title');
+    if (pageTitleEl) pageTitleEl.innerHTML = `🏆 월간 투기장 명예의 전당 (시즌 ${currentSeason})`;
 
     db.ref('arena_users').orderByChild('score').limitToLast(3).on('value', (snapshot) => {
         let users = [];
@@ -12261,6 +12281,11 @@ function gameLoop(time) {
                     } else {
                         let finalDamage = Math.floor(mon.atk - (teamTotalDef * 0.1) - totalDmgRed);
                         
+                        // [추가] 피해 감소 버프 30% 적용
+                        if (idGame.buffs && idGame.buffs.dmgReduction && idGame.buffs.dmgReduction.active && Date.now() < idGame.buffs.dmgReduction.endTime) {
+                            finalDamage = Math.floor(finalDamage * 0.7); // 최종 데미지 30% 삭감
+                        }
+
                         // [핵심] 최종 데미지가 NaN이거나 1보다 작으면 무조건 1로 고정
                         if (isNaN(finalDamage) || finalDamage < 1) finalDamage = 1;
 
@@ -12603,28 +12628,60 @@ function updateUI() {
 
     const teamAtkEl = document.getElementById('ui-team-atk');
     if(teamAtkEl) {
-        let atkText = `${totalTeamAtk.toLocaleString()}`;
+        // 1. 공격력 텍스트 구성
+        let atkText = `<b style="color:#539bf5;">${totalTeamAtk.toLocaleString()}</b>`;
         if (totalBonusAtk > 0) atkText += ` <span style="color:#ffcc00; font-size:12px;">(+${totalBonusAtk.toLocaleString()})</span>`;
         else if (totalBonusAtk < 0) atkText += ` <span style="color:#ff4d4d; font-size:12px;">(${totalBonusAtk.toLocaleString()})</span>`;
 
-        // [추가] 공격력 버프 실시간 카운트다운
+        // 2. 방어력 & 피해 감소 텍스트 구성
+        let defText = `<b style="color:#2ea043;">${totalTeamDef.toLocaleString()}</b>`;
+        if (totalBonusDef > 0) defText += ` <span style="color:#ffcc00; font-size:12px;">(+${totalBonusDef.toLocaleString()})</span>`;
+        else if (totalBonusDef < 0) defText += ` <span style="color:#ff4d4d; font-size:12px;">(${totalBonusDef.toLocaleString()})</span>`;
+        let dmgRedText = totalDmgRed > 0 ? `<b style="color:#a5d6ff;">-${totalDmgRed.toLocaleString()}</b>` : `<b style="color:#8b949e;">0</b>`;
+
+        // 3. 실시간 버프 목록 UI 박스화
+        let activeBuffsHtml = [];
+
+        // 공격력 버프 체크
         if (idGame.buffs && idGame.buffs.atkMultiplier && idGame.buffs.atkMultiplier.active) {
             let remain = idGame.buffs.atkMultiplier.endTime - Date.now();
             if (remain > 0) {
                 let m = Math.floor(remain / 60000);
                 let s = Math.floor((remain % 60000) / 1000);
-                atkText += ` <span style="color:#ff4d4d; font-size:13px; font-weight:bold; margin-left:8px; text-shadow:0 0 5px rgba(255,77,77,0.5);">[공격력 1.5배 ${m}:${s.toString().padStart(2, '0')}]</span>`;
+                let extraBuffAtk = Math.floor(totalTeamAtk * 0.5);
+                activeBuffsHtml.push(`<span style="display:inline-block; padding:3px 8px; background:rgba(255,77,77,0.15); border:1px solid rgba(255,77,77,0.5); border-radius:6px; color:#ff6b6b; font-size:11px; font-weight:bold;">⚔️ 공격력 1.5배 (+${extraBuffAtk.toLocaleString()}) [${m}:${s.toString().padStart(2, '0')}]</span>`);
             } else {
                 idGame.buffs.atkMultiplier.active = false;
             }
         }
 
-        let defText = `${totalTeamDef.toLocaleString()}`;
-        if (totalBonusDef > 0) defText += ` <span style="color:#ffcc00; font-size:12px;">(+${totalBonusDef.toLocaleString()})</span>`;
-        else if (totalBonusDef < 0) defText += ` <span style="color:#ff4d4d; font-size:12px;">(${totalBonusDef.toLocaleString()})</span>`;
-        
-        let dmgRedText = totalDmgRed > 0 ? ` <span style="color:#8b949e; font-size:12px; margin-left:15px; font-weight:normal;">| 피해 감소: <b style="color:#a5d6ff;">-${totalDmgRed.toLocaleString()}</b></span>` : '';
+        // 방어력(피해감소) 버프 체크
+        if (idGame.buffs && idGame.buffs.dmgReduction && idGame.buffs.dmgReduction.active) {
+            let remain = idGame.buffs.dmgReduction.endTime - Date.now();
+            if (remain > 0) {
+                let h = Math.floor(remain / 3600000);
+                let m = Math.floor((remain % 3600000) / 60000);
+                let s = Math.floor((remain % 60000) / 1000);
+                let timeStr = h > 0 ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}` : `${m}:${s.toString().padStart(2, '0')}`;
+                activeBuffsHtml.push(`<span style="display:inline-block; padding:3px 8px; background:rgba(83,155,245,0.15); border:1px solid rgba(83,155,245,0.5); border-radius:6px; color:#79b8ff; font-size:11px; font-weight:bold;">🛡️ 피해 감소 -30% [${timeStr}]</span>`);
+            } else {
+                idGame.buffs.dmgReduction.active = false;
+            }
+        }
 
+        // 스톤 버프 체크
+        if (idGame.buffs && idGame.buffs.goldMultiplier && idGame.buffs.goldMultiplier.active) {
+            let remain = idGame.buffs.goldMultiplier.endTime - Date.now();
+            if (remain > 0) {
+                let m = Math.floor(remain / 60000);
+                let s = Math.floor((remain % 60000) / 1000);
+                activeBuffsHtml.push(`<span style="display:inline-block; padding:3px 8px; background:rgba(252,163,17,0.15); border:1px solid rgba(252,163,17,0.5); border-radius:6px; color:#fca311; font-size:11px; font-weight:bold;">💰 스톤 획득 1.5배 [${m}:${s.toString().padStart(2, '0')}]</span>`);
+            } else {
+                idGame.buffs.goldMultiplier.active = false;
+            }
+        }
+
+        // 4. 특수 스탯 구성
         let specialStatsHtml = [];
         if (maxCrit > 0) specialStatsHtml.push(`치명 <span style="color:#ffcc00;">${Math.round(maxCrit * 100)}%</span>`);
         if (maxDodge > 0) specialStatsHtml.push(`회피 <span style="color:#a5d6ff;">${Math.round(maxDodge * 100)}%</span>`);
@@ -12633,10 +12690,23 @@ function updateUI() {
         if (maxLifeSteal > 0) specialStatsHtml.push(`흡혈 <span style="color:#ff4d4d;">${Math.round(maxLifeSteal * 100)}%</span>`);
 
         let specialStatsRow = specialStatsHtml.length > 0 
-            ? `<br><span style="display:inline-block; margin-top:6px; font-size:11.5px; color:#8b949e;">⚡ 팀 특수 스탯 : &nbsp; ${specialStatsHtml.join(' &nbsp;|&nbsp; ')}</span>`
+            ? `<div style="margin-top:6px; font-size:12px; color:#8b949e;">⚡ 특수 스탯 : &nbsp; ${specialStatsHtml.join(' &nbsp;|&nbsp; ')}</div>`
             : '';
 
-        teamAtkEl.innerHTML = `${atkText} <span style="color:#8b949e; font-size:12px; margin-left:15px; font-weight:normal;">| 팀 총 방어력: <b style="color:#2ea043;">${defText}</b></span>${dmgRedText}${specialStatsRow}`;
+        let buffRow = activeBuffsHtml.length > 0
+            ? `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${activeBuffsHtml.join('')}</div>`
+            : '';
+
+        // 5. 최종 HTML 조립
+        teamAtkEl.innerHTML = `
+            <div style="font-size:13px; color:#c9d1d9;">
+                팀 총 공격력: ${atkText} <span style="color:#555; margin:0 10px;">|</span> 
+                팀 총 방어력: ${defText} <span style="color:#555; margin:0 10px;">|</span> 
+                피해 감소: ${dmgRedText}
+            </div>
+            ${specialStatsRow}
+            ${buffRow}
+        `;
     }
     
     // --- 여기서부터 실수로 지워졌던 UI 업데이트 복구 ---
@@ -12777,6 +12847,8 @@ function renderShop() {
     let now = Date.now();
     let goldLeft = (idGame.buffs && idGame.buffs.goldMultiplier.endTime > now) ? Math.ceil((idGame.buffs.goldMultiplier.endTime - now) / 60000) : 0;
     let atkLeft = (idGame.buffs && idGame.buffs.atkMultiplier.endTime > now) ? Math.ceil((idGame.buffs.atkMultiplier.endTime - now) / 60000) : 0;
+    // [추가] 피해 감소 버프 남은 시간 계산
+    let defLeft = (idGame.buffs && idGame.buffs.dmgReduction && idGame.buffs.dmgReduction.endTime > now) ? Math.ceil((idGame.buffs.dmgReduction.endTime - now) / 60000) : 0;
     
     let html = `
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; flex-direction:column; justify-content:space-between;">
@@ -12825,6 +12897,14 @@ function renderShop() {
             <div style="font-size:12px; color:#8b949e;">모든 페트 공격력 50% 증가</div>
             <button onclick="activateBuff('atkBoost')" ${atkLeft > 0 ? 'disabled' : ''} style="width:100%; padding:8px; background:${atkLeft > 0 ? '#30363d' : '#ff4d4d'}; border:none; border-radius:6px; color:${atkLeft > 0 ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${atkLeft > 0 ? 'not-allowed' : 'pointer'};">
                 ${atkLeft > 0 ? `대기중 (${atkLeft}분)` : '1,000 다이아'}
+            </button>
+        </div>
+        <!-- [추가] 피해 감소 버프 (1시간) -->
+        <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #539bf5; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:14px; font-weight:bold; color:#539bf5;">피해 감소 30% (1시간)</div>
+            <div style="font-size:12px; color:#8b949e;">몬스터에게 받는 최종 피해 30% 감소</div>
+            <button onclick="activateBuff('defBoost')" ${defLeft > 0 ? 'disabled' : ''} style="width:100%; padding:8px; background:${defLeft > 0 ? '#30363d' : '#539bf5'}; border:none; border-radius:6px; color:${defLeft > 0 ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${defLeft > 0 ? 'not-allowed' : 'pointer'};">
+                ${defLeft > 0 ? `대기중 (${defLeft}분)` : '2,000 다이아'}
             </button>
         </div>
     </div>
@@ -13825,10 +13905,13 @@ function awakenPet(petId) {
 
 // [추가] 버프 활성화 로직
 function activateBuff(type) {
-    if (idGame.diamond < 1000) return alert("다이아가 부족합니다 (1,000 필요)");
-    idGame.diamond -= 1000;
+    // 버프별 가격 및 시간 설정
+    let cost = (type === 'defBoost') ? 2000 : 1000;
+    let duration = (type === 'defBoost') ? (60 * 60 * 1000) : (30 * 60 * 1000); 
     
-    let duration = 30 * 60 * 1000; // 30분
+    if (idGame.diamond < cost) return alert(`다이아가 부족합니다 (${cost.toLocaleString()} 필요)`);
+    idGame.diamond -= cost;
+    
     let now = Date.now();
 
     if (type === 'goldBoost') {
@@ -13837,6 +13920,11 @@ function activateBuff(type) {
     } else if (type === 'atkBoost') {
         idGame.buffs.atkMultiplier = { active: true, endTime: now + duration };
         addGameLog("⚔️ 공격력 증가 버프 적용 (30분)", "#ff4d4d");
+    } else if (type === 'defBoost') {
+        // 기존 세이브 파일 호환을 위한 객체 초기화
+        if (!idGame.buffs.dmgReduction) idGame.buffs.dmgReduction = { active: false, endTime: 0 };
+        idGame.buffs.dmgReduction = { active: true, endTime: now + duration };
+        addGameLog("🛡️ 피해 감소 30% 버프 적용 (1시간)", "#539bf5");
     }
     
     updateUI();
