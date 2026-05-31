@@ -12639,6 +12639,16 @@ function updateUI() {
         teamAtkEl.innerHTML = `${atkText} <span style="color:#8b949e; font-size:12px; margin-left:15px; font-weight:normal;">| 팀 총 방어력: <b style="color:#2ea043;">${defText}</b></span>${dmgRedText}${specialStatsRow}`;
     }
     
+    // --- 여기서부터 실수로 지워졌던 UI 업데이트 복구 ---
+    const passiveUI = document.getElementById('ui-active-passives');
+    if (passiveUI) {
+        if (activePassives.length > 0) {
+            passiveUI.innerHTML = `<strong>적용 중인 패시브 (${activePassives.length}명) :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px;">${activePassives.join(' &nbsp;|&nbsp; ')}</div>`;
+        } else {
+            passiveUI.innerHTML = `<strong>적용 중인 패시브 :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px; color:#8b949e;">없음</div>`;
+        }
+    }
+    
     const manualBtn = document.querySelector('[onclick="manualFieldAttack(event)"]');
     if(manualBtn) {
         if(idGame.manualAtkCooldown > 0) {
