@@ -12643,7 +12643,7 @@ function updateUI() {
     const passiveUI = document.getElementById('ui-active-passives');
     if (passiveUI) {
         if (activePassives.length > 0) {
-            passiveUI.innerHTML = `<strong>적용 중인 패시브 (${activePassives.length}명) :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px;">${activePassives.join(' &nbsp;|&nbsp; ')}</div>`;
+            passiveUI.innerHTML = `<strong>적용 중인 패시브 (${activePassives.length}마리) :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px;">${activePassives.join(' &nbsp;|&nbsp; ')}</div>`;
         } else {
             passiveUI.innerHTML = `<strong>적용 중인 패시브 :</strong><div style="margin-top: 5px; line-height: 1.6; font-size: 11px; color:#8b949e;">없음</div>`;
         }
