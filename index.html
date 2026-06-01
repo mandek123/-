@@ -4114,7 +4114,18 @@ button[onclick="resetGame()"]:hover {
     </div> 
 </div>
 <!-- 만득이 키우기 끝 -->
-
+<!-- [추가] 주간 펫 만렙 달성 닉네임 강제 입력 모달 -->
+<div id="pet-max-level-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
+    <div style="background: #1e242b; padding: 30px; border-radius: 12px; border: 1px solid #539bf5; width: 320px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.6);">
+        <h3 style="color: #fff; margin-top: 0; margin-bottom: 10px; font-size: 20px;">🎉 만렙 달성!</h3>
+        <p style="color: #8b949e; font-size: 13px; margin-bottom: 20px; line-height: 1.5;">주간 펫 육성이 완료되었습니다.<br>명예의 전당에 등록할 닉네임을 입력해 주세요.</p>
+        
+        <input type="text" id="pet-ranking-nick-input" placeholder="닉네임 입력" style="width: 85%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: #fff; text-align: center; font-weight: bold; font-size: 15px; outline: none;">
+        
+        <button onclick="submitPetRankingModal()" style="width: 93%; padding: 12px; background: #2ea043; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s;">랭킹 등록하기</button>
+    </div>
+</div>
+<!-- [추가] 주간 펫 만렙 달성 닉네임 강제 입력 모달 끝 -->
 </div>
     <div class="footer">
         <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
@@ -5211,7 +5222,7 @@ const NOTICE_DATABASE = [
         id: 29,
         date: "26년 6월 1일",
         title: "26년 6월 1일 업데이트 공지사항입니다.",
-        summary: "1. 투기장 시즌 2 시작 및 랭킹 초기화 | 2. 투기장 및 만득이 키우기 시스템 개선",
+        summary: "1. 투기장 시즌 2 시작 및 랭킹 초기화 | 2. 투기장, 만득이 키우기 | 3. 주간 펫 시스템 개선",
         content: `
             <strong>1) 투기장 정규 시즌 2 시작 및 랭킹 초기화</strong>
             <span>- 6월 1일을 맞이하여 투기장 정규 시즌 2가 새롭게 시작됩니다.</span>
@@ -5226,6 +5237,9 @@ const NOTICE_DATABASE = [
             <span>- 다이아 상점에 신규 버프 '피해 감소 30% (1시간)' 항목이 추가되었습니다.</span>
             <span>- 전투 상단 UI의 기본 스탯, 특수 스탯, 활성화 버프(타이머) 표기가 가독성 좋게 분리 개편되었습니다.</span>
             <span>- 몬스터 공격력이 5,000을 초과하는 후반 고층 스테이지에서 '피해 감소(강철류)' 스탯에 비례한 퍼센트(%) 삭감 효율이 추가로 발동되도록 상향되었습니다.</span>
+
+            <strong>4) 주간 펫 육성 시스템 개선</strong>
+            <span>- 페트 최대 레벨(140) 달성 시 닉네임을 필수로 입력하는 팝업(모달) 창을 추가하여, 의도치 않은 익명 랭킹 등록을 방지하였습니다.</span>
         `
     },
 
@@ -6453,7 +6467,7 @@ function toggleEncyPetList(listId) {
     animateResults('exp-result-container');
 }
 
-        /* ==========================================================
+/* ==========================================================
     1. 명중률 계산기 (디스코드 봇 최신 로직 적용)
     ========================================================== */
 function calcAccuracy() {
@@ -6733,13 +6747,13 @@ let countIdentify = 0;
 let countEnchant = 0;
 let totalDiamonds = 0; 
 
-const PRICE_IDENTIFY_EQUIP = 24900;  
-const PRICE_IDENTIFY_ACC = 125000;   
+const PRICE_IDENTIFY_EQUIP = 25000;  
+const PRICE_IDENTIFY_ACC = 140000;   
 
 const PRICE_ENCHANT = {
-    "fire": 12000,  
-    "jade": 6000,  
-    "deep": 5500,
+    "fire": 15000,  
+    "jade": 12000,  
+    "deep": 11000,
     "hongyo": 900
 };
 
@@ -7238,9 +7252,11 @@ function renderWeeklyUI() {
 
     if (currentLv >= 140) {
         if(resetArea) resetArea.style.display = 'block';
-        if (localStorage.getItem('weeklyPetSubmitted') === 'false' && typeof submitToFirebase === 'function') {
+        
+        // [수정] 바로 DB로 전송하지 않고, 모달창을 띄워 유저의 입력을 기다립니다.
+        if (localStorage.getItem('weeklyPetSubmitted') === 'false') {
             localStorage.setItem('weeklyPetSubmitted', 'pending'); 
-            submitToFirebase(data.name, data.growth);
+            openPetRankingModal(data); 
         }
     } else {
         if(resetArea) resetArea.style.display = 'none';
@@ -7411,7 +7427,65 @@ function updateDOMText(id, newText) {
     if (el && el.innerText !== newText) el.innerText = newText;
 }
 
-setInterval(renderWeeklyUI, 1000);
+/* =======================================
+    [추가] 주간 펫 만렙 달성 닉네임 강제 입력 모달 로직
+   ======================================= */
+let pendingRankingData = null;
+
+// 1. 모달 열기 함수 (140레벨 달성 시 자동 호출됨)
+function openPetRankingModal(data) {
+    pendingRankingData = data; 
+    const modal = document.getElementById('pet-max-level-modal');
+    const input = document.getElementById('pet-ranking-nick-input');
+    
+    if (modal && input) {
+        modal.style.display = 'flex';
+        
+        // 편의성: 투기장 닉네임이 로컬 스토리지에 있다면 자동으로 입력창에 띄워줌
+        const savedNick = localStorage.getItem('arenaUserNick');
+        input.value = savedNick ? savedNick : '';
+        input.focus();
+
+        // 엔터키를 눌러도 등록되도록 이벤트 추가
+        input.onkeyup = function(e) {
+            if (e.key === 'Enter') submitPetRankingModal();
+        };
+    }
+}
+
+// 2. 랭킹 등록 버튼 클릭 시 실행될 함수
+function submitPetRankingModal() {
+    const input = document.getElementById('pet-ranking-nick-input');
+    const nick = input.value.trim();
+
+    // 빈칸 검사 (익명 방지 핵심 로직)
+    if (!nick) {
+        alert("닉네임을 반드시 입력해 주셔야 랭킹에 등록됩니다!");
+        input.focus();
+        return; 
+    }
+
+    if (!pendingRankingData) return;
+
+    // 투기장 닉네임 갱신 (유저 편의용)
+    localStorage.setItem('arenaUserNick', nick);
+
+    // Firebase 랭킹 등록 실행
+    db.ref(`weekly_rank/${pendingRankingData.name}`).push({
+        name: nick,
+        score: pendingRankingData.growth,
+        timestamp: Date.now()
+    }).then(() => {
+        // 등록 성공 시 상태 변경 및 모달 닫기
+        localStorage.setItem('weeklyPetSubmitted', 'true');
+        document.getElementById('pet-max-level-modal').style.display = 'none';
+        alert(`🎉 [${nick}] 님의 기록이 명예의 전당에 성공적으로 등록되었습니다!`);
+        renderWeeklyUI(); 
+    }).catch(e => {
+        alert("랭킹 등록 중 오류가 발생했습니다: " + e.message);
+        localStorage.setItem('weeklyPetSubmitted', 'false'); // 실패 시 다시 시도할 수 있게 롤백
+    });
+}
 
 /* ==========================================================
    👇👇👇 페트 초기화 시뮬레이션 관련 JavaScript 👇👇👇
