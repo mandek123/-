@@ -5211,12 +5211,21 @@ const NOTICE_DATABASE = [
         id: 29,
         date: "26년 6월 1일",
         title: "26년 6월 1일 업데이트 공지사항입니다.",
-        summary: "1. 투기장 시즌 2 시작 및 랭킹 초기화",
+        summary: "1. 투기장 시즌 2 시작 및 랭킹 초기화 | 2. 투기장 및 만득이 키우기 시스템 개선",
         content: `
             <strong>1) 투기장 정규 시즌 2 시작 및 랭킹 초기화</strong>
             <span>- 6월 1일을 맞이하여 투기장 정규 시즌 2가 새롭게 시작됩니다.</span>
             <span>- 이에 따라 랭킹이 초기화되었으며, 모든 유저의 투기장 점수가 1000점으로 일괄 리셋되었습니다.</span>
             <span>- 지난 5월(시즌 1)의 랭킹 기록은 투기장 하단의 '역대 시즌 랭킹 확인하기'를 통해 언제든 열람하실 수 있습니다.</span>
+            
+            <strong>2) 투기장 시스템 개선</strong>
+            <span>- 시즌 전환 시 과거 시즌 유저와 매칭되거나 과거 랭킹 점수가 오염되던 매칭 시스템을 수정하였습니다.</span>
+            <span>- 메인 화면 및 투기장의 진행 시즌 번호 표기가 매월 1일 자동으로 갱신되도록 개선되었습니다.</span>
+
+            <strong>3) 만득이 키우기 시스템 및 밸런스 개선</strong>
+            <span>- 다이아 상점에 신규 버프 '피해 감소 30% (1시간)' 항목이 추가되었습니다.</span>
+            <span>- 전투 상단 UI의 기본 스탯, 특수 스탯, 활성화 버프(타이머) 표기가 가독성 좋게 분리 개편되었습니다.</span>
+            <span>- 몬스터 공격력이 5,000을 초과하는 후반 고층 스테이지에서 '피해 감소(강철류)' 스탯에 비례한 퍼센트(%) 삭감 효율이 추가로 발동되도록 상향되었습니다.</span>
         `
     },
 
@@ -8511,9 +8520,33 @@ function loadArenaHistoryData() {
     const container = document.getElementById('arena-history-container');
     container.innerHTML = '<div style="text-align:center; color:#888;">데이터를 불러오는 중...</div>';
 
-    db.ref('arena_history').once('value', (snapshot) => {
-        const historyData = snapshot.val();
-        if (!historyData) {
+    const now = new Date();
+    const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
+
+    // 1. 역대 기록과 현재 유저 데이터를 동시에 가져옵니다.
+    Promise.all([
+        db.ref('arena_history').once('value'),
+        db.ref('arena_users').once('value')
+    ]).then(([historySnap, usersSnap]) => {
+        let historyData = historySnap.val() || {};
+        let usersData = usersSnap.val() || {};
+        
+        // 2. 미접속 유저(이전 시즌에 머물러 있는 유저)의 데이터를 강제로 역사(History)에 편입시킵니다.
+        Object.values(usersData).forEach(user => {
+            if (user.lastResetMonth && user.lastResetMonth !== currentMonthLabel) {
+                if (!historyData[user.lastResetMonth]) historyData[user.lastResetMonth] = {};
+                // 역사에 아직 저장되지 않았다면 화면 상에서만 임시로 합쳐줌
+                if (!historyData[user.lastResetMonth][user.nick]) {
+                    historyData[user.lastResetMonth][user.nick] = {
+                        nick: user.nick,
+                        score: user.score || 1000,
+                        petImg: (user.pets && user.pets[0]) ? user.pets[0].img : (user.pet ? user.pet.img : '')
+                    };
+                }
+            }
+        });
+
+        if (Object.keys(historyData).length === 0) {
             container.innerHTML = '<div style="text-align:center; color:#888;">역대 랭킹 데이터가 없습니다.</div>';
             return;
         }
@@ -8530,7 +8563,7 @@ function loadArenaHistoryData() {
             const usersObj = historyData[monthLabel];
             let users = Object.values(usersObj);
             users.sort((a, b) => b.score - a.score);
-            let top3 = users.slice(0, 3);
+            let top3 = users.slice(0, 3); // 1~3위만 노출
 
             html += `<div style="margin-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 10px;">
                         <div style="color: var(--royal-gold); font-weight: bold; margin-bottom: 8px;">시즌 ${seasonNum} (${monthLabel})</div>`;
@@ -8540,7 +8573,7 @@ function loadArenaHistoryData() {
                 html += `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; font-size:13px;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span>${medals[i]}</span>
+                        <span>${medals[i] || `${i+1}위`}</span>
                         <img src="${user.petImg}" style="width:20px; height:20px; border-radius:4px; background:#000;">
                         <span style="color:#fff;">${user.nick}</span>
                     </div>
@@ -8833,10 +8866,21 @@ function saveArenaInfo() {
 }
 
 function refreshUserList() {
-    db.ref('arena_users').orderByChild('score').on('value', (snapshot) => {
+    const now = new Date();
+    const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
+
+    db.ref('arena_users').on('value', (snapshot) => {
         let users = [];
-        snapshot.forEach(child => { users.push(child.val()); });
-        users.reverse(); 
+        snapshot.forEach(child => { 
+            let u = child.val();
+            // [핵심] 이번 시즌에 접속하여 리셋을 마친 유저만 현재 랭킹 리스트에 포함
+            if (u.lastResetMonth === currentMonthLabel) {
+                users.push(u); 
+            }
+        });
+        
+        // 점수 내림차순 수동 정렬
+        users.sort((a, b) => b.score - a.score);
 
         for(let i=0; i<3; i++) {
             const rankEl = document.getElementById(`rank-${i+1}`);
@@ -8860,11 +8904,15 @@ function refreshUserList() {
         }
 
         const myNick = localStorage.getItem('arenaUserNick');
-        users.forEach(user => {
-            if (user.nick === myNick) {
-                updateMyInfoDisplay(user);
-            }
+        let myUserData = null;
+        snapshot.forEach(child => {
+            let u = child.val();
+            if (u.nick === myNick) myUserData = u;
         });
+        // [버그 방지] 내 정보 초기화 업데이트는 필터링과 무관하게 무조건 실행
+        if (myUserData) {
+            updateMyInfoDisplay(myUserData);
+        }
     });
 }
 
@@ -8880,7 +8928,7 @@ function findRandomMatch() {
         let opponents = [];
         snapshot.forEach(child => {
             let user = child.val();
-            // 본인은 제외하고 리스트에 추가
+            // [수정] 시즌 필터링을 제거하고, 본인만 아니면 모두 매칭 후보에 포함합니다.
             if(user.nick !== myNick) {
                 opponents.push(user);
             }
@@ -8918,7 +8966,6 @@ function findRandomMatch() {
             }, 1000);
             
         } else {
-            // HTML이 누락되었을 경우를 대비해 기존처럼 바로 진입
             initBattle(false, selectedOpponent);
         }
     });
@@ -9613,6 +9660,7 @@ function updateMatchScore(isWin, winPts, losePts) {
     let matchCategory = battleState.matchType === 'user_pvp' ? 'user' : 'bot';
     let todayStr = new Date().toDateString();
 
+    // 1. 내 점수 업데이트 로직
     db.ref(`arena_users/${myNick}`).once('value', snap => {
         let data = snap.val();
         if(!data) return;
@@ -9636,14 +9684,28 @@ function updateMatchScore(isWin, winPts, losePts) {
         });
     });
 
+    // 2. 상대방 점수 업데이트 로직
     if(battleState.matchType === 'user_pvp' && battleState.oppNick) {
         const winner = isWin ? myNick : battleState.oppNick;
         const loser = isWin ? battleState.oppNick : myNick;
+        
+        // 경기 실황 로그는 정상적으로 남깁니다.
         logMatchResult(winner, loser, winPts, losePts);
 
         db.ref(`arena_users/${battleState.oppNick}`).once('value', snap => {
             let oppData = snap.val();
             if(!oppData) return;
+
+            const now = new Date();
+            const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
+
+            // [핵심] 상대방이 이번 달에 접속하여 갱신된 유저가 아니라면(과거 시즌 유저라면)
+            // 상대의 점수와 전적을 깎거나 올리지 않고 여기서 함수를 즉시 종료(점수 고정)합니다.
+            if (oppData.lastResetMonth !== currentMonthLabel) {
+                return; 
+            }
+
+            // 이번 시즌 유저인 경우에만 상대방 점수 변동 반영
             let record = oppData.record || { user: {win:0, lose:0} };
             if (!isWin) record.user.win++; else record.user.lose++;
             db.ref(`arena_users/${battleState.oppNick}`).update({
@@ -9669,22 +9731,29 @@ function loadHomeArenaRanking() {
     const currentMonthLabel = `${now.getFullYear()}-${now.getMonth() + 1}`;
     const currentSeason = getSeasonNumber(currentMonthLabel);
 
-    // [추가] 매월 HTML을 직접 수정할 필요 없이, 접속 시 자동으로 시즌 숫자를 업데이트!
     const homeSeasonEl = document.getElementById('home-arena-season-text');
     if (homeSeasonEl) homeSeasonEl.innerText = `시즌 ${currentSeason}`;
     
     const pageTitleEl = document.getElementById('arena-page-title');
     if (pageTitleEl) pageTitleEl.innerHTML = `🏆 월간 투기장 명예의 전당 (시즌 ${currentSeason})`;
 
-    db.ref('arena_users').orderByChild('score').limitToLast(3).on('value', (snapshot) => {
+    db.ref('arena_users').on('value', (snapshot) => {
         let users = [];
-        snapshot.forEach(child => { users.push(child.val()); });
-        users.reverse(); 
+        snapshot.forEach(child => { 
+            let u = child.val();
+            // [핵심] 이번 시즌에 접속하여 리셋을 마친 유저만 메인 랭킹에 포함
+            if (u.lastResetMonth === currentMonthLabel) {
+                users.push(u);
+            }
+        });
+        
+        users.sort((a, b) => b.score - a.score);
+        let top3 = users.slice(0, 3);
 
         let html = ""; 
         const medals = ["🥇", "🥈", "🥉"];
         
-        users.forEach((user, i) => {
+        top3.forEach((user, i) => {
             if(user) {
                 const petImg = (user.pets && user.pets[0]) ? user.pets[0].img : '';
                 html += `
@@ -9698,6 +9767,10 @@ function loadHomeArenaRanking() {
                 </div>`;
             }
         });
+        
+        if (html === "") {
+            html = `<div style="text-align:center; color:#888; font-size:12px; padding:10px;">아직 시즌 ${currentSeason}에 등록된 랭커가 없습니다.</div>`;
+        }
         board.innerHTML = html;
     });
 }
@@ -12279,11 +12352,27 @@ function gameLoop(time) {
                     if (Math.random() < teamDodgeChance) {
                         showDmgText("회피!", target.x, target.y, 'dmg-dodge');
                     } else {
-                        let finalDamage = Math.floor(mon.atk - (teamTotalDef * 0.1) - totalDmgRed);
+                        let baseMonAtk = mon.atk - (teamTotalDef * 0.1);
+                        let finalDamage = 0;
+
+                        // [강철류 후반 스테이지 버프] 몬스터 공격력이 5000 초과 시 % 방어 효율 추가 발동
+                        if (mon.atk > 5000 && totalDmgRed > 0) {
+                            // 피해 감소 스탯 10당 1% (0.01)의 몬스터 데미지 퍼센트 삭감 비율 획득 (최대 50% 캡)
+                            // 예: totalDmgRed가 200 이면 0.2 (20%) 추가 감소
+                            let bonusPct = Math.min(0.50, totalDmgRed / 1000); 
+                            let bonusReduction = mon.atk * bonusPct;
+                            
+                            finalDamage = baseMonAtk - totalDmgRed - bonusReduction;
+                        } else {
+                            // 5000 이하일 때는 기존처럼 고정 수치만 감소
+                            finalDamage = baseMonAtk - totalDmgRed;
+                        }
+
+                        finalDamage = Math.floor(finalDamage);
                         
-                        // [추가] 피해 감소 버프 30% 적용
+                        // [상점 버프] 피해 감소 버프 30% 적용 (제일 마지막에 곱연산)
                         if (idGame.buffs && idGame.buffs.dmgReduction && idGame.buffs.dmgReduction.active && Date.now() < idGame.buffs.dmgReduction.endTime) {
-                            finalDamage = Math.floor(finalDamage * 0.7); // 최종 데미지 30% 삭감
+                            finalDamage = Math.floor(finalDamage * 0.7); 
                         }
 
                         // [핵심] 최종 데미지가 NaN이거나 1보다 작으면 무조건 1로 고정
