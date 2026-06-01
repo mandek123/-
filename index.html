@@ -4075,12 +4075,12 @@ button[onclick="resetGame()"]:hover {
                 <button class="idle-tab-btn" onclick="switchIdleTab('warehouse')">📦 창고 (페트 관리)</button>
             </div>
 
-            <div id="tab-battle" class="idle-tab-content">
+           <div id="tab-battle" class="idle-tab-content">
                 <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #30363d;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <div style="font-size: 13px; color: #8b949e;">
                             <div style="margin-bottom: 5px;">출전 중인 페트: <span id="ui-field-count" style="color: #fff; font-weight: bold;">1</span> / 5</div>
-                            <div>팀 총 공격력: <span id="ui-team-atk" style="color: #539bf5; font-weight:bold;">0</span></div>
+                            <div id="ui-team-atk"></div>
                         </div>
                         <div style="display: flex; gap: 10px;">
                             <button onclick="openDungeonMenu()" style="padding: 10px 20px; background: #8a2be2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">⚔️ 던전 입장</button>
@@ -12796,11 +12796,17 @@ function updateUI() {
         if (totalBonusAtk > 0) atkText += ` <span style="color:#ffcc00; font-size:12px;">(+${totalBonusAtk.toLocaleString()})</span>`;
         else if (totalBonusAtk < 0) atkText += ` <span style="color:#ff4d4d; font-size:12px;">(${totalBonusAtk.toLocaleString()})</span>`;
 
-        // 2. 방어력 & 피해 감소 텍스트 구성
+        // 2. 방어력 & 피해 감소 텍스트 구성 (퍼센트 표기 추가)
         let defText = `<b style="color:#2ea043;">${totalTeamDef.toLocaleString()}</b>`;
         if (totalBonusDef > 0) defText += ` <span style="color:#ffcc00; font-size:12px;">(+${totalBonusDef.toLocaleString()})</span>`;
         else if (totalBonusDef < 0) defText += ` <span style="color:#ff4d4d; font-size:12px;">(${totalBonusDef.toLocaleString()})</span>`;
-        let dmgRedText = totalDmgRed > 0 ? `<b style="color:#a5d6ff;">-${totalDmgRed.toLocaleString()}</b>` : `<b style="color:#8b949e;">0</b>`;
+        
+        // [수정] 피해 감소가 있을 경우 추가 퍼센트(%) 효율을 계산하여 화면에 표시
+        let dmgRedText = `<b style="color:#8b949e;">0</b>`;
+        if (totalDmgRed > 0) {
+            let bonusPct = Math.min(50, (totalDmgRed / 1000) * 100).toFixed(1); // 최대 50% 상한
+            dmgRedText = `<b style="color:#a5d6ff;">-${totalDmgRed.toLocaleString()}</b> <span style="color:#79b8ff; font-size:11px; font-weight:bold;">(고층 몹 피해 -${bonusPct}%)</span>`;
+        }
 
         // 3. 실시간 버프 목록 UI 박스화
         let activeBuffsHtml = [];
@@ -12860,7 +12866,7 @@ function updateUI() {
             ? `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${activeBuffsHtml.join('')}</div>`
             : '';
 
-        // 5. 최종 HTML 조립
+        // 5. 최종 HTML 조립 (글자 중복 제거)
         teamAtkEl.innerHTML = `
             <div style="font-size:13px; color:#c9d1d9;">
                 팀 총 공격력: ${atkText} <span style="color:#555; margin:0 10px;">|</span> 
