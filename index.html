@@ -2833,6 +2833,9 @@ button[onclick="resetGame()"]:hover {
                     <option value="왜곡">왜곡</option>
                     <option value="황혼의 날개">황혼의 날개</option>
                     <option value="칠흑의 방벽">칠흑의 방벽</option>
+                    <option value="불멸의 계시">불멸의 계시</option>
+                    <option value="기동 코어">기동 코어</option>
+                    <option value="용의 분노">용의 분노</option>
 
                 </select>
                 
@@ -5314,7 +5317,7 @@ const NOTICE_DATABASE = [
         id: 30,
         date: "26년 6월 2일",
         title: "26년 6월 2일 업데이트 공지사항입니다.",
-        summary: "1. 신규 페트 89마리 추가 | 2. 신규 패시브 3종 추가",
+        summary: "1. 신규 페트 추가 | 2. 신규 패시브 3종 추가 | 3. 만키 업데이트",
         content: `
             <strong>1) 신규 페트 추가</strong>
             <span>- 3차 복권 페트, 합성 페트, 진(眞) 및 환(還) 페트가 89마리 추가되었습니다.</span>
@@ -5322,6 +5325,10 @@ const NOTICE_DATABASE = [
             <strong>2) 신규 패시브 항목 추가</strong>
             <span>- 신규 레이드 패시브 3종이 추가되었습니다.</span>
             <span>- 신규 추가 패시브: '불멸의 계시', '기동 코어', '용의 분노'</span>
+            
+            <strong>3) 만득이 키우기 업데이트</strong>
+            <span>- 신규 등록 페트를 만득이 키우기에서 활용할 수 있도록 추가하였습니다.</span>
+            <span>- 신규 패시브 3종을 해당 게임의 방향과 밸런스에 맞게 수정하여 적용하였습니다.</span>
         `
     },
 
@@ -12448,13 +12455,18 @@ function gameLoop(time) {
                     // 공격력 버프 적용
                     let atkBuffMult = (idGame.buffs.atkMultiplier.active && Date.now() < idGame.buffs.atkMultiplier.endTime) ? 1.5 : 1.0;
                     
+                    // [변경] 기동 코어 5초 버프가 활성화 중일 때 공격력 1.05배 추가 적용
+                    if (idGame.buffs && idGame.buffs.maneuverCoreBuff && idGame.buffs.maneuverCoreBuff.active && Date.now() < idGame.buffs.maneuverCoreBuff.endTime) {
+                        atkBuffMult *= 1.05;
+                    }
+
                     let baseDmg = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 6 * (pet.growthBonus || 1)));
 
                     // [핵심 해결] 계산된 수치 중 하나라도 NaN일 경우 강제 보정하여 오염 원천 차단
                     if (isNaN(baseDmg)) baseDmg = 10;
                     if (isNaN(bonus.atkMult)) bonus.atkMult = 1.0;
 
-                    let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult); 
+                    let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult);
                     
                     // 데미지가 여전히 비정상적이라면 최소 데미지 1로 고정
                     if (isNaN(dmg) || dmg < 1) dmg = 1;
@@ -12564,10 +12576,35 @@ function gameLoop(time) {
 
                         idGame.teamCurHp -= finalDamage;
                         showDmgText(finalDamage, target.x, target.y, 'dmg-ally');
+                        // [신규 패시브] 기동 코어: 체력 30% 미만 시 5초간 공격력 5% 증가 버프 발동
+                        let hasManeuverCore = idGame.fieldPets.some(p => p.passiveName === '기동 코어');
+                        if (hasManeuverCore && (idGame.teamCurHp / idGame.teamMaxHp) < 0.3) {
+                            if (!idGame.cooldowns) idGame.cooldowns = {};
+                            if (!idGame.cooldowns.maneuverCore || Date.now() > idGame.cooldowns.maneuverCore) {
+                                idGame.cooldowns.maneuverCore = Date.now() + (60 * 1000); 
+                                // 5초(5000ms) 짜리 버프 활성화
+                                if (!idGame.buffs.maneuverCoreBuff) idGame.buffs.maneuverCoreBuff = {};
+                                idGame.buffs.maneuverCoreBuff = { active: true, endTime: Date.now() + 5000 };
+                                addGameLog("🔥 [기동 코어] 발동! 5초 동안 팀 전체 공격력이 5% 증폭됩니다. (쿨타임 60초)", "#ff4d4d");
+                            }
+                        }
 
+                        // [신규 패시브] 불멸의 계시: 사망 위기 시 부활 (쿨타임 60초)
                         if (idGame.teamCurHp <= 0) {
-                            handleGameOver();
-                            break; 
+                            let hasImmortal = idGame.fieldPets.some(p => p.passiveName === '불멸의 계시');
+                            
+                            if (hasImmortal && (!idGame.cooldowns || !idGame.cooldowns.immortal || Date.now() > idGame.cooldowns.immortal)) {
+                                if (!idGame.cooldowns) idGame.cooldowns = {};
+                                idGame.cooldowns.immortal = Date.now() + (60 * 1000); 
+                                idGame.teamCurHp = Math.floor(idGame.teamMaxHp * 0.3); 
+                                
+                                // 로그 메시지에 쿨타임 문구 추가
+                                addGameLog("✨ [불멸의 계시] 발동! 죽음의 위기에서 30%의 체력으로 부활했습니다. (쿨타임 60초)", "#ffcc00");
+                            } else {
+                                idGame.teamCurHp = 0;
+                                handleGameOver();
+                                break; 
+                            }
                         }
                     }
                 }
@@ -12898,7 +12935,16 @@ function updateUI() {
 
     let totalTeamAtk = totalBaseAtk + totalBonusAtk;
     let totalTeamDef = totalBaseDef + totalBonusDef;
-
+// [추가] 기동 코어 5초 버프 UI 즉각 반영 (팀 총 공격력의 5%만큼 보너스에 합산)
+    if (idGame.buffs && idGame.buffs.maneuverCoreBuff && idGame.buffs.maneuverCoreBuff.active) {
+        if (Date.now() < idGame.buffs.maneuverCoreBuff.endTime) {
+            let coreBonus = Math.floor(totalTeamAtk * 0.05); 
+            totalBonusAtk += coreBonus;
+            totalTeamAtk += coreBonus;
+        } else {
+            idGame.buffs.maneuverCoreBuff.active = false;
+        }
+    }
     const teamAtkEl = document.getElementById('ui-team-atk');
     if(teamAtkEl) {
         // 1. 공격력 텍스트 구성
@@ -12959,7 +13005,12 @@ function updateUI() {
                 idGame.buffs.goldMultiplier.active = false;
             }
         }
-
+// [추가] 기동 코어 발동 뱃지 (실시간 타이머)
+        if (idGame.buffs && idGame.buffs.maneuverCoreBuff && idGame.buffs.maneuverCoreBuff.active && Date.now() < idGame.buffs.maneuverCoreBuff.endTime) {
+            let remain = idGame.buffs.maneuverCoreBuff.endTime - Date.now();
+            let s = Math.ceil(remain / 1000);
+            activeBuffsHtml.push(`<span style="display:inline-block; padding:3px 8px; background:rgba(255,77,77,0.15); border:1px solid rgba(255,77,77,0.5); border-radius:6px; color:#ff6b6b; font-size:11px; font-weight:bold;">🔥 기동 코어 발동중 (+5%) [${s}초]</span>`);
+        }
         // 4. 특수 스탯 구성
         let specialStatsHtml = [];
         if (maxCrit > 0) specialStatsHtml.push(`치명 <span style="color:#ffcc00;">${Math.round(maxCrit * 100)}%</span>`);
@@ -13798,6 +13849,18 @@ function getDetailedPassiveBonus(pet) {
         } else if (isFlatStat) {
             // [수정] 고정 수치(Flat) 적용 (음수값은 절대값으로 변환하여 더함) + 60스테이지 이상 배율 적용
             bonus.dmgRed += (Math.abs(val) * lateGameBuff); 
+        }
+
+        // [추가] 신규 패시브 3종 스탯 적용
+        if (db.name === '불멸의 계시') {
+            bonus.atkMult += val; 
+        }
+        if (db.name === '기동 코어') {
+            bonus.atkMult += val;
+        }
+        if (db.name === '용의 분노') {
+            bonus.atkMult += val;
+            bonus.hit += 0.03; 
         }
 
         if (db.name === '심판') bonus.crit += val;
