@@ -5314,6 +5314,23 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 31,
+        date: "26년 6월 3일",
+        title: "26년 6월 3일 업데이트 공지사항입니다.",
+        summary: "1. 투기장 시스템 개편 | 2. 만득이 키우기 고층 밸런스 패치",
+        content: `
+            <strong>1) 투기장 시스템 전면 개편</strong>
+            <span>- 전투 방식이 수동 조작에서 '완전 자동(AI vs AI) 전투'로 변경되었습니다.</span>
+            <span>- 전투 관전을 위한 배속(1x, 2x) 및 스킵(결과 바로보기) UI가 추가되었습니다.</span>
+            <span>- AI의 일점사를 완화하고, 변수(무작위 타겟팅 등)를 부여하여 전투 밸런스를 조정하였습니다.</span>
+            
+            <strong>2) 만득이 키우기 밸런스 패치</strong>
+            <span>- 고층 스테이지의 몬스터 체력에 맞춰 아군 페트 능력치 증가 공식을 상향했습니다.</span>
+            <span>- 페트 레벨업 시 공격력과 방어력에 레벨당 5%의 복리(지수) 증폭이 적용되도록 개선되었습니다.</span>
+        `
+    },
+
+    {
         id: 30,
         date: "26년 6월 2일",
         title: "26년 6월 2일 업데이트 공지사항입니다.",
@@ -9288,12 +9305,13 @@ function searchArenaPet() {
 }
 
 // ==========================================
-//    배틀 엔진 (자연스러운 밸런스 조정 버전)
+//    배틀 엔진 (눈치싸움 AI & 배속/스킵 기능 탑재)
 // ==========================================
 let battleState = {
     turn: 1, phase: 'IDLE', activeSelector: null,
     units: {}, actions: [], matchType: '', oppNick: '', isGameOver: false,
-    myAliveQueue: [], currentActorIndex: 0
+    myAliveQueue: [], currentActorIndex: 0,
+    speed: 1, skip: false // [추가] 배속 및 스킵 상태 변수
 };
 
 function getAttrBonus(atkAttr, defAttr) {
@@ -9324,6 +9342,49 @@ function renderArenaUnitLayout(uId, unit) {
         </div>
     `;
 }
+
+// [추가] 배속과 스킵을 지원하는 커스텀 딜레이 함수
+const delay = ms => new Promise(res => {
+    if (battleState.skip) return setTimeout(res, 0); // 스킵 시 프레임만 넘기고 즉시 실행
+    setTimeout(res, ms / (battleState.speed || 1));
+});
+
+// [추가] 배속 및 스킵 버튼 UI 생성 함수
+function createSpeedControlUI() {
+    let panel = document.getElementById('auto-battle-speed-panel');
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'auto-battle-speed-panel';
+        panel.style.cssText = "position:absolute; top:15px; right:15px; display:flex; gap:8px; z-index:10000;";
+        panel.innerHTML = `
+            <button onclick="setBattleSpeed(1)" id="btn-spd-1" style="padding:6px 12px; background:#539bf5; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.5);">▶ 1x</button>
+            <button onclick="setBattleSpeed(2)" id="btn-spd-2" style="padding:6px 12px; background:#21262d; color:#fff; border:1px solid #30363d; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.5);">▶▶ 2x</button>
+            <button onclick="skipAutoBattle()" id="btn-spd-skip" style="padding:6px 12px; background:#dc3545; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.5);">⏭️ 스킵</button>
+        `;
+        document.getElementById('battle-arena-modal').appendChild(panel);
+    } else {
+        panel.style.display = 'flex';
+    }
+}
+
+// [추가] 버튼 클릭 이벤트 전역 함수
+window.setBattleSpeed = function(spd) {
+    battleState.speed = spd;
+    battleState.skip = false;
+    const btn1 = document.getElementById('btn-spd-1');
+    const btn2 = document.getElementById('btn-spd-2');
+    if(btn1) btn1.style.background = spd === 1 ? '#539bf5' : '#21262d';
+    if(btn2) btn2.style.background = spd === 2 ? '#539bf5' : '#21262d';
+};
+
+window.skipAutoBattle = function() {
+    battleState.skip = true;
+    const indicator = document.getElementById('battle-turn-indicator');
+    if(indicator) indicator.innerHTML = `<span style="color:#ffcc00; font-weight:bold;">⚡ 전투를 빠르게 마무리하는 중...</span>`;
+};
+// ==========================================
+//    전투 초기화 및 UI 제어 (누락된 부분 복구)
+// ==========================================
 
 async function initBattle(isBot, oppData = null) {
     if(arenaSelectedPets.filter(p=>p!==null).length === 0) return alert("전투에 참가할 펫이 없습니다. 최소 1마리 이상 설정하세요.");
@@ -9415,8 +9476,13 @@ async function initBattle(isBot, oppData = null) {
     document.getElementById('battle-log-box').innerHTML = "";
     addLog(`전투가 시작되었습니다! VS ${oppChar.name}`);
     document.getElementById('battle-arena-modal').style.display = 'flex';
-    document.getElementById('battle-control-panel').style.display = 'block'; 
-    document.getElementById('btn-close-battle').style.display = 'none'; 
+    
+    // 자동전투이므로 기존 수동 컨트롤 패널은 숨깁니다 (스킵 버튼 패널로 교체됨)
+    const controlPanel = document.getElementById('battle-control-panel');
+    if(controlPanel) controlPanel.style.display = 'none'; 
+    const closeBtn = document.getElementById('btn-close-battle');
+    if(closeBtn) closeBtn.style.display = 'none'; 
+    
     startTurnPhase();
 }
 
@@ -9457,11 +9523,8 @@ function showFloatingDmg(targetId, dmgText, type) {
     box.appendChild(div);
     setTimeout(() => div.remove(), 2500);
 }
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
 // ==========================================
-//  고도화된 지능형 AI 결정 엔진
+//  고도화된 지능형 AI 결정 엔진 (예측형)
 // ==========================================
 function getSmartAIAction(unit, allyIds, enemyIds) {
     let allies = allyIds.map(id => battleState.units[id]);
@@ -9471,29 +9534,34 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     
     let act = { unitId: unit.id, type: 'attack', target: null };
     
-    // 1. 유닛별 독립적인 변칙 타겟팅
-    let bestTarget = enemies[0];
-    let maxScore = -9999;
-    
-    enemies.forEach(enemy => {
-        let score = 0;
-        score += (1 - (enemy.hp / enemy.maxHp)) * 100;
-        score += (enemy.atk * 0.15);
+    // [밸런스 패치] 20% 확률로 AI가 이성적인 판단을 하지 않고 무작위 대상을 공격합니다. (숨통 트이기)
+    if (Math.random() < 0.20) {
+        let randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+        act.target = randomEnemy.id;
+    } else {
+        // 이성적인 타겟팅 (일점사 로직 약간 완화)
+        let bestTarget = enemies[0];
+        let maxScore = -9999;
         
-        let attrMod = getAttrBonus(unit.attr, enemy.attr);
-        if (attrMod > 1.0) score += 70;
-        else if (attrMod < 1.0) score -= 30;
-        
-        score += Math.random() * 60;
-        
-        if (score > maxScore) {
-            maxScore = score;
-            bestTarget = enemy;
-        }
-    });
-    act.target = bestTarget.id;
+        enemies.forEach(enemy => {
+            let score = 0;
+            score += (1 - (enemy.hp / enemy.maxHp)) * 60; // 체력 비례 점수 비중 축소 (기존 100 -> 60)
+            score += (enemy.atk * 0.1); // 공격력 위협도 비중 축소
+            
+            let attrMod = getAttrBonus(unit.attr, enemy.attr);
+            if (attrMod > 1.0) score += 40; // 상성 우위 점수 축소
+            else if (attrMod < 1.0) score -= 20;
+            
+            score += Math.random() * 80; // 무작위성 증가 (예측 불가능한 전투 양상 유도)
+            
+            if (score > maxScore) {
+                maxScore = score;
+                bestTarget = enemy;
+            }
+        });
+        act.target = bestTarget.id;
+    }
 
-    // 2. 생존 및 스킬 선택 로직
     let hpRatio = unit.hp / unit.maxHp;
     
     if (hpRatio < 0.25 && Math.random() < 0.5) {
@@ -9503,28 +9571,18 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     }
 
     if (unit.type === 'pet') {
-        // [신규] 적(유저) 캐릭터가 이번 턴에 방어(guard)를 선택했는지 확인
-        let isEnemyGuarding = false;
-        if (charEnemy && !charEnemy.isDead) {
-            isEnemyGuarding = battleState.actions.some(userAct => 
-                userAct.unitId === charEnemy.id && userAct.type === 'guard'
-            );
-        }
+        let enemyCharHpRatio = charEnemy ? (charEnemy.hp / charEnemy.maxHp) : 1;
+        let guessEnemyGuarding = (enemyCharHpRatio < 0.35 && Math.random() < 0.5); // 가드 예측 확률 하향 (60% -> 50%)
 
-        // [신규] 유저가 방어 중이라면 가드 브레이크 로직 작동
-        if (isEnemyGuarding) {
+        if (guessEnemyGuarding) {
             let aliveAllyPets = allies.filter(u => u.type === 'pet' && !u.isDead);
             if (aliveAllyPets.length > 0) {
-                // 공격력이 가장 높은 페트 도출
                 let highestAtkPet = aliveAllyPets.reduce((max, p) => p.atk > max.atk ? p : max, aliveAllyPets[0]);
-
                 if (unit.id === highestAtkPet.id) {
-                    // 1. 공격력이 제일 강한 펫은 무조건 가드브레이크
                     act.type = 'guardbreak';
                     act.target = charEnemy.id; 
                     return act;
-                } else if (Math.random() < 0.4) {
-                    // 2. 나머지 펫들은 40% 확률로 가드브레이크
+                } else if (Math.random() < 0.3) {
                     act.type = 'guardbreak';
                     act.target = charEnemy.id;
                     return act;
@@ -9532,26 +9590,20 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
             }
         }
 
-        // AI의 캐릭터를 타겟으로 지정하여 공격하려는지 확인
-        let isMasterTargeted = false;
-        if (charAlly && !charAlly.isDead) {
-            isMasterTargeted = battleState.actions.some(userAct => 
-                userAct.target === charAlly.id && 
-                (userAct.type === 'attack' || userAct.type === 'skill_back' || userAct.type === 'guardbreak')
-            );
-        }
+        let masterHpRatio = charAlly ? (charAlly.hp / charAlly.maxHp) : 1;
+        // 충견 발동 빈도 살짝 하향 (너무 철벽을 치지 않도록)
+        let needProtection = (masterHpRatio < 0.45 && Math.random() < 0.60) || (Math.random() < 0.10);
 
-        // 주인이 공격 타겟이 되었다면 90% 확률로 충견 발동
-        if (isMasterTargeted && Math.random() < 0.9) {
+        if (needProtection) {
             act.type = 'skill_dog';
-            act.target = bestTarget.id; 
+            act.target = act.target; // 이미 정해진 타겟으로 충견 돌진
             return act;
         }
         
         let rand = Math.random();
-        if (rand < 0.3 && hpRatio > 0.4) {
+        if (rand < 0.25 && hpRatio > 0.4) {
             act.type = 'skill_back'; 
-        } else if (rand < 0.55 && !isEnemyGuarding) {
+        } else if (rand < 0.45 && !guessEnemyGuarding) {
             act.type = 'guardbreak'; 
         }
     }
@@ -9560,92 +9612,96 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
 }
 
 function startTurnPhase() {
-    if(checkWinCondition()) return;
+    if(checkWinCondition()) {
+        const controlPanel = document.getElementById('battle-control-panel');
+        if(controlPanel) controlPanel.style.display = 'none'; 
+        return;
+    }
+
+    if (battleState.turn === 1) {
+        battleState.speed = 1;
+        battleState.skip = false;
+    }
+
     Object.values(battleState.units).forEach(u => { u.isGuard = false; });
     battleState.actions = [];
     
-    const ALL_MY_IDS = ['my-char', 'my-pet-0', 'my-pet-1', 'my-pet-2', 'my-pet-3', 'my-pet-4'];
-    battleState.myAliveQueue = ALL_MY_IDS.filter(id => battleState.units[id] && !battleState.units[id].isDead);
-    battleState.currentActorIndex = 0;
+    document.getElementById('battle-turn-indicator').innerText = `[ ${battleState.turn} 턴 ] 자동 전투 진행 중...`;
     
-    document.getElementById('battle-control-panel').style.display = 'block'; 
-    updateControlPanelForCurrentActor();
-}
+    const controlPanel = document.getElementById('battle-control-panel');
+    if (controlPanel) {
+        controlPanel.style.display = 'block'; 
+        
+        // CSS 애니메이션을 위한 style 태그 주입 (중복 생성 방지)
+        if (!document.getElementById('arena-btn-styles')) {
+            const style = document.createElement('style');
+            style.id = 'arena-btn-styles';
+            style.innerHTML = `
+                .arena-spd-btn {
+                    padding: 8px 20px; font-size: 13px; font-weight: 800; color: #8b949e; 
+                    background: #161b22; border: 1px solid #30363d; border-radius: 30px; 
+                    cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
+                }
+                .arena-spd-btn:hover { background: #1f242c; transform: translateY(-2px); }
+                .arena-spd-btn.active-spd {
+                    color: #fff; border: 1px solid #d4af37;
+                    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+                    box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+                }
+                .arena-skip-btn {
+                    padding: 8px 24px; font-size: 13px; font-weight: 800; color: #fff;
+                    background: linear-gradient(135deg, #d29922, #fca311); border: none; border-radius: 30px;
+                    cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(252, 163, 17, 0.4);
+                    display: flex; align-items: center; gap: 6px;
+                }
+                .arena-skip-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(252, 163, 17, 0.6); color: #fff; }
+            `;
+            document.head.appendChild(style);
+        }
 
-function updateControlPanelForCurrentActor() {
-    document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('active-actor', 'targetable'));
-
-    if (battleState.currentActorIndex >= battleState.myAliveQueue.length) {
-        executeTurn(); 
-        return;
+        controlPanel.innerHTML = `
+            <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-top:15px; padding:15px; background:rgba(13, 17, 23, 0.6); border-radius:15px; border:1px solid rgba(255,255,255,0.05); backdrop-filter:blur(5px);">
+                <div style="color:#d4af37; font-size:11px; font-weight:900; letter-spacing:1px; margin-right:5px;"><i class="fas fa-tachometer-alt"></i> SPEED</div>
+                <button onclick="setBattleSpeed(1)" id="btn-spd-1" class="arena-spd-btn ${battleState.speed === 1 ? 'active-spd' : ''}">
+                    ▶ 1배속
+                </button>
+                <button onclick="setBattleSpeed(2)" id="btn-spd-2" class="arena-spd-btn ${battleState.speed === 2 ? 'active-spd' : ''}">
+                    ▶▶ 2배속
+                </button>
+                <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
+                <button onclick="skipAutoBattle()" id="btn-spd-skip" class="arena-skip-btn">
+                    ⏭️ 결과 바로보기
+                </button>
+            </div>
+        `;
     }
     
-    let activeUnitId = battleState.myAliveQueue[battleState.currentActorIndex];
-    let unit = battleState.units[activeUnitId];
+    // 버튼 클릭 시 디자인 상태 즉각 반영
+    window.setBattleSpeed = function(spd) {
+        battleState.speed = spd;
+        battleState.skip = false;
+        const btn1 = document.getElementById('btn-spd-1');
+        const btn2 = document.getElementById('btn-spd-2');
+        if(btn1) { btn1.className = 'arena-spd-btn' + (spd === 1 ? ' active-spd' : ''); }
+        if(btn2) { btn2.className = 'arena-spd-btn' + (spd === 2 ? ' active-spd' : ''); }
+    };
     
-    const activeBox = document.getElementById(`unit-${activeUnitId}`);
-    if (activeBox) activeBox.classList.add('active-actor');
-
-    document.getElementById('battle-turn-indicator').innerText = `[ ${battleState.turn} 턴 ] ${unit.name}의 행동을 선택하세요.`;
-    document.getElementById('control-status').innerHTML = `<span style="color:#ffcc00; font-weight:bold;">${unit.name}</span> 행동 대기중...`;
-    
-    let isPet = activeUnitId.includes('pet');
-    document.getElementById('btn-skill-back').style.display = isPet ? 'inline-block' : 'none';
-    document.getElementById('btn-skill-dog').style.display = isPet ? 'inline-block' : 'none';
-    let btnGB = document.getElementById('btn-skill-gb');
-    if(btnGB) btnGB.style.display = isPet ? 'inline-block' : 'none';
-}
-
-function setPlayerAction(actionType) {
-    let activeUnitId = battleState.myAliveQueue[battleState.currentActorIndex];
-    if(!activeUnitId || battleState.units[activeUnitId].isDead) return;
-    
-    document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('targetable'));
-
-    if(actionType === 'guard') {
-        battleState.actions.push({ unitId: activeUnitId, type: 'guard', target: activeUnitId });
-        battleState.currentActorIndex++;
-        updateControlPanelForCurrentActor(); 
-    } else {
-        battleState.activeSelector = { unitId: activeUnitId, type: actionType };
-        document.getElementById('control-status').innerHTML = `<b style="color:#ff4d4d;">[대상 선택]</b> 공격할 적 유닛을 클릭하세요!`;
-
-        Object.keys(battleState.units).forEach(id => {
-            if (id.startsWith('opp-') && !battleState.units[id].isDead) {
-                const targetBox = document.getElementById(`unit-${id}`);
-                if (targetBox) targetBox.classList.add('targetable');
-            }
-        });
-    }
-}
-
-function selectTarget(targetId) {
-    if(!battleState.activeSelector) return;
-    if(!battleState.units[targetId] || battleState.units[targetId].isDead) return alert("이미 쓰러진 대상입니다.");
-    if(battleState.units[targetId].team === 'my') return alert("적을 선택하세요!");
-    
-    battleState.actions.push({ unitId: battleState.activeSelector.unitId, type: battleState.activeSelector.type, target: targetId });
-    battleState.activeSelector = null;
-    
-    document.querySelectorAll('.battle-unit-box').forEach(el => el.classList.remove('targetable'));
-    
-    battleState.currentActorIndex++;
-    updateControlPanelForCurrentActor(); 
+    setTimeout(executeTurn, battleState.skip ? 0 : 1500 / battleState.speed);
 }
 
 async function executeTurn() {
     battleState.phase = 'ANIMATION';
-    document.getElementById('control-status').innerText = "전투 진행 중...";
     
     let aliveMy = Object.keys(battleState.units).filter(id => id.startsWith('my-') && !battleState.units[id].isDead);
     let aliveOpp = Object.keys(battleState.units).filter(id => id.startsWith('opp-') && !battleState.units[id].isDead);
     
-    // 상대방(AI)의 지능형 행동 할당
+    aliveMy.forEach(id => {
+        battleState.actions.push(getSmartAIAction(battleState.units[id], aliveMy, aliveOpp));
+    });
     aliveOpp.forEach(id => {
         battleState.actions.push(getSmartAIAction(battleState.units[id], aliveOpp, aliveMy));
     });
 
-    // 선턴 고정 유지 (순발력 그대로 적용)
     battleState.actions.forEach(act => {
         let u = battleState.units[act.unitId];
         act.actionSpd = u.spd;
@@ -9653,14 +9709,12 @@ async function executeTurn() {
     });
     battleState.actions.sort((a, b) => b.actionSpd - a.actionSpd);
 
-    // 배수의진 방어력 페널티 적용
     battleState.actions.forEach(act => {
         if (act.type === 'skill_back') {
             battleState.units[act.unitId].buffs.defPenalty = 0.55;
         }
     });
 
-    // 다굴 판정
     for(let i=0; i < battleState.actions.length - 1; i++) {
         let a1 = battleState.actions[i]; let a2 = battleState.actions[i+1];
         if(a1.type.includes('attack') && a2.type.includes('attack') && !a1.isDagul) {
@@ -9673,7 +9727,6 @@ async function executeTurn() {
         }
     }
 
-    // 각 팀별로 이번 턴에 충견을 수행할 단 한 마리의 펫 지정
     let designatedDog = { my: null, opp: null };
     battleState.actions.forEach(a => {
         let u = battleState.units[a.unitId];
@@ -9684,7 +9737,6 @@ async function executeTurn() {
         }
     });
 
-    // 액션 실행 루프
     for(let act of battleState.actions) {
         let attacker = battleState.units[act.unitId];
         if(attacker.isDead || checkWinCondition()) continue;
@@ -9693,14 +9745,14 @@ async function executeTurn() {
         if(act.type === 'guard') { 
             attacker.isGuard = true; 
             addLog(`🛡️ [${attacker.name}] 방어 태세!`); 
-            await delay(400);
+            await delay(600); 
             continue; 
         }
 
         if(target.isDead) {
             let aliveEnemies = Object.values(battleState.units).filter(u => u.team !== attacker.team && !u.isDead);
             if(aliveEnemies.length === 0) break;
-            target = aliveEnemies[0];
+            target = aliveEnemies[0]; 
         }
 
         let isBackToWall = act.type === 'skill_back';
@@ -9709,25 +9761,21 @@ async function executeTurn() {
 
         let currentAtk = isBackToWall ? attacker.atk * 1.35 : (isDogSkill ? attacker.atk * 0.8 : attacker.atk); 
 
-        // 1. 회피율 선 연산
         let spdDiffForDodge = target.spd - attacker.spd;
         let dodgeChance = Math.max(5, Math.min(85, 5 + (spdDiffForDodge > 0 ? spdDiffForDodge * 0.45 : 0)));
         let isEvasion = !target.isGuard && !act.isDagul && (Math.random() * 100 < dodgeChance);
         let isDogIntercept = false;
 
-        // 방어 중이 아닌 대상에게 가드 브레이크 사용 시 무조건 MISS (회피 판정)
         if (isGuardBreak && !target.isGuard) {
             isEvasion = true;
         }
 
-        // 2. 충견진돗개 발동 체크 (지정된 1마리만)
-        // 충견진돗개는 가드 브레이크를 대신 맞아주지 못함 (act.type !== 'guardbreak' 조건)
         if(target.type === 'char' && act.type !== 'guardbreak') {
             if (!isEvasion) { 
                 let dogId = designatedDog[target.team];
                 if (dogId && !battleState.units[dogId].isDead) {
                     if(act.isDagul) {
-                        addLog(`⚠️ <b style="color:#ff7b72;">[다굴 효과]</b> 너무 거센 연계 공격에 충견이 끼어들 틈이 없습니다!`);
+                        addLog(`⚠️ <b style="color:#ff7b72;">[다굴 효과]</b> 거센 연계 공격에 충견이 끼어들지 못합니다!`);
                     } else {
                         target = battleState.units[dogId]; 
                         isDogIntercept = true; 
@@ -9743,12 +9791,13 @@ async function executeTurn() {
         }
 
         const attackerBox = document.getElementById(`unit-${attacker.id}`);
-        if(attackerBox) attackerBox.classList.add('active-turn');
+        if(attackerBox && !battleState.skip) attackerBox.classList.add('active-turn');
+        
         let moveClass = attacker.team === 'my' ? 'anim-attack-right' : 'anim-attack-left';
-        if(attackerBox) attackerBox.classList.add(moveClass);
-        await delay(300);
+        if(attackerBox && !battleState.skip) attackerBox.classList.add(moveClass);
+        
+        await delay(400); 
 
-        // 3. 회피 시 연출 및 데미지 로직 처리
         if(isEvasion && !isDogIntercept) {
             showFloatingDmg(target.id, "MISS", "miss"); 
             if (isGuardBreak) {
@@ -9767,7 +9816,6 @@ async function executeTurn() {
             
             if(target.isGuard) {
                 if (isGuardBreak) {
-                    // 가드 브레이크 적중시 데미지 0.8배 적용
                     baseDmg = (currentAtk * 0.8) * attrBonus; 
                     addLog(`💥 <b style="color:#ff4d4d; font-size:14px;">[가드 브레이크 적중]</b> ${attacker.name}의 일격이 방어 중인 적에게 치명타를 입혔습니다!`);
                 } else {
@@ -9779,7 +9827,7 @@ async function executeTurn() {
 
             target.hp -= finalDmg;
             const targetBox = document.getElementById(`unit-${target.id}`);
-            if(targetBox) targetBox.classList.add('anim-hit');
+            if(targetBox && !battleState.skip) targetBox.classList.add('anim-hit');
             
             let dmgType = isGuardBreak ? "critical" : "normal";
             showFloatingDmg(target.id, finalDmg, dmgType);
@@ -9788,14 +9836,18 @@ async function executeTurn() {
             updateAllHPUI(); 
         }
 
-        await delay(600);
+        await delay(1000); 
+        
         if(attackerBox) attackerBox.classList.remove(moveClass, 'active-turn');
         const targetBox = document.getElementById(`unit-${target.id}`);
         if(targetBox) targetBox.classList.remove('anim-hit');
     }
 
     Object.values(battleState.units).forEach(u => u.buffs.defPenalty = 1.0);
-    if(!checkWinCondition()) { battleState.turn++; startTurnPhase(); }
+    if(!checkWinCondition()) { 
+        battleState.turn++; 
+        startTurnPhase(); 
+    }
 }
 
 function checkWinCondition() {
@@ -9971,6 +10023,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const slotSelector = document.getElementById('pet-slot-selector');
     if(slotSelector) slotSelector.addEventListener('change', renderSelectedPets);
 });
+/* ==========================================
+                투기장 코드 끝
+   ========================================== */
 
 /* ==========================================
             1인 레이드 JS 코드 시작
@@ -12460,7 +12515,9 @@ function gameLoop(time) {
                         atkBuffMult *= 1.05;
                     }
 
-                    let baseDmg = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 6 * (pet.growthBonus || 1)));
+                    let petLevel = pet.level || 1;
+                    let levelMult = Math.pow(1.05, petLevel - 1); // 고층 돌파용 5% 복리 증폭
+                    let baseDmg = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
 
                     // [핵심 해결] 계산된 수치 중 하나라도 NaN일 경우 강제 보정하여 오염 원천 차단
                     if (isNaN(baseDmg)) baseDmg = 10;
@@ -12892,8 +12949,9 @@ function updateUI() {
 
     idGame.fieldPets.forEach(pet => {
         let petLevel = pet.level || 1;
-        let baseAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1)));
-        let baseDef = Math.floor((pet.baseDef || 5) + ((pet.gdef || 0.5) * (petLevel - 1) * (pet.growthBonus || 1)));
+        let levelMult = Math.pow(1.05, petLevel - 1); // 고층 돌파용 5% 복리 증폭
+        let baseAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
+        let baseDef = Math.floor(((pet.baseDef || 5) + ((pet.gdef || 0.5) * (petLevel - 1) * (pet.growthBonus || 1))) * levelMult);
         
         let pName = pet.passiveName || pet.passive;
         if (!pName && typeof PET_DATABASE !== 'undefined') {
@@ -13301,8 +13359,10 @@ function updateDynamicShopElements() {
         battlePets.forEach(pet => {
             let petLevel = pet.level || 1;
             let cost = Math.floor(50 * Math.pow(1.3, petLevel - 1));
-            let curAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1)));
-            let nextAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * petLevel * 6 * (pet.growthBonus || 1)));
+            let levelMult = Math.pow(1.05, petLevel - 1);
+            let nextLevelMult = Math.pow(1.05, petLevel);
+            let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
+            let nextAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * petLevel * 6 * (pet.growthBonus || 1))) * nextLevelMult);
             let petAtkMaxCd = getPetAtkMaxCd(pet).toFixed(2);
             
             trainHtml += `
@@ -14013,7 +14073,9 @@ function updateFormation() {
     let maxAtk = -1;
 
     idGame.fieldPets.forEach((pet, idx) => {
-        let curAtk = Math.floor((pet.baseAtk || 10) + ((pet.gatk || 1) * ((pet.level || 1) - 1) * 6 * (pet.growthBonus || 1)));
+        let petLevel = pet.level || 1;
+        let levelMult = Math.pow(1.05, petLevel - 1);
+        let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
         if (curAtk > maxAtk) {
             maxAtk = curAtk;
             maxAtkIdx = idx;
