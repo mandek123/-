@@ -5326,7 +5326,7 @@ const NOTICE_DATABASE = [
             
             <strong>2) 만득이 키우기 밸런스 패치</strong>
             <span>- 고층 스테이지의 몬스터 체력에 맞춰 아군 페트 능력치 증가 공식을 상향했습니다.</span>
-            <span>- 페트 레벨업 시 공격력과 방어력에 레벨당 5%의 복리(지수) 증폭이 적용되도록 개선되었습니다.</span>
+            <span>- 페트 레벨업 시 공격력과 방어력에 레벨당 1.5%의 복리(지수) 증폭이 적용되도록 개선되었습니다.</span>
         `
     },
 
@@ -12516,8 +12516,9 @@ function gameLoop(time) {
                     }
 
                     let petLevel = pet.level || 1;
-                    let levelMult = Math.pow(1.05, petLevel - 1); // 고층 돌파용 5% 복리 증폭
-                    let baseDmg = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
+                    let levelMult = Math.pow(1.015, petLevel - 1); // 1.5% 배율 적용
+                    let baseAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
+                    let baseDef = Math.floor(((pet.baseDef || 5) + ((pet.gdef || 0.5) * (petLevel - 1) * (pet.growthBonus || 1))) * levelMult);
 
                     // [핵심 해결] 계산된 수치 중 하나라도 NaN일 경우 강제 보정하여 오염 원천 차단
                     if (isNaN(baseDmg)) baseDmg = 10;
@@ -12949,7 +12950,7 @@ function updateUI() {
 
     idGame.fieldPets.forEach(pet => {
         let petLevel = pet.level || 1;
-        let levelMult = Math.pow(1.05, petLevel - 1); // 고층 돌파용 5% 복리 증폭
+        let levelMult = Math.pow(1.015, petLevel - 1); 
         let baseAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
         let baseDef = Math.floor(((pet.baseDef || 5) + ((pet.gdef || 0.5) * (petLevel - 1) * (pet.growthBonus || 1))) * levelMult);
         
@@ -13359,8 +13360,8 @@ function updateDynamicShopElements() {
         battlePets.forEach(pet => {
             let petLevel = pet.level || 1;
             let cost = Math.floor(50 * Math.pow(1.3, petLevel - 1));
-            let levelMult = Math.pow(1.05, petLevel - 1);
-            let nextLevelMult = Math.pow(1.05, petLevel);
+            let levelMult = Math.pow(1.015, petLevel - 1);
+            let nextLevelMult = Math.pow(1.015, petLevel);
             let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
             let nextAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * petLevel * 6 * (pet.growthBonus || 1))) * nextLevelMult);
             let petAtkMaxCd = getPetAtkMaxCd(pet).toFixed(2);
@@ -14074,7 +14075,7 @@ function updateFormation() {
 
     idGame.fieldPets.forEach((pet, idx) => {
         let petLevel = pet.level || 1;
-        let levelMult = Math.pow(1.05, petLevel - 1);
+        let levelMult = Math.pow(1.015, petLevel - 1);
         let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
         if (curAtk > maxAtk) {
             maxAtk = curAtk;
