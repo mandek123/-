@@ -12508,23 +12508,23 @@ function gameLoop(time) {
                     }
 
                     // 공격력 버프 적용
-                    let atkBuffMult = (idGame.buffs.atkMultiplier.active && Date.now() < idGame.buffs.atkMultiplier.endTime) ? 1.5 : 1.0;
-                    
-                    // [변경] 기동 코어 5초 버프가 활성화 중일 때 공격력 1.05배 추가 적용
-                    if (idGame.buffs && idGame.buffs.maneuverCoreBuff && idGame.buffs.maneuverCoreBuff.active && Date.now() < idGame.buffs.maneuverCoreBuff.endTime) {
-                        atkBuffMult *= 1.05;
-                    }
+let atkBuffMult = (idGame.buffs.atkMultiplier.active && Date.now() < idGame.buffs.atkMultiplier.endTime) ? 1.5 : 1.0;
 
-                    let petLevel = pet.level || 1;
-                    let levelMult = Math.pow(1.015, petLevel - 1); // 1.5% 배율 적용
-                    let baseAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
-                    let baseDef = Math.floor(((pet.baseDef || 5) + ((pet.gdef || 0.5) * (petLevel - 1) * (pet.growthBonus || 1))) * levelMult);
+// 기동 코어 5초 버프가 활성화 중일 때 공격력 1.05배 추가 적용
+if (idGame.buffs && idGame.buffs.maneuverCoreBuff && idGame.buffs.maneuverCoreBuff.active && Date.now() < idGame.buffs.maneuverCoreBuff.endTime) {
+    atkBuffMult *= 1.05;
+}
 
-                    // [핵심 해결] 계산된 수치 중 하나라도 NaN일 경우 강제 보정하여 오염 원천 차단
-                    if (isNaN(baseDmg)) baseDmg = 10;
-                    if (isNaN(bonus.atkMult)) bonus.atkMult = 1.0;
+// 기본 데미지 계산 (1.5% 복리 스케일링 적용)
+let petLevel = pet.level || 1;
+let levelMult = Math.pow(1.015, petLevel - 1); 
+let baseDmg = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
 
-                    let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult);
+// 계산된 수치 중 하나라도 NaN일 경우 강제 보정하여 오염 원천 차단
+if (isNaN(baseDmg)) baseDmg = 10;
+if (isNaN(bonus.atkMult)) bonus.atkMult = 1.0;
+
+let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult);
                     
                     // 데미지가 여전히 비정상적이라면 최소 데미지 1로 고정
                     if (isNaN(dmg) || dmg < 1) dmg = 1;
