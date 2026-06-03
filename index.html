@@ -9828,10 +9828,18 @@ async function executeTurn() {
             }
         } else {
             let attrBonus = getAttrBonus(attacker.attr, target.attr);
-            let defReductionFactor = (isBackToWall && target.type === 'char') ? 0.5 : 0.85; 
+            
+            // [밸런스 패치 1] 방어력 차감 효율을 85%에서 60%로 대폭 하향 (좀비 메타 방지)
+            let defReductionFactor = (isBackToWall && target.type === 'char') ? 0.4 : 0.6; 
 
             let skillMultiplier = act.isDagul ? 1.0 : (isBackToWall ? 1.35 : (isGuardBreak ? 1.0 : 1.2)); 
             let effectiveDef = target.def * (target.buffs.defPenalty || 1.0);
+            
+            // [밸런스 패치 2] 장기전(10턴 초과) 돌입 시 '피로도' 적용 -> 매 턴 방어력이 10%씩 깎여 뚫리게 됨
+            if (battleState.turn > 10) {
+                let fatigue = (battleState.turn - 10) * 0.1;
+                effectiveDef = effectiveDef * Math.max(0.2, (1.0 - fatigue)); // 방어가 무한정 높아도 결국 80%가 부식됨
+            }
             
             let baseDmg = ((currentAtk * skillMultiplier) - (effectiveDef * defReductionFactor)) * attrBonus;
             
@@ -9844,7 +9852,8 @@ async function executeTurn() {
                 }
             }
                         
-            let finalDmg = Math.max(Math.floor(currentAtk * 0.1), Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
+            // [밸런스 패치 3] 방어력이 우주를 뚫어도 무조건 들어가는 최소 관통 데미지를 공격력의 10% -> 15%로 상향
+            let finalDmg = Math.max(Math.floor(currentAtk * 0.15), Math.floor(baseDmg * (attacker.dmgMod || 1.0)));
 
             target.hp -= finalDmg;
             const targetBox = document.getElementById(`unit-${target.id}`);
