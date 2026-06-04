@@ -12260,6 +12260,57 @@ const ITEM_DATABASE = {
         awakened2: { atkMult: 2.8, cdMult: 0.3, defMultBonus: 0.02 } // [추가] 2차 각성 (기존 1.2배 + 1.6배 = 2.8배, 방어력 2% 추가)
     }
 };
+// --- 2차 각성 알림 플래그 및 CSS 효과 주입 ---
+window.viewedAwakenNoti = false; 
+
+// --- [추가] 1, 2차 각성 알림 플래그 및 CSS 효과 주입 ---
+window.viewedAwakenNoti = false; 
+window.lastAwakenState = 0; // 각성 상태 추적 (0:없음, 1:1차, 2:2차)
+
+const notiStyle = document.createElement('style');
+notiStyle.innerHTML = `
+    /* 2차 각성 (보라색) 탭 깜빡임 및 말풍선 */
+    @keyframes tab-blink-purple {
+        0% { box-shadow: 0 0 5px #8a2be2; border-color: #8a2be2; background-color: rgba(138, 43, 226, 0.1); color: #8a2be2; }
+        100% { box-shadow: 0 0 15px #8a2be2; border-color: #8a2be2; background-color: #8a2be2; color: white !important; transform: scale(1.02); }
+    }
+    .tab-noti-blink-purple { animation: tab-blink-purple 0.7s ease-in-out infinite alternate !important; border: 2px solid #8a2be2 !important; position: relative; overflow: visible !important; }
+    .tab-noti-blink-purple::after {
+        content: "2차 각성 가능!"; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+        background: #8a2be2; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3); pointer-events: none; z-index: 9999;
+    }
+    .tab-noti-blink-purple::before {
+        content: ""; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border-width: 6px; border-style: solid; border-color: #8a2be2 transparent transparent transparent; pointer-events: none; z-index: 9999;
+    }
+
+    /* 1차 각성 (노란색) 탭 깜빡임 및 말풍선 */
+    @keyframes tab-blink-yellow {
+        0% { box-shadow: 0 0 5px #ffcc00; border-color: #ffcc00; background-color: rgba(255, 204, 0, 0.1); color: #ffcc00; }
+        100% { box-shadow: 0 0 15px #ffcc00; border-color: #ffcc00; background-color: #ffcc00; color: #000 !important; transform: scale(1.02); }
+    }
+    .tab-noti-blink-yellow { animation: tab-blink-yellow 0.7s ease-in-out infinite alternate !important; border: 2px solid #ffcc00 !important; position: relative; overflow: visible !important; }
+    .tab-noti-blink-yellow::after {
+        content: "1차 각성 가능!"; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+        background: #ffcc00; color: #000; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3); pointer-events: none; z-index: 9999;
+    }
+    .tab-noti-blink-yellow::before {
+        content: ""; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border-width: 6px; border-style: solid; border-color: #ffcc00 transparent transparent transparent; pointer-events: none; z-index: 9999;
+    }
+
+    /* 타겟 카드 반짝임 (보라 / 노랑) */
+    @keyframes target-glow-purple {
+        0% { box-shadow: 0 0 5px rgba(138, 43, 226, 0.5), inset 0 0 5px rgba(138, 43, 226, 0.2); border-color: rgba(138, 43, 226, 0.6); }
+        100% { box-shadow: 0 0 15px rgba(138, 43, 226, 1), inset 0 0 10px rgba(138, 43, 226, 0.5); border-color: rgba(138, 43, 226, 1); }
+    }
+    .target-blink-purple { animation: target-glow-purple 0.8s ease-in-out infinite alternate !important; border: 2px dashed #8a2be2 !important; }
+
+    @keyframes target-glow-yellow {
+        0% { box-shadow: 0 0 5px rgba(255, 204, 0, 0.5), inset 0 0 5px rgba(255, 204, 0, 0.2); border-color: rgba(255, 204, 0, 0.6); }
+        100% { box-shadow: 0 0 15px rgba(255, 204, 0, 1), inset 0 0 10px rgba(255, 204, 0, 0.5); border-color: rgba(255, 204, 0, 1); }
+    }
+    .target-blink-yellow { animation: target-glow-yellow 0.8s ease-in-out infinite alternate !important; border: 2px dashed #ffcc00 !important; }
+`;
+document.head.appendChild(notiStyle);
 
 let autoSaveInterval; // 자동 저장을 관리할 변수
 let idGame = {
@@ -13276,6 +13327,51 @@ function updateUI() {
         renderShop();
         updateDynamicShopElements();
     }
+    // --- 1차/2차 각성 가능 여부 체크 및 창고 탭 깜빡임 효과 ---
+    let canAwaken1 = false;
+    let canAwaken2 = false;
+    let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
+    let currentDia = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond)) ? idGame.diamond : 0;
+    
+    // 아이템 각성 가능 체크 (1차: 1억 스톤, 2차: 30해 스톤)
+    if (Array.isArray(idGame.ownedItems)) {
+        if (currentStone >= 100000000 && idGame.ownedItems.some(i => !i.isAwakened)) canAwaken1 = true;
+        if (currentStone >= 30e20 && idGame.ownedItems.some(i => i.isAwakened && !i.isAwakened2)) canAwaken2 = true;
+    }
+    
+    // 페트 각성 가능 체크 (1차: 레벨 50 & 1만 다이아, 2차: 50해 스톤)
+    let hasPet1 = false; let hasPet2 = false;
+    if (Array.isArray(idGame.fieldPets)) {
+        hasPet1 = hasPet1 || idGame.fieldPets.some(p => !p.isAwakened && p.level >= 50);
+        hasPet2 = hasPet2 || idGame.fieldPets.some(p => p.isAwakened && !p.isAwakened2);
+    }
+    if (Array.isArray(idGame.warehouse)) {
+        hasPet1 = hasPet1 || idGame.warehouse.some(p => !p.isAwakened && p.level >= 50);
+        hasPet2 = hasPet2 || idGame.warehouse.some(p => p.isAwakened && !p.isAwakened2);
+    }
+    
+    if (currentDia >= 10000 && hasPet1) canAwaken1 = true;
+    if (currentStone >= 50e20 && hasPet2) canAwaken2 = true;
+
+    // 현재 각성 상태 결정 (2차가 우선순위 높음)
+    let awakenState = canAwaken2 ? 2 : (canAwaken1 ? 1 : 0);
+
+    // 각성 상태가 변했다면(돈이나 조건을 새로 만족했다면) 알림 플래그 리셋
+    if (window.lastAwakenState !== awakenState) {
+        window.viewedAwakenNoti = false;
+        window.lastAwakenState = awakenState;
+    }
+
+    // 상단 탭 버튼 중 '창고' 글자가 포함된 버튼을 완벽하게 찾아 깜빡임 적용
+    document.querySelectorAll('.idle-tab-btn').forEach(btn => {
+        if (btn.innerText.includes('창고')) {
+            btn.classList.remove('tab-noti-blink-purple', 'tab-noti-blink-yellow');
+            if (!window.viewedAwakenNoti) {
+                if (awakenState === 2) btn.classList.add('tab-noti-blink-purple');
+                else if (awakenState === 1) btn.classList.add('tab-noti-blink-yellow');
+            }
+        }
+    });
 }
 
 function switchIdleTab(tabName) {
@@ -13293,6 +13389,8 @@ function switchIdleTab(tabName) {
     
     if (tabName === 'shop') {
         renderShop();
+    } else if (tabName === 'warehouse') {
+        window.viewedAwakenNoti = true; // [추가] 창고 탭 진입 시 깜빡임 알림 끄기
     }
     updateUI();
 }
@@ -13606,6 +13704,9 @@ function renderWarehouse() {
     if (!container || container.offsetParent === null) return;
     container.innerHTML = '';
 
+    let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
+    let currentDia = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond)) ? idGame.diamond : 0;
+
     if (idGame.ownedItems && idGame.ownedItems.length > 0 && typeof idGame.ownedItems[0] === 'string') {
         idGame.ownedItems = idGame.ownedItems.map(itemKey => ({
             uid: 'item_' + Math.random().toString(36).substr(2, 9),
@@ -13639,18 +13740,25 @@ function renderWarehouse() {
                 ? `<div style="font-size:9px; color:#1e242b; background:#d29922; padding:1px 6px; border-radius:3px; margin:4px 0; font-weight:bold;">장착중</div>` : '<div style="height:17px;"></div>';
             
             let awakenStatus = "";
+            let isTargetBlink1 = false;
+            let isTargetBlink2 = false; 
+            
             if (!pet.isAwakened && pet.level >= 50) {
+                if (currentDia >= 10000) isTargetBlink1 = true;
                 awakenStatus = `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">1차 각성 (1만 다이아)</button>`;
             } else if (pet.isAwakened && !pet.isAwakened2) {
-                awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#ff4d4d; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (50해 스톤)</button>`;
+                if (currentStone >= 50e20) isTargetBlink2 = true; 
+                awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#8a2be2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (50해 스톤)</button>`;
             } else if (pet.isAwakened2) {
-                awakenStatus = `<div style="color:#ff4d4d; font-size:10px; margin-top:5px; font-weight:bold;">★★ 2차 각성 완료 ★★</div>`;
+                awakenStatus = `<div style="color:#8a2be2; font-size:10px; margin-top:5px; font-weight:bold;">★★ 2차 각성 완료 ★★</div>`;
             } else if (pet.isAwakened) {
                 awakenStatus = `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★ 1차 각성 완료 ★</div>`;
             }
 
+            let blinkClass = isTargetBlink2 ? " target-blink-purple" : (isTargetBlink1 ? " target-blink-yellow" : "");
+
             grid.innerHTML += `
-                <div style="background:rgba(83, 155, 245, 0.1); border:1px solid #539bf5; padding:10px; border-radius:8px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+                <div class="${blinkClass}" style="background:rgba(83, 155, 245, 0.1); border:1px solid #539bf5; padding:10px; border-radius:8px; text-align:center; display:flex; flex-direction:column; align-items:center; transition:0.3s;">
                     <img src="${pet.img}" style="width:40px; height:40px; object-fit:contain; margin-bottom:5px;">
                     <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom:2px;">${pet.name}</div>
                     ${itemHtml}
@@ -13669,13 +13777,10 @@ function renderWarehouse() {
         } else {
             idGame.warehouse.forEach((pet, idx) => {
                 let canEquip = idGame.fieldPets.length < 5;
-                
-                // 창고 대기실 UI 표기에도 1.5% 복리 스케일링 적용
                 let petLevel = pet.level || 1;
                 let levelMult = Math.pow(1.015, petLevel - 1);
                 let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
                 
-                // 창고 UI 표기에도 무기 각성(고정 쿨타임) 상태를 정확히 반영
                 let finalCd = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet) : 2.0;
                 if (pet.equippedItemUid) {
                     let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
@@ -13684,23 +13789,35 @@ function renderWarehouse() {
                         let cMult = eqItem.cdMult || 1.0;
                         if (foundItem.isAwakened2 && eqItem.awakened2) cMult = eqItem.awakened2.cdMult || cMult;
                         else if (foundItem.isAwakened && eqItem.awakened) cMult = eqItem.awakened.cdMult || cMult;
-                        
-                        if (cMult < 1.0) finalCd = cMult;
-                        else finalCd *= cMult;
+                        if (cMult < 1.0) finalCd = cMult; else finalCd *= cMult;
                     }
                 }
                 let speedText = finalCd.toFixed(1);
                 
-                let awakenBtn = (!pet.isAwakened && pet.level >= 50) 
-                    ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (10,000 다이아)</button>` 
-                    : (pet.isAwakened ? `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★각성 완료★</div>` : '');
+                let awakenStatus = "";
+                let isTargetBlink1 = false;
+                let isTargetBlink2 = false; 
+                
+                if (!pet.isAwakened && pet.level >= 50) {
+                    if (currentDia >= 10000) isTargetBlink1 = true;
+                    awakenStatus = `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">1차 각성 (1만 다이아)</button>`;
+                } else if (pet.isAwakened && !pet.isAwakened2) {
+                    if (currentStone >= 50e20) isTargetBlink2 = true; 
+                    awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#8a2be2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (50해 스톤)</button>`;
+                } else if (pet.isAwakened2) {
+                    awakenStatus = `<div style="color:#8a2be2; font-size:10px; margin-top:5px; font-weight:bold;">★★ 2차 각성 완료 ★★</div>`;
+                } else if (pet.isAwakened) {
+                    awakenStatus = `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★ 1차 각성 완료 ★</div>`;
+                }
+
+                let blinkClass = isTargetBlink2 ? " target-blink-purple" : (isTargetBlink1 ? " target-blink-yellow" : "");
 
                 grid.innerHTML += `
-                    <div style="background:#1e242b; border:1px solid #30363d; padding:10px; border-radius:8px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+                    <div class="${blinkClass}" style="background:#1e242b; border:1px solid #30363d; padding:10px; border-radius:8px; text-align:center; display:flex; flex-direction:column; align-items:center; transition:0.3s;">
                         <img src="${pet.img}" style="width:40px; height:40px; object-fit:contain; margin-bottom:5px; filter:grayscale(0.5);">
                         <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom:2px;">${pet.name}</div>
                         <div style="font-size:10px; color:#8b949e; margin-bottom:8px;">Atk: ${curAtk} | 속도: ${speedText}초</div>
-                        ${awakenBtn} 
+                        ${awakenStatus} 
                         <div style="display: flex; gap: 4px; width: 100%; margin-top:5px;">
                             <button onclick="equipPet(${idx})" ${!canEquip ? 'disabled' : ''} style="flex:1; font-size:11px; padding:4px 0; border-radius:4px; background:${canEquip ? '#2ea043' : '#30363d'}; color:#fff; border:none; cursor:${canEquip ? 'pointer' : 'not-allowed'}; font-weight:bold;">출전</button>
                             <button onclick="sellPet('${pet.id}')" style="flex:1; font-size:11px; padding:4px 0; border-radius:4px; background:#dc3545; color:#fff; border:none; cursor:pointer; font-weight:bold;">판매</button>
@@ -13715,53 +13832,59 @@ function renderWarehouse() {
             grid.innerHTML += `<div style="grid-column: 1 / -1; color: #8b949e; text-align: center; padding: 20px; font-size: 12px;">보유한 장비가 없습니다.</div>`;
         } else {
             idGame.ownedItems.forEach((itemObj) => {
-    let item = ITEM_DATABASE[itemObj.itemKey];
-    if(!item) return;
+                let item = ITEM_DATABASE[itemObj.itemKey];
+                if(!item) return;
 
-    let eqOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemObj.uid) || idGame.warehouse.find(p => p.equippedItemUid === itemObj.uid);
-    let actionBtn = eqOwner 
-        ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
-        : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
+                let eqOwner = idGame.fieldPets.find(p => p.equippedItemUid === itemObj.uid) || idGame.warehouse.find(p => p.equippedItemUid === itemObj.uid);
+                let actionBtn = eqOwner 
+                    ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
+                    : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
 
-    // [수정] 1차 및 2차 각성 상태에 따른 능력치 문자열 생성
-    let statsText = "";
-    if (itemObj.isAwakened2 && item.awakened2) {
-        let atk = item.awakened2.atkMult;
-        let cd = item.awakened2.cdMult;
-        let def = item.defBonus || 0;
-        let extra = item.awakened2.defMultBonus ? ' / 팀방어+2%' : '';
-        let cdText = (cd <= 0.5) ? `최대공속 ${cd}s` : `공속 ${cd}s`;
-        statsText = `공x${atk} / ${cdText}${def > 0 ? ' / 방+' + def : ''}${extra}`;
-    } else if (itemObj.isAwakened && item.awakened) {
-        let atk = item.awakened.atkMult || item.atkMult;
-        let cd = item.awakened.cdMult || item.cdMult;
-        let def = item.defBonus || 0;
-        let cdText = (cd <= 0.3) ? "최대공속 0.3s" : `공속 ${cd}s`;
-        statsText = `공x${atk} / ${cdText}${def > 0 ? ' / 방+' + def : ''}`;
-    } else {
-        let def = item.defBonus || 0;
-        statsText = `공x${item.atkMult} / 쿨x${item.cdMult}${def > 0 ? ' / 방+' + def : ''}`;
-    }
+                let statsText = "";
+                if (itemObj.isAwakened2 && item.awakened2) {
+                    let atk = item.awakened2.atkMult;
+                    let cd = item.awakened2.cdMult;
+                    let def = item.defBonus || 0;
+                    let extra = item.awakened2.defMultBonus ? ' / 팀방어+2%' : '';
+                    let cdText = (cd <= 0.5) ? `최대공속 ${cd}s` : `공속 ${cd}s`;
+                    statsText = `공x${atk} / ${cdText}${def > 0 ? ' / 방+' + def : ''}${extra}`;
+                } else if (itemObj.isAwakened && item.awakened) {
+                    let atk = item.awakened.atkMult || item.atkMult;
+                    let cd = item.awakened.cdMult || item.cdMult;
+                    let def = item.defBonus || 0;
+                    let cdText = (cd <= 0.3) ? "최대공속 0.3s" : `공속 ${cd}s`;
+                    statsText = `공x${atk} / ${cdText}${def > 0 ? ' / 방+' + def : ''}`;
+                } else {
+                    let def = item.defBonus || 0;
+                    statsText = `공x${item.atkMult} / 쿨x${item.cdMult}${def > 0 ? ' / 방+' + def : ''}`;
+                }
 
-    let awakenItemBtn = "";
-    if (!itemObj.isAwakened) {
-        awakenItemBtn = `<button onclick="awakenItem('${itemObj.uid}')" style="width:100%; background:#fca311; border:none; padding:4px 0; border-radius:4px; color:#000; font-weight:bold; cursor:pointer; font-size:10px;">1차 각성 (1억 스톤)</button>`;
-    } else if (!itemObj.isAwakened2) {
-        awakenItemBtn = `<button onclick="awakenItem2('${itemObj.uid}')" style="width:100%; background:#ff4d4d; border:none; padding:4px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:10px;">2차 각성 (30해 스톤)</button>`;
-    } else {
-        awakenItemBtn = `<div style="color:#ff4d4d; font-size:10px; font-weight:bold; margin-top:4px;">★★ 2차 각성 완료 ★★</div>`;
-    }
+                let awakenItemBtn = "";
+                let isTargetBlink1 = false;
+                let isTargetBlink2 = false; 
+                
+                if (!itemObj.isAwakened) {
+                    if (currentStone >= 100000000) isTargetBlink1 = true;
+                    awakenItemBtn = `<button onclick="awakenItem('${itemObj.uid}')" style="width:100%; background:#fca311; border:none; padding:4px 0; border-radius:4px; color:#000; font-weight:bold; cursor:pointer; font-size:10px;">1차 각성 (1억 스톤)</button>`;
+                } else if (!itemObj.isAwakened2) {
+                    if (currentStone >= 30e20) isTargetBlink2 = true; 
+                    awakenItemBtn = `<button onclick="awakenItem2('${itemObj.uid}')" style="width:100%; background:#8a2be2; border:none; padding:4px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:10px;">2차 각성 (30해 스톤)</button>`;
+                } else {
+                    awakenItemBtn = `<div style="color:#8a2be2; font-size:10px; font-weight:bold; margin-top:4px;">★★ 2차 각성 완료 ★★</div>`;
+                }
 
-    grid.innerHTML += `
-        <div style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;">
-            <img src="${item.img}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.2); border-radius:6px; padding:2px;">
-            <div style="font-size:12px; font-weight:bold; color:#fff;">${item.name}</div>
-            <div style="font-size:10px; color:#8b949e;">${statsText}</div>
-            ${actionBtn}
-            ${awakenItemBtn}
-            <button onclick="sellItem('${itemObj.uid}')" style="width:100%; background:#8b949e; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">판매 (1000 다이아)</button>
-        </div>`;
-});
+                let blinkClass = isTargetBlink2 ? " target-blink-purple" : (isTargetBlink1 ? " target-blink-yellow" : "");
+
+                grid.innerHTML += `
+                    <div class="${blinkClass}" style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; transition:0.3s;">
+                        <img src="${item.img}" style="width:40px; height:40px; object-fit:contain; background:rgba(0,0,0,0.2); border-radius:6px; padding:2px;">
+                        <div style="font-size:12px; font-weight:bold; color:#fff;">${item.name}</div>
+                        <div style="font-size:10px; color:#8b949e;">${statsText}</div>
+                        ${actionBtn}
+                        ${awakenItemBtn}
+                        <button onclick="sellItem('${itemObj.uid}')" style="width:100%; background:#8b949e; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">판매 (1000 다이아)</button>
+                    </div>`;
+            });
         }
     }
 }
