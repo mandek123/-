@@ -5314,6 +5314,24 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 32,
+        date: "26년 6월 4일",
+        title: "26년 6월 4일 업데이트 공지사항입니다.",
+        summary: "1. 투기장 지능형 AI 개편 | 2. 만득이 키우기 2차 각성 추가 및 시스템 안정화",
+        content: `
+            <strong>1) 투기장 시스템 업데이트</strong>
+            <span>- 스스로 '탐색전'과 '결전' 모드를 전환하는 지능형 AI가 도입되었습니다.</span>
+            <span>- 상대의 에이스를 집중 견제하거나 가드 타이밍을 예측하는 등 특수 스킬(가드 브레이크, 배수진 등)의 심리전 로직이 고도화되었습니다.</span>
+            
+            <strong>2) 만득이 키우기 업데이트</strong>
+            <span>- 2차 각성 시스템이 추가되었습니다. (페트 및 아이템 적용)</span>
+            <span>- 재화(스톤) 보유량 및 훈련 비용의 최대 상한선이 9,000해(9e23)로 확장되어 오버플로우(NaN) 현상을 방지했습니다.</span>
+            <span>- 아이템 공속 쿨타임이 비정상적으로 중첩 적용되던 버그를 고정 수치로 정상화했습니다.</span>
+            <span>- 전투 시 적군 공격에 아군 방어력 스케일링이 누락되던 현상 및 창고 대기실 UI 스탯 미적용 등 각종 표기/연산 버그가 완벽히 수정되었습니다.</span>
+        `
+    },
+
+    {
         id: 31,
         date: "26년 6월 3일",
         title: "26년 6월 3일 업데이트 공지사항입니다.",
@@ -9545,7 +9563,7 @@ function showFloatingDmg(targetId, dmgText, type) {
     setTimeout(() => div.remove(), 2500);
 }
 // ==========================================
-//  고도화된 지능형 AI 결정 엔진 (예측형)
+//  고도화된 지능형 AI 결정 엔진 (판세 분석 및 동적 수싸움)
 // ==========================================
 function getSmartAIAction(unit, allyIds, enemyIds) {
     let allies = allyIds.map(id => battleState.units[id]);
@@ -9554,78 +9572,102 @@ function getSmartAIAction(unit, allyIds, enemyIds) {
     let charEnemy = enemies.find(u => u.type === 'char');
     
     let act = { unitId: unit.id, type: 'attack', target: null };
-    
-    // [밸런스 패치] 20% 확률로 AI가 이성적인 판단을 하지 않고 무작위 대상을 공격합니다. (숨통 트이기)
-    if (Math.random() < 0.20) {
-        let randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-        act.target = randomEnemy.id;
-    } else {
-        // 이성적인 타겟팅 (일점사 로직 약간 완화)
-        let bestTarget = enemies[0];
-        let maxScore = -9999;
-        
-        enemies.forEach(enemy => {
-            let score = 0;
-            score += (1 - (enemy.hp / enemy.maxHp)) * 60; // 체력 비례 점수 비중 축소 (기존 100 -> 60)
-            score += (enemy.atk * 0.1); // 공격력 위협도 비중 축소
-            
-            let attrMod = getAttrBonus(unit.attr, enemy.attr);
-            if (attrMod > 1.0) score += 40; // 상성 우위 점수 축소
-            else if (attrMod < 1.0) score -= 20;
-            
-            score += Math.random() * 80; // 무작위성 증가 (예측 불가능한 전투 양상 유도)
-            
-            if (score > maxScore) {
-                maxScore = score;
-                bestTarget = enemy;
-            }
-        });
-        act.target = bestTarget.id;
-    }
+    let turn = battleState.turn;
 
-    let hpRatio = unit.hp / unit.maxHp;
+    // [동적 판세 분석] 
+    // 적 전체의 평균 체력을 계산하여, 피가 넉넉하면 '탐색전', 피가 빠졌으면 '난전/결전'으로 스스로 판단합니다.
+    let myHpRatio = unit.hp / unit.maxHp;
+    let enemyAvgHp = enemies.reduce((sum, e) => sum + (e.hp / e.maxHp), 0) / enemies.length;
+    let isEarlyPhase = (enemyAvgHp > 0.75); // 적 평균 체력이 75% 이상이면 탐색(간보기) 모드
+
+    // ----------------------------------------------------
+    // 1. 유동적 타겟팅 전략 (일점사 완화 및 상성/빈틈 찌르기)
+    // ----------------------------------------------------
+    let bestTarget = enemies[0];
+    let maxScore = -9999;
+
+    enemies.forEach(enemy => {
+        let score = 0;
+        let targetHpRatio = enemy.hp / enemy.maxHp;
+        
+        // 1) 킬 캐치 vs 분산 압박
+        if (targetHpRatio < 0.25) {
+            score += 80; // 피가 25% 미만인 적은 확실히 숨통을 끊음
+        } else {
+            score += (1 - targetHpRatio) * 20; // 맹목적 일점사 방지 (체력 비례 점수 대폭 하향)
+        }
+
+        // 2) 간보기의 핵심: 상성이 유리한 녀석부터 툭툭 건드림
+        let attrMod = getAttrBonus(unit.attr, enemy.attr);
+        if (attrMod > 1.0) score += 50;
+        else if (attrMod < 1.0) score -= 20;
+
+        // 3) 적 위협도 평가 (공격력이 높은 에이스 견제)
+        score += (enemy.atk * 0.15);
+
+        // 4) 에이스 견제 (체력이 70% 이상이면서 공격력이 위협적인 적군 에이스 타겟팅)
+        if (targetHpRatio > 0.7 && enemy.atk > (unit.def * 1.2)) {
+            score += 40; 
+        }
+
+        // 5) 판세에 따른 무작위성 조절
+        // 탐색전(적 피 많음)일 때는 랜덤성을 80까지 줘서 공격을 분산시키며 간을 보고, 결전일 땐 랜덤성을 줄임
+        let randomWeight = isEarlyPhase ? 80 : 25; 
+        score += Math.random() * randomWeight;
+
+        if (score > maxScore) { maxScore = score; bestTarget = enemy; }
+    });
     
-    if (hpRatio < 0.25 && Math.random() < 0.5) {
+    act.target = bestTarget.id;
+
+    // ----------------------------------------------------
+    // 2. 고도의 수싸움 (특수 스킬 / 심리전)
+    // ----------------------------------------------------
+    let highestEnemyAtk = Math.max(...enemies.map(e => e.atk));
+
+    // [방어(Guard) 심리전]
+    // 내 피가 적거나, 상대 에이스의 공격력이 내 방어력을 뚫을 만큼 위협적일 때 생존 본능 발동
+    let isThreatened = myHpRatio < 0.4 && highestEnemyAtk > (unit.def * 1.5);
+    if (isThreatened && Math.random() < 0.6) {
         act.type = 'guard';
         act.target = unit.id;
         return act;
     }
 
     if (unit.type === 'pet') {
-        let enemyCharHpRatio = charEnemy ? (charEnemy.hp / charEnemy.maxHp) : 1;
-        let guessEnemyGuarding = (enemyCharHpRatio < 0.35 && Math.random() < 0.5); // 가드 예측 확률 하향 (60% -> 50%)
+        // [가드 브레이크 심리전]
+        let targetEnemy = battleState.units[act.target];
+        let targetHpRatio = targetEnemy.hp / targetEnemy.maxHp;
+        
+        // 상대가 방어할 확률 예측: 상대 피가 적거나, '내가 우리 팀의 공격력 1위(에이스)'라서 상대가 내 공격을 두려워할 때
+        let amIAce = unit.atk === Math.max(...allies.map(a => a.atk));
+        let guessGuarding = (!isEarlyPhase && targetHpRatio < 0.35 && Math.random() < 0.5) || (amIAce && Math.random() < 0.35);
 
-        if (guessEnemyGuarding) {
-            let aliveAllyPets = allies.filter(u => u.type === 'pet' && !u.isDead);
-            if (aliveAllyPets.length > 0) {
-                let highestAtkPet = aliveAllyPets.reduce((max, p) => p.atk > max.atk ? p : max, aliveAllyPets[0]);
-                if (unit.id === highestAtkPet.id) {
-                    act.type = 'guardbreak';
-                    act.target = charEnemy.id; 
-                    return act;
-                } else if (Math.random() < 0.3) {
-                    act.type = 'guardbreak';
-                    act.target = charEnemy.id;
-                    return act;
-                }
-            }
+        if (guessGuarding) {
+            act.type = 'guardbreak';
+            return act; 
         }
 
+        // [충견(보호) 심리전]
+        // 오직 '주인'의 체력이 위험할 때, 내 체력이 50% 이상 남아있다면 희생을 각오하고 충견 발동
         let masterHpRatio = charAlly ? (charAlly.hp / charAlly.maxHp) : 1;
-        // 충견 발동 빈도 살짝 하향 (너무 철벽을 치지 않도록)
-        let needProtection = (masterHpRatio < 0.45 && Math.random() < 0.60) || (Math.random() < 0.10);
+        let shouldProtectMaster = (masterHpRatio < 0.35 && myHpRatio > 0.5 && Math.random() < 0.75);
 
-        if (needProtection) {
+        if (shouldProtectMaster) {
             act.type = 'skill_dog';
-            act.target = act.target; // 이미 정해진 타겟으로 충견 돌진
-            return act;
+            return act; 
         }
         
-        let rand = Math.random();
-        if (rand < 0.25 && hpRatio > 0.4) {
+        // [배수진(Skill_back) 심리전]
+        // 탐색전 단계이거나 내 체력이 빵빵할 때(75% 이상), 일부러 틈을 보여 적의 턴을 낭비시키고 딜을 욱여넣음
+        if (myHpRatio > 0.75 && Math.random() < 0.25) {
             act.type = 'skill_back'; 
-        } else if (rand < 0.45 && !guessEnemyGuarding) {
-            act.type = 'guardbreak'; 
+            return act;
+        }
+    } else if (unit.type === 'char') {
+        // 주인의 심리전: 초반 탐색전에서 여유로울 때 배수진(도발) 사용
+        if (isEarlyPhase && myHpRatio > 0.7 && Math.random() < 0.25) {
+            act.type = 'skill_back';
         }
     }
     
@@ -12208,14 +12250,17 @@ const ITEM_DATABASE = {
     "ignos": { 
         name: "이그노스의 활M", img: "./images/item1.png", type: "원거리 무기", 
         atkMult: 1.0, cdMult: 1.2, price: 3000,
-        awakened: { atkMult: 1.5, cdMult: 1.0 } // 활 각성: 공 1.5배, 공속 페널티 없음
+        awakened: { atkMult: 1.5, cdMult: 1.0 }, // 1차 각성
+        awakened2: { atkMult: 3.5, cdMult: 0.5 }  // [추가] 2차 각성 (기존 1.5배 + 2배 = 3.5배, 공속 0.5배 고정)
     },
     "spirit": { 
         name: "봉인된 정령왕의 창M", img: "./images/item2.png", type: "근거리 무기", 
         atkMult: 1.2, cdMult: 1.0, defBonus: 15, price: 3000,
-        awakened: { atkMult: 1.2, cdMult: 0.3 } // 창 각성: 공 그대로, 공속 0.3으로 돌파
+        awakened: { atkMult: 1.2, cdMult: 0.3 }, // 1차 각성
+        awakened2: { atkMult: 2.8, cdMult: 0.3, defMultBonus: 0.02 } // [추가] 2차 각성 (기존 1.2배 + 1.6배 = 2.8배, 방어력 2% 추가)
     }
 };
+
 let autoSaveInterval; // 자동 저장을 관리할 변수
 let idGame = {
     started: false,
@@ -12521,21 +12566,33 @@ function gameLoop(time) {
                 
                 if(pet.atkCooldown <= 0) {
                     let cdMult = eqItem ? (eqItem.cdMult || 1.0) : 1.0;
-                    pet.atkCooldown = getPetAtkMaxCd(pet) * cdMult; 
+                    let atkMult = eqItem ? (eqItem.atkMult || 1.0) : 1.0;
+                    
+                    // [완벽 수정] 1차 및 2차 무기 각성 수치를 '미리' 확인하여 덮어쓰기
+                    if (eqItem && pet.equippedItemUid) {
+                        let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+                        if (foundItem) {
+                            if (foundItem.isAwakened2 && eqItem.awakened2) {
+                                atkMult = eqItem.awakened2.atkMult || atkMult;
+                                cdMult = eqItem.awakened2.cdMult || cdMult;
+                            } else if (foundItem.isAwakened && eqItem.awakened) {
+                                atkMult = eqItem.awakened.atkMult || atkMult;
+                                cdMult = eqItem.awakened.cdMult || cdMult;
+                            }
+                        }
+                    }
+
+                    // [버그 수정] cdMult가 1.0 미만(0.5, 0.3 등)일 경우, 곱연산이 아닌 '고정 쿨타임(초)'으로 덮어씌웁니다.
+                    if (cdMult < 1.0) {
+                        pet.atkCooldown = cdMult;
+                    } else {
+                        pet.atkCooldown = getPetAtkMaxCd(pet) * cdMult; 
+                    } 
                     
                     triggerAnim(pet.el, 'anim-atk-right');
                     triggerAnim(target.el, 'anim-hit');
                     
                     let bonus = getDetailedPassiveBonus(pet);
-                    let atkMult = eqItem ? (eqItem.atkMult || 1.0) : 1.0;
-                    
-                    // [버그 수정] 무기 각성 데미지 실제 적용
-                    if (eqItem && pet.equippedItemUid) {
-                        let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
-                        if (foundItem && foundItem.isAwakened && eqItem.awakened && eqItem.awakened.atkMult) {
-                            atkMult = eqItem.awakened.atkMult;
-                        }
-                    }
 
                     // 공격력 버프 적용
 let atkBuffMult = (idGame.buffs.atkMultiplier.active && Date.now() < idGame.buffs.atkMultiplier.endTime) ? 1.5 : 1.0;
@@ -12608,18 +12665,23 @@ let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult);
                     let teamTotalDef = 0;
                     let totalDmgRed = 0;
                     let teamDodgeChance = 0;
+                    let spear2ndCount = 0; // 2차 각성 창 개수 카운터
                     
                     idGame.fieldPets.forEach(p => {
                         // [수정] p.level이 없을 경우(undefined)를 완벽히 대비
                         let pLevel = p.level || 1;
-                        let petDef = (p.baseDef || 5) + ((p.gdef || 0.5) * (pLevel - 1) * (p.growthBonus || 1));
+                        let levelMult = Math.pow(1.015, pLevel - 1); // [버그 수정] 실제 전투 방어력에도 1.5% 복리 스케일링 적용
+                        let petDef = Math.floor(((p.baseDef || 5) + ((p.gdef || 0.5) * (pLevel - 1) * (p.growthBonus || 1))) * levelMult);
                         let b = getDetailedPassiveBonus(p);
 
-                        // 장착한 아이템의 defBonus 적용
                         if (p.equippedItemUid) {
                             let foundItem = idGame.ownedItems.find(i => i.uid === p.equippedItemUid);
                             if (foundItem && ITEM_DATABASE[foundItem.itemKey] && ITEM_DATABASE[foundItem.itemKey].defBonus) {
                                 totalDmgRed += ITEM_DATABASE[foundItem.itemKey].defBonus;
+                            }
+                            // 장착한 무기가 2차 각성된 창인지 확인
+                            if (foundItem && foundItem.isAwakened2 && foundItem.itemKey === 'spirit') {
+                                spear2ndCount++;
                             }
                         }
 
@@ -12631,6 +12693,10 @@ let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult);
                         
                         if (b.dodge > teamDodgeChance) teamDodgeChance = b.dodge;
                     });
+                    // [추가] 창 2차 각성 효과 (개당 방어력 2% 증폭)
+                    if (spear2ndCount > 0) {
+                        teamTotalDef = Math.floor(teamTotalDef * (1 + (spear2ndCount * 0.02)));
+                    }
                     teamDodgeChance = Math.min(0.7, teamDodgeChance); 
 
                     if (Math.random() < teamDodgeChance) {
@@ -13001,6 +13067,22 @@ function updateUI() {
         let finalDef = baseDef;
         let currentDmgRed = 0; 
 
+        // [수정] 페트가 장착 중인 아이템의 공격력 배율 추출 (1차/2차 각성 포함)
+        let itemAtkMult = 1.0;
+        if (pet.equippedItemUid) {
+            let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+            if (foundItem && ITEM_DATABASE[foundItem.itemKey]) {
+                let eqItem = ITEM_DATABASE[foundItem.itemKey];
+                itemAtkMult = eqItem.atkMult || 1.0;
+                
+                if (foundItem.isAwakened2 && eqItem.awakened2 && eqItem.awakened2.atkMult) {
+                    itemAtkMult = eqItem.awakened2.atkMult;
+                } else if (foundItem.isAwakened && eqItem.awakened && eqItem.awakened.atkMult) {
+                    itemAtkMult = eqItem.awakened.atkMult;
+                }
+            }
+        }
+
         if (pName) {
             let pLevelIdx = Math.floor((petLevel - 1) / 10);
             activePassives.push(`<span style="color:#a5d6ff;">${pet.name}</span>: ${pName}(Lv.${pLevelIdx + 1})`);
@@ -13008,7 +13090,8 @@ function updateUI() {
         
         if (typeof getDetailedPassiveBonus === 'function') {
             let bonus = getDetailedPassiveBonus(pet);
-            finalAtk = Math.floor(baseAtk * bonus.atkMult);
+            // [수정] 패시브 보너스에 아이템 배율(itemAtkMult)을 함께 곱하여 UI에 즉각 표기
+            finalAtk = Math.floor(baseAtk * bonus.atkMult * itemAtkMult);
             finalDef = Math.floor(baseDef * bonus.defMult);
             currentDmgRed = bonus.dmgRed;
             
@@ -13028,7 +13111,23 @@ function updateUI() {
 
     let totalTeamAtk = totalBaseAtk + totalBonusAtk;
     let totalTeamDef = totalBaseDef + totalBonusDef;
-// [추가] 기동 코어 5초 버프 UI 즉각 반영 (팀 총 공격력의 5%만큼 보너스에 합산)
+
+    // 창 2차 각성 카운트 및 UI 방어력 뻥튀기 반영
+    let spear2ndCount = 0;
+    idGame.fieldPets.forEach(p => {
+        if (p.equippedItemUid) {
+            let fItem = idGame.ownedItems.find(i => i.uid === p.equippedItemUid);
+            if (fItem && fItem.isAwakened2 && fItem.itemKey === 'spirit') spear2ndCount++;
+        }
+    });
+    
+    if (spear2ndCount > 0) {
+        let spearBonusDef = Math.floor(totalTeamDef * (spear2ndCount * 0.02));
+        totalBonusDef += spearBonusDef;
+        totalTeamDef += spearBonusDef;
+    }
+
+    // 기동 코어 5초 버프 UI 즉각 반영 (팀 총 공격력의 5%만큼 보너스에 합산)
     if (idGame.buffs && idGame.buffs.maneuverCoreBuff && idGame.buffs.maneuverCoreBuff.active) {
         if (Date.now() < idGame.buffs.maneuverCoreBuff.endTime) {
             let coreBonus = Math.floor(totalTeamAtk * 0.05); 
@@ -13407,7 +13506,22 @@ function updateDynamicShopElements() {
             let nextLevelMult = Math.pow(1.015, petLevel);
             let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
             let nextAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * petLevel * 6 * (pet.growthBonus || 1))) * nextLevelMult);
-            let petAtkMaxCd = getPetAtkMaxCd(pet).toFixed(2);
+            
+            // [버그 수정] UI 표기에도 무기 각성(고정 쿨타임) 상태를 정확히 반영
+            let finalCd = getPetAtkMaxCd(pet);
+            if (pet.equippedItemUid) {
+                let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+                if (foundItem && ITEM_DATABASE[foundItem.itemKey]) {
+                    let eqItem = ITEM_DATABASE[foundItem.itemKey];
+                    let cMult = eqItem.cdMult || 1.0;
+                    if (foundItem.isAwakened2 && eqItem.awakened2) cMult = eqItem.awakened2.cdMult || cMult;
+                    else if (foundItem.isAwakened && eqItem.awakened) cMult = eqItem.awakened.cdMult || cMult;
+                    
+                    if (cMult < 1.0) finalCd = cMult;
+                    else finalCd *= cMult;
+                }
+            }
+            let petAtkMaxCd = finalCd.toFixed(2);
             
             trainHtml += `
             <div style="background:#1e242b; padding:15px; border-radius:10px; border:1px solid #30363d; display:flex; flex-direction:column; gap:8px;">
@@ -13524,9 +13638,16 @@ function renderWarehouse() {
             let itemHtml = pet.equippedItemUid && idGame.ownedItems.find(i => i.uid === pet.equippedItemUid) 
                 ? `<div style="font-size:9px; color:#1e242b; background:#d29922; padding:1px 6px; border-radius:3px; margin:4px 0; font-weight:bold;">장착중</div>` : '<div style="height:17px;"></div>';
             
-            let awakenStatus = (!pet.isAwakened && pet.level >= 50) 
-                ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (10,000 다이아)</button>` 
-                : (pet.isAwakened ? `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★각성 완료★</div>` : '');
+            let awakenStatus = "";
+            if (!pet.isAwakened && pet.level >= 50) {
+                awakenStatus = `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">1차 각성 (1만 다이아)</button>`;
+            } else if (pet.isAwakened && !pet.isAwakened2) {
+                awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#ff4d4d; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (50해 스톤)</button>`;
+            } else if (pet.isAwakened2) {
+                awakenStatus = `<div style="color:#ff4d4d; font-size:10px; margin-top:5px; font-weight:bold;">★★ 2차 각성 완료 ★★</div>`;
+            } else if (pet.isAwakened) {
+                awakenStatus = `<div style="color:#ffcc00; font-size:10px; margin-top:5px; font-weight:bold;">★ 1차 각성 완료 ★</div>`;
+            }
 
             grid.innerHTML += `
                 <div style="background:rgba(83, 155, 245, 0.1); border:1px solid #539bf5; padding:10px; border-radius:8px; text-align:center; display:flex; flex-direction:column; align-items:center;">
@@ -13548,8 +13669,27 @@ function renderWarehouse() {
         } else {
             idGame.warehouse.forEach((pet, idx) => {
                 let canEquip = idGame.fieldPets.length < 5;
-                let curAtk = Math.floor(pet.baseAtk + (pet.gatk * (pet.level - 1) * 6 * pet.growthBonus));
-                let speedText = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet).toFixed(1) : "2.0";
+                
+                // 창고 대기실 UI 표기에도 1.5% 복리 스케일링 적용
+                let petLevel = pet.level || 1;
+                let levelMult = Math.pow(1.015, petLevel - 1);
+                let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
+                
+                // 창고 UI 표기에도 무기 각성(고정 쿨타임) 상태를 정확히 반영
+                let finalCd = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet) : 2.0;
+                if (pet.equippedItemUid) {
+                    let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
+                    if (foundItem && ITEM_DATABASE[foundItem.itemKey]) {
+                        let eqItem = ITEM_DATABASE[foundItem.itemKey];
+                        let cMult = eqItem.cdMult || 1.0;
+                        if (foundItem.isAwakened2 && eqItem.awakened2) cMult = eqItem.awakened2.cdMult || cMult;
+                        else if (foundItem.isAwakened && eqItem.awakened) cMult = eqItem.awakened.cdMult || cMult;
+                        
+                        if (cMult < 1.0) finalCd = cMult;
+                        else finalCd *= cMult;
+                    }
+                }
+                let speedText = finalCd.toFixed(1);
                 
                 let awakenBtn = (!pet.isAwakened && pet.level >= 50) 
                     ? `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">각성 (10,000 다이아)</button>` 
@@ -13583,26 +13723,34 @@ function renderWarehouse() {
         ? `<button onclick="unequipItemFromPet('${eqOwner.id}')" style="width:100%; background:#dc3545; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">해제 (${eqOwner.name})</button>`
         : `<button onclick="openEquipModal('${itemObj.uid}')" style="width:100%; background:#539bf5; border:none; padding:6px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:11px;">장착하기</button>`;
 
-    // [수정] 각성 상태에 따른 능력치 문자열 생성
+    // [수정] 1차 및 2차 각성 상태에 따른 능력치 문자열 생성
     let statsText = "";
-    if (itemObj.isAwakened && item.awakened) {
+    if (itemObj.isAwakened2 && item.awakened2) {
+        let atk = item.awakened2.atkMult;
+        let cd = item.awakened2.cdMult;
+        let def = item.defBonus || 0;
+        let extra = item.awakened2.defMultBonus ? ' / 팀방어+2%' : '';
+        let cdText = (cd <= 0.5) ? `최대공속 ${cd}s` : `공속 ${cd}s`;
+        statsText = `공x${atk} / ${cdText}${def > 0 ? ' / 방+' + def : ''}${extra}`;
+    } else if (itemObj.isAwakened && item.awakened) {
         let atk = item.awakened.atkMult || item.atkMult;
         let cd = item.awakened.cdMult || item.cdMult;
         let def = item.defBonus || 0;
-        
-        // 활처럼 공속 1.0(배율)인 경우 '공속 1.0'으로 명시
         let cdText = (cd <= 0.3) ? "최대공속 0.3s" : `공속 ${cd}s`;
-        
         statsText = `공x${atk} / ${cdText}${def > 0 ? ' / 방+' + def : ''}`;
     } else {
         let def = item.defBonus || 0;
-        // 기존 쿨타임 배율 표기 (1.0도 생략 없이 출력)
         statsText = `공x${item.atkMult} / 쿨x${item.cdMult}${def > 0 ? ' / 방+' + def : ''}`;
     }
 
-    let awakenItemBtn = !itemObj.isAwakened 
-        ? `<button onclick="awakenItem('${itemObj.uid}')" style="width:100%; background:#fca311; border:none; padding:4px 0; border-radius:4px; color:#000; font-weight:bold; cursor:pointer; font-size:10px;">아이템 각성 (1억 스톤)</button>`
-        : `<div style="color:#fca311; font-size:10px; font-weight:bold; margin-top:4px;">★각성 완료★</div>`;
+    let awakenItemBtn = "";
+    if (!itemObj.isAwakened) {
+        awakenItemBtn = `<button onclick="awakenItem('${itemObj.uid}')" style="width:100%; background:#fca311; border:none; padding:4px 0; border-radius:4px; color:#000; font-weight:bold; cursor:pointer; font-size:10px;">1차 각성 (1억 스톤)</button>`;
+    } else if (!itemObj.isAwakened2) {
+        awakenItemBtn = `<button onclick="awakenItem2('${itemObj.uid}')" style="width:100%; background:#ff4d4d; border:none; padding:4px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:10px;">2차 각성 (30해 스톤)</button>`;
+    } else {
+        awakenItemBtn = `<div style="color:#ff4d4d; font-size:10px; font-weight:bold; margin-top:4px;">★★ 2차 각성 완료 ★★</div>`;
+    }
 
     grid.innerHTML += `
         <div style="background:#1e242b; padding:12px; border:1px solid ${eqOwner ? '#d29922' : '#30363d'}; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;">
@@ -14186,7 +14334,8 @@ function getPetAtkMaxCd(pet) {
     let isSpiritAwakened = false;
     if (pet.equippedItemUid) {
         let foundItem = idGame.ownedItems.find(i => i.uid === pet.equippedItemUid);
-        if (foundItem && foundItem.isAwakened && foundItem.itemKey === 'spirit') {
+        // [버그 수정] 1차 각성(isAwakened) 또는 2차 각성(isAwakened2) 여부 모두 체크
+        if (foundItem && (foundItem.isAwakened || foundItem.isAwakened2) && foundItem.itemKey === 'spirit') {
             isSpiritAwakened = true;
         }
     }
@@ -14330,7 +14479,7 @@ function sellItem(uid) {
         }
     }
 }
-// 페트 각성 로직
+// 페트 1차 각성 로직
 function awakenPet(petId) {
     let pet = idGame.fieldPets.find(p => p.id === petId) || idGame.warehouse.find(p => p.id === petId);
     if (!pet) return;
@@ -14340,10 +14489,14 @@ function awakenPet(petId) {
 
     idGame.diamond -= 10000;
     pet.isAwakened = true;
-    // 능력치 영구 20% 상승
+    
+    // 기본 스탯뿐만 아니라 '레벨업 당 성장치'도 같이 올려야 실질적인 20% 뻥튀기가 적용
     pet.baseAtk = Math.floor(pet.baseAtk * 1.2);
     pet.baseDef = Math.floor(pet.baseDef * 1.2);
     pet.baseHp = Math.floor(pet.baseHp * 1.2);
+    if (pet.gatk) pet.gatk = parseFloat((pet.gatk * 1.2).toFixed(2));
+    if (pet.gdef) pet.gdef = parseFloat((pet.gdef * 1.2).toFixed(2));
+    if (pet.ghp) pet.ghp = Math.floor(pet.ghp * 1.2);
     
     addGameLog(`✨ [${pet.name}] 각성 성공! 능력치가 영구적으로 20% 상승했습니다.`, '#ffcc00');
     saveGame();
@@ -14680,6 +14833,59 @@ function awakenItem(uid) {
     });
     
     addGameLog(`✨ [${ITEM_DATABASE[itemObj.itemKey].name}] 각성 완료!`, '#fca311');
+    saveGame();
+    renderWarehouse();
+    updateUI();
+}
+
+// 페트 2차 각성 로직
+function awakenPet2(petId) {
+    let pet = idGame.fieldPets.find(p => p.id === petId) || idGame.warehouse.find(p => p.id === petId);
+    if (!pet) return;
+    if (!pet.isAwakened) return alert("1차 각성을 먼저 진행해야 합니다.");
+    if (pet.isAwakened2) return alert("이미 2차 각성한 페트입니다.");
+
+    const AWAKEN2_COST = 50e20; // 50해 스톤
+    let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
+    
+    if (currentStone < AWAKEN2_COST) return alert(`스톤이 부족합니다 (50해 필요 / 현재: ${formatKoreanNumber(currentStone)})`);
+
+    idGame.stone = currentStone - AWAKEN2_COST;
+    pet.isAwakened2 = true;
+    
+    // 성장 스탯도 함께 50% 폭증
+    pet.baseAtk = Math.floor(pet.baseAtk * 1.5);
+    pet.baseDef = Math.floor(pet.baseDef * 1.5);
+    pet.baseHp = Math.floor(pet.baseHp * 1.5);
+    if (pet.gatk) pet.gatk = parseFloat((pet.gatk * 1.5).toFixed(2));
+    if (pet.gdef) pet.gdef = parseFloat((pet.gdef * 1.5).toFixed(2));
+    if (pet.ghp) pet.ghp = Math.floor(pet.ghp * 1.5);
+    
+    addGameLog(`🌟 [${pet.name}] 2차 각성 성공! 능력치가 영구적으로 50% 추가 상승했습니다.`, '#ff4d4d');
+    saveGame();
+    renderWarehouse();
+    updateUI();
+}
+
+// 아이템 2차 각성 로직
+function awakenItem2(uid) {
+    let itemObj = idGame.ownedItems.find(i => i.uid === uid);
+    if (!itemObj || !itemObj.isAwakened || itemObj.isAwakened2) return;
+    
+    const AWAKEN2_COST = 30e20; // 30해 스톤
+    let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
+    
+    if (currentStone < AWAKEN2_COST) return alert(`스톤이 부족합니다 (30해 필요 / 현재: ${formatKoreanNumber(currentStone)})`);
+    
+    idGame.stone = currentStone - AWAKEN2_COST;
+    itemObj.isAwakened2 = true;
+    
+    // 장착 중인 페트에게 2차 각성 상태 전파
+    idGame.fieldPets.forEach(p => {
+        if (p.equippedItemUid === uid) p.isItemAwakened2 = true;
+    });
+    
+    addGameLog(`🌟 [${ITEM_DATABASE[itemObj.itemKey].name}] 2차 각성 완료!`, '#ff4d4d');
     saveGame();
     renderWarehouse();
     updateUI();
