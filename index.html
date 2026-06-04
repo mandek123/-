@@ -5325,6 +5325,8 @@ const NOTICE_DATABASE = [
             
             <strong>2) 만득이 키우기 업데이트</strong>
             <span>- 2차 각성 시스템이 추가되었습니다. (페트 및 아이템 적용)</span>
+            <span>- 각성(1차/2차) 조건 달성 시 창고 탭과 해당 페트/장비에 직관적인 알림 효과(말풍선 및 네온 깜빡임)가 추가되었습니다.</span>
+            <span>- 고층 진입 시 골드 던전의 스톤 획득량이 과도하게 폭증하지 않도록 보상 밸런스가 안정적으로 조정되었습니다.</span>
             <span>- 재화(스톤) 보유량 및 훈련 비용의 최대 상한선이 9,000해(9e23)로 확장되어 오버플로우(NaN) 현상을 방지했습니다.</span>
             <span>- 아이템 공속 쿨타임이 비정상적으로 중첩 적용되던 버그를 고정 수치로 정상화했습니다.</span>
             <span>- 전투 시 적군 공격에 아군 방어력 스케일링이 누락되던 현상 및 창고 대기실 UI 스탯 미적용 등 각종 표기/연산 버그가 완벽히 수정되었습니다.</span>
@@ -12551,15 +12553,18 @@ multiplier = Number(multiplier);
     if (type === 'jackpot') {
         spinRoulette(multiplier); 
     } else if (type === 'gold') {
-        let rewardStone = Math.floor((30000 + (origStage * 3000)) * multiplier);
+        // [밸런스 패치] 400스테이지 기준 약 10해 수준으로 보상 계수 대폭 하향 (x300 -> x13)
+        let normalMobReward = 15 + 3 * origStage * Math.pow(1.10, origStage - 1);
+        let rewardStone = Math.floor((30000 + (normalMobReward * 13)) * multiplier); 
+        
         // 안전 더하기: 값이 없거나 NaN이면 0으로 간주
         idGame.stone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone) ? idGame.stone : 0) + rewardStone;
-        addGameLog(`💰 던전 클리어! ${rewardStone.toLocaleString()} 스톤 획득!`, '#fca311');
+        addGameLog(`💰 던전 클리어! ${formatKoreanNumber(rewardStone)} 스톤 획득!`, '#fca311');
         
         if (Math.random() < 0.5) { 
-            let bonusStone = Math.floor((50000 + (origStage * 5000)) * multiplier);
+            let bonusStone = Math.floor((50000 + (normalMobReward * 20)) * multiplier); 
             idGame.stone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone) ? idGame.stone : 0) + bonusStone;
-            addGameLog(`🎉 [행운] ${bonusStone.toLocaleString()} 스톤 추가!`, '#ffcc00'); 
+            addGameLog(`🎉 [행운] ${formatKoreanNumber(bonusStone)} 스톤 추가!`, '#ffcc00'); 
         }
     } else if (type === 'diamond') {
         let rewardDia = Math.floor(500 * multiplier);
