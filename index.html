@@ -13338,13 +13338,13 @@ function updateUI() {
     let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
     let currentDia = (typeof idGame.diamond === 'number' && !isNaN(idGame.diamond)) ? idGame.diamond : 0;
     
-    // 아이템 각성 가능 체크 (1차: 1억 스톤, 2차: 30해 스톤)
+    // 아이템 각성 가능 체크 (1차: 1억 스톤, 2차: 100해 스톤)
     if (Array.isArray(idGame.ownedItems)) {
         if (currentStone >= 100000000 && idGame.ownedItems.some(i => !i.isAwakened)) canAwaken1 = true;
-        if (currentStone >= 30e20 && idGame.ownedItems.some(i => i.isAwakened && !i.isAwakened2)) canAwaken2 = true;
+        if (currentStone >= 100e20 && idGame.ownedItems.some(i => i.isAwakened && !i.isAwakened2)) canAwaken2 = true;
     }
     
-    // 페트 각성 가능 체크 (1차: 레벨 50 & 1만 다이아, 2차: 50해 스톤)
+    // 페트 각성 가능 체크 (1차: 레벨 50 & 1만 다이아, 2차: 150해 스톤)
     let hasPet1 = false; let hasPet2 = false;
     if (Array.isArray(idGame.fieldPets)) {
         hasPet1 = hasPet1 || idGame.fieldPets.some(p => !p.isAwakened && p.level >= 50);
@@ -13356,7 +13356,7 @@ function updateUI() {
     }
     
     if (currentDia >= 10000 && hasPet1) canAwaken1 = true;
-    if (currentStone >= 50e20 && hasPet2) canAwaken2 = true;
+    if (currentStone >= 150e20 && hasPet2) canAwaken2 = true;
 
     // 현재 각성 상태 결정 (2차가 우선순위 높음)
     let awakenState = canAwaken2 ? 2 : (canAwaken1 ? 1 : 0);
@@ -13752,8 +13752,9 @@ function renderWarehouse() {
                 if (currentDia >= 10000) isTargetBlink1 = true;
                 awakenStatus = `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">1차 각성 (1만 다이아)</button>`;
             } else if (pet.isAwakened && !pet.isAwakened2) {
-                if (currentStone >= 50e20) isTargetBlink2 = true; 
-                awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#8a2be2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (50해 스톤)</button>`;
+                // [수정] 페트 2차 각성 체크 150해로 변경
+                if (currentStone >= 150e20) isTargetBlink2 = true; 
+                awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#8a2be2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (150해 스톤)</button>`;
             } else if (pet.isAwakened2) {
                 awakenStatus = `<div style="color:#8a2be2; font-size:10px; margin-top:5px; font-weight:bold;">★★ 2차 각성 완료 ★★</div>`;
             } else if (pet.isAwakened) {
@@ -13807,8 +13808,9 @@ function renderWarehouse() {
                     if (currentDia >= 10000) isTargetBlink1 = true;
                     awakenStatus = `<button onclick="awakenPet('${pet.id}')" style="width:100%; margin-top:5px; font-size:11px; padding:4px; background:#ffcc00; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">1차 각성 (1만 다이아)</button>`;
                 } else if (pet.isAwakened && !pet.isAwakened2) {
-                    if (currentStone >= 50e20) isTargetBlink2 = true; 
-                    awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#8a2be2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (50해 스톤)</button>`;
+                    // [수정] 페트 2차 각성 체크 150해로 변경
+                    if (currentStone >= 150e20) isTargetBlink2 = true; 
+                    awakenStatus = `<button onclick="awakenPet2('${pet.id}')" style="width:100%; margin-top:5px; font-size:10px; padding:4px; background:#8a2be2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">2차 각성 (150해 스톤)</button>`;
                 } else if (pet.isAwakened2) {
                     awakenStatus = `<div style="color:#8a2be2; font-size:10px; margin-top:5px; font-weight:bold;">★★ 2차 각성 완료 ★★</div>`;
                 } else if (pet.isAwakened) {
@@ -13872,8 +13874,9 @@ function renderWarehouse() {
                     if (currentStone >= 100000000) isTargetBlink1 = true;
                     awakenItemBtn = `<button onclick="awakenItem('${itemObj.uid}')" style="width:100%; background:#fca311; border:none; padding:4px 0; border-radius:4px; color:#000; font-weight:bold; cursor:pointer; font-size:10px;">1차 각성 (1억 스톤)</button>`;
                 } else if (!itemObj.isAwakened2) {
-                    if (currentStone >= 30e20) isTargetBlink2 = true; 
-                    awakenItemBtn = `<button onclick="awakenItem2('${itemObj.uid}')" style="width:100%; background:#8a2be2; border:none; padding:4px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:10px;">2차 각성 (30해 스톤)</button>`;
+                    // [수정] 아이템 2차 각성 체크 100해로 변경
+                    if (currentStone >= 100e20) isTargetBlink2 = true; 
+                    awakenItemBtn = `<button onclick="awakenItem2('${itemObj.uid}')" style="width:100%; background:#8a2be2; border:none; padding:4px 0; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer; font-size:10px;">2차 각성 (100해 스톤)</button>`;
                 } else {
                     awakenItemBtn = `<div style="color:#8a2be2; font-size:10px; font-weight:bold; margin-top:4px;">★★ 2차 각성 완료 ★★</div>`;
                 }
@@ -14973,10 +14976,10 @@ function awakenPet2(petId) {
     if (!pet.isAwakened) return alert("1차 각성을 먼저 진행해야 합니다.");
     if (pet.isAwakened2) return alert("이미 2차 각성한 페트입니다.");
 
-    const AWAKEN2_COST = 50e20; // 50해 스톤
+    const AWAKEN2_COST = 150e20; // [수정] 150해 스톤
     let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
     
-    if (currentStone < AWAKEN2_COST) return alert(`스톤이 부족합니다 (50해 필요 / 현재: ${formatKoreanNumber(currentStone)})`);
+    if (currentStone < AWAKEN2_COST) return alert(`스톤이 부족합니다 (150해 필요 / 현재: ${formatKoreanNumber(currentStone)})`);
 
     idGame.stone = currentStone - AWAKEN2_COST;
     pet.isAwakened2 = true;
@@ -15000,10 +15003,10 @@ function awakenItem2(uid) {
     let itemObj = idGame.ownedItems.find(i => i.uid === uid);
     if (!itemObj || !itemObj.isAwakened || itemObj.isAwakened2) return;
     
-    const AWAKEN2_COST = 30e20; // 30해 스톤
+    const AWAKEN2_COST = 100e20; // [수정] 100해 스톤
     let currentStone = (typeof idGame.stone === 'number' && !isNaN(idGame.stone)) ? idGame.stone : 0;
     
-    if (currentStone < AWAKEN2_COST) return alert(`스톤이 부족합니다 (30해 필요 / 현재: ${formatKoreanNumber(currentStone)})`);
+    if (currentStone < AWAKEN2_COST) return alert(`스톤이 부족합니다 (100해 필요 / 현재: ${formatKoreanNumber(currentStone)})`);
     
     idGame.stone = currentStone - AWAKEN2_COST;
     itemObj.isAwakened2 = true;
