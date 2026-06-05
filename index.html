@@ -14783,14 +14783,24 @@ function enterDungeon(type) {
         idGame.teamCurHp = idGame.teamMaxHp; 
         updateUI();
 
-        // 3. 변경된 던전 난이도 적용
+        // 3. 구간별 던전 난이도(스테이지) 조정
+        let diffOffset = 0;
+        if (idGame.dungeon.originalStage < 100) {
+            // 1스테이지엔 +30단계, 99스테이지엔 +1단계로 서서히 난이도 격차가 줄어듦
+            diffOffset = Math.floor(30 * (1 - (idGame.dungeon.originalStage / 100)));
+        } else if (idGame.dungeon.originalStage < 250) {
+            diffOffset = 0;  // 중반: 비슷하게
+        } else {
+            diffOffset = -1; // 후반: -1단계 하향 조정
+        }
+
         if (type === 'jackpot') {
-            // 잭팟 던전: 현재 스테이지 + 5단계
-            idGame.stage = idGame.dungeon.originalStage + 5;
+            // 잭팟 던전: 보스전 특성상 기본 +5단계 추가 배율 유지
+            idGame.stage = Math.max(1, idGame.dungeon.originalStage + diffOffset + 5);
             idGame.mobsKilled = 9; 
         } else {
-            // 골드, 다이아 던전: 현재 스테이지 - 1단계 (최소 1스테이지 보정)
-            idGame.stage = Math.max(1, idGame.dungeon.originalStage - 1);
+            // 골드, 다이아 던전
+            idGame.stage = Math.max(1, idGame.dungeon.originalStage + diffOffset);
             idGame.mobsKilled = 0; 
         }
         
