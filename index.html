@@ -13515,12 +13515,17 @@ function renderShop() {
     // 체력 단련 비용 상한선 적용
     let hpCost = Math.min(Math.floor(50 * Math.pow(1.4, idGame.upgrades.hpLv - 1)), MAX_STONE);
     
-    // [수정] 변수 선언 추가 (이게 없어서 상점이 안 떴던 겁니다)
+    // [수정] 변수 선언 추가
     let now = Date.now();
     let goldLeft = (idGame.buffs && idGame.buffs.goldMultiplier.endTime > now) ? Math.ceil((idGame.buffs.goldMultiplier.endTime - now) / 60000) : 0;
     let atkLeft = (idGame.buffs && idGame.buffs.atkMultiplier.endTime > now) ? Math.ceil((idGame.buffs.atkMultiplier.endTime - now) / 60000) : 0;
     // [추가] 피해 감소 버프 남은 시간 계산
     let defLeft = (idGame.buffs && idGame.buffs.dmgReduction && idGame.buffs.dmgReduction.endTime > now) ? Math.ceil((idGame.buffs.dmgReduction.endTime - now) / 60000) : 0;
+    
+    // [수정] 다이아 부족 시 버튼 비활성화 상태 계산
+    let goldDisabled = goldLeft > 0 || idGame.diamond < 1000;
+    let atkDisabled = atkLeft > 0 || idGame.diamond < 1000;
+    let defDisabled = defLeft > 0 || idGame.diamond < 2000;
     
     let html = `
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; flex-direction:column; justify-content:space-between;">
@@ -13560,22 +13565,21 @@ function renderShop() {
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #fca311; display:flex; flex-direction:column; gap:10px;">
             <div style="font-size:14px; font-weight:bold; color:#fca311;">스톤 1.5배 증가 (30분)</div>
             <div style="font-size:12px; color:#8b949e;">사냥 시 획득 스톤 50% 증가</div>
-            <button onclick="activateBuff('goldBoost')" ${goldLeft > 0 ? 'disabled' : ''} style="width:100%; padding:8px; background:${goldLeft > 0 ? '#30363d' : '#fca311'}; border:none; border-radius:6px; color:${goldLeft > 0 ? '#8b949e' : '#000'}; font-weight:bold; cursor:${goldLeft > 0 ? 'not-allowed' : 'pointer'};">
+            <button onclick="activateBuff('goldBoost')" ${goldDisabled ? 'disabled' : ''} style="width:100%; padding:8px; background:${goldDisabled ? '#30363d' : '#fca311'}; border:none; border-radius:6px; color:${goldDisabled ? '#8b949e' : '#000'}; font-weight:bold; cursor:${goldDisabled ? 'not-allowed' : 'pointer'};">
                 ${goldLeft > 0 ? `대기중 (${goldLeft}분)` : '1,000 다이아'}
             </button>
         </div>
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #ff4d4d; display:flex; flex-direction:column; gap:10px;">
             <div style="font-size:14px; font-weight:bold; color:#ff4d4d;">공격력 증가 (30분)</div>
             <div style="font-size:12px; color:#8b949e;">모든 페트 공격력 50% 증가</div>
-            <button onclick="activateBuff('atkBoost')" ${atkLeft > 0 ? 'disabled' : ''} style="width:100%; padding:8px; background:${atkLeft > 0 ? '#30363d' : '#ff4d4d'}; border:none; border-radius:6px; color:${atkLeft > 0 ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${atkLeft > 0 ? 'not-allowed' : 'pointer'};">
+            <button onclick="activateBuff('atkBoost')" ${atkDisabled ? 'disabled' : ''} style="width:100%; padding:8px; background:${atkDisabled ? '#30363d' : '#ff4d4d'}; border:none; border-radius:6px; color:${atkDisabled ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${atkDisabled ? 'not-allowed' : 'pointer'};">
                 ${atkLeft > 0 ? `대기중 (${atkLeft}분)` : '1,000 다이아'}
             </button>
         </div>
-        <!-- [추가] 피해 감소 버프 (1시간) -->
         <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #539bf5; display:flex; flex-direction:column; gap:10px;">
             <div style="font-size:14px; font-weight:bold; color:#539bf5;">피해 감소 30% (1시간)</div>
             <div style="font-size:12px; color:#8b949e;">몬스터에게 받는 최종 피해 30% 감소</div>
-            <button onclick="activateBuff('defBoost')" ${defLeft > 0 ? 'disabled' : ''} style="width:100%; padding:8px; background:${defLeft > 0 ? '#30363d' : '#539bf5'}; border:none; border-radius:6px; color:${defLeft > 0 ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${defLeft > 0 ? 'not-allowed' : 'pointer'};">
+            <button onclick="activateBuff('defBoost')" ${defDisabled ? 'disabled' : ''} style="width:100%; padding:8px; background:${defDisabled ? '#30363d' : '#539bf5'}; border:none; border-radius:6px; color:${defDisabled ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${defDisabled ? 'not-allowed' : 'pointer'};">
                 ${defLeft > 0 ? `대기중 (${defLeft}분)` : '2,000 다이아'}
             </button>
         </div>
@@ -13587,6 +13591,7 @@ function renderShop() {
         <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
         ${Object.keys(ITEM_DATABASE).map(key => {
             let item = ITEM_DATABASE[key];
+            let itemDisabled = idGame.diamond < item.price;
             return `
             <div style="background:#1e242b; padding:15px; border-radius:8px; border:1px solid #30363d; display:flex; flex-direction:column; gap:10px;">
                 <div style="display:flex; align-items:center; gap:15px;">
@@ -13596,8 +13601,8 @@ function renderShop() {
                         <div style="font-size:12px; color:#8b949e;">${item.type}</div>
                     </div>
                 </div>
-                <button id="shop-item-btn-${key}" onclick="buyItem('${key}')" 
-                    style="width:100%; padding:8px; background:${idGame.diamond >= item.price ? '#539bf5' : '#30363d'}; border:none; border-radius:6px; color:#fff; font-weight:bold; cursor:pointer;">
+                <button id="shop-item-btn-${key}" onclick="buyItem('${key}')" ${itemDisabled ? 'disabled' : ''}
+                    style="width:100%; padding:8px; background:${itemDisabled ? '#30363d' : '#539bf5'}; border:none; border-radius:6px; color:${itemDisabled ? '#8b949e' : '#fff'}; font-weight:bold; cursor:${itemDisabled ? 'not-allowed' : 'pointer'};">
                     ${item.price.toLocaleString()} 다이아
                 </button>
             </div>`;
