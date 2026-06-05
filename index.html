@@ -13472,32 +13472,39 @@ function processOfflineReward() {
 }
 
 function calcTeamStats() {
-    let oldMaxHp = idGame.teamMaxHp;
-    
-    // [수정] 체력 증가 배율 상향 조정 (생존력 강화)
-    let newHp = 100;
-    let lv = idGame.upgrades.hpLv;
-    
-    if (lv <= 30) {
-        // 1~30레벨: 18%씩 증가 (기존 15% -> 18%)
-        newHp = Math.floor(100 * Math.pow(1.18, lv - 1));
-    } else if (lv <= 60) {
-        // 31~60레벨: 12%씩 증가 (기존 8% -> 12%)
-        let hpAt30 = 100 * Math.pow(1.18, 29);
-        newHp = Math.floor(hpAt30 * Math.pow(1.12, lv - 30));
-    } else {
-        // 61레벨 이상: 5%씩 증가 (기존 3% -> 5%)
-        let hpAt30 = 100 * Math.pow(1.18, 29);
-        let hpAt60 = hpAt30 * Math.pow(1.12, 30);
-        newHp = Math.floor(hpAt60 * Math.pow(1.05, lv - 60));
-    }
-    
-    idGame.teamMaxHp = newHp;
-    idGame.teamCurHp += (idGame.teamMaxHp - oldMaxHp); 
-    
-    if (idGame.teamCurHp > idGame.teamMaxHp) {
-        idGame.teamCurHp = idGame.teamMaxHp;
-    }
+    let oldMaxHp = idGame.teamMaxHp;
+    
+    // [수정] 체력 증가 배율 상향 조정 (생존력 강화)
+    let newHp = 100;
+    let lv = idGame.upgrades.hpLv;
+    
+    if (lv <= 30) {
+        newHp = Math.floor(100 * Math.pow(1.18, lv - 1));
+    } else if (lv <= 60) {
+        let hpAt30 = 100 * Math.pow(1.18, 29);
+        newHp = Math.floor(hpAt30 * Math.pow(1.12, lv - 30));
+    } else {
+        let hpAt30 = 100 * Math.pow(1.18, 29);
+        let hpAt60 = hpAt30 * Math.pow(1.12, 30);
+        newHp = Math.floor(hpAt60 * Math.pow(1.05, lv - 60));
+    }
+    
+    // [버그 완벽 차단] 팀 체력이 Infinity가 되는 것 방지
+    newHp = isFinite(newHp) ? newHp : 1e250;
+    newHp = Math.min(1e250, Math.max(100, newHp));
+    
+    idGame.teamMaxHp = newHp;
+    
+    // [버그 완벽 차단] 현재 체력이 NaN이 된 경우 정상 체력으로 복구
+    if (isNaN(idGame.teamCurHp) || !isFinite(idGame.teamCurHp)) {
+        idGame.teamCurHp = idGame.teamMaxHp;
+    }
+    
+    idGame.teamCurHp += (idGame.teamMaxHp - oldMaxHp); 
+    
+    if (idGame.teamCurHp > idGame.teamMaxHp) {
+        idGame.teamCurHp = idGame.teamMaxHp;
+    }
 }
 
 function renderShop() {
@@ -14171,9 +14178,10 @@ function resetGame() {
         idGame.started = false; 
         if (typeof autoSaveInterval !== 'undefined') clearInterval(autoSaveInterval);
         
-        // 데이터 삭제
+        // 꼬여버린 세이브 데이터만 완벽하게 삭제
         localStorage.removeItem('idleGameSave_v3'); 
-        // [핵심] 유저 고유 ID를 지우는 코드를 삭제했습니다! (이제 초기화해도 복제인간이 생기지 않음)
+        
+        // [핵심] 유저 고유 ID(game_user_id)를 지우는 코드를 삭제했습니다! (랭킹 본인인증 유지)
         
         // 새로고침
         location.reload(); 
@@ -14255,10 +14263,13 @@ function getDetailedPassiveBonus(pet) {
         let val = (isPercent && !isFlatStat) ? rawVal / 100 : rawVal;
 
         // 3. 패시브 효과 적용
-        if (['격노', '폭주', '투혼'].includes(db.name)) {
-            bonus.atkMult += val;
-            if (['폭주', '투혼'].includes(db.name) && isOwner) bonus.defMult -= 0.1; 
-        } else if (['전투 집중', '야수의 포효', '심장 관통', '불타는 날개', '광휘의 화조'].includes(db.name)) {
+        if (['격노', '폭주', '투혼'].includes(db.name)) {
+            bonus.atkMult += val;
+            // [버그 완벽 차단] 레벨이 너무 높아져서 방어력이 마이너스가 되는 현상 방지 (최소 10% 유지)
+            if (['폭주', '투혼'].includes(db.name) && isOwner) {
+                bonus.defMult = Math.max(0.1, bonus.defMult - 0.1); 
+            }
+        } else if (['전투 집중', '야수의 포효', '심장 관통', '불타는 날개', '광휘의 화조'].includes(db.name)) {
             bonus.atkMult += 0.05;
             if (db.name === '전투 집중') bonus.hit += val;
             if (db.name === '야수의 포효') bonus.dodge += val;
