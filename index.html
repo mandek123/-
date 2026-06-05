@@ -12330,6 +12330,7 @@ document.head.appendChild(notiStyle);
 
 let autoSaveInterval; // 자동 저장을 관리할 변수
 let idGame = {
+    season: 2, // [추가] 시즌2 인증 번호
     started: false,
     stage: 1,
     mobsKilled: 0,
@@ -14019,6 +14020,7 @@ function showDmgText(text, x, y, className) {
 
 function saveGame() {
     const saveData = {
+        season: idGame.season, // [추가] 저장 시 시즌 번호 기록
         stage: idGame.stage,
         mobsKilled: idGame.mobsKilled,
         stone: idGame.stone,
@@ -14045,6 +14047,12 @@ function loadGame() {
     if (field) field.innerHTML = '';
 
     const data = JSON.parse(saved);
+    
+    // [추가] 이전 시즌 데이터 접근 원천 차단
+    if (data.season !== 2) {
+        console.warn("이전 시즌 데이터 접근 차단. 초기화 진행.");
+        return false; 
+    }
     
     idGame.stage = data.stage || 1;
     idGame.mobsKilled = data.mobsKilled || 0; 
@@ -14167,13 +14175,14 @@ document.addEventListener('visibilitychange', () => {
 
 function resetGame() {
     if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
-        // [핵심 수정] 새로고침 시 자동 저장이 발동하지 않도록 게임 진행 상태를 먼저 끕니다.
+        // 새로고침 시 자동 저장이 발동하지 않도록 게임 진행 상태를 먼저 끕니다.
         idGame.started = false; 
         if (typeof autoSaveInterval !== 'undefined') clearInterval(autoSaveInterval);
         
         // 데이터 삭제
         localStorage.removeItem('idleGameSave_v3'); 
-        localStorage.removeItem('game_user_id'); 
+        // [핵심 수정] 아래 코드를 삭제하여 유저의 고유 ID(game_user_id)는 남겨둡니다!
+        // localStorage.removeItem('game_user_id'); 
         
         // 새로고침
         location.reload(); 
@@ -14961,7 +14970,8 @@ function submitRanking(nickname) {
         timestamp: firebase.database.ServerValue.TIMESTAMP
     };
 
-    db.ref('rankings/' + userId).set(rankingData)
+    // [수정] DB 경로를 rankings_s2로 변경하여 새 시즌 랭킹에 등록
+    db.ref('rankings_s2/' + userId).set(rankingData)
       .then(() => {
           alert(`${nickname}님의 기록이 등록/갱신되었습니다!\n현재 스테이지: ${stageInfo}`);
           fetchRanking(); 
@@ -14969,6 +14979,37 @@ function submitRanking(nickname) {
       .catch((e) => {
           alert("등록 실패: " + e.message);
       });
+}
+
+function fetchRanking() {
+    const board = document.getElementById('ranking-board');
+    board.innerHTML = `<div style="color:#8b949e; font-size:12px; text-align:center; padding:10px;">불러오는 중...</div>`;
+
+    // [핵심 수정] 데이터를 불러오는 경로를 'rankings_s2'로 변경합니다!
+    db.ref('rankings_s2').orderByChild('stage').limitToLast(10).once('value', (snapshot) => {
+        let html = `<div style="color:#8b949e; font-size:12px; margin-bottom:5px;">상위 10위 랭킹</div>`;
+        let rankings = [];
+
+        snapshot.forEach((childSnapshot) => {
+            rankings.push(childSnapshot.val());
+        });
+
+        rankings.sort((a, b) => b.stage - a.stage || b.mobsKilled - a.mobsKilled);
+
+        if (rankings.length === 0) {
+            html += `<div style="color:#fff; padding:5px;">등록된 기록이 없습니다.</div>`;
+        } else {
+            rankings.forEach((d, idx) => {
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1) + '위';
+                html += `
+                    <div style="padding:5px; border-bottom:1px solid #30363d; font-size:13px;">
+                        ${medal} <b style="color:#fff;">${d.nickname}</b> - ${d.stage}스테이지 (${d.mobsKilled}/10)
+                    </div>
+                `;
+            });
+        }
+        board.innerHTML = html;
+    });
 }
 
 function fetchRanking() {
