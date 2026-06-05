@@ -14166,18 +14166,18 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function resetGame() {
-    if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
-        // [핵심 수정] 새로고침 시 자동 저장이 발동하지 않도록 게임 진행 상태를 먼저 끕니다.
-        idGame.started = false; 
-        if (typeof autoSaveInterval !== 'undefined') clearInterval(autoSaveInterval);
-        
-        // 데이터 삭제
-        localStorage.removeItem('idleGameSave_v3'); 
-        localStorage.removeItem('game_user_id'); 
-        
-        // 새로고침
-        location.reload(); 
-    }
+    if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
+        // 새로고침 시 자동 저장이 발동하지 않도록 게임 진행 상태를 먼저 끕니다.
+        idGame.started = false; 
+        if (typeof autoSaveInterval !== 'undefined') clearInterval(autoSaveInterval);
+        
+        // 데이터 삭제
+        localStorage.removeItem('idleGameSave_v3'); 
+        // [핵심] 유저 고유 ID를 지우는 코드를 삭제했습니다! (이제 초기화해도 복제인간이 생기지 않음)
+        
+        // 새로고침
+        location.reload(); 
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14972,33 +14972,53 @@ function submitRanking(nickname) {
 }
 
 function fetchRanking() {
-    const board = document.getElementById('ranking-board');
-    board.innerHTML = `<div style="color:#8b949e; font-size:12px; text-align:center; padding:10px;">불러오는 중...</div>`;
+    const board = document.getElementById('ranking-board');
+    board.innerHTML = `<div style="color:#8b949e; font-size:12px; text-align:center; padding:10px;">불러오는 중...</div>`;
 
-    db.ref('rankings').orderByChild('stage').limitToLast(10).once('value', (snapshot) => {
-        let html = `<div style="color:#8b949e; font-size:12px; margin-bottom:5px;">상위 10위 랭킹</div>`;
-        let rankings = [];
+    // 넉넉하게 최근 50개의 기록을 가져와서 중복을 걸러냅니다.
+    db.ref('rankings').orderByChild('stage').limitToLast(50).once('value', (snapshot) => {
+        let html = `<div style="color:#8b949e; font-size:12px; margin-bottom:5px;">상위 10위 랭킹</div>`;
+        
+        // [핵심] 닉네임별로 가장 높은 기록 하나만 담을 보관함
+        let userMap = {}; 
 
-        snapshot.forEach((childSnapshot) => {
-            rankings.push(childSnapshot.val());
-        });
+        snapshot.forEach((childSnapshot) => {
+            let d = childSnapshot.val();
+            let name = d.nickname;
+            
+            // 만약 처음 보는 닉네임이거나, 기존에 저장된 같은 닉네임 기록보다 지금 기록이 더 높다면 덮어쓰기
+            if (!userMap[name]) {
+                userMap[name] = d;
+            } else {
+                if (d.stage > userMap[name].stage || (d.stage === userMap[name].stage && d.mobsKilled > userMap[name].mobsKilled)) {
+                    userMap[name] = d;
+                }
+            }
+        });
 
-        rankings.sort((a, b) => b.stage - a.stage || b.mobsKilled - a.mobsKilled);
+        // 딕셔너리(보관함)에 모인 중복 제거된 유저 목록을 다시 배열로 변환
+        let rankings = Object.values(userMap);
 
-        if (rankings.length === 0) {
-            html += `<div style="color:#fff; padding:5px;">등록된 기록이 없습니다.</div>`;
-        } else {
-            rankings.forEach((d, idx) => {
-                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1) + '위';
-                html += `
-                    <div style="padding:5px; border-bottom:1px solid #30363d; font-size:13px;">
-                        ${medal} <b style="color:#fff;">${d.nickname}</b> - ${d.stage}스테이지 (${d.mobsKilled}/10)
-                    </div>
-                `;
-            });
-        }
-        board.innerHTML = html;
-    });
+        // 다시 스테이지와 몹 처치 수 기준으로 내림차순 정렬
+        rankings.sort((a, b) => b.stage - a.stage || b.mobsKilled - a.mobsKilled);
+        
+        // 상위 10명만 짤라서 보여주기
+        rankings = rankings.slice(0, 10);
+
+        if (rankings.length === 0) {
+            html += `<div style="color:#fff; padding:5px;">등록된 기록이 없습니다.</div>`;
+        } else {
+            rankings.forEach((d, idx) => {
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1) + '위';
+                html += `
+                    <div style="padding:5px; border-bottom:1px solid #30363d; font-size:13px;">
+                        ${medal} <b style="color:#fff;">${d.nickname}</b> - ${d.stage}스테이지 (${d.mobsKilled}/10)
+                    </div>
+                `;
+            });
+        }
+        board.innerHTML = html;
+    });
 }
 
 function toggleRankingView() {
