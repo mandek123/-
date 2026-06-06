@@ -5314,6 +5314,20 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 34,
+        date: "26년 6월 6일",
+        title: "26년 6월 6일 업데이트 공지사항입니다.",
+        summary: "1. 만득이 키우기 관련 업데이트",
+        content: `
+            <strong>1) 만득이 키우기 업데이트</strong>
+            <span>- 이전 시즌 유저의 데이터가 현재 시즌 데이터와 충돌하여 부득이 새롭게 초기화를 진행하였습니다. 이전 시즌 유저는 데이터 초기화를 눌러 이용해주시기 바랍니다.</span>
+            <span>- 새로고침 시 체력 유지 : 새로고침 이전의 현재 체력이 데이터에 저장되어 유지되도록 수정되었습니다.</span>
+            <span>- 노데스 판정 악용 방지 : 사망 시 즉시 데이터가 저장되어, 새로고침을 통해 노데스 보상을 획득하는 현상을 수정하였습니다.</span>
+            <span>- 데이터 저장 로직 강화 : 게임 종료 및 탭 전환 시 시스템 데이터 저장이 즉각적으로 이루어지도록 최적화되었습니다.</span>
+        `
+    },
+
+    {
         id: 33,
         date: "26년 6월 5일",
         title: "26년 6월 5일 업데이트 공지사항입니다.",
@@ -12926,6 +12940,7 @@ function exitDungeonProcess() {
 
 function handleGameOver() {
     idGame.diedThisStage = true;
+    saveGame(); // [수정] 사망 즉시 상태 저장 (새로고침 방지)
     
     idGame.monsters.forEach(m => { 
         if (m.el) { m.el.remove(); m.el = null; } 
@@ -12933,12 +12948,10 @@ function handleGameOver() {
     document.querySelectorAll('.idle-entity:not(.facing-right)').forEach(el => el.remove());
 
     if (idGame.dungeon && idGame.dungeon.active) {
-        // 던전에서 죽었을 때
         alert("던전 공략에 실패하여 기존 스테이지로 복귀합니다.");
         addGameLog(`⚠️ 던전 공략에 실패했습니다. 원래 스테이지로 복귀합니다.`, '#ff4d4d');
         exitDungeonProcess();
     } else {
-        // 일반 사냥에서 죽었을 때
         addGameLog(`💀 아군 전멸... STAGE ${idGame.stage}의 진행도가 초기화됩니다.`, '#ff4d4d');
         if (idGame.mobsKilled > 0) {
             idGame.mobsKilled--;
@@ -14032,6 +14045,7 @@ function saveGame() {
         diamond: idGame.diamond,
         upgrades: idGame.upgrades,
         diedThisStage: idGame.diedThisStage,
+        teamCurHp: idGame.teamCurHp, // [수정] 현재 체력 저장 추가
         fieldPets: idGame.fieldPets.map(p => ({...p, el: null})), 
         warehouse: idGame.warehouse.map(p => ({...p, el: null})),
         ownedItems: idGame.ownedItems || [],        
@@ -14059,7 +14073,9 @@ function loadGame() {
     idGame.diamond = data.diamond || 0;
     idGame.upgrades = data.upgrades || { hpLv: 1 };
     idGame.diedThisStage = data.diedThisStage || false;
-    // 추가: 저장된 데이터에서 버프 정보를 가져오거나 없으면 초기값 할당
+    // [수정] 체력 데이터 로드
+    idGame.teamCurHp = data.teamCurHp !== undefined ? data.teamCurHp : 100;
+    
     idGame.buffs = data.buffs || { 
         goldMultiplier: { active: false, endTime: 0 }, 
         atkMultiplier: { active: false, endTime: 0 } 
@@ -14074,11 +14090,8 @@ function loadGame() {
     
     if (idGame.dungeon.active) {
         if (idGame.dungeon.originalStage !== undefined && idGame.dungeon.originalStage > 0) {
-            console.log("던전 복구: 스테이지 복원", idGame.dungeon.originalStage);
             idGame.stage = idGame.dungeon.originalStage;
             idGame.mobsKilled = idGame.dungeon.originalMobs || 0;
-        } else {
-            console.warn("던전 복구 데이터가 올바르지 않아 스테이지를 유지합니다.");
         }
         idGame.dungeon.active = false; 
     }
@@ -14089,12 +14102,10 @@ function loadGame() {
     });
 
     calcTeamStats();
-    idGame.teamCurHp = idGame.teamMaxHp;
+    // [수정] calcTeamStats 이후에 체력 저장값이 최대치를 넘지 않게만 보정
+    if (idGame.teamCurHp > idGame.teamMaxHp) idGame.teamCurHp = idGame.teamMaxHp;
     
-    if (typeof updateFormation === 'function') {
-        updateFormation(); 
-    }
-    
+    if (typeof updateFormation === 'function') updateFormation(); 
     if (typeof renderLogs === 'function') renderLogs(); 
 
     return true;
