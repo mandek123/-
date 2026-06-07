@@ -12505,7 +12505,7 @@ function spawnWave() {
     
     let hpScale, atkScale;
 
-    // [수정] 40스테이지 전후 몬스터 체력/공격력 밸런스 스케일링
+    // 40스테이지 전후 몬스터 체력/공격력 밸런스 스케일링
     if (currentDifficulty <= 40) {
         hpScale = Math.pow(1.14, currentDifficulty - 1);
         atkScale = Math.pow(1.18, currentDifficulty - 1);
@@ -12532,13 +12532,20 @@ function spawnWave() {
     if (!isFinite(baseHp) || baseHp > 1e250) baseHp = 1e250;
     if (!isFinite(baseAtk) || baseAtk > 1e250) baseAtk = 1e250;
 
-    if(isBoss) { baseHp *= 5; baseAtk *= 3; }
+    // [수정] 보스 난이도 3단계 구간별 차등 적용
+    if(isBoss) {
+        if (currentDifficulty < 40) {
+            baseHp *= 2; baseAtk *= 1.5; // 초반 구간 (매우 낮음)
+        } else if (currentDifficulty < 100) {
+            baseHp *= 4; baseAtk *= 2;   // 중반 구간 (완만하게)
+        } else {
+            baseHp *= 5; baseAtk *= 3;   // 후반 구간 (원래의 강력함 유지)
+        }
+    }
     
     // 보스 배율을 곱한 뒤에도 한 번 더 체크
     if (!isFinite(baseHp) || baseHp > 1e250) baseHp = 1e250;
     if (!isFinite(baseAtk) || baseAtk > 1e250) baseAtk = 1e250;
-
-    if(isBoss) { baseHp *= 5; baseAtk *= 3; }
 
     const baseY = 110; 
 
@@ -12553,10 +12560,16 @@ function spawnWave() {
             spawnX -= 15;
         }
 
-        // [추가] 40스테이지부터 보스의 공격 속도를 0.7초로 고정 버프
-        let finalAtkMaxCd = 1.2; // 기본 몬스터 공격 쿨타임
-        if (isBoss && currentDifficulty >= 40) {
-            finalAtkMaxCd = 0.7; // 40스테이지 이상 보스 한정 공속 버프
+        // [수정] 보스 공속 버프: 구간별 차등 적용
+        let finalAtkMaxCd = 1.2;
+        if (isBoss) {
+            if (currentDifficulty >= 100) {
+                finalAtkMaxCd = 0.7; // 100스테이지 이상 (원래대로 강력하게)
+            } else if (currentDifficulty >= 40) {
+                finalAtkMaxCd = 0.9; // 40~99스테이지 완화
+            } else {
+                finalAtkMaxCd = 1.1; // 40스테이지 미만 (더 느리게)
+            }
         }
 
         idGame.monsters.push({
@@ -12571,7 +12584,7 @@ function spawnWave() {
             spd: 50 + (currentDifficulty * 1.5), 
             atkRange: 50,
             atkCooldown: 0.5, 
-            atkMaxCd: finalAtkMaxCd, // [적용] 계산된 공속 적용
+            atkMaxCd: finalAtkMaxCd,
             isBoss: isBoss,
             el: null
         });
@@ -12770,7 +12783,7 @@ let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult);
                     idGame.fieldPets.forEach(p => {
                         // [수정] p.level이 없을 경우(undefined)를 완벽히 대비
                         let pLevel = p.level || 1;
-                        let levelMult = Math.min(1e250, Math.pow(1.015, pLevel - 1)); // [버그 수정] 실제 전투 방어력에도 1.5% 복리 스케일링 적용
+                        let levelMult = Math.min(1e250, Math.pow(1.015, pLevel - 1)); 
                         let petDef = ((p.baseDef || 5) + ((p.gdef || 0.5) * (pLevel - 1) * (p.growthBonus || 1))) * levelMult;
                         petDef = isFinite(petDef) ? Math.floor(petDef) : 1e250;
                         let b = getDetailedPassiveBonus(p);
@@ -12868,6 +12881,7 @@ let dmg = Math.floor(baseDmg * bonus.atkMult * atkMult * atkBuffMult);
 
         // 몬스터 사망
         if (mon.hp <= 0) {
+            // 무한대 방어 (1e100 제한 추가)
             let reward = Math.floor(15 + 3 * idGame.stage * Math.min(1e100, Math.pow(1.10, idGame.stage - 1)));
             // [수정] 스톤 획득량 버프 적용
             if (idGame.buffs.goldMultiplier.active && Date.now() < idGame.buffs.goldMultiplier.endTime) {
@@ -13849,8 +13863,10 @@ function renderWarehouse() {
             idGame.warehouse.forEach((pet, idx) => {
                 let canEquip = idGame.fieldPets.length < 5;
                 let petLevel = pet.level || 1;
-                let levelMult = Math.pow(1.015, petLevel - 1);
-                let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
+                // [수정] 무한대 방어
+                let levelMult = Math.min(1e250, Math.pow(1.015, petLevel - 1));
+                let curAtk = ((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult;
+                curAtk = isFinite(curAtk) ? Math.floor(curAtk) : 1e250;
                 
                 let finalCd = typeof getPetAtkMaxCd === 'function' ? getPetAtkMaxCd(pet) : 2.0;
                 if (pet.equippedItemUid) {
@@ -14271,7 +14287,7 @@ function getDetailedPassiveBonus(pet) {
         const isFlatStat = ['강철', '충성', '철갑의 수호', '대지의 심장'].includes(db.name);
         let val = (isPercent && !isFlatStat) ? rawVal / 100 : rawVal;
 
-        // 패시브 효과 적용 (중첩 불가 로직 적용)
+        // 패시브 효과 적용
         if (['격노', '폭주', '투혼'].includes(db.name)) {
             bonus.atkMult += val;
             if (['폭주', '투혼'].includes(db.name) && isOwner) bonus.defMult -= 0.1; 
@@ -14290,8 +14306,6 @@ function getDetailedPassiveBonus(pet) {
             if (db.name === '광휘') bonus.dodge += val;
             if (db.name === '전광 석화') bonus.crit += val;
         } 
-        
-        // [중첩 방지 적용] 강철류/피해감소
         else if (isFlatStat) {
             bonus.dmgRed = Math.max(bonus.dmgRed, (Math.abs(val) * lateGameBuff)); 
         }
@@ -14310,18 +14324,15 @@ function getDetailedPassiveBonus(pet) {
         if (['암살'].includes(db.name)) { bonus.hit += val; bonus.crit += 0.03; }
         if (['심연의 보주'].includes(db.name)) { bonus.dodge += 0.05; } 
         
-        // [중첩 방지 적용] 흡혈 계열
         const lifestealPassives = ['칠흑의 방벽', '흡혈'];
         if (lifestealPassives.includes(db.name)) {
             bonus.lifeSteal = Math.max(bonus.lifeSteal, (0.08 * lateGameBuff)); 
         }
         
-        // [중첩 방지 적용] 타격회복(힐) 계열
         const healPassives = ['치유', '창공의 권능', '서리의 심장', '청영의 화조'];
         if (healPassives.includes(db.name)) {
             let currentHeal = Math.max(1, Math.floor(idGame.teamMaxHp * 0.0015 * lateGameBuff));
             bonus.heal = Math.max(bonus.heal, currentHeal);
-            
             if (db.name === '청영의 화조') bonus.crit += 0.05;
         }
     };
@@ -14334,23 +14345,12 @@ function getDetailedPassiveBonus(pet) {
         }
     } catch (e) { console.error("패시브 계산 에러:", e); }
 
+    // 특수 스탯 상한선 설정 (회피는 75% 제한)
     bonus.crit = Math.min(1.0, bonus.crit);
     bonus.dodge = Math.min(0.75, bonus.dodge);
     bonus.hit = Math.min(1.0, bonus.hit);
     bonus.lifeSteal = Math.min(1.0, bonus.lifeSteal);
-    try {
-        if (idGame.fieldPets && idGame.fieldPets.length > 0) {
-            idGame.fieldPets.forEach(p => applyStats(p, (p.id === pet.id)));
-        } else {
-            applyStats(pet, true); 
-        }
-    } catch (e) { console.error("패시브 계산 에러:", e); }
-
-    // [추가] 특수 스탯이 100%를 초과하지 않도록 상한선 설정 (회피는 75% 제한)
-    bonus.crit = Math.min(1.0, bonus.crit);
-    bonus.dodge = Math.min(0.75, bonus.dodge);
-    bonus.hit = Math.min(1.0, bonus.hit);
-    bonus.lifeSteal = Math.min(1.0, bonus.lifeSteal);
+    
     return bonus;
 }
 
@@ -14472,8 +14472,11 @@ function updateFormation() {
 
     idGame.fieldPets.forEach((pet, idx) => {
         let petLevel = pet.level || 1;
-        let levelMult = Math.pow(1.015, petLevel - 1);
-        let curAtk = Math.floor(((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult);
+        // [수정] 무한대 방어
+        let levelMult = Math.min(1e250, Math.pow(1.015, petLevel - 1));
+        let curAtk = ((pet.baseAtk || 10) + ((pet.gatk || 1) * (petLevel - 1) * 6 * (pet.growthBonus || 1))) * levelMult;
+        curAtk = isFinite(curAtk) ? Math.floor(curAtk) : 1e250;
+        
         if (curAtk > maxAtk) {
             maxAtk = curAtk;
             maxAtkIdx = idx;
@@ -14495,12 +14498,10 @@ function updateFormation() {
     });
 
     let finalFormation = [...remainingPets, mainDealer];
-
     const baseY = 110; 
     
     finalFormation.forEach((pet, idx) => {
         pet.x = 230 - (idx * 50);
-        
         if (idx % 2 === 0) {
             pet.y = baseY; 
         } else {
