@@ -12505,7 +12505,7 @@ function spawnWave() {
     
     let hpScale, atkScale;
 
-    // 40스테이지 전후 몬스터 체력/공격력 밸런스 스케일링
+    // 구간별 몬스터 체력/공격력 밸런스 스케일링
     if (currentDifficulty <= 40) {
         hpScale = Math.pow(1.14, currentDifficulty - 1);
         atkScale = Math.pow(1.18, currentDifficulty - 1);
@@ -12514,36 +12514,48 @@ function spawnWave() {
         let atkScaleAt40 = Math.pow(1.18, 39);
         hpScale = hpScaleAt40 * Math.pow(1.02, currentDifficulty - 40);
         atkScale = atkScaleAt40 * Math.pow(1.05, currentDifficulty - 40);
-    } else {
+    } else if (currentDifficulty < 250) {
         let hpScaleAt40 = Math.pow(1.14, 39);
         let atkScaleAt40 = Math.pow(1.18, 39);
         let hpScaleAt60 = hpScaleAt40 * Math.pow(1.02, 20);
         let atkScaleAt60 = atkScaleAt40 * Math.pow(1.05, 20);
         
-        // 60스테이지 이후: 공격력 증가폭을 1.015로 완화
+        // 61~249 스테이지: 기본 완화 구간
         hpScale = hpScaleAt60 * Math.pow(1.02, currentDifficulty - 60);
         atkScale = atkScaleAt60 * Math.pow(1.015, currentDifficulty - 60); 
+    } else {
+        let hpScaleAt40 = Math.pow(1.14, 39);
+        let atkScaleAt40 = Math.pow(1.18, 39);
+        let hpScaleAt60 = hpScaleAt40 * Math.pow(1.02, 20);
+        let atkScaleAt60 = atkScaleAt40 * Math.pow(1.05, 20);
+        let hpScaleAt249 = hpScaleAt60 * Math.pow(1.02, 189);
+        let atkScaleAt249 = atkScaleAt60 * Math.pow(1.015, 189);
+
+        // [수정] 250 스테이지 이후: 스탯 증가폭 아주 조금 상향
+        hpScale = hpScaleAt249 * Math.pow(1.025, currentDifficulty - 249);
+        atkScale = atkScaleAt249 * Math.pow(1.02, currentDifficulty - 249);
     }
 
     let baseHp = Math.floor(20 * hpScale);
     let baseAtk = Math.floor(3 * atkScale);
 
-    // [최종 안정화] 몬스터 스탯이 한계치를 넘어 불사신이 되는 현상 차단
     if (!isFinite(baseHp) || baseHp > 1e250) baseHp = 1e250;
     if (!isFinite(baseAtk) || baseAtk > 1e250) baseAtk = 1e250;
 
-    // [수정] 보스 난이도 3단계 구간별 차등 적용
+    // 보스 난이도 구간별 차등 적용
     if(isBoss) {
         if (currentDifficulty < 40) {
-            baseHp *= 2; baseAtk *= 1.5; // 초반 구간 (매우 낮음)
+            baseHp *= 2; baseAtk *= 1.5;
         } else if (currentDifficulty < 100) {
-            baseHp *= 4; baseAtk *= 2;   // 중반 구간 (완만하게)
+            baseHp *= 4; baseAtk *= 2;   
+        } else if (currentDifficulty < 250) {
+            baseHp *= 5; baseAtk *= 3;   
         } else {
-            baseHp *= 5; baseAtk *= 3;   // 후반 구간 (원래의 강력함 유지)
+            // [수정] 250 스테이지 이후 보스 스탯 상향
+            baseHp *= 6; baseAtk *= 4;
         }
     }
     
-    // 보스 배율을 곱한 뒤에도 한 번 더 체크
     if (!isFinite(baseHp) || baseHp > 1e250) baseHp = 1e250;
     if (!isFinite(baseAtk) || baseAtk > 1e250) baseAtk = 1e250;
 
@@ -12560,15 +12572,17 @@ function spawnWave() {
             spawnX -= 15;
         }
 
-        // [수정] 보스 공속 버프: 구간별 차등 적용
         let finalAtkMaxCd = 1.2;
         if (isBoss) {
-            if (currentDifficulty >= 100) {
-                finalAtkMaxCd = 0.7; // 100스테이지 이상 (원래대로 강력하게)
+            if (currentDifficulty >= 250) {
+                // [수정] 250 스테이지 이후 보스 공속 상향
+                finalAtkMaxCd = 0.6;
+            } else if (currentDifficulty >= 100) {
+                finalAtkMaxCd = 0.7; 
             } else if (currentDifficulty >= 40) {
-                finalAtkMaxCd = 0.9; // 40~99스테이지 완화
+                finalAtkMaxCd = 0.9; 
             } else {
-                finalAtkMaxCd = 1.1; // 40스테이지 미만 (더 느리게)
+                finalAtkMaxCd = 1.1; 
             }
         }
 
