@@ -4346,21 +4346,33 @@ button[onclick="resetGame()"]:hover {
 
     <div id="sv-exp-container"><div id="sv-exp-bar"></div></div>
     
-    <div class="sv-hud" id="sv-hud" style="display: none;">
-        <div class="sv-stat-box">
-            Lv.<span id="sv-ui-level">1</span>
-            <div id="sv-hp-container">
-                <div id="sv-hp-bar"></div>
-                <div id="sv-hp-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 11px; line-height: 16px; color: #fff; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;">100 / 100</div>
+    <div class="sv-hud" id="sv-hud" style="display: none; position: absolute; top: 20px; left: 20px; right: 20px; z-index: 10; pointer-events: none;">
+        
+        <div class="sv-stat-box" style="display: flex; align-items: center; gap: 20px; pointer-events: auto;">
+            <div>
+                Lv.<span id="sv-ui-level">1</span>
+                <div id="sv-hp-container">
+                    <div id="sv-hp-bar"></div>
+                    <div id="sv-hp-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 11px; line-height: 16px; color: #fff; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;">100 / 100</div>
+                </div>
+            </div>
+            
+            <div style="border-left: 2px solid #30363d; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+                <div id="sv-ui-weapons" style="color: #a5d6ff; font-weight: bold;">[장비] 없음</div>
+                <div id="sv-ui-stats" style="color: #ffcc00; font-weight: bold;">[능력치] 공격 +0% | 공속 +0% | 이속 +0% | 자석 +0</div>
             </div>
         </div>
-        <div class="sv-stat-box" style="font-size: 28px; color: #fca311; text-align: center;" id="sv-ui-time">00:00</div>
-        <div class="sv-stat-box" style="text-align: right; min-width: 200px;">
+
+        <div class="sv-stat-box" style="font-size: 28px; color: #fca311; text-align: center; position: absolute; left: 50%; transform: translateX(-50%); pointer-events: auto;" id="sv-ui-time">
+            00:00
+        </div>
+
+        <div class="sv-stat-box" style="text-align: right; min-width: 150px; position: absolute; right: 0; pointer-events: auto;">
             <button class="sv-btn sv-btn-close" onclick="sv_closeSurvivalMode()" style="margin-bottom: 10px;">나가기</button><br>
             처치: <span id="sv-ui-kills" style="color: #ff7b72; font-size: 20px;">0</span><br>
         </div>
+        
     </div>
-
     <div id="sv-start-screen" class="sv-modal">
         <div class="sv-modal-title" style="color:#539bf5; font-size:55px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;">
             🦇 만득서바이벌 
@@ -15478,7 +15490,7 @@ let sv_meats = [];
 let sv_particles = [];
 let sv_damageTexts = [];
 let sv_hitFlashAlpha = 0; 
-let sv_nextBossTime = 60; // 💡 첫 보스 등장 시간 (60초)
+let sv_nextBossTime = 60; 
 
 // ==========================================
 // 🎨 이미지 등록 및 캐싱
@@ -15595,17 +15607,34 @@ function sv_initPlayer() {
     };
     sv_addWeapon('bow'); 
     sv_hitFlashAlpha = 0; 
+    sv_updateStatusUI(); // 💡 게임 시작 시 상태창 초기화
 }
 
 function sv_addWeapon(weaponId) {
     let existing = sv_player.weapons.find(w => w.id === weaponId);
     if (existing) {
-        if (existing.level >= 6) return; // 💡 MAX 레벨 6으로 하향
+        if (existing.level >= 6) return; 
         existing.level++;
-        if (weaponId === 'bow') { existing.damage *= 1.25; if (existing.level === 5) existing.pierce += 1; }
-        else if (weaponId === 'spear') { existing.damage *= 1.3; existing.range += 15; }
-        else if (weaponId === 'axe') { existing.damage *= 1.2; existing.speed += 0.2; }
-        else if (weaponId === 'claw') { existing.damage *= 1.25; existing.range += 8; }
+        if (weaponId === 'bow') { 
+            existing.damage *= 1.25; 
+            if (existing.level === 5) existing.pierce += 1; 
+            if (existing.level === 6) existing.maxCd = 0.15; 
+        }
+        else if (weaponId === 'spear') { 
+            existing.damage *= 1.3; 
+            existing.range += 15; 
+            if (existing.level === 6) existing.maxCd = 1.0; // 💡 창 MAX 달성 시 쿨타임 1초 고정
+        }
+        else if (weaponId === 'axe') { 
+            existing.damage *= 1.2; 
+            existing.speed += 0.2; 
+            if (existing.level === 6) existing.maxCd = 2.0; // 💡 도끼 MAX: 2초 주기 요요 효과를 위해 2초 고정
+        }
+        else if (weaponId === 'claw') { 
+            existing.damage *= 1.25; 
+            existing.range += 8; 
+            if (existing.level === 6) existing.maxCd = 1.0; // 💡 클로 MAX: 1초마다 무한 발동 고정
+        }
     } else {
         let db = SV_WEAPON_DB[weaponId];
         sv_player.weapons.push({
@@ -15624,7 +15653,7 @@ function sv_startGame() {
     sv_enemies = []; sv_projectiles = []; sv_aoeEffects = []; 
     sv_gems = []; sv_meats = []; sv_particles = []; sv_damageTexts = [];
     sv_gameTime = 0; sv_killCount = 0;
-    sv_nextBossTime = 60; // 💡 시작 시 보스 출현 타이머 세팅
+    sv_nextBossTime = 60; 
     sv_resize();
     
     sv_gameState = 'playing';
@@ -15655,15 +15684,16 @@ function sv_spawnEnemy() {
     sv_enemies.push({
         x: sv_player.x + Math.cos(angle) * dist, y: sv_player.y + Math.sin(angle) * dist,
         radius: 14 + Math.random() * 6,
-        maxHp: 20 * Math.pow(1.15, difficulty), hp: 20 * Math.pow(1.15, difficulty),
-        damage: 5 + difficulty, speed: 90 + Math.random() * 30 + difficulty,
+        // 💡 적 체력 증가폭을 1.15제곱 -> 1.10제곱으로 완화하여 후반 난이도 하향
+        maxHp: 20 * Math.pow(1.10, difficulty), hp: 20 * Math.pow(1.10, difficulty),
+        damage: 2 + Math.floor(difficulty / 2), 
+        speed: 90 + Math.random() * 30 + difficulty,
         expValue: 1 + Math.floor(difficulty / 3), attackTimer: 0,
         color: `hsl(${Math.random()*20}, 80%, 40%)`, imgObj: imgObj,
         isBoss: false 
     });
 }
 
-// 💡 보스 소환 로직 추가
 function sv_spawnBoss() {
     let angle = Math.random() * Math.PI * 2;
     let dist = Math.max(sv_cw, sv_ch) / 2 + 150; 
@@ -15683,14 +15713,15 @@ function sv_spawnBoss() {
 
     sv_enemies.push({
         x: sv_player.x + Math.cos(angle) * dist, y: sv_player.y + Math.sin(angle) * dist,
-        radius: 28, // 반경 대폭 증가
-        maxHp: 20 * Math.pow(1.15, difficulty) * 15, // 체력 15배
-        hp: 20 * Math.pow(1.15, difficulty) * 15,
-        damage: (5 + difficulty) * 2, // 공격력 2배
-        speed: 130 + difficulty, // 이속 조금 더 빠름
-        expValue: 10 + Math.floor(difficulty), // 다량의 경험치
+        radius: 28, 
+        // 💡 보스 체력 증가폭 역시 1.10제곱으로 낮추고 배율 조정
+        maxHp: 20 * Math.pow(1.10, difficulty) * 12, 
+        hp: 20 * Math.pow(1.10, difficulty) * 12,
+        damage: 5 + difficulty, 
+        speed: 130 + difficulty, 
+        expValue: 10 + Math.floor(difficulty), 
         attackTimer: 0,
-        color: '#ff2222', // 기본 도형일 경우 강렬한 붉은색
+        color: '#ff2222', 
         imgObj: imgObj,
         isBoss: true
     });
@@ -15701,7 +15732,10 @@ function sv_checkLevelUp() {
     if (sv_player.exp >= sv_player.maxExp) {
         sv_player.exp -= sv_player.maxExp;
         sv_player.level++;
-        sv_player.maxExp = Math.floor(sv_player.maxExp * 1.4);
+        
+        // 💡 경험치 증가폭 대폭 완화! (기존 * 1.4배 -> * 1.15배 + 10) 
+        // 20레벨이 넘어가도 부드럽게 레벨업할 수 있습니다.
+        sv_player.maxExp = Math.floor(sv_player.maxExp * 1.15 + 10);
         
         sv_gameState = 'paused';
         const modal = document.getElementById('sv-levelup-modal');
@@ -15716,7 +15750,7 @@ function sv_checkLevelUp() {
 
             if (!w) {
                 pool.push({ name: `${db.name} 획득`, desc: db.desc, icon: iconHtml, action: () => sv_addWeapon(wId) });
-            } else if (w.level < 6) { // 💡 MAX 레벨 6 미만일 때만 등장
+            } else if (w.level < 6) { 
                 let nextLv = w.level + 1;
                 let extraDesc = nextLv === 6 ? "<br><span style='color:#fca311; font-weight:bold;'>[MAX 달성: 특수 형태 진화!]</span>" : "";
                 pool.push({ name: `${db.name} 강화 (Lv.${nextLv})`, desc: `피해량 및 능력치 증가${extraDesc}`, icon: iconHtml, action: () => sv_addWeapon(wId) });
@@ -15746,6 +15780,7 @@ function sv_checkLevelUp() {
                 sv_gameState = 'playing';
                 sv_lastTime = performance.now();
                 sv_updateUI();
+                sv_updateStatusUI(); // 💡 무기/스탯 현황 UI 갱신 호출
                 sv_reqId = requestAnimationFrame(sv_gameLoop);
             };
             container.appendChild(card);
@@ -15769,47 +15804,64 @@ function sv_fireWeapon(w) {
             });
         };
         shoot(angle);
-        if (w.level >= 6) { shoot(angle - 0.25); shoot(angle + 0.25); } // 💡 조건 변경
     } 
     else if (w.type === 'thrust') {
-        let angle = Math.atan2(sv_player.facingY, sv_player.facingX);
         const thrust = (ang) => {
             sv_projectiles.push({
                 x: sv_player.x, y: sv_player.y, vx: Math.cos(ang) * w.speed, vy: Math.sin(ang) * w.speed,
                 damage: w.damage * sv_player.atkMult, pierce: w.pierce, hitIds: new Set(), life: 0.25,
                 color: w.color, img: w.img, type: w.type, angle: ang, 
-                sizeMult: (w.level >= 6) ? 1.5 : 1.0 // 💡 조건 변경
+                sizeMult: (w.level >= 6) ? 1.5 : 1.0 
             });
         };
         
-        thrust(angle);
-        thrust(angle + Math.PI);
-        
-        if (w.level >= 6) { // 💡 조건 변경
-            thrust(angle + Math.PI/2);
-            thrust(angle - Math.PI/2);
+        if (w.level >= 6) { 
+            // 💡 MAX 레벨: 위(12시)부터 시계방향으로 1번씩 순차적으로 찌르기
+            if (w.attackStep === undefined) w.attackStep = 0;
+            
+            // 캔버스 기준 위쪽은 -Math.PI / 2
+            let targetAngle = -Math.PI / 2 + (w.attackStep * (Math.PI / 4));
+            thrust(targetAngle);
+            
+            // 다음 발사를 위해 스텝 증가 (0 ~ 7 반복, 총 8방향)
+            w.attackStep = (w.attackStep + 1) % 8;
+        } else {
+            // 기본 레벨: 바라보는 방향 앞, 뒤 양방향 찌르기
+            let angle = Math.atan2(sv_player.facingY, sv_player.facingX);
+            thrust(angle);
+            thrust(angle + Math.PI);
         }
     }
     else if (w.type === 'orbit') {
         let axeCount = Math.min(w.level + 1, 6);
         let radiusOffset = 1.0;
-        if (w.level >= 6) { axeCount = 8; radiusOffset = 1.6; w.speed = 5.0; } // 💡 조건 변경
+        let lifeTime = 3.0;
+
+        if (w.level >= 6) { 
+            axeCount = 8; 
+            radiusOffset = 1.6; 
+            w.speed = 5.0; 
+            lifeTime = 2.0; // 💡 2초마다 갱신(요요 1사이클)
+        } 
 
         let angleStep = (Math.PI * 2) / axeCount;
         for(let i=0; i<axeCount; i++) {
             sv_aoeEffects.push({
-                type: 'orbit', x: sv_player.x, y: sv_player.y, distance: w.range * radiusOffset,
+                type: 'orbit', x: sv_player.x, y: sv_player.y, 
+                baseDistance: w.range * radiusOffset, // 💡 원래 최대 범위 저장
+                distance: w.range * radiusOffset,
                 angle: angleStep * i, orbitSpeed: w.speed, damage: w.damage * sv_player.atkMult,
-                life: (w.level >= 6) ? 4.0 : 3.0, maxLife: (w.level >= 6) ? 4.0 : 3.0, hitTimer: 0, 
-                color: w.color, img: w.img, sizeMult: (w.level >= 6) ? 1.5 : 1.0
+                life: lifeTime, maxLife: lifeTime, hitTimer: 0, 
+                color: w.color, img: w.img, sizeMult: (w.level >= 6) ? 1.5 : 1.0,
+                isMax: (w.level >= 6) // MAX 플래그
             });
         }
     }
     else if (w.type === 'claw') {
-        let hits = (w.level >= 6) ? 4 : 2; // 💡 조건 변경
-        let lTimer = (w.level >= 6) ? 1.0 : 0.5; // 💡 조건 변경
+        let hits = (w.level >= 6) ? 4 : 2; 
+        let lTimer = (w.level >= 6) ? 1.0 : 0.5; // 💡 MAX시 1초 동안 4번 타격 (쿨타임 1초와 맞물려 무한 타격 유지)
         sv_aoeEffects.push({
-            type: 'claw', x: sv_player.x, y: sv_player.y, radius: w.range,
+            type: 'claw', x: sv_player.x, y: sv_player.y, radius: w.range, 
             damage: w.damage * sv_player.atkMult, life: lTimer, maxLife: lTimer,
             hitsLeft: hits, hitTimer: 0, hitInterval: 0.25, color: w.color, img: w.img
         });
@@ -15831,10 +15883,9 @@ function sv_createParticles(x, y, color, count) {
 function sv_update(dt) {
     sv_gameTime += dt;
 
-    // 💡 보스 등장 체크
     if (sv_gameTime >= sv_nextBossTime) {
         sv_spawnBoss();
-        sv_nextBossTime += 60; // 60초 뒤 다음 보스
+        sv_nextBossTime += 60; 
     }
 
     if (sv_hitFlashAlpha > 0) {
@@ -15868,13 +15919,12 @@ function sv_update(dt) {
         
         if (e.hp <= 0) {
             sv_killCount++;
-            sv_gems.push({ x: e.x, y: e.y, value: e.expValue });
+            sv_gems.push({ x: e.x, y: e.y, value: e.expValue, isBossDrop: e.isBoss });
             
-            // 💡 보스를 처치했을 경우 대형 고기 100% 드랍
             if (e.isBoss) {
-                sv_meats.push({ x: e.x, y: e.y, healAmount: 50 });
+                sv_meats.push({ x: e.x, y: e.y, healAmount: 50, isBossDrop: true });
             } else if (Math.random() < 0.05) { 
-                sv_meats.push({ x: e.x + (Math.random()*20-10), y: e.y + (Math.random()*20-10), healAmount: 30 }); 
+                sv_meats.push({ x: e.x + (Math.random()*20-10), y: e.y + (Math.random()*20-10), healAmount: 30, isBossDrop: false }); 
             }
 
             sv_createParticles(e.x, e.y, '#fff', 5);
@@ -15901,7 +15951,12 @@ function sv_update(dt) {
 
     sv_player.weapons.forEach(w => {
         w.timer -= dt;
-        if (w.timer <= 0) { w.timer = w.maxCd * sv_player.cdMult; sv_fireWeapon(w); }
+        if (w.timer <= 0) { 
+            // 💡 무기가 MAX(Lv.6)일 경우, 유저의 공속 버프(cdMult)를 완전히 무시하고 고정 공속 적용!
+            let currentCd = (w.level >= 6) ? w.maxCd : (w.maxCd * sv_player.cdMult);
+            w.timer = currentCd; 
+            sv_fireWeapon(w); 
+        }
     });
 
     for (let i = sv_projectiles.length - 1; i >= 0; i--) {
@@ -15931,12 +15986,20 @@ function sv_update(dt) {
         
         if (a.type === 'orbit') {
             a.angle += a.orbitSpeed * dt;
+            
+            // 💡 도끼 MAX: 캐릭터 쪽으로 모였다가 다시 넓어지는 요요 효과 (2초 주기)
+            if (a.isMax) {
+                let progress = 1.0 - (a.life / a.maxLife); // 0.0 ~ 1.0
+                let pullFactor = Math.abs(Math.cos(progress * Math.PI)); // 1.0 -> 0.0 -> 1.0 으로 진동
+                a.distance = 30 + (a.baseDistance - 30) * pullFactor; // 30(캐릭터 근처)까지만 당겨짐
+            }
+
             a.x = sv_player.x + Math.cos(a.angle) * a.distance;
             a.y = sv_player.y + Math.sin(a.angle) * a.distance;
             
             a.hitTimer -= dt;
             if (a.hitTimer <= 0) {
-                a.hitTimer = 0.2; 
+                a.hitTimer = 0.1; // 💡 요요처럼 움직일 때 타격이 빗나가지 않게 판정 주기 축소
                 sv_enemies.forEach(e => {
                     let orbitHitRange = 35 * (a.sizeMult || 1.0) + e.radius;
                     if (Math.hypot(a.x - e.x, a.y - e.y) <= orbitHitRange) {
@@ -15946,22 +16009,20 @@ function sv_update(dt) {
             }
         } 
         else if (a.type === 'claw') {
-            // 실제 타격 범위(히트박스) 영역 표시
-            sv_ctx.beginPath(); sv_ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
-            sv_ctx.fillStyle = a.color; sv_ctx.globalAlpha = (a.life / a.maxLife) * 0.15; sv_ctx.fill();
-            sv_ctx.globalAlpha = 1.0;
+            a.x = sv_player.x;
+            a.y = sv_player.y;
             
-            if (a.img && a.img.src && a.img.complete && a.img.naturalWidth > 0) {
-                sv_ctx.save();
-                sv_ctx.translate(a.x, a.y);
-                sv_ctx.globalAlpha = a.life / a.maxLife;
-                let offset = (a.hitsLeft % 2 === 0) ? -20 : 20; 
-                
-                // 💡 그려지는 이미지 크기만 타격 범위(a.radius)의 60% 비율로 축소
-                let renderSize = a.radius * 0.6; 
-                sv_ctx.drawImage(a.img, -renderSize/2 + offset, -renderSize/2 - offset, renderSize, renderSize);
-                
-                sv_ctx.restore();
+            a.hitTimer -= dt;
+            if (a.hitTimer <= 0 && a.hitsLeft > 0) {
+                a.hitTimer = a.hitInterval; 
+                a.hitsLeft--;
+                sv_enemies.forEach(e => {
+                    if (Math.hypot(a.x - e.x, a.y - e.y) <= a.radius + e.radius) {
+                        e.hp -= a.damage; 
+                        sv_showDamage(a.damage, e.x, e.y); 
+                        sv_createParticles(e.x, e.y, a.color, 3);
+                    }
+                });
             }
         }
         if (a.life <= 0) sv_aoeEffects.splice(i, 1);
@@ -16013,11 +16074,16 @@ function sv_draw() {
     sv_ctx.textAlign = "center"; 
     sv_ctx.textBaseline = "middle";
     
-    sv_ctx.font = "16px Arial"; 
-    sv_gems.forEach(g => { sv_ctx.fillText("💎", g.x, g.y); });
+    // 💡 보스 드랍 여부에 따라 폰트(이모지) 크기를 대폭 상향
+    sv_gems.forEach(g => { 
+        sv_ctx.font = g.isBossDrop ? "40px Arial" : "16px Arial";
+        sv_ctx.fillText("💎", g.x, g.y); 
+    });
     
-    sv_ctx.font = "18px Arial"; 
-    sv_meats.forEach(m => { sv_ctx.fillText("🥩", m.x, m.y); });
+    sv_meats.forEach(m => { 
+        sv_ctx.font = m.isBossDrop ? "45px Arial" : "18px Arial";
+        sv_ctx.fillText("🥩", m.x, m.y); 
+    });
     
     sv_ctx.textAlign = "left"; 
     sv_ctx.textBaseline = "alphabetic";
@@ -16047,8 +16113,10 @@ function sv_draw() {
             sv_ctx.rotate(angleOffset);
 
             if (a.img && a.img.src && a.img.complete && a.img.naturalWidth > 0) {
-                let s = a.radius * 2;
-                sv_ctx.drawImage(a.img, -s/2, -s/2, s, s);
+                // 💡 클로 이미지 렌더링 크기 축소 반영
+                let renderSize = a.radius * 0.6; 
+                let offset = (a.hitsLeft % 2 === 0) ? -20 : 20;
+                sv_ctx.drawImage(a.img, -renderSize/2 + offset, -renderSize/2 - offset, renderSize, renderSize);
             } else {
                 sv_ctx.strokeStyle = a.color;
                 sv_ctx.lineWidth = 6;
@@ -16074,7 +16142,6 @@ function sv_draw() {
             sv_ctx.fillStyle = e.color; sv_ctx.fillRect(e.x - e.radius, e.y - e.radius, e.radius*2, e.radius*2);
         }
         
-        // 보스는 체력바를 눈에 띄게 더 크게 표시
         let barW = e.isBoss ? 40 : 24;
         let barH = e.isBoss ? 6 : 4;
         let hpRatio = e.hp / e.maxHp;
@@ -16169,6 +16236,37 @@ function sv_gameLoop(time) {
     sv_update(dt);
     sv_draw();
     sv_reqId = requestAnimationFrame(sv_gameLoop);
+}
+// 💡 무기 및 스탯 현황을 상단 패널에 업데이트하는 함수 (새로 추가)
+function sv_updateStatusUI() {
+    // 1. 보유 무기 파싱
+    let wText = sv_player.weapons.map(w => {
+        let icon = '';
+        if(w.id === 'bow') icon = '🏹'; 
+        else if(w.id === 'spear') icon = '🔱'; 
+        else if(w.id === 'axe') icon = '🪓'; 
+        else if(w.id === 'claw') icon = '🐾';
+        let lvStr = w.level >= 6 ? 'MAX' : `Lv.${w.level}`;
+        return `${icon} ${lvStr}`;
+    }).join(' | ');
+    
+    if(!wText) wText = "없음";
+
+    // 2. 능력치 파싱 (기본값 대비 상승률 계산)
+    let atkPerc = Math.round((sv_player.atkMult - 1.0) * 100);
+    let cdPerc = Math.round((1.0 - sv_player.cdMult) * 100);
+    let spdPerc = Math.round((sv_player.speed / 220 - 1.0) * 100);
+    let magBonus = sv_player.magnetRange - 100;
+
+    let sText = `공격 +${atkPerc}% | 공속 +${cdPerc}% | 이속 +${spdPerc}% | 자석 +${magBonus}`;
+
+    // UI에 반영
+    let weaponDiv = document.getElementById('sv-ui-weapons');
+    let statDiv = document.getElementById('sv-ui-stats');
+    if (weaponDiv && statDiv) {
+        weaponDiv.innerText = `[장비] ${wText}`;
+        statDiv.innerText = `[능력치] ${sText}`;
+    }
 }
 /* ==========================================================
                   [만득서바이벌] JS 코드 끝
