@@ -2210,6 +2210,170 @@ button[onclick="resetGame()"]:hover {
 /* =========================================
    만득이 키우기 2.0 (필드 자동전투) CSS 끝
    ========================================= */
+
+/* =========================================
+            만득서바이벌 CSS 시작
+========================================= */
+#survival-fullscreen-wrapper { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: #0d1117; 
+    z-index: 99999; 
+    flex-direction: column; 
+    font-family: 'Malgun Gothic', sans-serif; 
+    user-select: none; 
+}
+#survival-fullscreen-wrapper * { 
+    box-sizing: border-box; 
+}
+.sv-hud { 
+    position: absolute; 
+    top: 20px; 
+    left: 20px; 
+    right: 20px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    z-index: 10; 
+    pointer-events: none; 
+}
+.sv-stat-box { 
+    background: rgba(13, 17, 23, 0.85); 
+    padding: 12px 20px; 
+    border-radius: 12px; 
+    border: 1px solid #30363d; 
+    font-weight: bold; 
+    font-size: 16px; 
+    color: #fff; 
+    text-shadow: 1px 1px 2px #000; 
+    pointer-events: auto; 
+}
+#sv-exp-container { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 12px; 
+    background: #000; 
+    z-index: 20; 
+}
+#sv-exp-bar { 
+    width: 0%; 
+    height: 100%; 
+    background: linear-gradient(90deg, #539bf5, #79b8ff); 
+    transition: width 0.2s ease-out; 
+}
+#sv-hp-container { 
+    margin-top: 8px; 
+    width: 200px; 
+    height: 16px; 
+    background: #444; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    border: 1px solid #222; 
+}
+#sv-hp-bar { 
+    width: 100%; 
+    height: 100%; 
+    background: #ff4d4d; 
+    transition: width 0.2s; 
+}
+.sv-modal { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.85); 
+    display: none; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 100; 
+}
+.sv-modal-title { 
+    font-size: 48px; 
+    color: #ffcc00; 
+    font-weight: bold; 
+    margin-bottom: 20px; 
+    text-shadow: 0 0 15px rgba(255, 204, 0, 0.6); 
+}
+.sv-upgrade-card { 
+    background: #1e242b; 
+    border: 2px solid #539bf5; 
+    border-radius: 12px; 
+    padding: 25px; 
+    width: 320px; 
+    margin: 15px; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    text-align: center; 
+    color: #fff; 
+}
+.sv-upgrade-card:hover { 
+    background: #539bf5; 
+    color: #000; 
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(83,155,245,0.4); 
+}
+.sv-upgrade-name { 
+    font-size: 22px; 
+    font-weight: bold; 
+    margin-bottom: 12px; 
+}
+.sv-upgrade-desc { 
+    font-size: 15px; 
+    color: #c9d1d9; 
+    line-height: 1.5; 
+}
+.sv-upgrade-card:hover .sv-upgrade-desc { 
+    color: #111; 
+}
+.sv-btn { 
+    padding: 15px 40px; 
+    font-size: 20px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    background: #2ea043; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    transition: 0.2s; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+}
+.sv-btn:hover { 
+    background: #3fb950; 
+    transform: scale(1.05); 
+}
+.sv-btn-close { 
+    background: #dc3545; 
+    font-size: 14px; 
+    padding: 8px 20px; 
+}
+.sv-btn-close:hover { 
+    background: #ff4d4d; 
+}
+.sv-upgrade-icon { 
+    font-size: 50px; 
+    margin: 10px auto 15px auto; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 60px;
+}
+.sv-upgrade-icon img {
+    max-width: 60px; 
+    max-height: 60px; 
+    object-fit: contain;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+}
+/* =========================================
+            만득서바이벌 CSS 끝
+========================================= */
 </style>
 </head>
 
@@ -2243,23 +2407,29 @@ button[onclick="resetGame()"]:hover {
                     ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
                 </a>
                 <div class="dropdown-content">
-    <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
-        <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
-        <span>투기장 (PvP)</span>
-        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
-    </a>
+                    <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
+                        <span>투기장 (PvP)</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
+                    </a>
 
-    <a href="javascript:void(0);" onclick="showPage('page-weekly-championship'); closeDropdown();" style="display: flex; align-items: center;">
-        <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
-        <span>펫 육성 챔피언십</span>
-        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
-    </a>
+                    <a href="javascript:void(0);" onclick="showPage('page-weekly-championship'); closeDropdown();" style="display: flex; align-items: center;">
+                        <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
+                        <span>펫 육성 챔피언십</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
+                    </a>
                     
                     <a href="javascript:void(0);" onclick="showPage('page-idle-rpg'); closeDropdown();" style="display: flex; align-items: center;">
                         <i class="fa-solid fa-gamepad" style="color: #2ea043; width: 18px;"></i> 
                         <span>만득이 키우기</span>
-                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
                     </a>
+
+                    <a href="javascript:void(0);" onclick="sv_openSurvivalMode(); closeDropdown();" style="display: flex; align-items: center;">
+    <span style="width: 18px; text-align: center;">🦇</span> 
+    <span>만득서바이벌</span>
+    <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+</a>
 
                     <a href="javascript:void(0);" onclick="showPage('page-raid'); closeDropdown();" style="display: flex; align-items: center;">
                         <span style="width: 18px; text-align: center;">💀</span> 
@@ -2301,104 +2471,103 @@ button[onclick="resetGame()"]:hover {
     </div>
 </nav>
 
-    <div class="main-container active" id="page-home">
-        <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 25px; cursor: pointer; display: flex; align-items: center; gap: 12px;" onclick="showPage('page-home')">
-            <i class="fa-solid fa-dog"></i> 만득월드
-        </div>
-        
-        <!-- 메인 화면: 월간 투기장 명예의 전당 -->
-<div class="card" style="width: 100%; max-width: 550px; margin-bottom: 40px; padding: 0; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15); background: #1a0505;">
-    <div style="background: linear-gradient(90deg, #1a0505, #8b0000, #1a0505); padding: 12px; text-align: center; font-weight: bold; color: #ffffff; font-size: 1.1rem; letter-spacing: 1px; border-bottom: 1px solid var(--border-gold);">
-        <i class="fas fa-trophy" style="color: var(--royal-gold); margin-right: 5px;"></i> 월간 투기장 명예의 전당
+<div class="main-container active" id="page-home">
+    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-blue); margin-bottom: 25px; cursor: pointer; display: flex; align-items: center; gap: 12px;" onclick="showPage('page-home')">
+        <i class="fa-solid fa-dog"></i> 만득월드
     </div>
     
-    <div style="display: flex; align-items: stretch; min-height: 140px;">
-        <div style="flex: 0 0 130px; background: rgba(212, 175, 55, 0.05); border-right: 1px solid var(--border-gold); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
-            <i class="fas fa-swords" style="font-size: 3rem; color: var(--royal-gold); margin-bottom: 10px; filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));"></i>
-            <div id="home-arena-season-text" style="margin-top: 5px; font-size: 0.85rem; color: var(--royal-gold); font-weight: bold; text-align: center; word-break: keep-all;">시즌 1</div>
+    <div class="card" style="width: 100%; max-width: 550px; margin-bottom: 40px; padding: 0; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15); background: #1a0505;">
+        <div style="background: linear-gradient(90deg, #1a0505, #8b0000, #1a0505); padding: 12px; text-align: center; font-weight: bold; color: #ffffff; font-size: 1.1rem; letter-spacing: 1px; border-bottom: 1px solid var(--border-gold);">
+            <i class="fas fa-trophy" style="color: var(--royal-gold); margin-right: 5px;"></i> 월간 투기장 명예의 전당
         </div>
         
-        <div id="homeArenaRankingBoard" style="flex: 1; padding: 15px 20px; background: #0d0202; display: flex; flex-direction: column; justify-content: center; color: #c9d1d9; line-height: 1.8; font-size: 1rem;">
-            데이터를 불러오는 중입니다...
-        </div>
-    </div>
-</div>
-
-        <!-- 메인 화면: 주간 펫 육성 명예의 전당 -->
-        <div class="card" style="width: 100%; max-width: 550px; margin-bottom: 40px; padding: 0; overflow: hidden; border: 1px solid #1f6feb; box-shadow: 0 8px 24px rgba(31, 111, 235, 0.15); background: #0d1117;">
-            <div style="background: linear-gradient(90deg, #0d1117, #1f6feb, #0d1117); padding: 12px; text-align: center; font-weight: bold; color: #ffffff; font-size: 1.1rem; letter-spacing: 1px; border-bottom: 1px solid #30363d;">
-                <i class="fa-solid fa-crown" style="color: #ffcc00; margin-right: 5px;"></i> 주간 펫 육성 명예의 전당
+        <div style="display: flex; align-items: stretch; min-height: 140px;">
+            <div style="flex: 0 0 130px; background: rgba(212, 175, 55, 0.05); border-right: 1px solid var(--border-gold); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
+                <i class="fas fa-swords" style="font-size: 3rem; color: var(--royal-gold); margin-bottom: 10px; filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));"></i>
+                <div id="home-arena-season-text" style="margin-top: 5px; font-size: 0.85rem; color: var(--royal-gold); font-weight: bold; text-align: center; word-break: keep-all;">시즌 1</div>
             </div>
             
-            <div style="display: flex; align-items: stretch; min-height: 140px;">
-                <div style="flex: 0 0 130px; background: rgba(31, 111, 235, 0.05); border-right: 1px solid #30363d; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
-                    <img id="homeWeeklyPetImg" src="./images/A1.png" alt="주간 페트" style="width: 100%; max-width: 80px; max-height: 80px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(31, 111, 235, 0.4));">
-                    <div id="homeWeeklyPetName" style="margin-top: 10px; font-size: 0.85rem; color: #539bf5; font-weight: bold; text-align: center; word-break: keep-all;">페트명</div>
-                </div>
-                
-                <div id="homeRankingBoard" style="flex: 1; padding: 15px 20px; background: #0d1117; display: flex; flex-direction: column; justify-content: center; color: #c9d1d9; line-height: 1.8; font-size: 1rem;">
-                    데이터를 불러오는 중입니다...
-                </div>
+            <div id="homeArenaRankingBoard" style="flex: 1; padding: 15px 20px; background: #0d0202; display: flex; flex-direction: column; justify-content: center; color: #c9d1d9; line-height: 1.8; font-size: 1rem;">
+                데이터를 불러오는 중입니다...
             </div>
+        </div>
+    </div>
+
+    <div class="card" style="width: 100%; max-width: 550px; margin-bottom: 40px; padding: 0; overflow: hidden; border: 1px solid #1f6feb; box-shadow: 0 8px 24px rgba(31, 111, 235, 0.15); background: #0d1117;">
+        <div style="background: linear-gradient(90deg, #0d1117, #1f6feb, #0d1117); padding: 12px; text-align: center; font-weight: bold; color: #ffffff; font-size: 1.1rem; letter-spacing: 1px; border-bottom: 1px solid #30363d;">
+            <i class="fa-solid fa-crown" style="color: #ffcc00; margin-right: 5px;"></i> 주간 펫 육성 명예의 전당
         </div>
         
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 600px;">
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #539bf5; box-shadow: 0 0 10px rgba(83, 155, 245, 0.2); background: linear-gradient(145deg, #15191d, #0d1a2a);" onclick="showPage('page-weekly-championship')">
-        <i class="fa-solid fa-trophy" style="font-size: 2rem; color: #539bf5; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: #539bf5;">펫 육성 챔피언십</div>
-        <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">주간 실시간 랭킹 대전</div>
-    </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); background: linear-gradient(145deg, #15191d, #2d1212);" onclick="showPage('page-arena')">
-        <i class="fa-solid fa-khanda" style="font-size: 2rem; color: #ff4d4d; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: #ffcc00;">투기장 (PvP)</div>
-        <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">월간 실시간 랭킹 대전</div>
-    </div>        
+        <div style="display: flex; align-items: stretch; min-height: 140px;">
+            <div style="flex: 0 0 130px; background: rgba(31, 111, 235, 0.05); border-right: 1px solid #30363d; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;">
+                <img id="homeWeeklyPetImg" src="./images/A1.png" alt="주간 페트" style="width: 100%; max-width: 80px; max-height: 80px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(31, 111, 235, 0.4));">
+                <div id="homeWeeklyPetName" style="margin-top: 10px; font-size: 0.85rem; color: #539bf5; font-weight: bold; text-align: center; word-break: keep-all;">페트명</div>
+            </div>
             
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); background: linear-gradient(145deg, #15191d, #050505);" onclick="showPage('page-raid')">
-        <i class="fa-solid fa-skull" style="font-size: 2rem; color: #ff7b72; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: #ff7b72;">1인 레이드</div>
-        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">실시간으로 저장되는 레이드</div>
-    </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; border-color: #2ea043; box-shadow: 0 0 10px rgba(46, 160, 67, 0.2); background: linear-gradient(145deg, #15191d, #091a0e);" onclick="showPage('page-idle-rpg')">
-    <i class="fa-solid fa-gamepad" style="font-size: 2rem; color: #2ea043; margin-bottom: 10px;"></i>
-    <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">만득이 키우기</div>
-    <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">방치형 자동사냥 미니게임</div>
-    </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;" onclick="showPage('page-exp')">
-        <i class="fa-solid fa-chart-simple" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">경험치계산기</div>
-    </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-ency')">
-        <i class="fa-solid fa-book" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
-    </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-acc')">
-        <i class="fa-solid fa-crosshairs" style="font-size: 2rem; color: var(--accent-orange); margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">명중/회피계산기</div>
-    </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-rev')">
-        <i class="fa-solid fa-arrows-left-right" style="font-size: 2rem; color: #2ea043; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">순발력범위계산기</div>
-    </div>
-
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-init-sim')">
-        <i class="fa-solid fa-arrows-rotate" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">초기화시뮬</div>
+            <div id="homeRankingBoard" style="flex: 1; padding: 15px 20px; background: #0d1117; display: flex; flex-direction: column; justify-content: center; color: #c9d1d9; line-height: 1.8; font-size: 1rem;">
+                데이터를 불러오는 중입니다...
+            </div>
+        </div>
     </div>
     
-    <div class="res-box" style="text-align: center; cursor: pointer; padding: 25px 15px;" onclick="showPage('page-raid-guide')">
-        <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 10px;"></i>
-        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
-    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; gap: 15px; width: 100%; max-width: 600px;">
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; border-color: #539bf5; box-shadow: 0 0 10px rgba(83, 155, 245, 0.2); background: linear-gradient(145deg, #15191d, #0d1a2a); height: 100%; box-sizing: border-box;" onclick="showPage('page-weekly-championship')">
+                <i class="fa-solid fa-trophy" style="font-size: 2rem; color: #539bf5; margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: #539bf5;">펫 육성 챔피언십</div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 6px;">주간 실시간 랭킹 대전</div>
+            </div>
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; border-color: #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); background: linear-gradient(145deg, #15191d, #2d1212); height: 100%; box-sizing: border-box;" onclick="showPage('page-arena')">
+                <i class="fa-solid fa-khanda" style="font-size: 2rem; color: #ff4d4d; margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: #ffcc00;">투기장 (PvP)</div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 6px;">월간 실시간 랭킹 대전</div>
+            </div>        
+            
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); background: linear-gradient(145deg, #15191d, #050505); height: 100%; box-sizing: border-box;" onclick="showPage('page-raid')">
+                <i class="fa-solid fa-skull" style="font-size: 2rem; color: #ff7b72; margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: #ff7b72;">1인 레이드</div>
+                <div style="font-size: 0.8rem; color: #666; margin-top: 6px;">실시간으로 저장되는 레이드</div>
+            </div>
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; border-color: #2ea043; box-shadow: 0 0 10px rgba(46, 160, 67, 0.2); background: linear-gradient(145deg, #15191d, #091a0e); height: 100%; box-sizing: border-box;" onclick="showPage('page-idle-rpg')">
+                <i class="fa-solid fa-gamepad" style="font-size: 2rem; color: #2ea043; margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">만득이 키우기</div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 6px;">방치형 자동사냥 미니게임</div>
+            </div>
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; border-color: #d2a8ff; box-shadow: 0 0 15px rgba(210, 168, 255, 0.25); background: linear-gradient(145deg, #15191d, #1a0b2e); height: 100%; box-sizing: border-box;" onclick="sv_openSurvivalMode()">
+                <span style="font-size: 2rem; margin-bottom: 12px; display: inline-block;">🦇</span>
+                <div style="font-weight: bold; font-size: 1.1rem; color: #d2a8ff;">만득서바이벌</div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 6px;">뱀서류 미니게임</div>
+            </div>
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; height: 100%; box-sizing: border-box;" onclick="showPage('page-ency')">
+                <i class="fa-solid fa-book" style="font-size: 2rem; color: #d2a8ff; margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">펫 도감</div>
+            </div>
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; height: 100%; box-sizing: border-box;" onclick="showPage('page-exp')">
+                <i class="fa-solid fa-chart-simple" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">경험치계산기</div>
+            </div>
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; height: 100%; box-sizing: border-box;" onclick="showPage('page-acc')">
+                <i class="fa-solid fa-crosshairs" style="font-size: 2rem; color: var(--accent-orange); margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">명중/회피계산기</div>
+            </div>
+
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; height: 100%; box-sizing: border-box;" onclick="showPage('page-rev')">
+                <i class="fa-solid fa-arrows-left-right" style="font-size: 2rem; color: #2ea043; margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">순발력범위계산기</div>
+            </div>
+            
+            <div class="res-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; padding: 20px 10px; height: 100%; box-sizing: border-box;" onclick="showPage('page-raid-guide')">
+                <i class="fa-solid fa-gear" style="font-size: 2rem; color: #8b949e; margin-bottom: 12px;"></i>
+                <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-highlight);">기타</div>
+            </div>
+        </div>
 </div>
-    </div>
 
 <div class="main-container" id="page-notice">
     <div class="card" style="grid-column: span 2;">
@@ -4137,6 +4306,124 @@ button[onclick="resetGame()"]:hover {
     </div>
 </div>
 <!-- [추가] 주간 펫 만렙 달성 닉네임 강제 입력 모달 끝 -->
+
+<!-- 만득서바이벌 HTML 시작 -->
+<div id="survival-fullscreen-wrapper" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0d1117; z-index: 99999; flex-direction: column; font-family: 'Malgun Gothic', sans-serif; user-select: none;">
+    
+    <style>
+        #survival-fullscreen-wrapper * { box-sizing: border-box; }
+        .sv-hud { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 10; pointer-events: none; }
+        .sv-stat-box { background: rgba(13, 17, 23, 0.85); padding: 12px 20px; border-radius: 12px; border: 1px solid #30363d; font-weight: bold; font-size: 16px; color: #fff; text-shadow: 1px 1px 2px #000; pointer-events: auto; }
+        
+        #sv-exp-container { position: absolute; top: 0; left: 0; width: 100%; height: 12px; background: #000; z-index: 20; }
+        #sv-exp-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #539bf5, #79b8ff); transition: width 0.2s ease-out; }
+        
+        /* 체력바 Relative 속성 추가 */
+        #sv-hp-container { position: relative; margin-top: 8px; width: 200px; height: 16px; background: #444; border-radius: 8px; overflow: hidden; border: 1px solid #222; }
+        #sv-hp-bar { width: 100%; height: 100%; background: #ff4d4d; transition: width 0.2s; }
+        
+        .sv-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .sv-modal-title { font-size: 48px; color: #ffcc00; font-weight: bold; margin-bottom: 20px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.6); }
+        
+        .sv-upgrade-card { background: #1e242b; border: 2px solid #539bf5; border-radius: 12px; padding: 25px; width: 320px; margin: 15px; cursor: pointer; transition: 0.2s; text-align: center; color: #fff; }
+        .sv-upgrade-card:hover { background: #539bf5; color: #000; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(83,155,245,0.4); }
+        .sv-upgrade-name { font-size: 22px; font-weight: bold; margin-bottom: 12px; }
+        .sv-upgrade-desc { font-size: 15px; color: #c9d1d9; line-height: 1.5; }
+        .sv-upgrade-card:hover .sv-upgrade-desc { color: #111; }
+        
+        .sv-upgrade-icon { font-size: 50px; margin: 10px auto 15px auto; display: flex; justify-content: center; align-items: center; height: 60px; }
+        .sv-upgrade-icon img { max-width: 60px; max-height: 60px; object-fit: contain; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+
+        .sv-btn { padding: 12px 30px; font-size: 18px; font-weight: bold; cursor: pointer; background: #2ea043; color: white; border: none; border-radius: 8px; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .sv-btn:hover { background: #3fb950; transform: scale(1.05); }
+        .sv-btn-close { background: #dc3545; font-size: 14px; padding: 8px 20px; }
+        .sv-btn-close:hover { background: #ff4d4d; }
+        
+        #sv-char-list::-webkit-scrollbar { width: 8px; }
+        #sv-char-list::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        #sv-char-list::-webkit-scrollbar-track { background: #0d1117; }
+    </style>
+
+    <div id="sv-exp-container"><div id="sv-exp-bar"></div></div>
+    
+    <div class="sv-hud" id="sv-hud" style="display: none;">
+        <div class="sv-stat-box">
+            Lv.<span id="sv-ui-level">1</span>
+            <div id="sv-hp-container">
+                <div id="sv-hp-bar"></div>
+                <div id="sv-hp-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 11px; line-height: 16px; color: #fff; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;">100 / 100</div>
+            </div>
+        </div>
+        <div class="sv-stat-box" style="font-size: 28px; color: #fca311; text-align: center;" id="sv-ui-time">00:00</div>
+        <div class="sv-stat-box" style="text-align: right; min-width: 200px;">
+            <button class="sv-btn sv-btn-close" onclick="sv_closeSurvivalMode()" style="margin-bottom: 10px;">나가기</button><br>
+            처치: <span id="sv-ui-kills" style="color: #ff7b72; font-size: 20px;">0</span><br>
+        </div>
+    </div>
+
+    <div id="sv-start-screen" class="sv-modal">
+        <div class="sv-modal-title" style="color:#539bf5; font-size:55px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;">
+            🦇 만득서바이벌 
+            <span style="font-size: 16px; background: #ff4d4d; color: white; padding: 4px 8px; border-radius: 6px; margin-left: 15px;">BETA</span>
+        </div>
+        <div style="color:#fca311; font-size: 15px; margin-bottom: 30px; font-weight: bold;">
+            ※ 현재 베타 서비스 중입니다. 오류 및 건의사항을 제보해주시면 적극 반영하겠습니다!
+        </div>
+        
+        <div style="display: flex; gap: 20px; margin-bottom: 30px; max-width: 800px; width: 90%;">
+            <div style="flex: 2; background: rgba(13,17,23,0.8); border: 1px solid #30363d; border-radius: 12px; padding: 25px; text-align: left;">
+                <div style="color: #a5d6ff; font-size: 18px; font-weight: bold; border-bottom: 1px solid #30363d; padding-bottom: 10px; margin-bottom: 15px;">📖 생존 가이드</div>
+                <ul style="color: #c9d1d9; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                    <li><b>이동:</b> 방향키 또는 W, A, S, D 키를 사용하세요.</li>
+                    <li><b>전투:</b> 장착한 무기가 자동으로 적을 향해 발사됩니다.</li>
+                    <li><b>성장:</b> 적이 떨어뜨리는 <span style="color:#2ea043; font-weight:bold;">초록색 보석</span>을 모아 레벨업하세요.</li>
+                    <li><b>회복:</b> 가끔 드랍되는 <span style="color:#ff7b72; font-weight:bold;">고기(🥩)</span>를 먹으면 체력이 30 회복됩니다.</li>
+                    <li><b>무기 진화:</b> 무기를 <span style="color:#ffcc00; font-weight:bold;">Lv.10(MAX)</span>까지 강화하면 강력한 특수 공격이 개방됩니다!</li>
+                </ul>
+            </div>
+
+            <div style="flex: 1; background: rgba(13,17,23,0.8); border: 1px solid #30363d; border-radius: 12px; padding: 25px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="color:#8b949e; font-size: 14px; margin-bottom: 15px;">플레이어 스킨 (능력치 무관)</div>
+                <img id="sv-current-char-img" src="" style="width: 90px; height: 90px; object-fit: contain; display: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+                <div id="sv-current-char-none" style="width: 90px; height: 90px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px dashed #30363d; display: flex; align-items: center; justify-content: center; color: #539bf5; font-size: 40px;">👤</div>
+                <div id="sv-current-char-name" style="color:#fff; font-weight:bold; font-size: 18px; margin-top: 15px;">기본 만득이</div>
+                <button class="sv-btn" style="padding: 8px 15px; font-size: 14px; margin-top: 15px; background: #21262d; border: 1px solid #539bf5; color: #539bf5;" onclick="sv_openCharSelect()">캐릭터 선택하기</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 20px;">
+            <button class="sv-btn" style="background:#539bf5; padding: 15px 50px;" onclick="sv_startGame()">게임 시작</button>
+            <button class="sv-btn sv-btn-close" style="padding: 15px 30px; font-size: 20px;" onclick="sv_closeSurvivalMode()">나가기</button>
+        </div>
+    </div>
+
+    <div id="sv-char-select-modal" class="sv-modal" style="z-index: 105;">
+        <div class="sv-modal-title" style="font-size: 32px; color: #fff;">캐릭터 스킨 선택</div>
+        <input type="text" id="sv-char-search" placeholder="페트 이름 검색" onkeyup="sv_renderCharList()" style="padding: 12px; width: 100%; max-width: 400px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: #fff; margin-bottom: 20px; font-size: 16px; outline: none;">
+        
+        <div id="sv-char-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); align-content: start; gap: 12px; width: 90%; max-width: 800px; height: 50vh; overflow-y: auto; background: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d;">
+    </div>
+        <button class="sv-btn sv-btn-close" style="margin-top: 25px; padding: 12px 40px; font-size: 18px;" onclick="sv_closeCharSelect()">닫기</button>
+    </div>
+
+    <div id="sv-levelup-modal" class="sv-modal">
+        <div class="sv-modal-title">무기 / 능력치 획득!</div>
+        <div id="sv-upgrade-container" style="display: flex; flex-wrap: wrap; justify-content: center; max-width: 1100px;"></div>
+    </div>
+
+    <div id="sv-gameover-modal" class="sv-modal">
+        <div class="sv-modal-title" style="color: #ff4d4d;">사망했습니다...</div>
+        <div style="font-size: 24px; margin-bottom: 30px; color: #fff;">생존 시간: <span id="sv-final-time" style="color:#fca311;">00:00</span> | 처치 수: <span id="sv-final-kills" style="color:#ff7b72;">0</span></div>
+        <div style="display: flex; gap: 20px;">
+            <button class="sv-btn" onclick="sv_restartWithCharSelect()">다시 도전</button>
+            <button class="sv-btn sv-btn-close" onclick="sv_goToLobby()">메인으로</button>
+        </div>
+    </div>
+
+    <canvas id="sv-canvas" style="flex-grow: 1; display: block;"></canvas>
+</div>
+<!-- 만득서바이벌 HTML 끝 -->
+
 </div>
     <div class="footer">
         <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
@@ -15152,7 +15439,711 @@ function awakenItem2(uid) {
     updateUI();
 }
 /* 만득이 키우기 JS 코드 끝 */
+/* ==========================================================
+                  [만득서바이벌] JS 코드 시작
+========================================================== */
+const sv_wrapper = document.getElementById('survival-fullscreen-wrapper');
+const sv_canvas = document.getElementById('sv-canvas');
+const sv_ctx = sv_canvas.getContext('2d');
 
+let sv_cw = 0, sv_ch = 0;
+let sv_reqId = null;
+let sv_gameState = 'stopped'; 
+let sv_lastTime = 0;
+let sv_gameTime = 0;
+let sv_killCount = 0;
+let sv_camX = 0, sv_camY = 0;
+
+let sv_keys = {};
+let sv_enemies = [];
+let sv_projectiles = []; 
+let sv_aoeEffects = [];  
+let sv_gems = [];
+let sv_meats = [];
+let sv_particles = [];
+let sv_damageTexts = [];
+let sv_hitFlashAlpha = 0; 
+let sv_nextBossTime = 60; // 💡 첫 보스 등장 시간 (60초)
+
+// ==========================================
+// 🎨 이미지 등록 및 캐싱
+// ==========================================
+let sv_selectedCharImgPath = null; 
+const SV_PET_IMG_CACHE = {}; 
+
+const SV_IMAGES = {
+    player: new Image(), bow: new Image(), spear: new Image(), axe: new Image(), claw: new Image(), enemy: new Image()
+};
+
+SV_IMAGES.bow.src = './images/item1.png';
+SV_IMAGES.spear.src = './images/item2.png';
+SV_IMAGES.axe.src = './images2/item21.png';
+SV_IMAGES.claw.src = './images2/item22.png';
+
+let sv_player = {};
+
+const SV_WEAPON_DB = {
+    bow:   { id: 'bow', name: "이그노스의 활", desc: "가장 가까운 적에게 화살을 발사합니다.", type: "projectile", baseDmg: 15, baseCd: 1.0, speed: 500, range: 600, pierce: 1, color: '#d2a8ff', img: SV_IMAGES.bow },
+    spear: { id: 'spear', name: "봉인된 정령왕의 창", desc: "바라보는 방향으로 창을 찌릅니다. (관통)", type: "thrust", baseDmg: 30, baseCd: 1.5, speed: 600, range: 150, pierce: 99, color: '#539bf5', img: SV_IMAGES.spear },
+    axe:   { id: 'axe', name: "메가죠의 도끼", desc: "캐릭터 주변을 맴도는 도끼를 소환합니다.", type: "orbit", baseDmg: 18, baseCd: 3.0, speed: 3.5, range: 110, pierce: 99, color: '#fca311', img: SV_IMAGES.axe },
+    claw:  { id: 'claw', name: "얼음 손톱", desc: "주변 넓은 범위의 적들을 2회 연속 할큅니다.", type: "claw", baseDmg: 22, baseCd: 2.5, speed: 0, range: 150, pierce: 99, color: '#a5d6ff', img: SV_IMAGES.claw }
+};
+
+window.addEventListener('keydown', e => {
+    if (sv_wrapper.style.display !== 'none') {
+        sv_keys[e.key.toLowerCase()] = true;
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.code)) e.preventDefault();
+    }
+}, {passive: false});
+window.addEventListener('keyup', e => {
+    if (sv_wrapper.style.display !== 'none') sv_keys[e.key.toLowerCase()] = false;
+});
+
+function sv_openCharSelect() {
+    document.getElementById('sv-char-select-modal').style.display = 'flex';
+    document.getElementById('sv-char-search').value = '';
+    sv_renderCharList();
+}
+function sv_closeCharSelect() { document.getElementById('sv-char-select-modal').style.display = 'none'; }
+function sv_renderCharList() {
+    const container = document.getElementById('sv-char-list');
+    const query = document.getElementById('sv-char-search').value.trim().toLowerCase();
+    container.innerHTML = '';
+    let db = typeof PET_DATABASE !== 'undefined' ? PET_DATABASE : [];
+    if (query) db = db.filter(p => p.name.toLowerCase().includes(query));
+    if (db.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8b949e; padding: 40px; font-size: 16px;">검색 결과가 없거나 도감 데이터가 없습니다.</div>';
+        return;
+    }
+    db.forEach(pet => {
+        const card = document.createElement('div');
+        card.style.cssText = "background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s;";
+        card.onmouseover = () => { card.style.borderColor = '#539bf5'; card.style.transform = 'translateY(-3px)'; };
+        card.onmouseout = () => { card.style.borderColor = '#30363d'; card.style.transform = 'translateY(0)'; };
+        card.onclick = () => sv_selectChar(pet);
+        card.innerHTML = `<img src="${pet.img}" style="width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+                          <div style="color: #c9d1d9; font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pet.name}</div>`;
+        container.appendChild(card);
+    });
+}
+function sv_selectChar(pet) {
+    sv_selectedCharImgPath = pet.img; SV_IMAGES.player.src = pet.img;
+    document.getElementById('sv-current-char-img').src = pet.img;
+    document.getElementById('sv-current-char-img').style.display = 'block';
+    document.getElementById('sv-current-char-none').style.display = 'none';
+    document.getElementById('sv-current-char-name').innerText = pet.name;
+    document.getElementById('sv-current-char-name').style.color = '#539bf5';
+    sv_closeCharSelect();
+}
+
+function sv_openSurvivalMode() {
+    document.body.style.overflow = 'hidden';
+    sv_wrapper.style.display = 'flex';
+    document.getElementById('sv-start-screen').style.display = 'flex';
+    document.getElementById('sv-hud').style.display = 'none';
+    document.getElementById('sv-levelup-modal').style.display = 'none';
+    document.getElementById('sv-gameover-modal').style.display = 'none';
+    sv_resize();
+}
+
+function sv_closeSurvivalMode() {
+    document.body.style.overflow = '';
+    sv_wrapper.style.display = 'none';
+    sv_gameState = 'stopped';
+    if (sv_reqId) { cancelAnimationFrame(sv_reqId); sv_reqId = null; }
+}
+
+function sv_goToLobby() {
+    document.getElementById('sv-gameover-modal').style.display = 'none';
+    document.getElementById('sv-start-screen').style.display = 'flex';
+    document.getElementById('sv-hud').style.display = 'none';
+    sv_gameState = 'stopped';
+    if (sv_reqId) { cancelAnimationFrame(sv_reqId); sv_reqId = null; }
+}
+
+function sv_restartWithCharSelect() {
+    sv_goToLobby();
+    sv_openCharSelect();
+}
+
+function sv_resize() {
+    sv_cw = sv_wrapper.clientWidth; sv_ch = sv_wrapper.clientHeight;
+    sv_canvas.width = sv_cw; sv_canvas.height = sv_ch;
+}
+
+function sv_initPlayer() {
+    sv_player = {
+        x: 0, y: 0, radius: 18,
+        hp: 100, maxHp: 100, speed: 220,
+        exp: 0, maxExp: 10, level: 1, magnetRange: 100,
+        atkMult: 1.0, cdMult: 1.0, facingX: 1, facingY: 0, weapons: []
+    };
+    sv_addWeapon('bow'); 
+    sv_hitFlashAlpha = 0; 
+}
+
+function sv_addWeapon(weaponId) {
+    let existing = sv_player.weapons.find(w => w.id === weaponId);
+    if (existing) {
+        if (existing.level >= 10) return; 
+        existing.level++;
+        if (weaponId === 'bow') { existing.damage *= 1.25; if (existing.level === 5) existing.pierce += 1; }
+        else if (weaponId === 'spear') { existing.damage *= 1.3; existing.range += 15; }
+        else if (weaponId === 'axe') { existing.damage *= 1.2; existing.speed += 0.2; }
+        else if (weaponId === 'claw') { existing.damage *= 1.25; existing.range += 8; }
+    } else {
+        let db = SV_WEAPON_DB[weaponId];
+        sv_player.weapons.push({
+            id: db.id, type: db.type, level: 1, damage: db.baseDmg, maxCd: db.baseCd, timer: 0,
+            speed: db.speed, range: db.range, pierce: db.pierce, color: db.color, img: db.img
+        });
+    }
+}
+
+function sv_startGame() {
+    document.getElementById('sv-start-screen').style.display = 'none';
+    document.getElementById('sv-gameover-modal').style.display = 'none';
+    document.getElementById('sv-hud').style.display = 'flex';
+    
+    sv_initPlayer();
+    sv_enemies = []; sv_projectiles = []; sv_aoeEffects = []; 
+    sv_gems = []; sv_meats = []; sv_particles = []; sv_damageTexts = [];
+    sv_gameTime = 0; sv_killCount = 0;
+    sv_nextBossTime = 60; // 💡 시작 시 보스 출현 타이머 세팅
+    sv_resize();
+    
+    sv_gameState = 'playing';
+    sv_lastTime = performance.now();
+    sv_updateUI();
+    
+    if (sv_reqId) cancelAnimationFrame(sv_reqId);
+    sv_reqId = requestAnimationFrame(sv_gameLoop);
+}
+
+function sv_spawnEnemy() {
+    let angle = Math.random() * Math.PI * 2;
+    let dist = Math.max(sv_cw, sv_ch) / 2 + 100; 
+    let difficulty = 1 + Math.floor(sv_gameTime / 20); 
+    
+    let imgObj = null;
+    if (typeof PET_DATABASE !== 'undefined' && PET_DATABASE.length > 0) {
+        let randomPet = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
+        if (randomPet.img) {
+            if (!SV_PET_IMG_CACHE[randomPet.img]) {
+                let img = new Image(); img.src = randomPet.img;
+                SV_PET_IMG_CACHE[randomPet.img] = img;
+            }
+            imgObj = SV_PET_IMG_CACHE[randomPet.img];
+        }
+    }
+
+    sv_enemies.push({
+        x: sv_player.x + Math.cos(angle) * dist, y: sv_player.y + Math.sin(angle) * dist,
+        radius: 14 + Math.random() * 6,
+        maxHp: 20 * Math.pow(1.15, difficulty), hp: 20 * Math.pow(1.15, difficulty),
+        damage: 5 + difficulty, speed: 90 + Math.random() * 30 + difficulty,
+        expValue: 1 + Math.floor(difficulty / 3), attackTimer: 0,
+        color: `hsl(${Math.random()*20}, 80%, 40%)`, imgObj: imgObj,
+        isBoss: false 
+    });
+}
+
+// 💡 보스 소환 로직 추가
+function sv_spawnBoss() {
+    let angle = Math.random() * Math.PI * 2;
+    let dist = Math.max(sv_cw, sv_ch) / 2 + 150; 
+    let difficulty = 1 + Math.floor(sv_gameTime / 20); 
+    
+    let imgObj = null;
+    if (typeof PET_DATABASE !== 'undefined' && PET_DATABASE.length > 0) {
+        let randomPet = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
+        if (randomPet.img) {
+            if (!SV_PET_IMG_CACHE[randomPet.img]) {
+                let img = new Image(); img.src = randomPet.img;
+                SV_PET_IMG_CACHE[randomPet.img] = img;
+            }
+            imgObj = SV_PET_IMG_CACHE[randomPet.img];
+        }
+    }
+
+    sv_enemies.push({
+        x: sv_player.x + Math.cos(angle) * dist, y: sv_player.y + Math.sin(angle) * dist,
+        radius: 28, // 반경 대폭 증가
+        maxHp: 20 * Math.pow(1.15, difficulty) * 15, // 체력 15배
+        hp: 20 * Math.pow(1.15, difficulty) * 15,
+        damage: (5 + difficulty) * 2, // 공격력 2배
+        speed: 130 + difficulty, // 이속 조금 더 빠름
+        expValue: 10 + Math.floor(difficulty), // 다량의 경험치
+        attackTimer: 0,
+        color: '#ff2222', // 기본 도형일 경우 강렬한 붉은색
+        imgObj: imgObj,
+        isBoss: true
+    });
+}
+
+function sv_checkLevelUp() {
+    sv_updateUI();
+    if (sv_player.exp >= sv_player.maxExp) {
+        sv_player.exp -= sv_player.maxExp;
+        sv_player.level++;
+        sv_player.maxExp = Math.floor(sv_player.maxExp * 1.4);
+        
+        sv_gameState = 'paused';
+        const modal = document.getElementById('sv-levelup-modal');
+        const container = document.getElementById('sv-upgrade-container');
+        container.innerHTML = '';
+        
+        let pool = [];
+        ['bow', 'spear', 'axe', 'claw'].forEach(wId => {
+            let w = sv_player.weapons.find(wp => wp.id === wId);
+            let db = SV_WEAPON_DB[wId];
+            let iconHtml = db.img.src ? `<div class="sv-upgrade-icon"><img src="${db.img.src}"></div>` : `<div class="sv-upgrade-icon">❓</div>`;
+
+            if (!w) {
+                pool.push({ name: `${db.name} 획득`, desc: db.desc, icon: iconHtml, action: () => sv_addWeapon(wId) });
+            } else if (w.level < 10) {
+                let nextLv = w.level + 1;
+                let extraDesc = nextLv === 10 ? "<br><span style='color:#fca311; font-weight:bold;'>[MAX 달성: 특수 형태 진화!]</span>" : "";
+                pool.push({ name: `${db.name} 강화 (Lv.${nextLv})`, desc: `피해량 및 능력치 증가${extraDesc}`, icon: iconHtml, action: () => sv_addWeapon(wId) });
+            }
+        });
+
+        pool.push({ name: "공격력 증가", desc: "모든 피해량이 20% 증가합니다.", icon: `<div class="sv-upgrade-icon">⚔️</div>`, action: () => sv_player.atkMult += 0.2 });
+        pool.push({ name: "공속 증가", desc: "무기 발사 주기가 10% 짧아집니다.", icon: `<div class="sv-upgrade-icon">⚡</div>`, action: () => sv_player.cdMult *= 0.9 });
+        pool.push({ name: "이동 속도", desc: "발걸음이 15% 빨라집니다.", icon: `<div class="sv-upgrade-icon">👟</div>`, action: () => sv_player.speed *= 1.15 });
+        pool.push({ name: "아이템 자석", desc: "보석을 끌어당기는 반경이 넓어집니다.", icon: `<div class="sv-upgrade-icon">🧲</div>`, action: () => sv_player.magnetRange += 60 });
+        
+        // 💡 1. 최대 체력 증가 (상시 등장 가능)
+        pool.push({ name: "최대 체력 증가", desc: "최대 체력이 20 증가합니다.", icon: `<div class="sv-upgrade-icon">❤️‍🔥</div>`, action: () => { sv_player.maxHp += 20; sv_player.hp += 20; } });
+
+        // 💡 2. 긴급 체력 회복 (체력이 50% 이하일 때만 등장)
+        if (sv_player.hp <= sv_player.maxHp * 0.5) {
+            pool.push({ name: "긴급 체력 회복", desc: "체력을 50 즉시 회복합니다.", icon: `<div class="sv-upgrade-icon">💖</div>`, action: () => { sv_player.hp = Math.min(sv_player.maxHp, sv_player.hp + 50); } });
+        }
+
+        let choices = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
+        
+        choices.forEach(c => {
+            let card = document.createElement('div');
+            card.className = 'sv-upgrade-card';
+            card.innerHTML = `${c.icon}<div class="sv-upgrade-name">${c.name}</div><div class="sv-upgrade-desc">${c.desc}</div>`;
+            card.onclick = () => {
+                c.action();
+                modal.style.display = 'none';
+                sv_gameState = 'playing';
+                sv_lastTime = performance.now();
+                sv_updateUI();
+                sv_reqId = requestAnimationFrame(sv_gameLoop);
+            };
+            container.appendChild(card);
+        });
+        modal.style.display = 'flex';
+    }
+}
+
+function sv_fireWeapon(w) {
+    if (sv_enemies.length === 0) return;
+
+    if (w.type === 'projectile') {
+        let nearest = sv_enemies.reduce((p, c) => Math.hypot(sv_player.x - p.x, sv_player.y - p.y) < Math.hypot(sv_player.x - c.x, sv_player.y - c.y) ? p : c);
+        let angle = Math.atan2(nearest.y - sv_player.y, nearest.x - sv_player.x);
+        
+        const shoot = (ang) => {
+            sv_projectiles.push({
+                x: sv_player.x, y: sv_player.y, vx: Math.cos(ang) * w.speed, vy: Math.sin(ang) * w.speed,
+                damage: w.damage * sv_player.atkMult, pierce: w.pierce, hitIds: new Set(), life: 2.0,
+                color: w.color, img: w.img, type: w.type, angle: ang, sizeMult: 1.0
+            });
+        };
+        shoot(angle);
+        if (w.level >= 10) { shoot(angle - 0.25); shoot(angle + 0.25); }
+    } 
+    else if (w.type === 'thrust') {
+        let angle = Math.atan2(sv_player.facingY, sv_player.facingX);
+        const thrust = (ang) => {
+            sv_projectiles.push({
+                x: sv_player.x, y: sv_player.y, vx: Math.cos(ang) * w.speed, vy: Math.sin(ang) * w.speed,
+                damage: w.damage * sv_player.atkMult, pierce: w.pierce, hitIds: new Set(), life: 0.25,
+                color: w.color, img: w.img, type: w.type, angle: ang, 
+                sizeMult: (w.level >= 10) ? 1.5 : 1.0
+            });
+        };
+        thrust(angle);
+        if (w.level >= 10) { thrust(angle + Math.PI); }
+    }
+    else if (w.type === 'orbit') {
+        let axeCount = Math.min(w.level + 1, 6);
+        let radiusOffset = 1.0;
+        if (w.level >= 10) { axeCount = 8; radiusOffset = 1.6; w.speed = 5.0; }
+
+        let angleStep = (Math.PI * 2) / axeCount;
+        for(let i=0; i<axeCount; i++) {
+            sv_aoeEffects.push({
+                type: 'orbit', x: sv_player.x, y: sv_player.y, distance: w.range * radiusOffset,
+                angle: angleStep * i, orbitSpeed: w.speed, damage: w.damage * sv_player.atkMult,
+                life: (w.level >= 10) ? 4.0 : 3.0, maxLife: (w.level >= 10) ? 4.0 : 3.0, hitTimer: 0, 
+                color: w.color, img: w.img, sizeMult: (w.level >= 10) ? 1.5 : 1.0
+            });
+        }
+    }
+    else if (w.type === 'claw') {
+        let hits = (w.level >= 10) ? 4 : 2;
+        let lTimer = (w.level >= 10) ? 1.0 : 0.5;
+        sv_aoeEffects.push({
+            type: 'claw', x: sv_player.x, y: sv_player.y, radius: w.range,
+            damage: w.damage * sv_player.atkMult, life: lTimer, maxLife: lTimer,
+            hitsLeft: hits, hitTimer: 0, hitInterval: 0.25, color: w.color, img: w.img
+        });
+    }
+}
+
+function sv_showDamage(dmg, x, y, color = '#fff') {
+    let displayDmg = typeof dmg === 'number' ? Math.floor(dmg) : dmg;
+    sv_damageTexts.push({ text: displayDmg, x: x + (Math.random()*20-10), y: y - 20, life: 0.6, maxLife: 0.6, color: color });
+}
+
+function sv_createParticles(x, y, color, count) {
+    for(let i=0; i<count; i++) {
+        let angle = Math.random() * Math.PI * 2;
+        let speed = Math.random() * 100 + 50;
+        sv_particles.push({ x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: Math.random() * 3 + 1, color: color, life: 0.5, maxLife: 0.5 });
+    }
+}
+
+function sv_update(dt) {
+    sv_gameTime += dt;
+
+    // 💡 보스 등장 체크
+    if (sv_gameTime >= sv_nextBossTime) {
+        sv_spawnBoss();
+        sv_nextBossTime += 60; // 60초 뒤 다음 보스
+    }
+
+    if (sv_hitFlashAlpha > 0) {
+        sv_hitFlashAlpha -= dt * 2; 
+        if (sv_hitFlashAlpha < 0) sv_hitFlashAlpha = 0;
+    }
+
+    let dx = 0; let dy = 0;
+    if (sv_keys['w'] || sv_keys['arrowup']) dy -= 1;
+    if (sv_keys['s'] || sv_keys['arrowdown']) dy += 1;
+    if (sv_keys['a'] || sv_keys['arrowleft']) dx -= 1;
+    if (sv_keys['d'] || sv_keys['arrowright']) dx += 1;
+
+    if (dx !== 0 || dy !== 0) {
+        const length = Math.sqrt(dx*dx + dy*dy);
+        dx /= length; dy /= length;
+        sv_player.facingX = dx; sv_player.facingY = dy;
+    }
+    
+    sv_player.x += dx * sv_player.speed * dt;
+    sv_player.y += dy * sv_player.speed * dt;
+
+    sv_camX += ((sv_player.x - sv_cw / 2) - sv_camX) * 10 * dt;
+    sv_camY += ((sv_player.y - sv_ch / 2) - sv_camY) * 10 * dt;
+
+    const spawnRate = Math.max(0.1, 0.8 - (sv_gameTime / 300));
+    if (Math.random() < dt / spawnRate) sv_spawnEnemy();
+
+    for (let i = sv_enemies.length - 1; i >= 0; i--) {
+        let e = sv_enemies[i];
+        
+        if (e.hp <= 0) {
+            sv_killCount++;
+            sv_gems.push({ x: e.x, y: e.y, value: e.expValue });
+            
+            // 💡 보스를 처치했을 경우 대형 고기 100% 드랍
+            if (e.isBoss) {
+                sv_meats.push({ x: e.x, y: e.y, healAmount: 50 });
+            } else if (Math.random() < 0.05) { 
+                sv_meats.push({ x: e.x + (Math.random()*20-10), y: e.y + (Math.random()*20-10), healAmount: 30 }); 
+            }
+
+            sv_createParticles(e.x, e.y, '#fff', 5);
+            sv_enemies.splice(i, 1);
+            continue;
+        }
+
+        let ex = sv_player.x - e.x; let ey = sv_player.y - e.y;
+        let dist = Math.hypot(ex, ey);
+        if (dist > 0) { e.x += (ex/dist) * e.speed * dt; e.y += (ey/dist) * e.speed * dt; }
+
+        if (dist < sv_player.radius + e.radius) {
+            if (e.attackTimer <= 0) {
+                sv_player.hp -= e.damage;
+                e.attackTimer = 1.0; 
+                sv_createParticles(sv_player.x, sv_player.y, '#ff4d4d', 5);
+                sv_hitFlashAlpha = 0.4; 
+                sv_updateUI();
+                if (sv_player.hp <= 0) return sv_gameOver();
+            }
+        }
+        if (e.attackTimer > 0) e.attackTimer -= dt;
+    }
+
+    sv_player.weapons.forEach(w => {
+        w.timer -= dt;
+        if (w.timer <= 0) { w.timer = w.maxCd * sv_player.cdMult; sv_fireWeapon(w); }
+    });
+
+    for (let i = sv_projectiles.length - 1; i >= 0; i--) {
+        let p = sv_projectiles[i];
+        p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+        if (p.life <= 0) { sv_projectiles.splice(i, 1); continue; }
+
+        for (let j = sv_enemies.length - 1; j >= 0; j--) {
+            let e = sv_enemies[j];
+            let hitRange = 15 + e.radius;
+            if (p.sizeMult > 1.0) hitRange += 10; 
+
+            if (!p.hitIds.has(e) && Math.hypot(p.x - e.x, p.y - e.y) < hitRange) {
+                e.hp -= p.damage;
+                p.hitIds.add(e);
+                sv_showDamage(p.damage, e.x, e.y);
+                sv_createParticles(e.x, e.y, p.color, 3);
+                p.pierce--;
+                if (p.pierce <= 0) { sv_projectiles.splice(i, 1); break; }
+            }
+        }
+    }
+
+    for (let i = sv_aoeEffects.length - 1; i >= 0; i--) {
+        let a = sv_aoeEffects[i];
+        a.life -= dt;
+        
+        if (a.type === 'orbit') {
+            a.angle += a.orbitSpeed * dt;
+            a.x = sv_player.x + Math.cos(a.angle) * a.distance;
+            a.y = sv_player.y + Math.sin(a.angle) * a.distance;
+            
+            a.hitTimer -= dt;
+            if (a.hitTimer <= 0) {
+                a.hitTimer = 0.2; 
+                sv_enemies.forEach(e => {
+                    let orbitHitRange = 35 * (a.sizeMult || 1.0) + e.radius;
+                    if (Math.hypot(a.x - e.x, a.y - e.y) <= orbitHitRange) {
+                        e.hp -= a.damage; sv_showDamage(a.damage, e.x, e.y); sv_createParticles(e.x, e.y, a.color, 2);
+                    }
+                });
+            }
+        } 
+        else if (a.type === 'claw') {
+            a.x = sv_player.x; a.y = sv_player.y;
+            
+            a.hitTimer -= dt;
+            if (a.hitTimer <= 0 && a.hitsLeft > 0) {
+                a.hitTimer = a.hitInterval; a.hitsLeft--;
+                sv_enemies.forEach(e => {
+                    if (Math.hypot(a.x - e.x, a.y - e.y) <= a.radius + e.radius) {
+                        e.hp -= a.damage; sv_showDamage(a.damage, e.x, e.y); sv_createParticles(e.x, e.y, a.color, 3);
+                    }
+                });
+            }
+        }
+        if (a.life <= 0) sv_aoeEffects.splice(i, 1);
+    }
+
+    for (let i = sv_gems.length - 1; i >= 0; i--) {
+        let g = sv_gems[i];
+        let dist = Math.hypot(sv_player.x - g.x, sv_player.y - g.y);
+        if (dist < sv_player.radius + 15) { sv_player.exp += g.value; sv_gems.splice(i, 1); sv_checkLevelUp(); } 
+        else if (dist < sv_player.magnetRange) { g.x += ((sv_player.x - g.x) / dist) * 500 * dt; g.y += ((sv_player.y - g.y) / dist) * 500 * dt; }
+    }
+
+    for (let i = sv_meats.length - 1; i >= 0; i--) {
+        let m = sv_meats[i];
+        let dist = Math.hypot(sv_player.x - m.x, sv_player.y - m.y);
+        if (dist < sv_player.radius + 15) {
+            sv_player.hp = Math.min(sv_player.maxHp, sv_player.hp + m.healAmount);
+            sv_showDamage("+" + m.healAmount, sv_player.x, sv_player.y - 10, '#2ea043'); 
+            sv_createParticles(sv_player.x, sv_player.y, '#2ea043', 5);
+            sv_meats.splice(i, 1); sv_updateUI();
+        }
+    }
+
+    for (let i = sv_particles.length - 1; i >= 0; i--) {
+        let pt = sv_particles[i]; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.life -= dt;
+        if (pt.life <= 0) sv_particles.splice(i, 1);
+    }
+    for (let i = sv_damageTexts.length - 1; i >= 0; i--) {
+        let d = sv_damageTexts[i]; d.y -= 20 * dt; d.life -= dt;
+        if (d.life <= 0) sv_damageTexts.splice(i, 1);
+    }
+}
+
+function sv_draw() {
+    sv_ctx.fillStyle = '#0d1117';
+    sv_ctx.fillRect(0, 0, sv_cw, sv_ch);
+    sv_ctx.save();
+    sv_ctx.translate(-sv_camX, -sv_camY);
+
+    sv_ctx.strokeStyle = '#21262d'; sv_ctx.lineWidth = 2;
+    const gridSize = 150;
+    const startX = Math.floor(sv_camX / gridSize) * gridSize;
+    const startY = Math.floor(sv_camY / gridSize) * gridSize;
+    sv_ctx.beginPath();
+    for (let x = startX; x < sv_camX + sv_cw + gridSize; x += gridSize) { sv_ctx.moveTo(x, startY); sv_ctx.lineTo(x, startY + sv_ch + gridSize); }
+    for (let y = startY; y < sv_camY + sv_ch + gridSize; y += gridSize) { sv_ctx.moveTo(startX, y); sv_ctx.lineTo(startX + sv_cw + gridSize, y); }
+    sv_ctx.stroke();
+
+    sv_ctx.fillStyle = '#2ea043';
+    sv_gems.forEach(g => { sv_ctx.beginPath(); sv_ctx.arc(g.x, g.y, 6, 0, Math.PI * 2); sv_ctx.fill(); });
+
+    sv_ctx.font = "18px Arial"; sv_ctx.textAlign = "center"; sv_ctx.textBaseline = "middle";
+    sv_meats.forEach(m => { sv_ctx.fillText("🥩", m.x, m.y); });
+    sv_ctx.textAlign = "left"; sv_ctx.textBaseline = "alphabetic";
+
+    sv_aoeEffects.forEach(a => {
+        if (a.type === 'orbit') {
+            sv_ctx.save();
+            sv_ctx.translate(a.x, a.y);
+            sv_ctx.rotate(a.angle + Math.PI/4); 
+            sv_ctx.rotate(sv_gameTime * 15); 
+            
+            if (a.img && a.img.src && a.img.complete && a.img.naturalWidth > 0) {
+                let s = 40 * (a.sizeMult || 1.0); sv_ctx.drawImage(a.img, -s/2, -s/2, s, s);
+            } else {
+                sv_ctx.fillStyle = a.color;
+                sv_ctx.beginPath();
+                sv_ctx.moveTo(-5, -15); sv_ctx.lineTo(5, -15); sv_ctx.lineTo(15, -5); sv_ctx.lineTo(15, 5);
+                sv_ctx.lineTo(5, 15); sv_ctx.lineTo(-5, 15); sv_ctx.lineTo(0, 0); sv_ctx.fill();
+            }
+            sv_ctx.restore();
+        } 
+        else if (a.type === 'claw') {
+            sv_ctx.save();
+            sv_ctx.translate(a.x, a.y);
+            sv_ctx.globalAlpha = a.life / a.maxLife;
+            let angleOffset = (a.hitsLeft % 2 === 0) ? Math.PI/6 : -Math.PI/6;
+            sv_ctx.rotate(angleOffset);
+
+            if (a.img && a.img.src && a.img.complete && a.img.naturalWidth > 0) {
+                let s = a.radius * 2;
+                sv_ctx.drawImage(a.img, -s/2, -s/2, s, s);
+            } else {
+                sv_ctx.strokeStyle = a.color;
+                sv_ctx.lineWidth = 6;
+                sv_ctx.lineCap = 'round';
+                let r = a.radius * 0.8;
+                sv_ctx.beginPath();
+                for (let i = -1; i <= 1; i++) {
+                    let yOff = i * 20;
+                    sv_ctx.moveTo(-r, yOff - 10);
+                    sv_ctx.quadraticCurveTo(0, yOff + 20, r, yOff - 10);
+                }
+                sv_ctx.stroke();
+            }
+            sv_ctx.restore();
+        }
+    });
+
+    sv_enemies.forEach(e => {
+        if (e.imgObj && e.imgObj.complete && e.imgObj.naturalWidth > 0) {
+            let renderSize = e.radius * 2.5; 
+            sv_ctx.drawImage(e.imgObj, e.x - renderSize/2, e.y - renderSize/2, renderSize, renderSize);
+        } else {
+            sv_ctx.fillStyle = e.color; sv_ctx.fillRect(e.x - e.radius, e.y - e.radius, e.radius*2, e.radius*2);
+        }
+        
+        // 보스는 체력바를 눈에 띄게 더 크게 표시
+        let barW = e.isBoss ? 40 : 24;
+        let barH = e.isBoss ? 6 : 4;
+        let hpRatio = e.hp / e.maxHp;
+        sv_ctx.fillStyle = '#000'; sv_ctx.fillRect(e.x - barW/2, e.y - e.radius - 12, barW, barH);
+        sv_ctx.fillStyle = '#ff4d4d'; sv_ctx.fillRect(e.x - barW/2, e.y - e.radius - 12, barW * hpRatio, barH);
+    });
+
+    if(sv_selectedCharImgPath && SV_IMAGES.player.complete && SV_IMAGES.player.naturalWidth > 0) {
+        sv_ctx.drawImage(SV_IMAGES.player, sv_player.x - 25, sv_player.y - 25, 50, 50);
+    } else {
+        sv_ctx.fillStyle = '#fff'; sv_ctx.beginPath(); sv_ctx.arc(sv_player.x, sv_player.y, sv_player.radius, 0, Math.PI * 2); sv_ctx.fill();
+        sv_ctx.fillStyle = '#539bf5'; sv_ctx.beginPath(); sv_ctx.arc(sv_player.x, sv_player.y, sv_player.radius-3, 0, Math.PI * 2); sv_ctx.fill();
+    }
+
+    sv_projectiles.forEach(p => {
+        sv_ctx.save();
+        sv_ctx.translate(p.x, p.y);
+        sv_ctx.rotate(p.angle); 
+        if (p.img && p.img.src && p.img.complete && p.img.naturalWidth > 0) {
+            sv_ctx.rotate(Math.PI/4); 
+            let baseSize = p.type === 'thrust' ? 40 : 25; 
+            let s = baseSize * (p.sizeMult || 1.0); 
+            sv_ctx.drawImage(p.img, -s/2, -s/2, s, s);
+        } else {
+            sv_ctx.fillStyle = p.color;
+            if (p.type === 'thrust') {
+                sv_ctx.fillRect(-15, -4, 30, 8); 
+                sv_ctx.beginPath(); sv_ctx.moveTo(15, -6); sv_ctx.lineTo(25, 0); sv_ctx.lineTo(15, 6); sv_ctx.fill();
+            } else { 
+                sv_ctx.beginPath(); sv_ctx.moveTo(10, 0); sv_ctx.lineTo(-5, 6); sv_ctx.lineTo(-2, 0); sv_ctx.lineTo(-5, -6); sv_ctx.fill();
+                sv_ctx.strokeStyle = p.color; sv_ctx.lineWidth = 2;
+                sv_ctx.beginPath(); sv_ctx.moveTo(-15, 0); sv_ctx.lineTo(-2, 0); sv_ctx.stroke();
+            } 
+        }
+        sv_ctx.restore();
+    });
+
+    sv_particles.forEach(pt => {
+        sv_ctx.fillStyle = pt.color; sv_ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+        sv_ctx.beginPath(); sv_ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2); sv_ctx.fill();
+    });
+    sv_ctx.globalAlpha = 1.0;
+    
+    sv_ctx.font = "bold 16px 'Malgun Gothic'";
+    sv_damageTexts.forEach(d => {
+        sv_ctx.globalAlpha = Math.max(0, d.life / d.maxLife);
+        sv_ctx.fillStyle = d.color; 
+        sv_ctx.strokeStyle = '#000'; sv_ctx.lineWidth = 3;
+        sv_ctx.strokeText(d.text, d.x, d.y); sv_ctx.fillText(d.text, d.x, d.y);
+    });
+    sv_ctx.globalAlpha = 1.0;
+
+    sv_ctx.restore();
+
+    if (sv_hitFlashAlpha > 0) {
+        sv_ctx.fillStyle = `rgba(255, 0, 0, ${sv_hitFlashAlpha})`;
+        sv_ctx.fillRect(0, 0, sv_cw, sv_ch);
+    }
+}
+
+function sv_updateUI() {
+    document.getElementById('sv-exp-bar').style.width = `${(sv_player.exp / sv_player.maxExp) * 100}%`;
+    document.getElementById('sv-hp-bar').style.width = `${Math.max(0, (sv_player.hp / sv_player.maxHp) * 100)}%`;
+    document.getElementById('sv-hp-text').innerText = `${Math.ceil(Math.max(0, sv_player.hp))} / ${sv_player.maxHp}`;
+    
+    document.getElementById('sv-ui-level').innerText = sv_player.level;
+    document.getElementById('sv-ui-kills').innerText = sv_killCount;
+    let mins = Math.floor(sv_gameTime / 60); let secs = Math.floor(sv_gameTime % 60);
+    document.getElementById('sv-ui-time').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function sv_gameOver() {
+    sv_gameState = 'gameover';
+    document.getElementById('sv-hud').style.display = 'none';
+    let mins = Math.floor(sv_gameTime / 60); let secs = Math.floor(sv_gameTime % 60);
+    document.getElementById('sv-final-time').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    document.getElementById('sv-final-kills').innerText = sv_killCount;
+    document.getElementById('sv-gameover-modal').style.display = 'flex';
+}
+
+function sv_gameLoop(time) {
+    if (sv_wrapper.style.display === 'none' || sv_gameState !== 'playing') {
+        sv_lastTime = time;
+        sv_reqId = requestAnimationFrame(sv_gameLoop);
+        return; 
+    }
+    
+    let dt = (time - sv_lastTime) / 1000;
+    if (dt > 0.1) dt = 0.1; 
+    sv_lastTime = time;
+
+    sv_update(dt);
+    sv_draw();
+    sv_reqId = requestAnimationFrame(sv_gameLoop);
+}
+/* ==========================================================
+                  [만득서바이벌] JS 코드 끝
+========================================================== */
 </script>
 
 <div id="sRankPopup">
