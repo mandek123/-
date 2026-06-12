@@ -15511,10 +15511,10 @@ SV_IMAGES.claw.src = './images2/item22.png';
 let sv_player = {};
 
 const SV_WEAPON_DB = {
-    bow:   { id: 'bow', name: "이그노스의 활", desc: "가장 가까운 적에게 화살을 발사합니다.", type: "projectile", baseDmg: 15, baseCd: 1.0, speed: 500, range: 600, pierce: 1, color: '#d2a8ff', img: SV_IMAGES.bow },
-    spear: { id: 'spear', name: "봉인된 정령왕의 창", desc: "바라보는 방향으로 창을 찌릅니다. (관통)", type: "thrust", baseDmg: 30, baseCd: 1.5, speed: 600, range: 150, pierce: 99, color: '#539bf5', img: SV_IMAGES.spear },
-    axe:   { id: 'axe', name: "메가죠의 도끼", desc: "캐릭터 주변을 맴도는 도끼를 소환합니다.", type: "orbit", baseDmg: 18, baseCd: 3.0, speed: 3.5, range: 110, pierce: 99, color: '#fca311', img: SV_IMAGES.axe },
-    claw:  { id: 'claw', name: "얼음 손톱", desc: "주변 넓은 범위의 적들을 2회 연속 할큅니다.", type: "claw", baseDmg: 22, baseCd: 2.5, speed: 0, range: 150, pierce: 99, color: '#a5d6ff', img: SV_IMAGES.claw }
+    bow:   { id: 'bow', name: "이그노스의 활", desc: "가장 가까운 적에게 화살을 발사합니다.", type: "projectile", baseDmg: 20, baseCd: 1.0, speed: 500, range: 600, pierce: 1, color: '#d2a8ff', img: SV_IMAGES.bow },
+    spear: { id: 'spear', name: "봉인된 정령왕의 창", desc: "바라보는 방향으로 창을 찌릅니다. (관통)", type: "thrust", baseDmg: 40, baseCd: 1.5, speed: 600, range: 150, pierce: 99, color: '#539bf5', img: SV_IMAGES.spear },
+    axe:   { id: 'axe', name: "메가죠의 도끼", desc: "캐릭터 주변을 맴도는 도끼를 소환합니다.", type: "orbit", baseDmg: 25, baseCd: 3.0, speed: 3.5, range: 110, pierce: 99, color: '#fca311', img: SV_IMAGES.axe },
+    claw:  { id: 'claw', name: "얼음 손톱", desc: "주변 넓은 범위의 적들을 2회 연속 할큅니다.", type: "claw", baseDmg: 30, baseCd: 2.5, speed: 0, range: 150, pierce: 99, color: '#a5d6ff', img: SV_IMAGES.claw }
 };
 
 window.addEventListener('keydown', e => {
@@ -15685,7 +15685,7 @@ function sv_spawnEnemy() {
         }
     }
 
-    let hpScaling = 20 * Math.pow(1.14, difficulty) * (1 + (sv_player.level - 1) * 0.25);
+    let hpScaling = 20 * Math.pow(1.12, difficulty) * (1 + (sv_player.level - 1) * 0.15);
 
     // 일반 근접형 개체만 생성
     sv_enemies.push({
@@ -15756,16 +15756,14 @@ function sv_spawnBoss() {
     sv_enemies.push({
         x: sv_player.x + Math.cos(angle) * dist, y: sv_player.y + Math.sin(angle) * dist,
         radius: 28, 
-        // 💡 보스 체력 증가폭 역시 1.10제곱으로 낮추고 배율 조정
-        maxHp: 20 * Math.pow(1.10, difficulty) * 12, 
-        hp: 20 * Math.pow(1.10, difficulty) * 12,
+        maxHp: 20 * Math.pow(1.08, difficulty) * 10, 
+        hp: 20 * Math.pow(1.08, difficulty) * 10,
         damage: 5 + difficulty, 
         speed: 130 + difficulty, 
         expValue: 10 + Math.floor(difficulty), 
         attackTimer: 0,
-        color: '#ff2222', 
-        imgObj: imgObj,
-        isBoss: true
+        color: '#ff2222', imgObj: imgObj,
+        isBoss: true, isRanged: false
     });
 }
 
@@ -16235,7 +16233,7 @@ function sv_draw() {
     });
 
     sv_enemies.forEach(e => {
-        // 💡 보스일 경우 선명한 레드 네온 아우라(그림자 효과)를 주변에 렌더링
+        // 💡 보스일 경우 선명한 레드 네온 아우라 렌더링
         if (e.isBoss) {
             sv_ctx.save();
             sv_ctx.shadowColor = '#ff0000';
@@ -16245,6 +16243,17 @@ function sv_draw() {
             sv_ctx.beginPath();
             sv_ctx.arc(e.x, e.y, e.radius + 3, 0, Math.PI * 2);
             sv_ctx.stroke();
+            sv_ctx.restore();
+        }
+        // 💡 원거리 몬스터일 경우 보라색 외곽선 렌더링
+        else if (e.isRanged) {
+            sv_ctx.save();
+            sv_ctx.strokeStyle = '#a853ff';
+            sv_ctx.lineWidth = 3;
+            sv_ctx.beginPath();
+            sv_ctx.arc(e.x, e.y, e.radius + 2, 0, Math.PI * 2);
+            sv_ctx.stroke();
+            sv_ctx.restore();
         }
 
         if (e.imgObj && e.imgObj.complete && e.imgObj.naturalWidth > 0) {
@@ -16254,18 +16263,19 @@ function sv_draw() {
             sv_ctx.fillStyle = e.color; sv_ctx.fillRect(e.x - e.radius, e.y - e.radius, e.radius*2, e.radius*2);
         }
 
+        // 💡 보스 네임택 및 원거리 몬스터 식별 아이콘
+        sv_ctx.save();
+        sv_ctx.textAlign = "center";
+        sv_ctx.textBaseline = "middle";
         if (e.isBoss) {
-            sv_ctx.restore(); 
-            
-            // 💡 보스 머리 위에 명확히 식별 가능한 위험 경고용 네임택 추가
-            sv_ctx.save();
             sv_ctx.font = "bold 13px 'Malgun Gothic'";
             sv_ctx.fillStyle = '#ff2a2a';
-            sv_ctx.textAlign = "center";
-            sv_ctx.textBaseline = "middle";
             sv_ctx.fillText("⚠️ [ BOSS ]", e.x, e.y - e.radius - 24);
-            sv_ctx.restore();
+        } else if (e.isRanged) {
+            sv_ctx.font = "14px Arial";
+            sv_ctx.fillText("🏹", e.x, e.y - e.radius - 15);
         }
+        sv_ctx.restore();
         
         let barW = e.isBoss ? 40 : 24;
         let barH = e.isBoss ? 6 : 4;
@@ -16387,6 +16397,7 @@ function sv_gameLoop(time) {
 
     sv_update(dt);
     sv_draw();
+    sv_updateUI(); // 💡 핵심: 매 프레임마다 UI(타이머, 체력, 경험치)를 갱신하도록 추가!
     sv_reqId = requestAnimationFrame(sv_gameLoop);
 }
 // 💡 무기 및 스탯 현황을 상단 패널에 업데이트하는 함수 (새로 추가)
