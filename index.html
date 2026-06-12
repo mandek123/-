@@ -5612,6 +5612,21 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 36,
+        date: "26년 6월 12일",
+        title: "26년 6월 12일 업데이트 공지사항입니다.",
+        summary: "1. 신규 미니게임 '만득서바이벌(BETA)' 출시",
+        content: `
+            <strong>1) 신규 미니게임 '만득서바이벌(BETA)' 출시</strong>
+            <span>- 뱀파이어 서바이버 스타일의 신규 미니게임 '만득서바이벌'이 새롭게 추가되었습니다. 메인 화면 하단 또는 [기타] 메뉴에서 접속하실 수 있습니다.</span>
+            <span>- 펫 도감과 연동되어 원하는 페트 스킨을 입고 플레이할 수 있습니다.</span>
+            <span>- 4종의 고유 무기(활, 창, 도끼, 클로)를 조합하고 MAX(Lv.10)까지 강화하여 강력한 특수 진화 형태를 경험해 보세요.</span>
+            <span>- 사냥 중 일정 확률로 등장하는 '고기(🥩)'를 획득해 체력을 관리하고, 60초마다 등장하는 보스를 처치해 보세요!</span>
+            <span>- 현재 베타 서비스 중이며, 플레이 중 발생하는 오류나 밸런스 건의사항을 제보해 주시면 적극적으로 반영하겠습니다.</span>
+        `
+    },
+    
+    {
         id: 35,
         date: "26년 6월 11일",
         title: "26년 6월 11일 업데이트 공지사항입니다.",
@@ -15768,8 +15783,16 @@ function sv_fireWeapon(w) {
                 sizeMult: (w.level >= 10) ? 1.5 : 1.0
             });
         };
+        
+        // 💡 1. 기본으로 앞, 뒤 양방향 동시 찌르기!
         thrust(angle);
-        if (w.level >= 10) { thrust(angle + Math.PI); }
+        thrust(angle + Math.PI);
+        
+        // 💡 2. MAX(10) 레벨 특수 효과: 양옆(십자 형태)까지 4방향 타격으로 진화!
+        if (w.level >= 10) { 
+            thrust(angle + Math.PI/2);
+            thrust(angle - Math.PI/2);
+        }
     }
     else if (w.type === 'orbit') {
         let axeCount = Math.min(w.level + 1, 6);
@@ -15928,16 +15951,22 @@ function sv_update(dt) {
             }
         } 
         else if (a.type === 'claw') {
-            a.x = sv_player.x; a.y = sv_player.y;
+            // 실제 타격 범위(히트박스) 영역 표시
+            sv_ctx.beginPath(); sv_ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
+            sv_ctx.fillStyle = a.color; sv_ctx.globalAlpha = (a.life / a.maxLife) * 0.15; sv_ctx.fill();
+            sv_ctx.globalAlpha = 1.0;
             
-            a.hitTimer -= dt;
-            if (a.hitTimer <= 0 && a.hitsLeft > 0) {
-                a.hitTimer = a.hitInterval; a.hitsLeft--;
-                sv_enemies.forEach(e => {
-                    if (Math.hypot(a.x - e.x, a.y - e.y) <= a.radius + e.radius) {
-                        e.hp -= a.damage; sv_showDamage(a.damage, e.x, e.y); sv_createParticles(e.x, e.y, a.color, 3);
-                    }
-                });
+            if (a.img && a.img.src && a.img.complete && a.img.naturalWidth > 0) {
+                sv_ctx.save();
+                sv_ctx.translate(a.x, a.y);
+                sv_ctx.globalAlpha = a.life / a.maxLife;
+                let offset = (a.hitsLeft % 2 === 0) ? -20 : 20; 
+                
+                // 💡 그려지는 이미지 크기만 타격 범위(a.radius)의 60% 비율로 축소
+                let renderSize = a.radius * 0.6; 
+                sv_ctx.drawImage(a.img, -renderSize/2 + offset, -renderSize/2 - offset, renderSize, renderSize);
+                
+                sv_ctx.restore();
             }
         }
         if (a.life <= 0) sv_aoeEffects.splice(i, 1);
