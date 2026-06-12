@@ -15491,7 +15491,8 @@ let sv_particles = [];
 let sv_damageTexts = [];
 let sv_hitFlashAlpha = 0; 
 let sv_nextBossTime = 60; 
-
+let sv_enemyProjectiles = []; 
+let sv_rangedSpawnTimer = 0; // 원거리 몬스터 소환 주기를 조율할 전용 타이머 추가
 // ==========================================
 // 🎨 이미지 등록 및 캐싱
 // ==========================================
@@ -15623,7 +15624,7 @@ function sv_addWeapon(weaponId) {
         else if (weaponId === 'spear') { 
             existing.damage *= 1.3; 
             existing.range += 15; 
-            if (existing.level === 6) existing.maxCd = 1.0; // 💡 창 MAX 달성 시 쿨타임 1초 고정
+            if (existing.level === 6) existing.maxCd = 0.5; // 💡 만렙 창 쿨타임 0.5초로 단축
         }
         else if (weaponId === 'axe') { 
             existing.damage *= 1.2; 
@@ -15649,9 +15650,12 @@ function sv_startGame() {
     document.getElementById('sv-gameover-modal').style.display = 'none';
     document.getElementById('sv-hud').style.display = 'flex';
     
-    sv_initPlayer();
+    sv_initPlayer(); // 💡 필수! 플레이어 데이터 초기화 코드가 추가되어야 합니다.
+    
     sv_enemies = []; sv_projectiles = []; sv_aoeEffects = []; 
     sv_gems = []; sv_meats = []; sv_particles = []; sv_damageTexts = [];
+    sv_enemyProjectiles = []; 
+    sv_rangedSpawnTimer = 0; 
     sv_gameTime = 0; sv_killCount = 0;
     sv_nextBossTime = 60; 
     sv_resize();
@@ -15681,16 +15685,54 @@ function sv_spawnEnemy() {
         }
     }
 
+    let hpScaling = 20 * Math.pow(1.14, difficulty) * (1 + (sv_player.level - 1) * 0.25);
+
+    // 일반 근접형 개체만 생성
     sv_enemies.push({
         x: sv_player.x + Math.cos(angle) * dist, y: sv_player.y + Math.sin(angle) * dist,
         radius: 14 + Math.random() * 6,
-        // 💡 적 체력 증가폭을 1.15제곱 -> 1.10제곱으로 완화하여 후반 난이도 하향
-        maxHp: 20 * Math.pow(1.10, difficulty), hp: 20 * Math.pow(1.10, difficulty),
+        maxHp: hpScaling, hp: hpScaling,
         damage: 2 + Math.floor(difficulty / 2), 
         speed: 90 + Math.random() * 30 + difficulty,
         expValue: 1 + Math.floor(difficulty / 3), attackTimer: 0,
         color: `hsl(${Math.random()*20}, 80%, 40%)`, imgObj: imgObj,
-        isBoss: false 
+        isBoss: false,
+        isRanged: false
+    });
+}
+
+// 💡 30초당 5마리 제한 스폰을 위해 전용 함수 배치
+function sv_spawnRangedEnemy() {
+    let angle = Math.random() * Math.PI * 2;
+    let dist = Math.max(sv_cw, sv_ch) / 2 + 100; 
+    let difficulty = 1 + Math.floor(sv_gameTime / 20); 
+    
+    let imgObj = null;
+    if (typeof PET_DATABASE !== 'undefined' && PET_DATABASE.length > 0) {
+        let randomPet = PET_DATABASE[Math.floor(Math.random() * PET_DATABASE.length)];
+        if (randomPet.img) {
+            if (!SV_PET_IMG_CACHE[randomPet.img]) {
+                let img = new Image(); img.src = randomPet.img;
+                SV_PET_IMG_CACHE[randomPet.img] = img;
+            }
+            imgObj = SV_PET_IMG_CACHE[randomPet.img];
+        }
+    }
+
+    let hpScaling = 20 * Math.pow(1.14, difficulty) * (1 + (sv_player.level - 1) * 0.25);
+
+    sv_enemies.push({
+        x: sv_player.x + Math.cos(angle) * dist, y: sv_player.y + Math.sin(angle) * dist,
+        radius: 14,
+        maxHp: hpScaling * 0.8, // 원거리 개체 밸런스를 위해 체력을 조금 낮춤
+        hp: hpScaling * 0.8,
+        damage: 2 + Math.floor(difficulty / 2), 
+        speed: 75,
+        expValue: 3, attackTimer: 0,
+        color: '#a853ff', imgObj: imgObj,
+        isBoss: false,
+        isRanged: true,
+        shootTimer: 3.0 // 원거리 공격 주기 (초 단위)
     });
 }
 
@@ -15732,9 +15774,6 @@ function sv_checkLevelUp() {
     if (sv_player.exp >= sv_player.maxExp) {
         sv_player.exp -= sv_player.maxExp;
         sv_player.level++;
-        
-        // 💡 경험치 증가폭 대폭 완화! (기존 * 1.4배 -> * 1.15배 + 10) 
-        // 20레벨이 넘어가도 부드럽게 레벨업할 수 있습니다.
         sv_player.maxExp = Math.floor(sv_player.maxExp * 1.15 + 10);
         
         sv_gameState = 'paused';
@@ -15742,35 +15781,48 @@ function sv_checkLevelUp() {
         const container = document.getElementById('sv-upgrade-container');
         container.innerHTML = '';
         
-        let pool = [];
+        let weaponPool = [];
+        let statPool = [];
+        
         ['bow', 'spear', 'axe', 'claw'].forEach(wId => {
             let w = sv_player.weapons.find(wp => wp.id === wId);
             let db = SV_WEAPON_DB[wId];
             let iconHtml = db.img.src ? `<div class="sv-upgrade-icon"><img src="${db.img.src}"></div>` : `<div class="sv-upgrade-icon">❓</div>`;
 
             if (!w) {
-                pool.push({ name: `${db.name} 획득`, desc: db.desc, icon: iconHtml, action: () => sv_addWeapon(wId) });
+                weaponPool.push({ name: `${db.name} 획득`, desc: db.desc, icon: iconHtml, action: () => sv_addWeapon(wId) });
             } else if (w.level < 6) { 
                 let nextLv = w.level + 1;
                 let extraDesc = nextLv === 6 ? "<br><span style='color:#fca311; font-weight:bold;'>[MAX 달성: 특수 형태 진화!]</span>" : "";
-                pool.push({ name: `${db.name} 강화 (Lv.${nextLv})`, desc: `피해량 및 능력치 증가${extraDesc}`, icon: iconHtml, action: () => sv_addWeapon(wId) });
+                weaponPool.push({ name: `${db.name} 강화 (Lv.${nextLv})`, desc: `피해량 및 능력치 증가${extraDesc}`, icon: iconHtml, action: () => sv_addWeapon(wId) });
             }
         });
 
-        pool.push({ name: "공격력 증가", desc: "모든 피해량이 20% 증가합니다.", icon: `<div class="sv-upgrade-icon">⚔️</div>`, action: () => sv_player.atkMult += 0.2 });
-        pool.push({ name: "공속 증가", desc: "무기 발사 주기가 10% 짧아집니다.", icon: `<div class="sv-upgrade-icon">⚡</div>`, action: () => sv_player.cdMult *= 0.9 });
-        pool.push({ name: "이동 속도", desc: "발걸음이 15% 빨라집니다.", icon: `<div class="sv-upgrade-icon">👟</div>`, action: () => sv_player.speed *= 1.15 });
-        pool.push({ name: "아이템 자석", desc: "보석을 끌어당기는 반경이 넓어집니다.", icon: `<div class="sv-upgrade-icon">🧲</div>`, action: () => sv_player.magnetRange += 60 });
-        
-        pool.push({ name: "최대 체력 증가", desc: "최대 체력이 20 증가합니다.", icon: `<div class="sv-upgrade-icon">❤️‍🔥</div>`, action: () => { sv_player.maxHp += 20; sv_player.hp += 20; } });
+        statPool.push({ name: "공격력 증가", desc: "모든 피해량이 20% 증가합니다.", icon: `<div class="sv-upgrade-icon">⚔️</div>`, action: () => sv_player.atkMult += 0.2 });
+        statPool.push({ name: "공속 증가", desc: "무기 발사 주기가 10% 짧아집니다.", icon: `<div class="sv-upgrade-icon">⚡</div>`, action: () => sv_player.cdMult *= 0.9 });
+        statPool.push({ name: "이동 속도", desc: "발걸음이 15% 빨라집니다.", icon: `<div class="sv-upgrade-icon">👟</div>`, action: () => sv_player.speed *= 1.15 });
+        statPool.push({ name: "아이템 자석", desc: "보석을 끌어당기는 반경이 넓어집니다.", icon: `<div class="sv-upgrade-icon">🧲</div>`, action: () => sv_player.magnetRange += 60 });
+        statPool.push({ name: "최대 체력 증가", desc: "최대 체력이 20 증가합니다.", icon: `<div class="sv-upgrade-icon">❤️‍🔥</div>`, action: () => { sv_player.maxHp += 20; sv_player.hp += 20; } });
 
         if (sv_player.hp <= sv_player.maxHp * 0.5) {
-            pool.push({ name: "긴급 체력 회복", desc: "체력을 50 즉시 회복합니다.", icon: `<div class="sv-upgrade-icon">💖</div>`, action: () => { sv_player.hp = Math.min(sv_player.maxHp, sv_player.hp + 50); } });
+            statPool.push({ name: "긴급 체력 회복", desc: "체력을 50 즉시 회복합니다.", icon: `<div class="sv-upgrade-icon">💖</div>`, action: () => { sv_player.hp = Math.min(sv_player.maxHp, sv_player.hp + 50); } });
         }
 
-        let choices = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
+        let finalChoices = [];
+        let isStatOnlyRoll = Math.random() < 0.15;
+
+        if (weaponPool.length === 0 || isStatOnlyRoll) {
+            finalChoices = statPool.sort(() => 0.5 - Math.random()).slice(0, 3);
+        } else {
+            weaponPool.sort(() => 0.5 - Math.random());
+            statPool.sort(() => 0.5 - Math.random());
+            finalChoices.push(weaponPool.pop()); 
+            let combinedPool = [...weaponPool, ...statPool].sort(() => 0.5 - Math.random());
+            finalChoices.push(...combinedPool.slice(0, 2));
+            finalChoices.sort(() => 0.5 - Math.random());
+        }
         
-        choices.forEach(c => {
+        finalChoices.forEach(c => {
             let card = document.createElement('div');
             card.className = 'sv-upgrade-card';
             card.innerHTML = `${c.icon}<div class="sv-upgrade-name">${c.name}</div><div class="sv-upgrade-desc">${c.desc}</div>`;
@@ -15780,7 +15832,7 @@ function sv_checkLevelUp() {
                 sv_gameState = 'playing';
                 sv_lastTime = performance.now();
                 sv_updateUI();
-                sv_updateStatusUI(); // 💡 무기/스탯 현황 UI 갱신 호출
+                sv_updateStatusUI(); 
                 sv_reqId = requestAnimationFrame(sv_gameLoop);
             };
             container.appendChild(card);
@@ -15888,6 +15940,15 @@ function sv_update(dt) {
         sv_nextBossTime += 60; 
     }
 
+    // 💡 20레벨 이상일 때, 12초에 1마리씩(1분에 5마리 요건) 규칙적으로 원거리 유닛 생성
+    if (sv_player.level >= 20) {
+        sv_rangedSpawnTimer -= dt;
+        if (sv_rangedSpawnTimer <= 0) {
+            sv_spawnRangedEnemy();
+            sv_rangedSpawnTimer = 12.0; // 💡 6.0에서 12.0으로 수정
+        }
+    }
+
     if (sv_hitFlashAlpha > 0) {
         sv_hitFlashAlpha -= dt * 2; 
         if (sv_hitFlashAlpha < 0) sv_hitFlashAlpha = 0;
@@ -15934,7 +15995,30 @@ function sv_update(dt) {
 
         let ex = sv_player.x - e.x; let ey = sv_player.y - e.y;
         let dist = Math.hypot(ex, ey);
-        if (dist > 0) { e.x += (ex/dist) * e.speed * dt; e.y += (ey/dist) * e.speed * dt; }
+        if (dist > 0) { 
+            // 💡 원거리형 개체는 플레이어와 일정 거리(280px)를 유지하며 포지셔닝
+            if (e.isRanged && dist < 280) {
+                if (dist < 180) { // 지나치게 근접할 경우 소폭 거리를 벌림
+                    e.x -= (ex/dist) * e.speed * dt; e.y -= (ey/dist) * e.speed * dt;
+                }
+            } else {
+                e.x += (ex/dist) * e.speed * dt; e.y += (ey/dist) * e.speed * dt; 
+            }
+        }
+
+        // 💡 원거리 투사체 발사 타이머 로직
+        if (e.isRanged) {
+            e.shootTimer -= dt;
+            if (e.shootTimer <= 0) {
+                e.shootTimer = 3.0; // 💡 2.2에서 3.0으로 수정 (3초에 1번 발사)
+                let angle = Math.atan2(sv_player.y - e.y, sv_player.x - e.x);
+                sv_enemyProjectiles.push({
+                    x: e.x, y: e.y,
+                    vx: Math.cos(angle) * 280, vy: Math.sin(angle) * 280,
+                    damage: e.damage, life: 2.5
+                });
+            }
+        }
 
         if (dist < sv_player.radius + e.radius) {
             if (e.attackTimer <= 0) {
@@ -16054,6 +16138,22 @@ function sv_update(dt) {
         let d = sv_damageTexts[i]; d.y -= 20 * dt; d.life -= dt;
         if (d.life <= 0) sv_damageTexts.splice(i, 1);
     }
+    // 원거리 몬스터 투사체 이동 및 플레이어 피격 충돌 처리
+    for (let i = sv_enemyProjectiles.length - 1; i >= 0; i--) {
+        let ep = sv_enemyProjectiles[i];
+        ep.x += ep.vx * dt; ep.y += ep.vy * dt; ep.life -= dt;
+        
+        if (ep.life <= 0) { sv_enemyProjectiles.splice(i, 1); continue; }
+        
+        if (Math.hypot(ep.x - sv_player.x, ep.y - sv_player.y) < sv_player.radius + 6) {
+            sv_player.hp -= ep.damage;
+            sv_createParticles(sv_player.x, sv_player.y, '#ff4d4d', 4);
+            sv_hitFlashAlpha = 0.4; 
+            sv_updateUI();
+            sv_enemyProjectiles.splice(i, 1);
+            if (sv_player.hp <= 0) return sv_gameOver();
+        }
+    }
 }
 
 function sv_draw() {
@@ -16135,11 +16235,36 @@ function sv_draw() {
     });
 
     sv_enemies.forEach(e => {
+        // 💡 보스일 경우 선명한 레드 네온 아우라(그림자 효과)를 주변에 렌더링
+        if (e.isBoss) {
+            sv_ctx.save();
+            sv_ctx.shadowColor = '#ff0000';
+            sv_ctx.shadowBlur = 22;
+            sv_ctx.strokeStyle = '#ff1e1e';
+            sv_ctx.lineWidth = 4;
+            sv_ctx.beginPath();
+            sv_ctx.arc(e.x, e.y, e.radius + 3, 0, Math.PI * 2);
+            sv_ctx.stroke();
+        }
+
         if (e.imgObj && e.imgObj.complete && e.imgObj.naturalWidth > 0) {
             let renderSize = e.radius * 2.5; 
             sv_ctx.drawImage(e.imgObj, e.x - renderSize/2, e.y - renderSize/2, renderSize, renderSize);
         } else {
             sv_ctx.fillStyle = e.color; sv_ctx.fillRect(e.x - e.radius, e.y - e.radius, e.radius*2, e.radius*2);
+        }
+
+        if (e.isBoss) {
+            sv_ctx.restore(); 
+            
+            // 💡 보스 머리 위에 명확히 식별 가능한 위험 경고용 네임택 추가
+            sv_ctx.save();
+            sv_ctx.font = "bold 13px 'Malgun Gothic'";
+            sv_ctx.fillStyle = '#ff2a2a';
+            sv_ctx.textAlign = "center";
+            sv_ctx.textBaseline = "middle";
+            sv_ctx.fillText("⚠️ [ BOSS ]", e.x, e.y - e.radius - 24);
+            sv_ctx.restore();
         }
         
         let barW = e.isBoss ? 40 : 24;
@@ -16178,7 +16303,32 @@ function sv_draw() {
         }
         sv_ctx.restore();
     });
-
+// 💡 몬스터의 원거리 투사체를 날렵한 불꽃 투사체(Flame Vector)로 드로잉
+    sv_enemyProjectiles.forEach(ep => {
+        sv_ctx.save();
+        sv_ctx.translate(ep.x, ep.y);
+        sv_ctx.rotate(Math.atan2(ep.vy, ep.vx)); 
+        
+        // 외부 화염 줄기 (오렌지 레드)
+        sv_ctx.fillStyle = '#ff4500'; 
+        sv_ctx.beginPath();
+        sv_ctx.moveTo(11, 0);
+        sv_ctx.quadraticCurveTo(0, -8, -11, -5);
+        sv_ctx.quadraticCurveTo(-4, 0, -11, 5);
+        sv_ctx.quadraticCurveTo(0, 8, 11, 0);
+        sv_ctx.fill();
+        
+        // 내부 화염 핵 (옐로우)
+        sv_ctx.fillStyle = '#ffcc00'; 
+        sv_ctx.beginPath();
+        sv_ctx.moveTo(6, 0);
+        sv_ctx.quadraticCurveTo(0, -4, -6, -3);
+        sv_ctx.quadraticCurveTo(-2, 0, -6, 3);
+        sv_ctx.quadraticCurveTo(0, 4, 6, 0);
+        sv_ctx.fill();
+        
+        sv_ctx.restore();
+    });
     sv_particles.forEach(pt => {
         sv_ctx.fillStyle = pt.color; sv_ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
         sv_ctx.beginPath(); sv_ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2); sv_ctx.fill();
@@ -16203,6 +16353,8 @@ function sv_draw() {
 }
 
 function sv_updateUI() {
+    if(!sv_player || sv_player.level === undefined) return; // 💡 데이터가 없을 때 튕기지 않도록 방어 로직 추가
+    
     document.getElementById('sv-exp-bar').style.width = `${(sv_player.exp / sv_player.maxExp) * 100}%`;
     document.getElementById('sv-hp-bar').style.width = `${Math.max(0, (sv_player.hp / sv_player.maxHp) * 100)}%`;
     document.getElementById('sv-hp-text').innerText = `${Math.ceil(Math.max(0, sv_player.hp))} / ${sv_player.maxHp}`;
