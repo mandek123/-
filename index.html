@@ -16128,6 +16128,10 @@ function sv_update(dt) {
         }
     }
 
+    // 💡 최적화: 입자와 데미지 텍스트가 너무 많으면 렉 유발하므로 갯수 제한
+    if (sv_particles.length > 100) sv_particles.splice(0, sv_particles.length - 100);
+    if (sv_damageTexts.length > 30) sv_damageTexts.splice(0, sv_damageTexts.length - 30);
+
     for (let i = sv_particles.length - 1; i >= 0; i--) {
         let pt = sv_particles[i]; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.life -= dt;
         if (pt.life <= 0) sv_particles.splice(i, 1);
@@ -16160,6 +16164,10 @@ function sv_draw() {
     sv_ctx.save();
     sv_ctx.translate(-sv_camX, -sv_camY);
 
+    // 💡 화면 절삭(Culling) 영역 (화면 밖은 안 그려서 렉 방지)
+    let viewL = sv_camX - 100, viewR = sv_camX + sv_cw + 100;
+    let viewT = sv_camY - 100, viewB = sv_camY + sv_ch + 100;
+
     sv_ctx.strokeStyle = '#21262d'; sv_ctx.lineWidth = 2;
     const gridSize = 150;
     const startX = Math.floor(sv_camX / gridSize) * gridSize;
@@ -16172,15 +16180,18 @@ function sv_draw() {
     sv_ctx.textAlign = "center"; 
     sv_ctx.textBaseline = "middle";
     
-    // 💡 보스 드랍 여부에 따라 폰트(이모지) 크기를 대폭 상향
     sv_gems.forEach(g => { 
-        sv_ctx.font = g.isBossDrop ? "40px Arial" : "16px Arial";
-        sv_ctx.fillText("💎", g.x, g.y); 
+        if(g.x > viewL && g.x < viewR && g.y > viewT && g.y < viewB) {
+            sv_ctx.font = g.isBossDrop ? "40px Arial" : "16px Arial";
+            sv_ctx.fillText("💎", g.x, g.y); 
+        }
     });
     
     sv_meats.forEach(m => { 
-        sv_ctx.font = m.isBossDrop ? "45px Arial" : "18px Arial";
-        sv_ctx.fillText("🥩", m.x, m.y); 
+        if(m.x > viewL && m.x < viewR && m.y > viewT && m.y < viewB) {
+            sv_ctx.font = m.isBossDrop ? "45px Arial" : "18px Arial";
+            sv_ctx.fillText("🥩", m.x, m.y); 
+        }
     });
     
     sv_ctx.textAlign = "left"; 
@@ -16211,7 +16222,6 @@ function sv_draw() {
             sv_ctx.rotate(angleOffset);
 
             if (a.img && a.img.src && a.img.complete && a.img.naturalWidth > 0) {
-                // 💡 클로 이미지 렌더링 크기 축소 반영
                 let renderSize = a.radius * 0.6; 
                 let offset = (a.hitsLeft % 2 === 0) ? -20 : 20;
                 sv_ctx.drawImage(a.img, -renderSize/2 + offset, -renderSize/2 - offset, renderSize, renderSize);
@@ -16233,7 +16243,9 @@ function sv_draw() {
     });
 
     sv_enemies.forEach(e => {
-        // 💡 보스일 경우 선명한 레드 네온 아우라 렌더링
+        if(e.x < viewL || e.x > viewR || e.y < viewT || e.y > viewB) return; // 💡 화면 밖 적 무시
+
+        // 💡 외곽선 아우라 처리 (보스: 빨강 / 원거리: 보라)
         if (e.isBoss) {
             sv_ctx.save();
             sv_ctx.shadowColor = '#ff0000';
@@ -16244,9 +16256,7 @@ function sv_draw() {
             sv_ctx.arc(e.x, e.y, e.radius + 3, 0, Math.PI * 2);
             sv_ctx.stroke();
             sv_ctx.restore();
-        }
-        // 💡 원거리 몬스터일 경우 보라색 외곽선 렌더링
-        else if (e.isRanged) {
+        } else if (e.isRanged) {
             sv_ctx.save();
             sv_ctx.strokeStyle = '#a853ff';
             sv_ctx.lineWidth = 3;
@@ -16263,7 +16273,7 @@ function sv_draw() {
             sv_ctx.fillStyle = e.color; sv_ctx.fillRect(e.x - e.radius, e.y - e.radius, e.radius*2, e.radius*2);
         }
 
-        // 💡 보스 네임택 및 원거리 몬스터 식별 아이콘
+        // 💡 네임택 처리
         sv_ctx.save();
         sv_ctx.textAlign = "center";
         sv_ctx.textBaseline = "middle";
@@ -16272,8 +16282,10 @@ function sv_draw() {
             sv_ctx.fillStyle = '#ff2a2a';
             sv_ctx.fillText("⚠️ [ BOSS ]", e.x, e.y - e.radius - 24);
         } else if (e.isRanged) {
-            sv_ctx.font = "14px Arial";
-            sv_ctx.fillText("🏹", e.x, e.y - e.radius - 15);
+            sv_ctx.font = "bold 13px 'Malgun Gothic'";
+            sv_ctx.fillStyle = '#ffffff';
+            sv_ctx.shadowColor = '#000'; sv_ctx.shadowBlur = 4;
+            sv_ctx.fillText("🏹 [원거리]", e.x, e.y - e.radius - 20);
         }
         sv_ctx.restore();
         
@@ -16292,6 +16304,7 @@ function sv_draw() {
     }
 
     sv_projectiles.forEach(p => {
+        if(p.x < viewL || p.x > viewR || p.y < viewT || p.y > viewB) return; // 최적화
         sv_ctx.save();
         sv_ctx.translate(p.x, p.y);
         sv_ctx.rotate(p.angle); 
@@ -16313,33 +16326,27 @@ function sv_draw() {
         }
         sv_ctx.restore();
     });
-// 💡 몬스터의 원거리 투사체를 날렵한 불꽃 투사체(Flame Vector)로 드로잉
+
+    // 💡 적 투사체(불꽃) 크기 증가 및 밝은 노란색으로 강조
     sv_enemyProjectiles.forEach(ep => {
+        if(ep.x < viewL || ep.x > viewR || ep.y < viewT || ep.y > viewB) return; // 최적화
         sv_ctx.save();
         sv_ctx.translate(ep.x, ep.y);
         sv_ctx.rotate(Math.atan2(ep.vy, ep.vx)); 
         
-        // 외부 화염 줄기 (오렌지 레드)
-        sv_ctx.fillStyle = '#ff4500'; 
+        sv_ctx.fillStyle = '#ffff00'; // 매우 밝은 노란색 불꽃
         sv_ctx.beginPath();
-        sv_ctx.moveTo(11, 0);
-        sv_ctx.quadraticCurveTo(0, -8, -11, -5);
-        sv_ctx.quadraticCurveTo(-4, 0, -11, 5);
-        sv_ctx.quadraticCurveTo(0, 8, 11, 0);
-        sv_ctx.fill();
-        
-        // 내부 화염 핵 (옐로우)
-        sv_ctx.fillStyle = '#ffcc00'; 
-        sv_ctx.beginPath();
-        sv_ctx.moveTo(6, 0);
-        sv_ctx.quadraticCurveTo(0, -4, -6, -3);
-        sv_ctx.quadraticCurveTo(-2, 0, -6, 3);
-        sv_ctx.quadraticCurveTo(0, 4, 6, 0);
+        sv_ctx.moveTo(18, 0); // 기존보다 크기 대폭 키움
+        sv_ctx.quadraticCurveTo(0, -12, -18, -8);
+        sv_ctx.quadraticCurveTo(-6, 0, -18, 8);
+        sv_ctx.quadraticCurveTo(0, 12, 18, 0);
         sv_ctx.fill();
         
         sv_ctx.restore();
     });
+
     sv_particles.forEach(pt => {
+        if(pt.x < viewL || pt.x > viewR || pt.y < viewT || pt.y > viewB) return; // 최적화
         sv_ctx.fillStyle = pt.color; sv_ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
         sv_ctx.beginPath(); sv_ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2); sv_ctx.fill();
     });
@@ -16347,6 +16354,7 @@ function sv_draw() {
     
     sv_ctx.font = "bold 16px 'Malgun Gothic'";
     sv_damageTexts.forEach(d => {
+        if(d.x < viewL || d.x > viewR || d.y < viewT || d.y > viewB) return; // 최적화
         sv_ctx.globalAlpha = Math.max(0, d.life / d.maxLife);
         sv_ctx.fillStyle = d.color; 
         sv_ctx.strokeStyle = '#000'; sv_ctx.lineWidth = 3;
