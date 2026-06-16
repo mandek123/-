@@ -16042,11 +16042,15 @@ function sv_fireWeapon(w) {
     }
 }
 function sv_showDamage(dmg, x, y, color = '#fff') {
+    // 💡 최적화: 화면에 텍스트가 40개를 넘으면 렉 방지를 위해 텍스트 생성을 무시합니다.
+    if (sv_damageTexts.length > 40) return; 
     let displayDmg = typeof dmg === 'number' ? Math.floor(dmg) : dmg;
     sv_damageTexts.push({ text: displayDmg, x: x + (Math.random()*20-10), y: y - 20, life: 0.6, maxLife: 0.6, color: color });
 }
 
 function sv_createParticles(x, y, color, count) {
+    // 💡 최적화: 화면에 이펙트 입자가 150개를 넘으면 생성을 무시합니다.
+    if (sv_particles.length > 150) return; 
     for(let i=0; i<count; i++) {
         let angle = Math.random() * Math.PI * 2;
         let speed = Math.random() * 100 + 50;
@@ -16062,12 +16066,11 @@ function sv_update(dt) {
         sv_nextBossTime += 60; 
     }
 
-    // 💡 20레벨 이상일 때, 12초에 1마리씩(1분에 5마리 요건) 규칙적으로 원거리 유닛 생성
     if (sv_player.level >= 20) {
         sv_rangedSpawnTimer -= dt;
         if (sv_rangedSpawnTimer <= 0) {
             sv_spawnRangedEnemy();
-            sv_rangedSpawnTimer = 12.0; // 💡 6.0에서 12.0으로 수정
+            sv_rangedSpawnTimer = 12.0; 
         }
     }
 
@@ -16116,11 +16119,12 @@ function sv_update(dt) {
         }
 
         let ex = sv_player.x - e.x; let ey = sv_player.y - e.y;
-        let dist = Math.hypot(ex, ey);
+        // 💡 최적화: Math.hypot 대신 Math.sqrt를 사용하여 연산 속도 향상
+        let dist = Math.sqrt(ex*ex + ey*ey);
+        
         if (dist > 0) { 
-            // 💡 원거리형 개체는 플레이어와 일정 거리(280px)를 유지하며 포지셔닝
             if (e.isRanged && dist < 280) {
-                if (dist < 180) { // 지나치게 근접할 경우 소폭 거리를 벌림
+                if (dist < 180) { 
                     e.x -= (ex/dist) * e.speed * dt; e.y -= (ey/dist) * e.speed * dt;
                 }
             } else {
@@ -16128,11 +16132,10 @@ function sv_update(dt) {
             }
         }
 
-        // 💡 원거리 투사체 발사 타이머 로직
         if (e.isRanged) {
             e.shootTimer -= dt;
             if (e.shootTimer <= 0) {
-                e.shootTimer = 3.0; // 💡 2.2에서 3.0으로 수정 (3초에 1번 발사)
+                e.shootTimer = 3.0; 
                 let angle = Math.atan2(sv_player.y - e.y, sv_player.x - e.x);
                 sv_enemyProjectiles.push({
                     x: e.x, y: e.y,
@@ -16158,7 +16161,6 @@ function sv_update(dt) {
     sv_player.weapons.forEach(w => {
         w.timer -= dt;
         if (w.timer <= 0) { 
-            // 💡 무기가 MAX(Lv.6)일 경우, 유저의 공속 버프(cdMult)를 완전히 무시하고 고정 공속 적용!
             let currentCd = (w.level >= 6) ? w.maxCd : (w.maxCd * sv_player.cdMult);
             w.timer = currentCd; 
             sv_fireWeapon(w); 
@@ -16168,19 +16170,16 @@ function sv_update(dt) {
     for (let i = sv_projectiles.length - 1; i >= 0; i--) {
         let p = sv_projectiles[i];
         
-        // 💡 부메랑: 비행 시간이 절반 지나면 플레이어에게 되돌아옴
         if (p.type === 'boomerang') {
             if (!p.returned && p.life <= p.maxLife * 0.5) {
-                p.returned = true;
-                p.hitIds.clear(); // 되돌아올 때 다시 타격 가능
+                p.returned = true; p.hitIds.clear(); 
             }
             if (p.returned) {
                 let angle = Math.atan2(sv_player.y - p.y, sv_player.x - p.x);
-                p.vx = Math.cos(angle) * 800; // 복귀 시 속도 가속
-                p.vy = Math.sin(angle) * 800;
-                if (Math.hypot(sv_player.x - p.x, sv_player.y - p.y) < sv_player.radius + 20) {
-                    p.life = 0; // 플레이어에 닿으면 삭제
-                }
+                p.vx = Math.cos(angle) * 800; p.vy = Math.sin(angle) * 800;
+                // 💡 최적화: 제곱 거리 비교로 연산 감축
+                let pdx = sv_player.x - p.x, pdy = sv_player.y - p.y;
+                if ((pdx*pdx + pdy*pdy) < Math.pow(sv_player.radius + 20, 2)) p.life = 0; 
             }
         }
 
@@ -16189,14 +16188,15 @@ function sv_update(dt) {
 
         for (let j = sv_enemies.length - 1; j >= 0; j--) {
             let e = sv_enemies[j];
-            let hitRange = 15 + e.radius;
-            if (p.sizeMult > 1.0) hitRange += 10; 
-
-            if (!p.hitIds.has(e) && Math.hypot(p.x - e.x, p.y - e.y) < hitRange) {
+            let hitRange = 15 + e.radius + (p.sizeMult > 1.0 ? 10 : 0); 
+            
+            // 💡 최적화: 렉의 핵심 원인이었던 투사체 vs 몬스터 Math.hypot 제거 후 제곱 비교
+            let pdx = p.x - e.x, pdy = p.y - e.y;
+            if (!p.hitIds.has(e) && (pdx*pdx + pdy*pdy) < hitRange * hitRange) {
                 e.hp -= p.damage;
                 p.hitIds.add(e);
                 sv_showDamage(p.damage, e.x, e.y);
-                sv_createParticles(e.x, e.y, p.color, 3);
+                sv_createParticles(e.x, e.y, p.color, 2);
                 p.pierce--;
                 if (p.pierce <= 0) { sv_projectiles.splice(i, 1); break; }
             }
@@ -16222,41 +16222,52 @@ function sv_update(dt) {
                 a.hitTimer = 0.1; 
                 sv_enemies.forEach(e => {
                     let orbitHitRange = 35 * (a.sizeMult || 1.0) + e.radius;
-                    if (Math.hypot(a.x - e.x, a.y - e.y) <= orbitHitRange) {
-                        e.hp -= a.damage; sv_showDamage(a.damage, e.x, e.y); sv_createParticles(e.x, e.y, a.color, 2);
+                    let adx = a.x - e.x, ady = a.y - e.y;
+                    // 💡 최적화 판정 & 이펙트 확률 적용
+                    if ((adx*adx + ady*ady) <= orbitHitRange * orbitHitRange) {
+                        e.hp -= a.damage; 
+                        // 💡 광역 무기가 몬스터 무리에 맞을 때 이펙트를 25% 확률로만 생성하여 렉 방지
+                        if (Math.random() < 0.25) { 
+                            sv_showDamage(a.damage, e.x, e.y); 
+                            sv_createParticles(e.x, e.y, a.color, 1);
+                        }
                     }
                 });
             }
         } 
         else if (a.type === 'claw') {
-            a.x = sv_player.x;
-            a.y = sv_player.y;
-            
+            a.x = sv_player.x; a.y = sv_player.y;
             a.hitTimer -= dt;
             if (a.hitTimer <= 0 && a.hitsLeft > 0) {
-                a.hitTimer = a.hitInterval; 
-                a.hitsLeft--;
+                a.hitTimer = a.hitInterval; a.hitsLeft--;
                 sv_enemies.forEach(e => {
-                    if (Math.hypot(a.x - e.x, a.y - e.y) <= a.radius + e.radius) {
+                    let hitRange = a.radius + e.radius;
+                    let adx = a.x - e.x, ady = a.y - e.y;
+                    if ((adx*adx + ady*ady) <= hitRange * hitRange) {
                         e.hp -= a.damage; 
-                        sv_showDamage(a.damage, e.x, e.y); 
-                        sv_createParticles(e.x, e.y, a.color, 3);
+                        if (Math.random() < 0.5) {
+                            sv_showDamage(a.damage, e.x, e.y); 
+                            sv_createParticles(e.x, e.y, a.color, 2);
+                        }
                     }
                 });
             }
         }
-        // 💡 강인한 돌 낙하 데미지 판정
         else if (a.type === 'drop') {
             if (a.life <= 0.2 && !a.hasHit) {
                 a.hasHit = true;
                 sv_enemies.forEach(e => {
-                    if (Math.hypot(a.x - e.x, a.y - e.y) <= (a.radius * a.sizeMult) + e.radius) {
+                    let hitRange = (a.radius * a.sizeMult) + e.radius;
+                    let adx = a.x - e.x, ady = a.y - e.y;
+                    if ((adx*adx + ady*ady) <= hitRange * hitRange) {
                         e.hp -= a.damage; 
-                        sv_showDamage(a.damage, e.x, e.y); 
-                        sv_createParticles(e.x, e.y, a.color, 4);
+                        if (Math.random() < 0.5) {
+                            sv_showDamage(a.damage, e.x, e.y); 
+                            sv_createParticles(e.x, e.y, a.color, 2);
+                        }
                     }
                 });
-                sv_createParticles(a.x, a.y, '#888', 15); // 폭발 입자 이펙트
+                sv_createParticles(a.x, a.y, '#888', 8); 
             }
         }
         if (a.life <= 0) sv_aoeEffects.splice(i, 1);
@@ -16264,15 +16275,16 @@ function sv_update(dt) {
 
     for (let i = sv_gems.length - 1; i >= 0; i--) {
         let g = sv_gems[i];
-        let dist = Math.hypot(sv_player.x - g.x, sv_player.y - g.y);
+        let ex = sv_player.x - g.x, ey = sv_player.y - g.y;
+        let dist = Math.sqrt(ex*ex + ey*ey);
         if (dist < sv_player.radius + 15) { sv_player.exp += g.value; sv_gems.splice(i, 1); sv_checkLevelUp(); } 
-        else if (dist < sv_player.magnetRange) { g.x += ((sv_player.x - g.x) / dist) * 500 * dt; g.y += ((sv_player.y - g.y) / dist) * 500 * dt; }
+        else if (dist < sv_player.magnetRange) { g.x += (ex / dist) * 500 * dt; g.y += (ey / dist) * 500 * dt; }
     }
 
     for (let i = sv_meats.length - 1; i >= 0; i--) {
         let m = sv_meats[i];
-        let dist = Math.hypot(sv_player.x - m.x, sv_player.y - m.y);
-        if (dist < sv_player.radius + 15) {
+        let ex = sv_player.x - m.x, ey = sv_player.y - m.y;
+        if ((ex*ex + ey*ey) < Math.pow(sv_player.radius + 15, 2)) {
             sv_player.hp = Math.min(sv_player.maxHp, sv_player.hp + m.healAmount);
             sv_showDamage("+" + m.healAmount, sv_player.x, sv_player.y - 10, '#2ea043'); 
             sv_createParticles(sv_player.x, sv_player.y, '#2ea043', 5);
@@ -16280,11 +16292,9 @@ function sv_update(dt) {
         }
     }
 
-    // 💡 최적화: 텍스트 렌더링은 렉의 주범입니다. 
-    // 바닥에 방치된 보석이 150개를 넘어가면 가장 오래된 것부터 삭제합니다.
+    // 💡 최적화: 기존에 매 프레임마다 배열 앞부분을 자르던(splice) 로직을 제거했습니다. 
+    // 위 생성 제한 함수에서 이미 개수를 통제하므로 불필요한 배열 이동 연산이 사라집니다.
     if (sv_gems.length > 150) sv_gems.splice(0, sv_gems.length - 150); 
-    if (sv_particles.length > 100) sv_particles.splice(0, sv_particles.length - 100);
-    if (sv_damageTexts.length > 30) sv_damageTexts.splice(0, sv_damageTexts.length - 30);
 
     for (let i = sv_particles.length - 1; i >= 0; i--) {
         let pt = sv_particles[i]; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.life -= dt;
@@ -16294,14 +16304,15 @@ function sv_update(dt) {
         let d = sv_damageTexts[i]; d.y -= 20 * dt; d.life -= dt;
         if (d.life <= 0) sv_damageTexts.splice(i, 1);
     }
-    // 원거리 몬스터 투사체 이동 및 플레이어 피격 충돌 처리
+    
     for (let i = sv_enemyProjectiles.length - 1; i >= 0; i--) {
         let ep = sv_enemyProjectiles[i];
         ep.x += ep.vx * dt; ep.y += ep.vy * dt; ep.life -= dt;
         
         if (ep.life <= 0) { sv_enemyProjectiles.splice(i, 1); continue; }
         
-        if (Math.hypot(ep.x - sv_player.x, ep.y - sv_player.y) < sv_player.radius + 6) {
+        let ex = ep.x - sv_player.x, ey = ep.y - sv_player.y;
+        if ((ex*ex + ey*ey) < Math.pow(sv_player.radius + 6, 2)) {
             sv_player.hp -= ep.damage;
             sv_createParticles(sv_player.x, sv_player.y, '#ff4d4d', 4);
             sv_hitFlashAlpha = 0.4; 
