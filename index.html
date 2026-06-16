@@ -4382,16 +4382,16 @@ button[onclick="resetGame()"]:hover {
         </div>
         
         <div style="display: flex; gap: 20px; margin-bottom: 30px; max-width: 800px; width: 90%;">
-            <div style="flex: 2; background: rgba(13,17,23,0.8); border: 1px solid #30363d; border-radius: 12px; padding: 25px; text-align: left;">
-                <div style="color: #a5d6ff; font-size: 18px; font-weight: bold; border-bottom: 1px solid #30363d; padding-bottom: 10px; margin-bottom: 15px;">📖 생존 가이드</div>
-                <ul style="color: #c9d1d9; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
-                    <li><b>이동:</b> 방향키 또는 W, A, S, D 키를 사용하세요.</li>
-                    <li><b>전투:</b> 장착한 무기가 자동으로 적을 향해 발사됩니다.</li>
-                    <li><b>성장:</b> 적이 떨어뜨리는 <span style="color:#2ea043; font-weight:bold;">다이아몬드(💎)</span>을 모아 레벨업 하세요.</li>
-                    <li><b>회복:</b> 가끔 드랍되는 <span style="color:#ff7b72; font-weight:bold;">고기(🥩)</span>를 먹으면 체력이 30 회복됩니다.</li>
-                    <li><b>무기 진화:</b> 무기를 <span style="color:#ffcc00; font-weight:bold;">Lv.6(MAX)</span>까지 강화하면 강력한 특수 공격이 개방됩니다!</li>
-                </ul>
-            </div>
+    <div style="flex: 2; background: rgba(13,17,23,0.8); border: 1px solid #30363d; border-radius: 12px; padding: 25px; text-align: left;">
+        <div style="color: #a5d6ff; font-size: 18px; font-weight: bold; border-bottom: 1px solid #30363d; padding-bottom: 10px; margin-bottom: 15px;">📖 생존 가이드</div>
+        <ul style="color: #c9d1d9; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+            <li><b>이동 및 전투:</b> W, A, S, D 또는 방향키로 이동하며, 무기는 자동 발사됩니다.</li>
+            <li><b>성장과 회복:</b> 적이 떨어뜨리는 <span style="color:#2ea043; font-weight:bold;">보석(💎)</span>으로 레벨업하고, <span style="color:#ff7b72; font-weight:bold;">고기(🥩)</span>로 체력을 회복합니다.</li>
+            <li><b>보스 보상:</b> 60초마다 등장하는 보스 처치 시 <span style="color:#fca311; font-weight:bold;">보상 상자(🎁)</span>가 열려 랜덤 보상을 획득합니다.</li>
+            <li><b>무기 진화:</b> 무기 <span style="color:#ffcc00; font-weight:bold;">MAX(Lv.6)</span> 달성 후 특정 패시브 조건을 만족한 상태로 보스를 처치하면 진화 무기를 얻습니다.</li>
+            <li><b>명예의 전당:</b> 게임 종료 시 기기당 1개의 최고 생존 기록을 <span style="color:#3fb950; font-weight:bold;">랭킹(🏆)</span>에 등록할 수 있습니다.</li>
+        </ul>
+</div>
 
             <div style="flex: 1; background: rgba(13,17,23,0.8); border: 1px solid #30363d; border-radius: 12px; padding: 25px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <div style="color:#8b949e; font-size: 14px; margin-bottom: 15px;">플레이어 스킨 (능력치 무관)</div>
@@ -4431,19 +4431,28 @@ button[onclick="resetGame()"]:hover {
             생존 시간: <span id="sv-final-time" style="color:#fca311; margin-right: 15px;">00:00</span> 
             처치 수: <span id="sv-final-kills" style="color:#ff7b72;">0</span>
         </div>
-        
+
         <div id="sv-score-submit-area" style="margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 420px;">
-            
             <input type="text" id="sv-nickname-input" placeholder="닉네임 입력 (최대 8자)" maxlength="8" style="flex: 1; height: 48px; margin: 0; padding: 0 15px; border-radius: 8px; border: 1px solid #539bf5; background: #0d1117; color: #fff; font-size: 16px; outline: none; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); box-sizing: border-box;">
             
             <button class="sv-btn" style="height: 48px; margin: 0; padding: 0 25px; background: linear-gradient(180deg, #3fb950, #238636); border: 1px solid #2ea043; border-radius: 8px; font-size: 16px; color: #fff; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.6); box-sizing: border-box; display: flex; align-items: center; justify-content: center;" onclick="sv_submitScore()">기록 등록</button>
-            
         </div>
 
         <div style="display: flex; gap: 15px; width: 100%; max-width: 420px; height: 50px; box-sizing: border-box;">
             <button class="sv-btn" style="flex: 1; height: 100%; background: linear-gradient(180deg, #3fb950, #238636); border: 1px solid #2ea043; border-radius: 8px; font-size: 18px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.6);" onclick="sv_restartWithCharSelect()">다시 도전</button>
             
             <button class="sv-btn sv-btn-close" style="flex: 1; height: 100%; background: linear-gradient(180deg, #f85149, #da3633); border: 1px solid #b3261e; border-radius: 8px; font-size: 18px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.6);" onclick="sv_goToLobby()">메인으로</button>
+        </div>
+    </div> <div id="sv-boss-reward-modal" class="sv-modal" style="display: none; z-index: 120;">
+        <div style="background: rgba(13, 17, 23, 0.95); padding: 40px 50px; border-radius: 16px; border: 2px solid #fca311; box-shadow: 0 0 40px rgba(252, 163, 17, 0.4); text-align: center; max-width: 450px; display: flex; flex-direction: column; align-items: center;">
+            <div style="font-size: 60px; margin-bottom: 10px; text-shadow: 0 0 20px #fca311;">🎁</div>
+            <div class="sv-modal-title" style="color: #fca311; text-shadow: 0 0 10px rgba(252, 163, 17, 0.6); margin-top: 0; font-size: 32px;">보스 처치 보상!</div>
+            
+            <div id="sv-boss-reward-content" style="font-size: 20px; color: #fff; margin: 30px 0; background: #21262d; padding: 25px 20px; border-radius: 12px; border: 1px solid #30363d; width: 100%; box-sizing: border-box; line-height: 1.5;">
+                보상을 확인하는 중...
+            </div>
+            
+            <button class="sv-btn" style="background: linear-gradient(180deg, #fca311, #d48300); border: 1px solid #b77100; padding: 15px 40px; font-size: 18px; width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.4); font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.6);" onclick="sv_claimBossReward()">보상 획득 및 계속하기</button>
         </div>
     </div>
     <!-- 💡 랭킹 모달 UI 최적화 -->
@@ -15550,13 +15559,19 @@ let sv_selectedCharImgPath = null;
 const SV_PET_IMG_CACHE = {}; 
 
 const SV_IMAGES = {
-    player: new Image(), bow: new Image(), spear: new Image(), axe: new Image(), claw: new Image(), enemy: new Image()
+    player: new Image(), bow: new Image(), spear: new Image(), axe: new Image(), claw: new Image(), 
+    boomerang: new Image(), stone: new Image(), enemy: new Image(),
+    evo_bow: new Image(), evo_axe: new Image()
 };
 
 SV_IMAGES.bow.src = './images/item1.png';
 SV_IMAGES.spear.src = './images/item2.png';
 SV_IMAGES.axe.src = './images2/item21.png';
 SV_IMAGES.claw.src = './images2/item22.png';
+SV_IMAGES.boomerang.src = './images2/item23.png'; 
+SV_IMAGES.stone.src = './images2/item24.png';     
+SV_IMAGES.evo_bow.src = './images2/item25.png';
+SV_IMAGES.evo_axe.src = './images2/item26.png';
 
 let sv_player = {};
 
@@ -15564,7 +15579,13 @@ const SV_WEAPON_DB = {
     bow:   { id: 'bow', name: "이그노스의 활", desc: "가장 가까운 적에게 화살을 발사합니다.", type: "projectile", baseDmg: 20, baseCd: 1.0, speed: 500, range: 600, pierce: 1, color: '#d2a8ff', img: SV_IMAGES.bow },
     spear: { id: 'spear', name: "봉인된 정령왕의 창", desc: "바라보는 방향으로 창을 찌릅니다. (관통)", type: "thrust", baseDmg: 40, baseCd: 1.5, speed: 600, range: 150, pierce: 99, color: '#539bf5', img: SV_IMAGES.spear },
     axe:   { id: 'axe', name: "메가죠의 도끼", desc: "캐릭터 주변을 맴도는 도끼를 소환합니다.", type: "orbit", baseDmg: 25, baseCd: 3.0, speed: 3.5, range: 110, pierce: 99, color: '#fca311', img: SV_IMAGES.axe },
-    claw:  { id: 'claw', name: "얼음 손톱", desc: "주변 넓은 범위의 적들을 2회 연속 할큅니다.", type: "claw", baseDmg: 30, baseCd: 2.5, speed: 0, range: 150, pierce: 99, color: '#a5d6ff', img: SV_IMAGES.claw }
+    claw:  { id: 'claw', name: "얼음 손톱", desc: "주변 넓은 범위의 적들을 2회 연속 할큅니다.", type: "claw", baseDmg: 30, baseCd: 2.5, speed: 0, range: 150, pierce: 99, color: '#a5d6ff', img: SV_IMAGES.claw },
+    boomerang: { id: 'boomerang', name: "용암부메랑", desc: "적을 관통하고 되돌아오는 부메랑을 던집니다.", type: "boomerang", baseDmg: 35, baseCd: 2.0, speed: 600, range: 400, pierce: 99, color: '#ff4500', img: SV_IMAGES.boomerang },
+    stone: { id: 'stone', name: "강인한 돌", desc: "무작위 적의 위치에 무거운 돌을 떨어뜨립니다.", type: "drop", baseDmg: 60, baseCd: 3.5, speed: 0, range: 120, pierce: 99, color: '#888888', img: SV_IMAGES.stone },
+    
+    // 💡 진화 무기 데이터베이스 추가
+    evo_bow: { id: 'evo_bow', name: "심해의 활 (진화)", desc: "적을 관통하는 3발의 빛의 화살을 쏩니다.", type: "projectile", baseDmg: 50, baseCd: 0.15, speed: 800, range: 800, pierce: 99, color: '#ffff00', img: SV_IMAGES.evo_bow },
+    evo_axe: { id: 'evo_axe', name: "열공의 도끼 (진화)", desc: "12개의 화염 도끼가 초고속으로 회전합니다.", type: "orbit", baseDmg: 60, baseCd: 1.0, speed: 10.0, range: 160, pierce: 99, color: '#ff0000', img: SV_IMAGES.evo_axe }
 };
 
 window.addEventListener('keydown', e => {
@@ -15684,7 +15705,16 @@ function sv_addWeapon(weaponId) {
         else if (weaponId === 'claw') { 
             existing.damage *= 1.25; 
             existing.range += 8; 
-            if (existing.level === 6) existing.maxCd = 1.0; // 💡 클로 MAX: 1초마다 무한 발동 고정
+            if (existing.level === 6) existing.maxCd = 1.0; 
+        }
+        else if (weaponId === 'boomerang') { 
+            existing.damage *= 1.3; 
+            if (existing.level === 6) existing.maxCd = 1.0; 
+        }
+        else if (weaponId === 'stone') { 
+            existing.damage *= 1.5; 
+            existing.range += 20; 
+            if (existing.level === 6) existing.maxCd = 2.0; 
         }
     } else {
         let db = SV_WEAPON_DB[weaponId];
@@ -15700,7 +15730,11 @@ function sv_startGame() {
     document.getElementById('sv-gameover-modal').style.display = 'none';
     document.getElementById('sv-hud').style.display = 'flex';
     
-    sv_initPlayer(); // 💡 필수! 플레이어 데이터 초기화 코드가 추가되어야 합니다.
+    // 💡 게임 시작 시 보상 모달 초기화 강제 적용
+    let rewardModal = document.getElementById('sv-boss-reward-modal');
+    if (rewardModal) rewardModal.style.display = 'none';
+    
+    sv_initPlayer(); 
     
     sv_enemies = []; sv_projectiles = []; sv_aoeEffects = []; 
     sv_gems = []; sv_meats = []; sv_particles = []; sv_damageTexts = [];
@@ -15831,8 +15865,11 @@ function sv_checkLevelUp() {
         
         let weaponPool = [];
         let statPool = [];
-        
-        ['bow', 'spear', 'axe', 'claw'].forEach(wId => {
+                
+        ['bow', 'spear', 'axe', 'claw', 'boomerang', 'stone'].forEach(wId => {
+            let hasEvolved = sv_player.weapons.find(wp => wp.id === 'evo_' + wId);
+            if (hasEvolved) return; 
+
             let w = sv_player.weapons.find(wp => wp.id === wId);
             let db = SV_WEAPON_DB[wId];
             let iconHtml = db.img.src ? `<div class="sv-upgrade-icon"><img src="${db.img.src}"></div>` : `<div class="sv-upgrade-icon">❓</div>`;
@@ -15900,11 +15937,17 @@ function sv_fireWeapon(w) {
             sv_projectiles.push({
                 x: sv_player.x, y: sv_player.y, vx: Math.cos(ang) * w.speed, vy: Math.sin(ang) * w.speed,
                 damage: w.damage * sv_player.atkMult, pierce: w.pierce, hitIds: new Set(), life: 2.0,
-                color: w.color, img: w.img, type: w.type, angle: ang, sizeMult: 1.0
+                color: w.color, img: w.img, type: w.type, angle: ang, 
+                sizeMult: (w.id === 'evo_bow') ? 2.5 : 1.0 
             });
         };
-        shoot(angle);
-    } 
+        
+        if (w.id === 'evo_bow') {
+            shoot(angle); shoot(angle - 0.25); shoot(angle + 0.25);
+        } else {
+            shoot(angle);
+        }
+    }
     else if (w.type === 'thrust') {
         const thrust = (ang) => {
             sv_projectiles.push({
@@ -15937,33 +15980,64 @@ function sv_fireWeapon(w) {
         let radiusOffset = 1.0;
         let lifeTime = 3.0;
 
-        if (w.level >= 6) { 
+        if (w.id === 'evo_axe') {
+            axeCount = 12; 
+            radiusOffset = 2.5; 
+            w.speed = 10.0; 
+            lifeTime = 2.0; 
+        } else if (w.level >= 6) { 
             axeCount = 8; 
             radiusOffset = 1.6; 
             w.speed = 5.0; 
-            lifeTime = 2.0; // 💡 2초마다 갱신(요요 1사이클)
+            lifeTime = 2.0; 
         } 
 
         let angleStep = (Math.PI * 2) / axeCount;
         for(let i=0; i<axeCount; i++) {
             sv_aoeEffects.push({
                 type: 'orbit', x: sv_player.x, y: sv_player.y, 
-                baseDistance: w.range * radiusOffset, // 💡 원래 최대 범위 저장
+                baseDistance: w.range * radiusOffset, 
                 distance: w.range * radiusOffset,
                 angle: angleStep * i, orbitSpeed: w.speed, damage: w.damage * sv_player.atkMult,
                 life: lifeTime, maxLife: lifeTime, hitTimer: 0, 
-                color: w.color, img: w.img, sizeMult: (w.level >= 6) ? 1.5 : 1.0,
-                isMax: (w.level >= 6) // MAX 플래그
+                color: w.color, img: w.img, 
+                sizeMult: (w.id === 'evo_axe') ? 2.0 : ((w.level >= 6) ? 1.5 : 1.0),
+                isMax: (w.level >= 6 || w.id === 'evo_axe') 
             });
         }
     }
     else if (w.type === 'claw') {
         let hits = (w.level >= 6) ? 4 : 2; 
-        let lTimer = (w.level >= 6) ? 1.0 : 0.5; // 💡 MAX시 1초 동안 4번 타격 (쿨타임 1초와 맞물려 무한 타격 유지)
+        let lTimer = (w.level >= 6) ? 1.0 : 0.5; 
         sv_aoeEffects.push({
             type: 'claw', x: sv_player.x, y: sv_player.y, radius: w.range, 
             damage: w.damage * sv_player.atkMult, life: lTimer, maxLife: lTimer,
             hitsLeft: hits, hitTimer: 0, hitInterval: 0.25, color: w.color, img: w.img
+        });
+    }
+    else if (w.type === 'boomerang') {
+        let nearest = sv_enemies.reduce((p, c) => Math.hypot(sv_player.x - p.x, sv_player.y - p.y) < Math.hypot(sv_player.x - c.x, sv_player.y - c.y) ? p : c);
+        let angle = Math.atan2(nearest.y - sv_player.y, nearest.x - sv_player.x);
+        
+        let count = (w.level >= 6) ? 3 : 1;
+        for (let i = 0; i < count; i++) {
+            let offset = (i - Math.floor(count/2)) * 0.3; // 다중 발사 시 각도 분산
+            sv_projectiles.push({
+                x: sv_player.x, y: sv_player.y, vx: Math.cos(angle + offset) * w.speed, vy: Math.sin(angle + offset) * w.speed,
+                damage: w.damage * sv_player.atkMult, pierce: w.pierce, hitIds: new Set(), life: 1.5, maxLife: 1.5,
+                color: w.color, img: w.img, type: w.type, angle: angle + offset, sizeMult: (w.level >= 6) ? 1.5 : 1.0, returned: false
+            });
+        }
+    }
+    else if (w.type === 'drop') {
+        // 무작위 적을 찾아 해당 위치에 투하 (만렙 시 4발, 기본 2발)
+        let targets = sv_enemies.slice().sort(() => 0.5 - Math.random()).slice(0, w.level >= 6 ? 4 : 2);
+        targets.forEach(t => {
+            sv_aoeEffects.push({
+                type: 'drop', x: t.x, y: t.y, radius: w.range, 
+                damage: w.damage * sv_player.atkMult, life: 1.0, maxLife: 1.0,
+                color: w.color, img: w.img, sizeMult: (w.level >= 6) ? 1.5 : 1.0, hasHit: false
+            });
         });
     }
 }
@@ -16031,7 +16105,7 @@ function sv_update(dt) {
             sv_gems.push({ x: e.x, y: e.y, value: e.expValue, isBossDrop: e.isBoss });
             
             if (e.isBoss) {
-                sv_meats.push({ x: e.x, y: e.y, healAmount: 50, isBossDrop: true });
+                sv_openBossReward();
             } else if (Math.random() < 0.05) { 
                 sv_meats.push({ x: e.x + (Math.random()*20-10), y: e.y + (Math.random()*20-10), healAmount: 30, isBossDrop: false }); 
             }
@@ -16093,6 +16167,23 @@ function sv_update(dt) {
 
     for (let i = sv_projectiles.length - 1; i >= 0; i--) {
         let p = sv_projectiles[i];
+        
+        // 💡 부메랑: 비행 시간이 절반 지나면 플레이어에게 되돌아옴
+        if (p.type === 'boomerang') {
+            if (!p.returned && p.life <= p.maxLife * 0.5) {
+                p.returned = true;
+                p.hitIds.clear(); // 되돌아올 때 다시 타격 가능
+            }
+            if (p.returned) {
+                let angle = Math.atan2(sv_player.y - p.y, sv_player.x - p.x);
+                p.vx = Math.cos(angle) * 800; // 복귀 시 속도 가속
+                p.vy = Math.sin(angle) * 800;
+                if (Math.hypot(sv_player.x - p.x, sv_player.y - p.y) < sv_player.radius + 20) {
+                    p.life = 0; // 플레이어에 닿으면 삭제
+                }
+            }
+        }
+
         p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
         if (p.life <= 0) { sv_projectiles.splice(i, 1); continue; }
 
@@ -16118,20 +16209,17 @@ function sv_update(dt) {
         
         if (a.type === 'orbit') {
             a.angle += a.orbitSpeed * dt;
-            
-            // 💡 도끼 MAX: 캐릭터 쪽으로 모였다가 다시 넓어지는 요요 효과 (2초 주기)
             if (a.isMax) {
-                let progress = 1.0 - (a.life / a.maxLife); // 0.0 ~ 1.0
-                let pullFactor = Math.abs(Math.cos(progress * Math.PI)); // 1.0 -> 0.0 -> 1.0 으로 진동
-                a.distance = 30 + (a.baseDistance - 30) * pullFactor; // 30(캐릭터 근처)까지만 당겨짐
+                let progress = 1.0 - (a.life / a.maxLife); 
+                let pullFactor = Math.abs(Math.cos(progress * Math.PI)); 
+                a.distance = 30 + (a.baseDistance - 30) * pullFactor; 
             }
-
             a.x = sv_player.x + Math.cos(a.angle) * a.distance;
             a.y = sv_player.y + Math.sin(a.angle) * a.distance;
             
             a.hitTimer -= dt;
             if (a.hitTimer <= 0) {
-                a.hitTimer = 0.1; // 💡 요요처럼 움직일 때 타격이 빗나가지 않게 판정 주기 축소
+                a.hitTimer = 0.1; 
                 sv_enemies.forEach(e => {
                     let orbitHitRange = 35 * (a.sizeMult || 1.0) + e.radius;
                     if (Math.hypot(a.x - e.x, a.y - e.y) <= orbitHitRange) {
@@ -16155,6 +16243,20 @@ function sv_update(dt) {
                         sv_createParticles(e.x, e.y, a.color, 3);
                     }
                 });
+            }
+        }
+        // 💡 강인한 돌 낙하 데미지 판정
+        else if (a.type === 'drop') {
+            if (a.life <= 0.2 && !a.hasHit) {
+                a.hasHit = true;
+                sv_enemies.forEach(e => {
+                    if (Math.hypot(a.x - e.x, a.y - e.y) <= (a.radius * a.sizeMult) + e.radius) {
+                        e.hp -= a.damage; 
+                        sv_showDamage(a.damage, e.x, e.y); 
+                        sv_createParticles(e.x, e.y, a.color, 4);
+                    }
+                });
+                sv_createParticles(a.x, a.y, '#888', 15); // 폭발 입자 이펙트
             }
         }
         if (a.life <= 0) sv_aoeEffects.splice(i, 1);
@@ -16216,7 +16318,7 @@ function sv_draw() {
     sv_ctx.save();
     sv_ctx.translate(-sv_camX, -sv_camY);
 
-    // 💡 화면 절삭(Culling) 영역 (화면 밖은 안 그려서 렉 방지)
+    // 💡 화면 절삭(Culling) 영역
     let viewL = sv_camX - 100, viewR = sv_camX + sv_cw + 100;
     let viewT = sv_camY - 100, viewB = sv_camY + sv_ch + 100;
 
@@ -16292,6 +16394,32 @@ function sv_draw() {
             }
             sv_ctx.restore();
         }
+        // 💡 강인한 돌 떨어지는 그래픽 추가
+        else if (a.type === 'drop') {
+            sv_ctx.save();
+            sv_ctx.translate(a.x, a.y);
+            
+            // 바닥 그림자 (떨어질수록 커짐)
+            sv_ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            let shadowScale = 1.0 - (a.life / a.maxLife); 
+            if (shadowScale < 0) shadowScale = 0;
+            sv_ctx.beginPath(); 
+            sv_ctx.arc(0, 0, a.radius * (a.sizeMult || 1.0) * shadowScale, 0, Math.PI * 2); 
+            sv_ctx.fill();
+
+            // 돌 낙하
+            if (!a.hasHit) {
+                let dropY = -600 * (a.life / a.maxLife); // 하늘에서 바닥(0)으로 떨어짐
+                if (a.img && a.img.src && a.img.complete && a.img.naturalWidth > 0) {
+                    let s = 60 * (a.sizeMult || 1.0); 
+                    sv_ctx.drawImage(a.img, -s/2, dropY - s/2, s, s);
+                } else {
+                    sv_ctx.fillStyle = a.color;
+                    sv_ctx.beginPath(); sv_ctx.arc(0, dropY, 30 * (a.sizeMult || 1.0), 0, Math.PI * 2); sv_ctx.fill();
+                }
+            }
+            sv_ctx.restore();
+        }
     });
 
     sv_enemies.forEach(e => {
@@ -16299,7 +16427,6 @@ function sv_draw() {
 
         if (e.isBoss) {
             sv_ctx.save();
-            // 💡 치명적인 렉 유발자인 shadowBlur 제거 후 가벼운 반투명 원으로 아우라 대체
             sv_ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
             sv_ctx.beginPath();
             sv_ctx.arc(e.x, e.y, e.radius + 15, 0, Math.PI * 2);
@@ -16336,7 +16463,6 @@ function sv_draw() {
             sv_ctx.fillStyle = '#ff2a2a';
             sv_ctx.fillText("⚠️ [ BOSS ]", e.x, e.y - e.radius - 24);
         } else if (e.isRanged) {
-            // 💡 shadowBlur 제거 후 빠른 사각형 렌더링으로 가독성 확보
             sv_ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
             sv_ctx.fillRect(e.x - 35, e.y - e.radius - 28, 70, 16);
             sv_ctx.font = "bold 12px 'Malgun Gothic'";
@@ -16360,13 +16486,23 @@ function sv_draw() {
     }
 
     sv_projectiles.forEach(p => {
-        if(p.x < viewL || p.x > viewR || p.y < viewT || p.y > viewB) return; // 최적화
+        if(p.x < viewL || p.x > viewR || p.y < viewT || p.y > viewB) return; 
         sv_ctx.save();
         sv_ctx.translate(p.x, p.y);
-        sv_ctx.rotate(p.angle); 
+        
+        // 💡 부메랑 회전 추가
+        if (p.type === 'boomerang') {
+            sv_ctx.rotate(sv_gameTime * 20); 
+        } else {
+            sv_ctx.rotate(p.angle); 
+        }
+
         if (p.img && p.img.src && p.img.complete && p.img.naturalWidth > 0) {
-            sv_ctx.rotate(Math.PI/4); 
-            let baseSize = p.type === 'thrust' ? 40 : 25; 
+            // 부메랑이 아닐 때만 45도 회전 렌더링 유지
+            if (p.type !== 'boomerang') {
+                sv_ctx.rotate(Math.PI/4); 
+            }
+            let baseSize = p.type === 'thrust' ? 40 : (p.type === 'boomerang' ? 35 : 25); 
             let s = baseSize * (p.sizeMult || 1.0); 
             sv_ctx.drawImage(p.img, -s/2, -s/2, s, s);
         } else {
@@ -16383,16 +16519,15 @@ function sv_draw() {
         sv_ctx.restore();
     });
 
-    // 💡 적 투사체(불꽃) 크기 증가 및 밝은 노란색으로 강조
     sv_enemyProjectiles.forEach(ep => {
-        if(ep.x < viewL || ep.x > viewR || ep.y < viewT || ep.y > viewB) return; // 최적화
+        if(ep.x < viewL || ep.x > viewR || ep.y < viewT || ep.y > viewB) return;
         sv_ctx.save();
         sv_ctx.translate(ep.x, ep.y);
         sv_ctx.rotate(Math.atan2(ep.vy, ep.vx)); 
         
-        sv_ctx.fillStyle = '#ffff00'; // 매우 밝은 노란색 불꽃
+        sv_ctx.fillStyle = '#ffff00'; 
         sv_ctx.beginPath();
-        sv_ctx.moveTo(18, 0); // 기존보다 크기 대폭 키움
+        sv_ctx.moveTo(18, 0); 
         sv_ctx.quadraticCurveTo(0, -12, -18, -8);
         sv_ctx.quadraticCurveTo(-6, 0, -18, 8);
         sv_ctx.quadraticCurveTo(0, 12, 18, 0);
@@ -16402,7 +16537,7 @@ function sv_draw() {
     });
 
     sv_particles.forEach(pt => {
-        if(pt.x < viewL || pt.x > viewR || pt.y < viewT || pt.y > viewB) return; // 최적화
+        if(pt.x < viewL || pt.x > viewR || pt.y < viewT || pt.y > viewB) return; 
         sv_ctx.fillStyle = pt.color; sv_ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
         sv_ctx.beginPath(); sv_ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2); sv_ctx.fill();
     });
@@ -16410,7 +16545,7 @@ function sv_draw() {
     
     sv_ctx.font = "bold 16px 'Malgun Gothic'";
     sv_damageTexts.forEach(d => {
-        if(d.x < viewL || d.x > viewR || d.y < viewT || d.y > viewB) return; // 최적화
+        if(d.x < viewL || d.x > viewR || d.y < viewT || d.y > viewB) return; 
         sv_ctx.globalAlpha = Math.max(0, d.life / d.maxLife);
         sv_ctx.fillStyle = d.color; 
         sv_ctx.strokeStyle = '#000'; sv_ctx.lineWidth = 3;
@@ -16481,6 +16616,8 @@ function sv_updateStatusUI() {
         else if(w.id === 'spear') icon = '🔱'; 
         else if(w.id === 'axe') icon = '🪓'; 
         else if(w.id === 'claw') icon = '🐾';
+        else if(w.id === 'boomerang') icon = '🪃';
+        else if(w.id === 'stone') icon = '🪨';
         let lvStr = w.level >= 6 ? 'MAX' : `Lv.${w.level}`;
         return `${icon} ${lvStr}`;
     }).join(' | ');
@@ -16602,6 +16739,85 @@ function sv_showRanking() {
             `;
         });
     });
+}
+// ==========================================
+// 💡 보스 처치 랜덤 보상 및 무기 조합(진화) 시스템
+// ==========================================
+let sv_pendingBossReward = null;
+
+function sv_openBossReward() {
+    // 💡 HTML 요소를 찾지 못할 경우의 오류 방지
+    let modal = document.getElementById('sv-boss-reward-modal');
+    let content = document.getElementById('sv-boss-reward-content');
+    if (!modal || !content) {
+        console.error("보상 모달 HTML 요소를 찾을 수 없습니다.");
+        return;
+    }
+
+    sv_gameState = 'paused';
+    modal.style.display = 'flex';
+
+    let rewardType = 'normal';
+    let rewardMsg = '';
+    sv_pendingBossReward = null;
+
+    // 💡 진화 조건 체크
+    // 조합 공식 1: 활 MAX + 공격력 상승 특성
+    let hasBowMax = sv_player.weapons.find(w => w.id === 'bow' && w.level >= 6);
+    let hasEvoBow = sv_player.weapons.find(w => w.id === 'evo_bow');
+    
+    // 조합 공식 2: 도끼 MAX + 공속 상승 특성
+    let hasAxeMax = sv_player.weapons.find(w => w.id === 'axe' && w.level >= 6);
+    let hasEvoAxe = sv_player.weapons.find(w => w.id === 'evo_axe');
+
+    if (hasBowMax && !hasEvoBow && sv_player.atkMult > 1.0) {
+        rewardType = 'evo_bow';
+    } else if (hasAxeMax && !hasEvoAxe && sv_player.cdMult < 1.0) {
+        rewardType = 'evo_axe';
+    } else {
+        // 💡 진화 조건 미달성 시 랜덤 보상 룰렛
+        let r = Math.random();
+        if (r < 0.3) rewardType = 'heal';
+        else if (r < 0.6) rewardType = 'maxhp';
+        else rewardType = 'exp';
+    }
+
+    // 보상 내용 적용
+    if (rewardType === 'evo_bow') {
+        rewardMsg = `<span style="color:#ffff00; font-weight:bold; font-size:24px;">[무기 진화 달성!]</span><br><br>이그노스의 활이<br><span style="color:#fca311; font-size:28px; font-weight:bold;">태양의 신궁</span>으로 진화했습니다!`;
+        sv_pendingBossReward = () => {
+            sv_player.weapons = sv_player.weapons.filter(w => w.id !== 'bow');
+            sv_addWeapon('evo_bow');
+        };
+    } else if (rewardType === 'evo_axe') {
+        rewardMsg = `<span style="color:#ff4d4d; font-weight:bold; font-size:24px;">[무기 진화 달성!]</span><br><br>메가죠의 도끼가<br><span style="color:#ff0000; font-size:28px; font-weight:bold;">종말의 소용돌이</span>로 진화했습니다!`;
+        sv_pendingBossReward = () => {
+            sv_player.weapons = sv_player.weapons.filter(w => w.id !== 'axe');
+            sv_addWeapon('evo_axe');
+        };
+    } else if (rewardType === 'heal') {
+        rewardMsg = `<span style="color:#2ea043; font-weight:bold; font-size:24px;">[초토화 회복]</span><br><br>모든 상처가 치유됩니다!<br>체력을 100% 회복합니다.`;
+        sv_pendingBossReward = () => { sv_player.hp = sv_player.maxHp; };
+    } else if (rewardType === 'maxhp') {
+        rewardMsg = `<span style="color:#ff7b72; font-weight:bold; font-size:24px;">[생명력 한계 돌파]</span><br><br>육체가 더욱 강인해집니다!<br>최대 체력이 50 증가하고 모두 회복됩니다.`;
+        sv_pendingBossReward = () => { sv_player.maxHp += 50; sv_player.hp = sv_player.maxHp; };
+    } else {
+        rewardMsg = `<span style="color:#539bf5; font-weight:bold; font-size:24px;">[경험치 잭팟]</span><br><br>엄청난 깨달음을 얻습니다!<br>대량의 경험치를 획득하여 즉시 레벨업합니다.`;
+        sv_pendingBossReward = () => { sv_player.exp += sv_player.maxExp; };
+    }
+
+    document.getElementById('sv-boss-reward-content').innerHTML = rewardMsg;
+}
+
+function sv_claimBossReward() {
+    if (sv_pendingBossReward) sv_pendingBossReward();
+    document.getElementById('sv-boss-reward-modal').style.display = 'none';
+    sv_gameState = 'playing';
+    sv_lastTime = performance.now();
+    sv_updateUI();
+    sv_updateStatusUI();
+    sv_checkLevelUp(); // 잭팟으로 경험치 꽉 찼을 경우 즉시 렙업 창 호출
+    requestAnimationFrame(sv_gameLoop);
 }
 /* ==========================================================
                   [만득서바이벌] JS 코드 끝
