@@ -5624,6 +5624,19 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 37,
+        date: "26년 6월 16일",
+        title: "26년 6월 16일 업데이트 공지사항입니다.",
+        summary: "1. 만득서바이벌(BETA) 프레임 드랍(렉) 최적화",
+        content: `
+            <strong>1) 만득서바이벌(BETA) 프레임 드랍(렉) 완화 및 최적화</strong>
+            <span>- 화면 밖에 위치한 몬스터, 아이템, 투사체를 렌더링하지 않도록(화면 절삭) 처리하여 연산량을 대폭 감소시켰습니다.</span>
+            <span>- 바닥에 쌓이는 보석(경험치) 및 이펙트 입자(Particle)의 최대 유지 갯수에 상한선을 설정하여 메모리 과부하를 방지했습니다.</span>
+            <span>- 심각한 프레임 저하의 원인이었던 보스 및 원거리 몬스터의 그림자 효과(shadowBlur)를 제거하고, 연산이 가벼운 반투명 그래픽으로 대체했습니다.</span>
+        `
+    },
+    
+    {
         id: 36,
         date: "26년 6월 12일",
         title: "26년 6월 12일 업데이트 공지사항입니다.",
@@ -16128,7 +16141,9 @@ function sv_update(dt) {
         }
     }
 
-    // 💡 최적화: 입자와 데미지 텍스트가 너무 많으면 렉 유발하므로 갯수 제한
+    // 💡 최적화: 텍스트 렌더링은 렉의 주범입니다. 
+    // 바닥에 방치된 보석이 150개를 넘어가면 가장 오래된 것부터 삭제합니다.
+    if (sv_gems.length > 150) sv_gems.splice(0, sv_gems.length - 150); 
     if (sv_particles.length > 100) sv_particles.splice(0, sv_particles.length - 100);
     if (sv_damageTexts.length > 30) sv_damageTexts.splice(0, sv_damageTexts.length - 30);
 
@@ -16243,13 +16258,16 @@ function sv_draw() {
     });
 
     sv_enemies.forEach(e => {
-        if(e.x < viewL || e.x > viewR || e.y < viewT || e.y > viewB) return; // 💡 화면 밖 적 무시
+        if(e.x < viewL || e.x > viewR || e.y < viewT || e.y > viewB) return; 
 
-        // 💡 외곽선 아우라 처리 (보스: 빨강 / 원거리: 보라)
         if (e.isBoss) {
             sv_ctx.save();
-            sv_ctx.shadowColor = '#ff0000';
-            sv_ctx.shadowBlur = 22;
+            // 💡 치명적인 렉 유발자인 shadowBlur 제거 후 가벼운 반투명 원으로 아우라 대체
+            sv_ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+            sv_ctx.beginPath();
+            sv_ctx.arc(e.x, e.y, e.radius + 15, 0, Math.PI * 2);
+            sv_ctx.fill();
+            
             sv_ctx.strokeStyle = '#ff1e1e';
             sv_ctx.lineWidth = 4;
             sv_ctx.beginPath();
@@ -16273,7 +16291,6 @@ function sv_draw() {
             sv_ctx.fillStyle = e.color; sv_ctx.fillRect(e.x - e.radius, e.y - e.radius, e.radius*2, e.radius*2);
         }
 
-        // 💡 네임택 처리
         sv_ctx.save();
         sv_ctx.textAlign = "center";
         sv_ctx.textBaseline = "middle";
@@ -16282,9 +16299,11 @@ function sv_draw() {
             sv_ctx.fillStyle = '#ff2a2a';
             sv_ctx.fillText("⚠️ [ BOSS ]", e.x, e.y - e.radius - 24);
         } else if (e.isRanged) {
-            sv_ctx.font = "bold 13px 'Malgun Gothic'";
+            // 💡 shadowBlur 제거 후 빠른 사각형 렌더링으로 가독성 확보
+            sv_ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            sv_ctx.fillRect(e.x - 35, e.y - e.radius - 28, 70, 16);
+            sv_ctx.font = "bold 12px 'Malgun Gothic'";
             sv_ctx.fillStyle = '#ffffff';
-            sv_ctx.shadowColor = '#000'; sv_ctx.shadowBlur = 4;
             sv_ctx.fillText("🏹 [원거리]", e.x, e.y - e.radius - 20);
         }
         sv_ctx.restore();
