@@ -4376,10 +4376,9 @@ button[onclick="resetGame()"]:hover {
     <div id="sv-start-screen" class="sv-modal">
         <div class="sv-modal-title" style="color:#539bf5; font-size:55px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;">
             🦇 만득서바이벌 
-            <span style="font-size: 16px; background: #ff4d4d; color: white; padding: 4px 8px; border-radius: 6px; margin-left: 15px;">BETA</span>
         </div>
         <div style="color:#fca311; font-size: 15px; margin-bottom: 30px; font-weight: bold;">
-            ※ 현재 베타 서비스 중입니다. 오류 및 건의사항을 제보해주시면 적극 반영하겠습니다!
+            ※ 오류 및 건의사항을 제보해주시면 적극 반영하겠습니다!
         </div>
         
         <div style="display: flex; gap: 20px; margin-bottom: 30px; max-width: 800px; width: 90%;">
@@ -4403,11 +4402,13 @@ button[onclick="resetGame()"]:hover {
             </div>
         </div>
 
+        <!-- 💡 메인 화면 하단 버튼: 랭킹 버튼 추가 -->
         <div style="display: flex; gap: 20px;">
             <button class="sv-btn" style="background:#539bf5; padding: 15px 50px;" onclick="sv_startGame()">게임 시작</button>
+            <button class="sv-btn" style="background:#fca311; padding: 15px 30px;" onclick="sv_showRanking()">🏆 랭킹</button>
             <button class="sv-btn sv-btn-close" style="padding: 15px 30px; font-size: 20px;" onclick="sv_closeSurvivalMode()">나가기</button>
         </div>
-    </div>
+    </div> <!-- sv-start-screen 끝 -->
 
     <div id="sv-char-select-modal" class="sv-modal" style="z-index: 105;">
         <div class="sv-modal-title" style="font-size: 32px; color: #fff;">캐릭터 스킨 선택</div>
@@ -4424,12 +4425,46 @@ button[onclick="resetGame()"]:hover {
     </div>
 
     <div id="sv-gameover-modal" class="sv-modal">
-        <div class="sv-modal-title" style="color: #ff4d4d;">사망했습니다...</div>
-        <div style="font-size: 24px; margin-bottom: 30px; color: #fff;">생존 시간: <span id="sv-final-time" style="color:#fca311;">00:00</span> | 처치 수: <span id="sv-final-kills" style="color:#ff7b72;">0</span></div>
-        <div style="display: flex; gap: 20px;">
-            <button class="sv-btn" onclick="sv_restartWithCharSelect()">다시 도전</button>
-            <button class="sv-btn sv-btn-close" onclick="sv_goToLobby()">메인으로</button>
+        <div class="sv-modal-title" style="color: #ff4d4d; text-shadow: 0 0 20px rgba(255, 77, 77, 0.8); margin-top: 0;">사망했습니다...</div>
+        
+        <div style="font-size: 22px; margin-bottom: 30px; color: #c9d1d9; font-weight: bold; background: rgba(33, 38, 45, 0.8); padding: 18px 30px; border-radius: 12px; border: 1px solid #30363d; width: 100%; max-width: 420px; text-align: center; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+            생존 시간: <span id="sv-final-time" style="color:#fca311; margin-right: 15px;">00:00</span> 
+            처치 수: <span id="sv-final-kills" style="color:#ff7b72;">0</span>
         </div>
+        
+        <div id="sv-score-submit-area" style="margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 420px;">
+            
+            <input type="text" id="sv-nickname-input" placeholder="닉네임 입력 (최대 8자)" maxlength="8" style="flex: 1; height: 48px; margin: 0; padding: 0 15px; border-radius: 8px; border: 1px solid #539bf5; background: #0d1117; color: #fff; font-size: 16px; outline: none; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); box-sizing: border-box;">
+            
+            <button class="sv-btn" style="height: 48px; margin: 0; padding: 0 25px; background: linear-gradient(180deg, #3fb950, #238636); border: 1px solid #2ea043; border-radius: 8px; font-size: 16px; color: #fff; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.6); box-sizing: border-box; display: flex; align-items: center; justify-content: center;" onclick="sv_submitScore()">기록 등록</button>
+            
+        </div>
+
+        <div style="display: flex; gap: 15px; width: 100%; max-width: 420px; height: 50px; box-sizing: border-box;">
+            <button class="sv-btn" style="flex: 1; height: 100%; background: linear-gradient(180deg, #3fb950, #238636); border: 1px solid #2ea043; border-radius: 8px; font-size: 18px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.6);" onclick="sv_restartWithCharSelect()">다시 도전</button>
+            
+            <button class="sv-btn sv-btn-close" style="flex: 1; height: 100%; background: linear-gradient(180deg, #f85149, #da3633); border: 1px solid #b3261e; border-radius: 8px; font-size: 18px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.6);" onclick="sv_goToLobby()">메인으로</button>
+        </div>
+    </div>
+    <!-- 💡 랭킹 모달 UI 최적화 -->
+    <div id="sv-ranking-modal" class="sv-modal" style="z-index: 110;">
+        <div class="sv-modal-title" style="color: #fca311; font-size: 38px; text-shadow: 0 0 15px rgba(255, 204, 0, 0.4);">🏆 생존자 명예의 전당 🏆</div>
+        <div style="background: #161b22; width: 90%; max-width: 550px; border-radius: 12px; border: 1px solid #30363d; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.7); overflow: hidden;">
+            <table style="width: 100%; color: #fff; text-align: center; border-collapse: collapse; font-size: 16px;">
+                <thead style="background: #21262d;">
+                    <tr style="border-bottom: 2px solid #30363d; color: #8b949e; font-size: 15px;">
+                        <th style="padding: 18px 10px; width: 20%;">순위</th>
+                        <th style="padding: 18px 10px; width: 35%;">닉네임</th>
+                        <th style="padding: 18px 10px; width: 25%;">생존 시간</th>
+                        <th style="padding: 18px 10px; width: 20%;">처치 수</th>
+                    </tr>
+                </thead>
+                <tbody id="sv-ranking-list">
+                    <!-- 랭킹 리스트 생성 위치 -->
+                </tbody>
+            </table>
+        </div>
+        <button class="sv-btn sv-btn-close" style="margin-top: 30px; padding: 14px 50px; font-size: 18px; border-radius: 8px;" onclick="document.getElementById('sv-ranking-modal').style.display = 'none';">닫기</button>
     </div>
 
     <canvas id="sv-canvas" style="flex-grow: 1; display: block;"></canvas>
@@ -5627,15 +5662,17 @@ const NOTICE_DATABASE = [
         id: 37,
         date: "26년 6월 16일",
         title: "26년 6월 16일 업데이트 공지사항입니다.",
-        summary: "1. 만득서바이벌(BETA) 프레임 드랍(렉) 최적화",
+        summary: "1. 만득서바이벌 프레임 드랍(렉) 최적화  | 2. 베타서비스 종료 및 랭킹시스템 도입",
         content: `
-            <strong>1) 만득서바이벌(BETA) 프레임 드랍(렉) 완화 및 최적화</strong>
+            <strong>1) 만득서바이벌 프레임 드랍(렉) 완화 및 최적화</strong>
             <span>- 화면 밖에 위치한 몬스터, 아이템, 투사체를 렌더링하지 않도록(화면 절삭) 처리하여 연산량을 대폭 감소시켰습니다.</span>
             <span>- 바닥에 쌓이는 보석(경험치) 및 이펙트 입자(Particle)의 최대 유지 갯수에 상한선을 설정하여 메모리 과부하를 방지했습니다.</span>
             <span>- 심각한 프레임 저하의 원인이었던 보스 및 원거리 몬스터의 그림자 효과(shadowBlur)를 제거하고, 연산이 가벼운 반투명 그래픽으로 대체했습니다.</span>
+            <strong>2) 베타서비스 종료 및 랭킹시스템 도입</strong>
+            <span>- 만득서바이벌 베타 서비스가 종료되었으며, 새로운 랭킹 시스템이 도입되었습니다.</span>
         `
     },
-    
+
     {
         id: 36,
         date: "26년 6월 12일",
@@ -16408,6 +16445,14 @@ function sv_gameOver() {
     let mins = Math.floor(sv_gameTime / 60); let secs = Math.floor(sv_gameTime % 60);
     document.getElementById('sv-final-time').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     document.getElementById('sv-final-kills').innerText = sv_killCount;
+    
+    // 💡 랭킹 입력 영역 초기화
+    let submitArea = document.getElementById('sv-score-submit-area');
+    if(submitArea) {
+        submitArea.style.display = 'flex';
+        document.getElementById('sv-nickname-input').value = '';
+    }
+    
     document.getElementById('sv-gameover-modal').style.display = 'flex';
 }
 
@@ -16457,6 +16502,106 @@ function sv_updateStatusUI() {
         weaponDiv.innerText = `[장비] ${wText}`;
         statDiv.innerText = `[능력치] ${sText}`;
     }
+}
+// 랭킹 기록 등록 (1기기 1기록 업데이트 로직 적용)
+function sv_submitScore() {
+    if (typeof firebase === 'undefined') { alert("서버에 연결할 수 없습니다."); return; }
+    
+    const nickname = document.getElementById('sv-nickname-input').value.trim();
+    if (!nickname) { alert('랭킹에 등록할 닉네임을 입력해주세요!'); return; }
+    
+    // 로컬 스토리지를 이용한 기기 고유 ID 발급 및 로드
+    let deviceId = localStorage.getItem('sv_device_id');
+    if (!deviceId) {
+        deviceId = 'user_' + Math.random().toString(36).substr(2, 9) + Date.now();
+        localStorage.setItem('sv_device_id', deviceId);
+    }
+
+    const sv_db = firebase.database();
+    const recordRef = sv_db.ref('survival_rankings/' + deviceId);
+    let newTime = Math.floor(sv_gameTime);
+
+    // 기존 기록과 비교하여 최고 기록일 경우에만 덮어쓰기
+    recordRef.once('value').then(snapshot => {
+        let data = snapshot.val();
+        
+        if (!data || newTime > data.time || (newTime === data.time && sv_killCount > data.kills)) {
+            recordRef.set({
+                nickname: nickname,
+                time: newTime,
+                kills: sv_killCount,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                alert('최고 기록이 명예의 전당에 등록/갱신되었습니다!');
+                document.getElementById('sv-score-submit-area').style.display = 'none';
+                sv_showRanking(); 
+            }).catch(error => {
+                console.error(error);
+                alert('기록 등록 중 오류가 발생했습니다.');
+            });
+        } else {
+            alert('기존의 본인 최고 기록에 미치지 못하여 등록되지 않았습니다.');
+            document.getElementById('sv-score-submit-area').style.display = 'none';
+            sv_showRanking();
+        }
+    });
+}
+
+// 랭킹 보여주기 (Top 5 제한 및 UI 디자인 적용)
+function sv_showRanking() {
+    if (typeof firebase === 'undefined') { alert("서버에 연결할 수 없습니다."); return; }
+    
+    const modal = document.getElementById('sv-ranking-modal');
+    const list = document.getElementById('sv-ranking-list');
+    list.innerHTML = '<tr><td colspan="4" style="padding: 30px; color: #8b949e;">서버에서 데이터를 불러오는 중...</td></tr>';
+    modal.style.display = 'flex';
+
+    const sv_db = firebase.database();
+    // 데이터 로드 (넉넉히 가져온 뒤 JS에서 5위 커트)
+    sv_db.ref('survival_rankings').orderByChild('time').limitToLast(30).once('value', snapshot => {
+        let records = [];
+        snapshot.forEach(child => { records.push(child.val()); });
+        
+        // 내림차순 정렬 (생존 시간 1순위, 처치 수 2순위)
+        records.sort((a, b) => {
+            if (b.time !== a.time) return b.time - a.time;
+            return b.kills - a.kills;
+        });
+
+        // 최대 5위까지만 자르기
+        records = records.slice(0, 5);
+
+        list.innerHTML = '';
+        if (records.length === 0) {
+            list.innerHTML = '<tr><td colspan="4" style="padding: 30px; color: #8b949e;">아직 등록된 랭킹이 없습니다.<br>첫 번째 생존자가 되어보세요!</td></tr>';
+            return;
+        }
+
+        records.forEach((r, idx) => {
+            let mins = Math.floor(r.time / 60).toString().padStart(2, '0');
+            let secs = Math.floor(r.time % 60).toString().padStart(2, '0');
+            
+            // 순위에 따른 메달 아이콘 및 색상 차등 적용
+            let rankIcon = '';
+            if (idx === 0) rankIcon = '<span style="font-size: 26px;">🥇</span>';
+            else if (idx === 1) rankIcon = '<span style="font-size: 24px;">🥈</span>';
+            else if (idx === 2) rankIcon = '<span style="font-size: 22px;">🥉</span>';
+            else rankIcon = `<span style="display: inline-block; width: 26px; height: 26px; background: #30363d; border-radius: 50%; line-height: 26px; font-size: 14px;">${idx + 1}</span>`;
+            
+            let color = idx === 0 ? '#ffcc00' : (idx === 1 ? '#e3e3e3' : (idx === 2 ? '#ff9a56' : '#c9d1d9'));
+            let weight = idx < 3 ? 'bold' : 'normal';
+            let bgStr = idx % 2 === 0 ? 'background: rgba(255,255,255,0.02);' : '';
+            
+            list.innerHTML += `
+                <tr style="border-bottom: 1px solid #30363d; color: ${color}; font-weight: ${weight}; ${bgStr}">
+                    <td style="padding: 16px 10px;">${rankIcon}</td>
+                    <td style="padding: 16px 10px;">${r.nickname}</td>
+                    <td style="padding: 16px 10px; color: #fca311;">${mins}:${secs}</td>
+                    <td style="padding: 16px 10px; color: #ff7b72;">${r.kills}</td>
+                </tr>
+            `;
+        });
+    });
 }
 /* ==========================================================
                   [만득서바이벌] JS 코드 끝
