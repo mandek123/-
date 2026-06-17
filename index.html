@@ -4148,6 +4148,12 @@ button[onclick="resetGame()"]:hover {
                     <span style="color: #fca311;"><i class="fa-solid fa-coins"></i> 스톤: <span id="ui-stone" style="color: #fff;">0</span></span>
                     <span style="color: #a5d6ff;"><i class="fa-solid fa-gem"></i> 다이아: <span id="ui-diamond" style="color: #fff;">0</span></span>
                 </div>
+                
+                <!-- 💡 방치 보상 수동 확인 버튼 추가 -->
+                <button onclick="checkOfflineRewardOnMenu()" style="background: linear-gradient(135deg, #539bf5, #2188ff); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                    <i class="fa-solid fa-gift"></i> 방치 보상 확인
+                </button>
+
                 <button onclick="resetGame()" style="background: linear-gradient(135deg, #dc3545, #a31c29); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
                     <i class="fa-solid fa-rotate-left"></i> 데이터 초기화
                 </button>
@@ -5667,6 +5673,25 @@ button[onclick="resetGame()"]:hover {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+        id: 38,
+        date: "26년 6월 17일",
+        title: "26년 6월 17일 업데이트 공지사항입니다.",
+        summary: "1. 서바이벌: 무기 진화·보스 보상·신규 무기 추가 및 최적화 | 2. 키우기: 방치 보상 시스템 개선 및 버그 수정",
+        content: `
+            <strong>1) 만득서바이벌 대규모 시스템 추가 및 최적화</strong>
+            <span>- <b>무기 진화 시스템 도입:</b> 무기를 MAX(Lv.6)까지 강화하고 특정 특성 조건을 만족한 상태로 보스를 처치하면, 한 차원 높은 위력의 '진화 무기'를 획득할 수 있습니다.</span>
+            <span>- <b>보스 처치 보상 상자:</b> 보스 몬스터 처치 시 진화 무기, 대량의 경험치 잭팟, 체력 회복 등의 보상을 제공하는 룰렛 시스템이 추가되었습니다.</span>
+            <span>- <b>신규 무기 2종 추가:</b> 관통 후 되돌아오는 '용암부메랑'과 무작위 적에게 강력한 광역 피해를 주는 '강인한 돌'이 추가되었습니다.</span>
+            <span>- <b>물리 연산 최적화:</b> 무거운 거리 계산 알고리즘을 가벼운 사칙연산으로 대체하고 이펙트 생성 상한선을 추가해 후반부 대규모 전투 렉을 획기적으로 줄였습니다.</span>
+            <span>- 게임오버 화면, 랭킹 기록 등록 모달, 명예의 전당 UI의 크기조정 및 정렬하여 시안성 좋게 개편했습니다.</span>
+            
+            <strong>2) 만득이 키우기 오프라인 방치 시스템 개선 및 버그 수정</strong>
+            <span>- <b>방치 보상 수동 수령:</b> 탭 전환이나 페이지 진입 시마다 강제로 팝업되던 방치 보상을 메뉴의 '방치 보상 확인' 버튼을 통해 원할 때만 수동으로 수령하도록 개선했습니다.</span>
+            <span>- <b>데이터 초기화 버그 수정:</b> 데이터 초기화 후에도 과거의 방치 시간이 누적되어 엄청난 보상이 지급되거나, 페트 선택 화면이 통째로 스킵되던 치명적인 버그를 수정했습니다.</span>
+        `
+    },
+
     {
         id: 37,
         date: "26년 6월 16일",
@@ -13500,11 +13525,8 @@ function renderEntities() {
 
 let offlineRewardProcessed = false; 
 function updateUI() {
-    if (idGame.started && !offlineRewardProcessed) {
-        processOfflineReward();
-        offlineRewardProcessed = true; 
-    }
-
+    // 💡 웹페이지 진입 시 자동 팝업을 막기 위해 오프라인 보상 로직을 제거했습니다.
+    
     const stoneEl = document.getElementById('ui-stone');
     const diamondEl = document.getElementById('ui-diamond');
 
@@ -13878,33 +13900,30 @@ function switchIdleTab(tabName) {
     updateUI();
 }
 
-function processOfflineReward() {
+// 💡 [수동 버튼 전용] 방치 보상 확인 함수
+function checkOfflineRewardOnMenu() {
     if (!idGame.started || document.getElementById('offline-reward-overlay')) return;
 
-    const saved = localStorage.getItem('idleGameSave_v3');
-    if (!saved) return;
-    const data = JSON.parse(saved);
+    let offlineSeconds = window.pendingOfflineSeconds || 0;
     
-    if (data.lastSaveTime) {
-        let offlineMs = Date.now() - data.lastSaveTime;
-        let offlineSeconds = Math.floor(offlineMs / 1000);
+    if (offlineSeconds > 60) {
+        // 방치 시간 최대 24시간(86,400초) 제한
+        let applySeconds = offlineSeconds > 86400 ? 86400 : offlineSeconds;
         
-        console.log(`방치 시간 체크: ${offlineSeconds}초 지남`);
+        // 보상 배율 계산
+        let rewardPerSec = Math.floor((15 + 3 * idGame.stage * Math.min(1e100, Math.pow(1.10, idGame.stage - 1))) * 0.01);
+        if (rewardPerSec < 1) rewardPerSec = 1; 
         
-        if (offlineSeconds > 60) {
-            // 방치 시간 최대 24시간(86,400초) 제한
-            let applySeconds = offlineSeconds > 86400 ? 86400 : offlineSeconds;
-            
-            // 보상 배율
-            let rewardPerSec = Math.floor((15 + 3 * idGame.stage * Math.min(1e100, Math.pow(1.10, idGame.stage - 1))) * 0.01);
-            if (rewardPerSec < 1) rewardPerSec = 1; // 최소 1 보장
-            
-            let stoneReward = rewardPerSec * applySeconds;
+        let stoneReward = rewardPerSec * applySeconds;
 
-            showOfflineRewardModal(stoneReward, offlineSeconds);
-        } else {
-            console.log("60초 미만 방치라 보상을 지급하지 않습니다.");
-        }
+        // 모달 창 띄우기
+        showOfflineRewardModal(stoneReward, applySeconds);
+        
+        // 💡 무한 수령 방지를 위해 보상 창을 띄우자마자 누적 시간을 0으로 초기화하고 저장
+        window.pendingOfflineSeconds = 0;
+        saveGame();
+    } else {
+        alert(`보상을 받을 수 있는 방치 시간(60초)이 부족합니다.\n(현재 누적 대기 시간: ${offlineSeconds}초)`);
     }
 }
 
@@ -14481,6 +14500,7 @@ function saveGame() {
         logs: idGame.logs || [],
         dungeon: idGame.dungeon,
         buffs: idGame.buffs, 
+        pendingOfflineSeconds: window.pendingOfflineSeconds || 0, // 💡 방치 시간 누적 저장
         lastSaveTime: Date.now() 
     };
     localStorage.setItem('idleGameSave_v3', JSON.stringify(saveData));
@@ -14490,13 +14510,20 @@ function loadGame() {
     const saved = localStorage.getItem('idleGameSave_v3');
     if (!saved) return false;
 
-    const field = document.getElementById('idle-field');
-    if (field) field.innerHTML = '';
-
     const data = JSON.parse(saved);
     
+    // 💡 [버그 수정] 초기화용 껍데기 세이브이거나, 펫이 한 마리도 없는 빈 데이터라면 로드를 거부하고 시작 화면(페트 선택창)으로 보냄
+    let hasFieldPets = data.fieldPets && data.fieldPets.length > 0;
+    let hasWarehousePets = data.warehouse && data.warehouse.length > 0;
+    if (!hasFieldPets && !hasWarehousePets) {
+        return false;
+    }
+
+    const field = document.getElementById('idle-field');
+    if (field) field.innerHTML = '';
+    
     idGame.stage = data.stage || 1;
-    idGame.mobsKilled = data.mobsKilled || 0; 
+    idGame.mobsKilled = data.mobsKilled || 0;
     idGame.stone = data.stone || 0;
     idGame.diamond = data.diamond || 0;
     idGame.upgrades = data.upgrades || { hpLv: 1 };
@@ -14508,6 +14535,13 @@ function loadGame() {
         goldMultiplier: { active: false, endTime: 0 }, 
         atkMultiplier: { active: false, endTime: 0 } 
     };
+    
+    // 💡 팝업을 띄우지 않고 누적 대기 시간만 조용히 계산합니다.
+    window.pendingOfflineSeconds = data.pendingOfflineSeconds || 0;
+    if (data.lastSaveTime) {
+        window.pendingOfflineSeconds += Math.floor((Date.now() - data.lastSaveTime) / 1000);
+    }
+
     idGame.fieldPets = data.fieldPets || [];
     idGame.warehouse = data.warehouse || [];
     idGame.ownedItems = data.ownedItems || []; 
@@ -14582,29 +14616,26 @@ function showOfflineRewardModal(reward, seconds) {
     claimBtn.onmouseout = () => claimBtn.style.transform = "scale(1)";
 }
 
-// [핵심] 탭 이동 시 게임 완전 중지 및 복귀 시 보상 체크 (시간차 계산 완벽 해결)
+// 💡 탭 이동 이벤트: 무단 팝업을 막고 시간만 누적시킵니다.
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        // 1. 탭을 나갈 때
-        if (idGame.started) saveGame(); // [추가] 나가기 직전의 시간을 0.1초의 오차도 없이 저장!
-        
-        idGame.started = false; // 게임 일시정지 (여기서 자물쇠가 잠김)
+        if (idGame.started) saveGame(); 
+        idGame.started = false; 
         clearInterval(autoSaveInterval);
-        console.log("탭 이동: 게임 정지 및 방치 시간 기록 완료");
     } else {
-        // 2. 탭으로 돌아왔을 때
-        console.log("탭 복귀: 게임 재개 및 보상 확인");
-        
-        idGame.started = true; // [핵심 수정] 자물쇠부터 먼저 엽니다!
+        idGame.started = true; 
         idGame.lastTime = performance.now(); 
         
-        // 이제 자물쇠가 열렸으므로 보상 함수가 정상적으로 끝까지 실행됩니다.
-        if (idGame.warehouse.length > 0 || idGame.fieldPets.length > 0) {
-            processOfflineReward();
+        // 💡 강제로 팝업을 띄우지 않고, 흘러간 시간만 pendingOfflineSeconds에 누적!
+        const saved = localStorage.getItem('idleGameSave_v3');
+        if (saved) {
+            const data = JSON.parse(saved);
+            if (data.lastSaveTime) {
+                window.pendingOfflineSeconds += Math.floor((Date.now() - data.lastSaveTime) / 1000);
+            }
         }
         
-        requestAnimationFrame(gameLoop); // 전투 애니메이션 재개
-        
+        requestAnimationFrame(gameLoop); 
         autoSaveInterval = setInterval(() => {
             if (idGame.started) saveGame();
         }, 30000);
@@ -14613,16 +14644,14 @@ document.addEventListener('visibilitychange', () => {
 
 function resetGame() {
     if (confirm("정말로 모든 데이터를 초기화하고 처음부터 시작하시겠습니까?")) {
-        // 새로고침 시 자동 저장이 발동하지 않도록 게임 진행 상태를 먼저 끕니다.
         idGame.started = false; 
         if (typeof autoSaveInterval !== 'undefined') clearInterval(autoSaveInterval);
         
-        // 꼬여버린 세이브 데이터만 완벽하게 삭제
+        // 💡 1차 삭제
         localStorage.removeItem('idleGameSave_v3'); 
+        // 💡 2차 안전장치: 방치 시간을 0초로 강제 조작하는 껍데기 세이브를 덮어씌움
+        localStorage.setItem('idleGameSave_v3', JSON.stringify({ lastSaveTime: Date.now() }));
         
-        // [핵심] 유저 고유 ID(game_user_id)를 지우는 코드를 삭제했습니다! (랭킹 본인인증 유지)
-        
-        // 새로고침
         location.reload(); 
     }
 }
@@ -15523,6 +15552,34 @@ function awakenItem2(uid) {
     saveGame();
     renderWarehouse();
     updateUI();
+}
+// ==========================================
+// 💡 메뉴 클릭 시 오프라인 보상 수동 호출 함수
+// ==========================================
+function checkOfflineRewardOnMenu() {
+    if (!idGame.started || document.getElementById('offline-reward-overlay')) return;
+
+    let offlineSeconds = window.pendingOfflineSeconds || 0;
+    
+    if (offlineSeconds > 60) {
+        // 방치 시간 최대 24시간(86,400초) 제한
+        let applySeconds = offlineSeconds > 86400 ? 86400 : offlineSeconds;
+        
+        // 보상 배율 계산
+        let rewardPerSec = Math.floor((15 + 3 * idGame.stage * Math.min(1e100, Math.pow(1.10, idGame.stage - 1))) * 0.01);
+        if (rewardPerSec < 1) rewardPerSec = 1; 
+        
+        let stoneReward = rewardPerSec * applySeconds;
+
+        // 모달 창 띄우기
+        showOfflineRewardModal(stoneReward, applySeconds);
+        
+        // 무한 수령 방지를 위해 보상 창을 띄우자마자 누적 시간을 0으로 초기화하고 저장
+        window.pendingOfflineSeconds = 0;
+        saveGame();
+    } else {
+        alert(`보상을 받을 수 있는 방치 시간(60초)이 부족합니다.\n(현재 누적 대기 시간: ${offlineSeconds}초)`);
+    }
 }
 /* 만득이 키우기 JS 코드 끝 */
 /* ==========================================================
