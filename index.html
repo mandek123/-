@@ -2374,6 +2374,53 @@ button[onclick="resetGame()"]:hover {
 /* =========================================
             만득서바이벌 CSS 끝
 ========================================= */
+/* 💡 특수 상태 이상 툴팁 스타일 */
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-container .tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background-color: rgba(13, 17, 23, 0.95);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: normal;
+    border: 1px solid #30363d;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    
+    /* 툴팁 위치 조정 (마우스 위에 표시) */
+    position: absolute;
+    z-index: 9999;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none; /* 마우스 간섭 방지 */
+}
+
+/* 툴팁 꼬리(화살표) */
+.tooltip-container .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #30363d transparent transparent transparent;
+}
+
+/* 마우스를 올렸을 때 툴팁 보이기 */
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
 </style>
 </head>
 
@@ -5633,22 +5680,22 @@ button[onclick="resetGame()"]:hover {
 
         const RAID_PASSIVE_DATABASE = [
             { name: "격노", effect: "본인과 펫, 3턴 동안 공격력 증가", values: ["10%", "11%", "12%", "15%", "18%"] },
-            { name: "전투 집중", effect: "본인과 펫, 3턴 동안 공격력 증가 및 명중률 5% 증가", values: ["8%", "9%", "10%", "13%", "15%"] },
-            { name: "야수의 포효", effect: "본인과 펫, 3턴 동안 공격력 증가 및 회피율 5% 증가", values: ["8%", "9%", "10%", "13%", "15%"] },
-            { name: "심장 관통", effect: "본인과 펫, 3턴 동안 공격력 증가 및 치명타 5% 증가", values: ["8%", "9%", "10%", "13%", "15%"] },
-            { name: "신속", effect: "본인과 펫, 3턴 동안 순발력 증가 및 <span style='color:#fca311; font-weight:bold;'>표식</span> 부여", values: ["10%", "11%", "12%", "15%", "18%"] },
-            { name: "질풍의 눈", effect: "본인과 펫, 3턴 동안 순발력 및 명중률 5% 증가와 <span style='color:#fca311; font-weight:bold;'>표식</span> 부여", values: ["8%", "9%", "10%", "13%", "15%"] },
-            { name: "광휘", effect: "본인과 펫, 3턴 동안 순발력 및 회피율 5% 증가와 <span style='color:#fca311; font-weight:bold;'>표식</span> 부여", values: ["8%", "9%", "10%", "13%", "15%"] },
-            { name: "전광 석화", effect: "본인과 펫, 3턴 동안 순발력 및 치명타 5% 증가와 <span style='color:#fca311; font-weight:bold;'>표식</span> 부여", values: ["8%", "9%", "10%", "13%", "15%"] },
-            { name: "잔상", effect: "본인과 펫, 3턴 동안 회피율 증가 및 <span style='color:#ff7b72; font-weight:bold;'>탈진</span> 부여", values: ["10%", "11%", "12%", "13%", "15%"] },
-            { name: "심판", effect: "본인과 펫, 3턴 동안 치명타 증가 및 <span style='color:#ff7b72; font-weight:bold;'>탈진</span> 부여", values: ["10%", "11%", "12%", "13%", "15%"] },
-            { name: "조준", effect: "본인과 펫, 3턴 동안 명중률 증가 및 <span style='color:#ff7b72; font-weight:bold;'>탈진</span> 부여", values: ["5%", "6%", "7%", "8%", "10%"] },
+            { name: "전투 집중", effect: "본인과 펫, 3턴 동안 공격력 및 명중률 5% 증가", values: ["8%", "9%", "10%", "13%", "15%"] },
+            { name: "야수의 포효", effect: "본인과 펫, 3턴 동안 공격력 및 회피율 5% 증가", values: ["8%", "9%", "10%", "13%", "15%"] },
+            { name: "심장 관통", effect: "본인과 펫, 3턴 동안 공격력 및 치명타 5% 증가", values: ["8%", "9%", "10%", "13%", "15%"] },
+            { name: "신속", effect: "본인과 펫, 3턴 동안 순발력 증가 및 <span class='tooltip-container' style='color:#fca311; font-weight:bold; cursor:pointer;'>표식<span class='tooltip-text'>3턴간 랜덤 3명 방어력 10% 감소</span></span> 부여", values: ["10%", "11%", "12%", "15%", "18%"] },
+            { name: "질풍의 눈", effect: "본인과 펫, 3턴 동안 순발력 및 명중률 5% 증가 및 <span class='tooltip-container' style='color:#fca311; font-weight:bold; cursor:pointer;'>표식<span class='tooltip-text'>3턴간 랜덤 3명 방어력 10% 감소</span></span> 부여", values: ["8%", "9%", "10%", "13%", "15%"] },
+            { name: "광휘", effect: "본인과 펫, 3턴 동안 순발력 및 회피율 5% 증가 및 <span class='tooltip-container' style='color:#fca311; font-weight:bold; cursor:pointer;'>표식<span class='tooltip-text'>3턴간 랜덤 3명 방어력 10% 감소</span></span> 부여", values: ["8%", "9%", "10%", "13%", "15%"] },
+            { name: "전광 석화", effect: "본인과 펫, 3턴 동안 순발력 및 치명타 5% 증가 및 <span class='tooltip-container' style='color:#fca311; font-weight:bold; cursor:pointer;'>표식<span class='tooltip-text'>3턴간 랜덤 3명 방어력 10% 감소</span></span> 부여", values: ["8%", "9%", "10%", "13%", "15%"] },
+            { name: "잔상", effect: "본인과 펫, 3턴 동안 회피율 증가 및 <span class='tooltip-container' style='color:#ff7b72; font-weight:bold; cursor:pointer;'>탈진<span class='tooltip-text'>3턴간 랜덤 3명 공격력 10% 감소</span></span> 부여", values: ["10%", "11%", "12%", "13%", "15%"] },
+            { name: "심판", effect: "본인과 펫, 3턴 동안 치명타 증가 및 <span class='tooltip-container' style='color:#ff7b72; font-weight:bold; cursor:pointer;'>탈진<span class='tooltip-text'>3턴간 랜덤 3명 공격력 10% 감소</span></span> 부여", values: ["10%", "11%", "12%", "13%", "15%"] },
+            { name: "조준", effect: "본인과 펫, 3턴 동안 명중률 증가 및 <span class='tooltip-container' style='color:#ff7b72; font-weight:bold; cursor:pointer;'>탈진<span class='tooltip-text'>3턴간 랜덤 3명 공격력 10% 감소</span></span> 부여", values: ["5%", "6%", "7%", "8%", "10%"] },
             { name: "불굴의 의지", effect: "팀원 전체, 10턴 동안 상태 이상 저항 증가", values: ["30%", "35%", "40%", "45%", "60%"] },
             { name: "강철", effect: "본인과 펫, 3턴 동안 데미지 감소 및 수호의 정령 시전 (치명타 무효)", values: ["40", "50", "60", "70", "100"] },
             { name: "치유", effect: "본인과 펫, 3턴 동안 HP 회복", values: ["300", "350", "400", "450", "550"] },
-            { name: "질주", effect: "본인과 펫, 3턴 동안 회피율 및 명중률 5% 증가 및 <span style='color:#ff7b72; font-weight:bold;'>탈진</span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
-            { name: "파열", effect: "본인과 펫, 3턴 동안 치명타 및 회피율 5% 증가 및 <span style='color:#ff7b72; font-weight:bold;'>탈진</span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
-            { name: "암살", effect: "본인과 펫, 3턴 동안 명중률 및 치명타 5% 증가 및 <span style='color:#ff7b72; font-weight:bold;'>탈진</span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
+            { name: "질주", effect: "본인과 펫, 3턴 동안 회피율 및 명중률 5% 증가 및 <span class='tooltip-container' style='color:#ff7b72; font-weight:bold; cursor:pointer;'>탈진<span class='tooltip-text'>3턴간 랜덤 3명 공격력 10% 감소</span></span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
+            { name: "파열", effect: "본인과 펫, 3턴 동안 치명타 및 회피율 5% 증가 및 <span class='tooltip-container' style='color:#ff7b72; font-weight:bold; cursor:pointer;'>탈진<span class='tooltip-text'>3턴간 랜덤 3명 공격력 10% 감소</span></span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
+            { name: "암살", effect: "본인과 펫, 3턴 동안 명중률 및 치명타 5% 증가 및 <span class='tooltip-container' style='color:#ff7b72; font-weight:bold; cursor:pointer;'>탈진<span class='tooltip-text'>3턴간 랜덤 3명 공격력 10% 감소</span></span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
             { name: "충성", effect: "본인과 펫, 3턴 동안 데미지 감소 및 수호의 정령 시전 (충견진돗개 적용)", values: ["40", "50", "60", "70", "100"] },
             { name: "투혼", effect: "본인과 펫, 3턴 동안 공격력 증가 (방어력 5% 감소 패널티)", values: ["13%", "14%", "15%", "18%", "20%"] },
             { name: "난무", effect: "캐릭터 전용, 근거리 공격 시 분신 공격 (최대 3명)", values: ["1턴", "2턴", "3턴", "4턴", "5턴"] },
@@ -5669,7 +5716,7 @@ button[onclick="resetGame()"]:hover {
             { name: "심연의 보주", effect: "본인과 펫, 5턴 동안 반격률 증가 및 회피율 5% 증가", values: ["50%", "55%", "60%", "70%", "80%"] },
             { name: "청영의 화조", effect: "팀원 전체, 6턴 동안 HP 회복 및 치명타 5% 증가", values: ["50", "80", "100", "150", "200"] },
             { name: "광휘의 권능", effect: "팀원 전체, 6턴 동안 순발력 증가 및 수호의 정령 시전", values: ["3%", "4%", "5%", "6%", "8%"] },
-            { name: "왜곡", effect: "본인과 펫, 5턴 동안 명중률 및 치명타 5% 증가 및 <span style='color:#c8a0ff; font-weight:bold;'>감염</span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
+            { name: "왜곡", effect: "본인과 펫, 5턴 동안 명중률 및 치명타 5% 증가 및 <span class='tooltip-container' style='color:#c8a0ff; font-weight:bold; cursor:pointer;'>감염<span class='tooltip-text'>5턴간 랜덤 3명 체력 회복 효과 50% 감소</span></span> 부여", values: ["3%", "4%", "5%", "6%", "8%"] },
             { name: "황혼의 날개", effect: "팀원 전체, 6턴 동안 회피율 및 명중률 및 치명타 증가", values: ["3%", "4%", "5%", "6%", "8%"] },
             { name: "칠흑의 방벽", effect: "팀원 전체, 5턴 동안 근거리 피해 33% 감소 및 피해량 비례 HP 회복", values: ["10%", "20%", "30%", "40%", "50%"] },
             { name: "불멸의 계시", effect: "본인과 펫, 5턴 동안 공격력 증가 및 본인에게 부활 효과 부여", values: ["12%", "13%", "14%", "16%", "19%"] },
@@ -5686,9 +5733,9 @@ const NOTICE_DATABASE = [
         id: 39,
         date: "26년 6월 18일",
         title: "26년 6월 18일 업데이트 공지사항입니다.",
-        summary: "1. 레이드: 패시브 시스템 전면 개편 및 가독성·정렬 최적화",
+        summary: "1. 레이드: 패시브 개편 정보 업데이트 및 가독성·정렬 최적화",
         content: `
-            <strong>1) 레이드 패시브 시스템 전면 개편 및 UI 최적화</strong>
+            <strong>1) 레이드 패시브 개편 정보 업데이트 및 UI 최적화</strong>
             <span>- <b>설명 문구 가독성 개선:</b> 패시브 효과 설명 내 불필요한 기호(+)를 제거하고, 문장이 자연스럽게 이어지도록 매끄럽게 다듬었습니다.</span>
             <span>- <b>카드 정렬 및 높낮이 균등화:</b> 레벨별 능력치 배열(values) 내 접두사 텍스트를 제거하여 텍스트 비대칭으로 인한 카드 간 높낮이 불균형 현상을 해결하고 정렬을 최적화했습니다.</span>
             <span>- <b>특수 상태이상 가시성 강화:</b> 패시브 설명 내 주요 상태이상 키워드(표식, 탈진, 감염)에 전용 색상 및 볼드 효과를 부여하여 시각적 직관성을 높였습니다.</span>
