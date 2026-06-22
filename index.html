@@ -5771,6 +5771,18 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 41,
+        date: "26년 6월 22일",
+        title: "26년 6월 22일 업데이트 공지사항입니다.",
+        summary: "1. 주간 펫 육성 교체",
+        content: `        
+            <strong>1) 주간 펫 육성 교체</strong>
+            <span>- 이번 주 육성 펫이 '라바로스'에서 '실피온'(으)로 교체되었습니다.</span>
+            <span>- 기존 육성 중인 페트를 140레벨까지 육성한 뒤 새로운 알을 부화시켜야 정상적으로 진행됩니다.</span>
+        `
+    },
+
+    {
         id: 40,
         date: "26년 6월 19일",
         title: "26년 6월 19일 업데이트 공지사항입니다.",
@@ -7826,7 +7838,7 @@ function resetCounts() {
     [주간 페트 챔피언십 로직 - 종합 가치 반영본]
    ======================================= */
 
-const WEEKLY_PET_NAME = "라바로스"; 
+const WEEKLY_PET_NAME = "실피온"; 
 
 // 1. 알 부화 로직 (종합 가치 비율 적용)
 function startWeeklyChallenge() {
