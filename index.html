@@ -3163,7 +3163,7 @@ button[onclick="resetGame()"]:hover {
     min-height: 400px; /* 
 ">
     <div class="sim-pet-selector" style="position: relative; width: 100%; margin-bottom: auto; /* 상단 고정 */">
-        <input type="text" id="sim-pet-search" placeholder="🔍 페트 이름 검색..." autocomplete="off">
+        <input type="text" id="simPetSearchInput" oninput="searchSimPet()" placeholder="🔍 페트 이름 검색..." autocomplete="off">
         <div id="sim-search-results" class="sim-search-results" style="display: none;"></div>
     </div>
 
@@ -3201,9 +3201,7 @@ button[onclick="resetGame()"]:hover {
         모두 적중해야 S베이스로 판정됩니다.
     </div>
 </div>
-<div id="sim-pet-image-area" style="text-align: center; margin: 15px 0;">
-    <img id="sim-pet-img" src="" style="max-height: 100px; display: none; margin: 0 auto; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">
-</div>
+
     <div class="sim-panel sim-middle">
         <table class="sim-stat-table">
             <thead>
@@ -5752,6 +5750,21 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+        id: 44,
+        date: "26년 7월 13일",
+        title: "26년 7월 13일 업데이트 공지사항입니다.",
+        summary: "1. 펫 도감 필터링 오류 수정  | 2. 페트 초기화 시뮬레이션 검색 기능 정상화",
+        content: `
+            <strong>1) 펫 도감 등록 상태 필터링 오류 수정</strong>
+            <span>- '도감 등록 완료' 및 '도감 미등록' 필터 적용 시, 조건에 맞지 않는 페트가 화면에 함께 노출되던 현상을 수정했습니다.</span>
+            <strong>2) 페트 초기화 시뮬레이션 검색 기능 정상화 및 UI 최적화</strong>
+            <span>- 시뮬레이션 화면 내 페트 검색창에 입력 시 드롭다운 목록이 나타나도록 검색 스크립트를 추가 및 연동했습니다.</span>
+            <span>- 검색된 페트를 클릭할 경우 시뮬레이션 대상이 즉시 변경되며, 썸네일 이미지와 초기 스탯이 UI에 정상적으로 업데이트되도록 수정했습니다.</span>
+            <span>- 코드 내 중복 배치되어 있던 이미지 태그(HTML)를 제거하여 스크립트 충돌 및 오류 발생 가능성을 방지했습니다.</span>
+        `
+    },
+
+    {
     id: 43,
     date: "26년 7월 2일",
     title: "26년 7월 2일 업데이트 공지사항입니다.",
@@ -6934,31 +6947,37 @@ function toggleEncyPetList(listId) {
             }
 
             const filtered = PET_DATABASE.filter(pet => {
-                const matchName = pet.name.toLowerCase().includes(searchText);
-                const matchElement = element === 'all' || pet.elements.includes(element);
-                const matchGrade = grade === 'all' || pet.grade === grade;
-                const matchPassive = passive === 'all' || pet.passive.includes(passive);
-                const matchEncyBuff = encyBuff === 'all' || pet.encyBuff.includes(encyBuff); 
-                
-                // 등록 상태 필터 검사 추가
-                const isRide = !!pet.isRideable; 
-                if (rideStatus === 'rideable' && !isRide) return false;
-                if (rideStatus === 'unrideable' && isRide) return false;
+    const matchName = pet.name.toLowerCase().includes(searchText);
+    const matchElement = element === 'all' || pet.elements.includes(element);
+    const matchGrade = grade === 'all' || pet.grade === grade;
+    const matchPassive = passive === 'all' || pet.passive.includes(passive);
+    const matchEncyBuff = encyBuff === 'all' || pet.encyBuff.includes(encyBuff); 
+    
+    // 1. 등록 상태 필터 로직 추가
+    const isRegistered = !!registeredData[pet.name];
+    if (regStatus === 'registered' && !isRegistered) return false;
+    if (regStatus === 'unregistered' && isRegistered) return false;
 
+    // 2. 기존 탑승 상태 필터
+    const isRide = !!pet.isRideable; 
+    if (rideStatus === 'rideable' && !isRide) return false;
+    if (rideStatus === 'unrideable' && isRide) return false;
+
+    // 기존 조건들
     if (!matchName || !matchElement || !matchGrade || !matchPassive || !matchEncyBuff) return false;
 
-                // 스탯 검사 로직
-                for (const key in statFilters) {
-                    const val = pet[key];
-                    const min = statFilters[key].min;
-                    const max = statFilters[key].max;
-                    
-                    if (!isNaN(min) && val < min) return false;
-                    if (!isNaN(max) && val > max) return false;
-                }
+    // 스탯 검사 로직 (기존과 동일)
+    for (const key in statFilters) {
+        const val = pet[key];
+        const min = statFilters[key].min;
+        const max = statFilters[key].max;
+        
+        if (!isNaN(min) && val < min) return false;
+        if (!isNaN(max) && val > max) return false;
+    }
 
-                return true;
-            });
+    return true;
+});
 
             updateSelectColor('petElement');
             updateSelectColor('petGrade');
@@ -8653,6 +8672,103 @@ function updateDiff(elementId, curVal, baseVal) {
         el.style.color = "#ff7b72"; // 빨간색
     }
 }
+/* ==========================================================
+   페트 초기화 시뮬레이션 - 검색창 전용 로직 추가
+   ========================================================== */
+
+// 1. 검색창에 타이핑할 때 실행되는 함수 (HTML의 oninput="searchSimPet()" 과 연결됨)
+function searchSimPet() {
+    const input = document.getElementById('simPetSearchInput');
+    const resultsContainer = document.getElementById('sim-search-results');
+    
+    if (!input || !resultsContainer) return;
+    
+    const query = input.value.toLowerCase().trim();
+    resultsContainer.innerHTML = ''; // 기존 검색 결과 초기화
+    
+    // 검색어가 없으면 창 숨기기
+    if (query === '') {
+        resultsContainer.style.display = 'none';
+        return;
+    }
+
+    // PET_DATABASE에서 이름 검색 (최대 10개 노출)
+    const filteredPets = PET_DATABASE.filter(pet => 
+        pet.name.toLowerCase().includes(query)
+    ).slice(0, 10);
+
+    // 드롭다운 UI 스타일 강제 적용 (레이아웃 깨짐 방지 및 항상 위로 올라오게 설정)
+    resultsContainer.style.position = 'absolute';
+    resultsContainer.style.top = '100%';
+    resultsContainer.style.left = '0';
+    resultsContainer.style.width = '100%';
+    resultsContainer.style.background = 'var(--inner-card, #2d333b)';
+    resultsContainer.style.border = '1px solid var(--border, #444c56)';
+    resultsContainer.style.borderRadius = '6px';
+    resultsContainer.style.zIndex = '9999'; // 무조건 최상단 노출
+    resultsContainer.style.maxHeight = '200px';
+    resultsContainer.style.overflowY = 'auto';
+
+    // 결과가 없을 때
+    if (filteredPets.length === 0) {
+        resultsContainer.innerHTML = '<div style="padding: 10px; color: #8b949e; text-align: center; font-size: 14px;">검색 결과가 없습니다.</div>';
+        resultsContainer.style.display = 'block';
+        return;
+    }
+
+    // 결과가 있을 때 리스트 생성
+    filteredPets.forEach(pet => {
+        const item = document.createElement('div');
+        item.innerText = pet.name;
+        item.style.padding = '10px 15px';
+        item.style.cursor = 'pointer';
+        item.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+        item.style.color = 'var(--text-main, #adbac7)';
+        item.style.fontSize = '14px';
+        
+        // 마우스 호버 효과
+        item.onmouseenter = () => item.style.background = 'rgba(255, 255, 255, 0.1)';
+        item.onmouseleave = () => item.style.background = 'transparent';
+        
+        // 검색된 페트 클릭 시
+        item.onclick = () => {
+            selectSimPet(pet);
+        };
+        
+        resultsContainer.appendChild(item);
+    });
+    
+    resultsContainer.style.display = 'block';
+}
+
+// 2. 검색 목록에서 페트를 클릭했을 때 실행되는 함수
+function selectSimPet(pet) {
+    currentSimPet = pet; // 기존에 있던 전역 변수에 선택한 페트 저장
+    
+    const input = document.getElementById('simPetSearchInput');
+    const resultsContainer = document.getElementById('sim-search-results');
+    
+    // 검색창에 이름 넣고 드롭다운 닫기
+    if (input) input.value = pet.name;
+    if (resultsContainer) resultsContainer.style.display = 'none';
+    
+    // 기존에 작성되어 있던 UI 업데이트 함수 실행 (이미지 띄우고 스탯 초기화)
+    if (typeof updateSimPetInfo === 'function') {
+        updateSimPetInfo();
+    }
+}
+
+// 3. 화면의 빈 곳을 클릭하면 열려있는 검색창 닫기
+document.addEventListener('click', (e) => {
+    const input = document.getElementById('simPetSearchInput');
+    const results = document.getElementById('sim-search-results');
+    
+    if (input && results) {
+        if (!input.contains(e.target) && !results.contains(e.target)) {
+            results.style.display = 'none';
+        }
+    }
+});
 /* ==========================================================
    👆👆👆 페트 초기화 시뮬레이션 관련 JavaScript 끝 👆👆👆
    ========================================================== */
