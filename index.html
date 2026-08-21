@@ -17332,14 +17332,24 @@ function sv_claimBossReward() {
 ========================================================== */
 
 /* ==========================================================
-                  페트랭킹 데이터 불러오기 시작
+                  페트랭킹 원본 사이트 직접 검색 시작
 ========================================================== */
 function loadPetRankings() {
+    const searchInput = document.getElementById('rankingSearch').value.trim();
     const container = document.getElementById('ranking-container');
-    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 데이터를 불러오는 중입니다...</div>';
+    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 원본 서버에서 데이터를 검색하여 불러오는 중입니다...</div>';
 
-    const targetUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+    // 1. 원본 사이트의 기본 주소
+    let targetUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
+    
+    // 2. 검색어가 입력된 경우 검색 파라미터 추가
+    if (searchInput !== '') {
+        targetUrl += `&sfl=wr_subject&stx=${encodeURIComponent(searchInput)}`;
+    }
+
+    // 3. 프록시 서버의 캐시(과거 기록)를 무력화하기 위해 현재 시간값을 강제로 꼬리표로 붙임
+    const noCacheUrl = targetUrl + '&_t=' + Date.now();
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`;
 
     fetch(proxyUrl)
       .then(response => {
@@ -17357,13 +17367,11 @@ function loadPetRankings() {
         petItems.forEach(pet => {
           const petNameNode = pet.querySelector('.pet-name');
           let petName = '이름 없음';
-          
+
           if (petNameNode) {
-              // 하위 태그(스킬 설명 등)를 제외하고 순수 텍스트(페트 이름)만 추출
-              const clonedNode = petNameNode.cloneNode(true);
-              const children = clonedNode.querySelectorAll('*');
-              children.forEach(child => child.remove());
-              petName = clonedNode.textContent.trim();
+              // 4. 불필요한 공백과 줄바꿈을 하나로 압축한 뒤, 띄어쓰기를 기준으로 첫 번째 단어(페트 이름)만 완벽히 추출
+              const cleanText = petNameNode.textContent.replace(/\s+/g, ' ').trim();
+              petName = cleanText.split(' ')[0];
           }
 
           const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
@@ -17371,7 +17379,6 @@ function loadPetRankings() {
           if(rankingRows.length > 0) {
             const wrapper = document.createElement('div');
             wrapper.className = 'ranking-item';
-            wrapper.setAttribute('data-pet-name', petName);
 
             const title = document.createElement('h4');
             title.innerHTML = `<i class="fa-solid fa-caret-right"></i> [${petName}] TOP 5`;
@@ -17427,32 +17434,17 @@ function loadPetRankings() {
           }
         });
 
+        // 랭킹 표가 하나도 생성되지 않았을 때의 예외 처리
         if (container.innerHTML === '') {
-            container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">랭킹 데이터를 찾을 수 없습니다.</div>';
+            container.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--accent-orange);">검색된 랭킹 데이터가 없습니다. 페트 이름을 정확히 입력해주세요.</div>';
         }
       })
       .catch(error => {
         container.innerHTML = `<div style="text-align:center; padding: 20px; color: red;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}</div>`;
       });
 }
-
-// 랭킹 검색 필터링 함수
-function filterRankings() {
-    const searchInput = document.getElementById('rankingSearch').value.toLowerCase().trim();
-    const rankingItems = document.querySelectorAll('.ranking-item');
-
-    rankingItems.forEach(item => {
-        const petName = item.getAttribute('data-pet-name').toLowerCase();
-        
-        if (petName.includes(searchInput)) {
-            item.style.display = ''; 
-        } else {
-            item.style.display = 'none'; 
-        }
-    });
-}
 /* ==========================================================
-                  페트랭킹 데이터 불러오기 끝
+                  페트랭킹 원본 사이트 직접 검색 끝
 ========================================================== */
 </script>
 
