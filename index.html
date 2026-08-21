@@ -3172,10 +3172,10 @@ button[onclick="resetGame()"]:hover {
 <!-- 검색창 및 데이터 불러오기 버튼 일체형 배치 (중앙 정렬) -->
 <div class="filter-row" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; padding: 0 10px; width: 100%; box-sizing: border-box;">
     
-    <input type="text" id="rankingSearch" placeholder="페트 이름 검색 (예: 모가로스)" onkeyup="filterRankings()" style="width: 300px; height: 42px; padding: 0 15px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border); background: var(--inner-card); color: var(--text-main); box-sizing: border-box;">
+    <input type="text" id="rankingSearch" placeholder="페트 이름 검색 (예: 모가로스 후 엔터)" onkeypress="if(event.keyCode===13) loadPetRankings()" style="width: 300px; height: 42px; padding: 0 15px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border); background: var(--inner-card); color: var(--text-main); box-sizing: border-box;">
     
     <button onclick="loadPetRankings()" style="height: 42px; padding: 0 20px; font-size: 13px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: var(--accent-blue); color: #fff; white-space: nowrap; font-weight: bold; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 6px;">
-        <i class="fa-solid fa-rotate-right"></i> 랭킹 데이터 불러오기
+        <i class="fa-solid fa-magnifying-glass"></i> 랭킹 데이터 검색
     </button>
 
 </div>
