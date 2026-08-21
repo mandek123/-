@@ -17369,7 +17369,6 @@ async function loadPetRankings() {
             if (petItems.length === 0) break; 
 
             petItems.forEach(pet => {
-                // 1. 페트 이름 추출
                 const petNameNode = pet.querySelector('.pet-name');
                 let petName = '이름 없음';
                 if (petNameNode) {
@@ -17377,7 +17376,6 @@ async function loadPetRankings() {
                     petName = cleanText.split(' ')[0];
                 }
 
-                // 2. 페트 이미지 추출
                 const imgNode = pet.querySelector('.pet-thumb img');
                 let imgSrc = '';
                 if (imgNode) {
@@ -17391,7 +17389,7 @@ async function loadPetRankings() {
                     }
                 }
 
-                // 3. 정석 스탯 계산을 위한 초기치/성장치 추출
+                // 수정된 부분: 초기치/성장치 데이터 정상 추출 (td 기준 4개)
                 let initialStats = null;
                 let growthStats = null;
                 const statRows = pet.querySelectorAll('.pet-stats tbody tr');
@@ -17400,18 +17398,18 @@ async function loadPetRankings() {
                     const initialCols = statRows[0].querySelectorAll('td');
                     const growthCols = statRows[1].querySelectorAll('td');
                     
-                    if (initialCols.length >= 5 && growthCols.length >= 5) {
+                    if (initialCols.length >= 4 && growthCols.length >= 4) {
                         initialStats = {
-                            hp: parseFloat(initialCols[1].textContent) || 0,
-                            atk: parseFloat(initialCols[2].textContent) || 0,
-                            def: parseFloat(initialCols[3].textContent) || 0,
-                            spd: parseFloat(initialCols[4].textContent) || 0
+                            hp: parseFloat(initialCols[0].textContent) || 0,
+                            atk: parseFloat(initialCols[1].textContent) || 0,
+                            def: parseFloat(initialCols[2].textContent) || 0,
+                            spd: parseFloat(initialCols[3].textContent) || 0
                         };
                         growthStats = {
-                            hp: parseFloat(growthCols[1].textContent) || 0,
-                            atk: parseFloat(growthCols[2].textContent) || 0,
-                            def: parseFloat(growthCols[3].textContent) || 0,
-                            spd: parseFloat(growthCols[4].textContent) || 0
+                            hp: parseFloat(growthCols[0].textContent) || 0,
+                            atk: parseFloat(growthCols[1].textContent) || 0,
+                            def: parseFloat(growthCols[2].textContent) || 0,
+                            spd: parseFloat(growthCols[3].textContent) || 0
                         };
                     }
                 }
@@ -17422,7 +17420,6 @@ async function loadPetRankings() {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'ranking-item';
 
-                    // 타이틀 및 이미지 래퍼 생성
                     const headerContainer = document.createElement('div');
                     headerContainer.style.display = 'flex';
                     headerContainer.style.alignItems = 'center';
@@ -17450,7 +17447,6 @@ async function loadPetRankings() {
                     headerContainer.appendChild(title);
                     wrapper.appendChild(headerContainer);
 
-                    // 테이블 생성
                     const table = document.createElement('table');
                     table.style.width = '100%';
                     table.style.borderCollapse = 'collapse';
@@ -17485,7 +17481,7 @@ async function loadPetRankings() {
                           let originalText = col.textContent.trim();
                           let innerHTML = originalText;
 
-                          // 스탯 열(내구력, 공격력, 방어력, 순발력)에 대한 증감 계산
+                          // 스탯 열 오차 연산 및 색상 지정 로직
                           if (initialStats && growthStats && index >= 3 && index <= 6) {
                               const level = parseInt(cols[2].textContent);
                               
@@ -17493,25 +17489,23 @@ async function loadPetRankings() {
                                   const statKeys = ['hp', 'atk', 'def', 'spd'];
                                   const key = statKeys[index - 3];
                                   
-                                  // 실제 스탯 숫자만 추출 (예: "1524 (10.52)" -> 1524)
-                                  const actualValue = parseFloat(originalText.split(' ')[0] || originalText);
+                                  const cleanOriginal = originalText.replace(/,/g, '');
+                                  const actualValue = parseFloat(cleanOriginal.split(' ')[0] || cleanOriginal);
                                   
-                                  // 정석 스탯 계산 = 초기치 + (성장치 * (레벨 - 1))
                                   const stdValue = initialStats[key] + (growthStats[key] * (level - 1));
-                                  
-                                  // 오차 계산 및 소수점 둘째자리 반올림
                                   const diff = actualValue - stdValue;
                                   const diffRounded = parseFloat(diff.toFixed(2));
 
                                   let diffHtml = '';
                                   if (diffRounded > 0) {
-                                      diffHtml = `<br><span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diffRounded})</span>`;
+                                      diffHtml = `<span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diffRounded})</span>`;
                                   } else if (diffRounded < 0) {
-                                      diffHtml = `<br><span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diffRounded})</span>`;
+                                      diffHtml = `<span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diffRounded})</span>`;
                                   } else {
-                                      diffHtml = `<br><span style="color: #8b949e; font-size: 11px;">(0)</span>`;
+                                      diffHtml = `<span style="color: #8b949e; font-size: 11px;">(0)</span>`;
                                   }
-                                  innerHTML = `${originalText}${diffHtml}`;
+                                  
+                                  innerHTML = `${originalText}<br>${diffHtml}`;
                               }
                           }
 
@@ -17533,7 +17527,6 @@ async function loadPetRankings() {
                   }
             });
 
-            // 4. 다음 페이지 탐색
             const nextLink = doc.querySelector(`a[href*="page=${currentPage + 1}"]`);
             if (nextLink) {
                 currentPage++; 
