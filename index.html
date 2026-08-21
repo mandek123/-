@@ -17498,34 +17498,32 @@ async function loadPetRankings() {
                           let innerHTML = originalText;
 
                           // 스탯 열 오차 연산 및 색상 지정 로직
-if (initialStats && growthStats && index >= 3 && index <= 6) {
-    const level = parseInt(cols[2].textContent);
-    
-    if (!isNaN(level)) {
-        const statKeys = ['hp', 'atk', 'def', 'spd'];
-        const key = statKeys[index - 3];
-        
-        const cleanOriginal = originalText.replace(/,/g, '');
-        const actualValue = parseFloat(cleanOriginal.split(' ')[0] || cleanOriginal);
-        
-        // 인게임 공식 완벽 적용: 초기치 내림 + (성장치 * 레벨업 횟수) 내림
-        const stdValue = Math.floor(initialStats[key]) + Math.floor(growthStats[key] * (level - 1));
-        
-        // 정수 단위로 오차 계산
-        const diff = actualValue - stdValue;
+                          if (initialStats && growthStats && index >= 3 && index <= 6) {
+                              const level = parseInt(cols[2].textContent);
+                              
+                              if (!isNaN(level)) {
+                                  const statKeys = ['hp', 'atk', 'def', 'spd'];
+                                  const key = statKeys[index - 3];
+                                  
+                                  const cleanOriginal = originalText.replace(/,/g, '');
+                                  const actualValue = parseFloat(cleanOriginal.split(' ')[0] || cleanOriginal);
+                                  
+                                  const stdValue = initialStats[key] + (growthStats[key] * (level - 1));
+                                  const diff = actualValue - stdValue;
+                                  const diffRounded = parseFloat(diff.toFixed(2));
 
-        let diffHtml = '';
-        if (diff > 0) {
-            diffHtml = `<span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diff})</span>`;
-        } else if (diff < 0) {
-            diffHtml = `<span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diff})</span>`;
-        } else {
-            diffHtml = `<span style="color: #8b949e; font-size: 11px;">(0)</span>`;
-        }
-        
-        innerHTML = `${originalText}<br>${diffHtml}`;
-    }
-}
+                                  let diffHtml = '';
+                                  if (diffRounded > 0) {
+                                      diffHtml = `<span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diffRounded})</span>`;
+                                  } else if (diffRounded < 0) {
+                                      diffHtml = `<span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diffRounded})</span>`;
+                                  } else {
+                                      diffHtml = `<span style="color: #8b949e; font-size: 11px;">(0)</span>`;
+                                  }
+                                  
+                                  innerHTML = `${originalText}<br>${diffHtml}`;
+                              }
+                          }
 
                           td.innerHTML = innerHTML;
                           td.style.textAlign = 'center'; 
