@@ -2487,11 +2487,11 @@ button[onclick="resetGame()"]:hover {
                 <a href="javascript:void(0);" class="nav-item" id="menu-etc">
                     ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
                 </a>            
-                <div class="dropdown-content">
-                    <a href="javascript:void(0);" onclick="showPage('page-ranking'); closeDropdown();" style="display: flex; align-items: center;">
-                    <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
-                    <span>페트 랭킹 보기</span>
-                    </a>
+                <a href="javascript:void(0);" onclick="showPage('page-ranking'); closeDropdown();" style="display: flex; align-items: center;">
+    <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
+    <span>페트 랭킹 보기</span>
+    <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+</a>
 
                     <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
                         <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
@@ -17346,10 +17346,9 @@ async function loadPetRankings() {
 
     let currentPage = 1;
     let hasNextPage = true;
-    let resultElements = []; // 여러 페이지에서 수집한 랭킹 표를 담아둘 배열
+    let resultElements = []; 
 
     try {
-        // 다음 페이지가 존재하고, 최대 10페이지를 넘지 않을 때까지 반복 수집 (무한루프 방지)
         while (hasNextPage && currentPage <= 10) {
             const targetUrl = baseUrl + `&page=${currentPage}`;
             const noCacheUrl = targetUrl + '&_t=' + Date.now();
@@ -17363,7 +17362,7 @@ async function loadPetRankings() {
             const doc = parser.parseFromString(html, 'text/html');
             
             const petItems = doc.querySelectorAll('.pet-item');
-            if (petItems.length === 0) break; // 해당 페이지에 페트 항목이 없으면 반복 종료
+            if (petItems.length === 0) break; 
 
             petItems.forEach(pet => {
                 // 1. 페트 이름 추출
@@ -17388,13 +17387,38 @@ async function loadPetRankings() {
                     }
                 }
 
+                // 3. 정석 스탯 계산을 위한 초기치/성장치 추출
+                let initialStats = null;
+                let growthStats = null;
+                const statRows = pet.querySelectorAll('.pet-stats tbody tr');
+                
+                if (statRows.length >= 2) {
+                    const initialCols = statRows[0].querySelectorAll('td');
+                    const growthCols = statRows[1].querySelectorAll('td');
+                    
+                    if (initialCols.length >= 5 && growthCols.length >= 5) {
+                        initialStats = {
+                            hp: parseFloat(initialCols[1].textContent) || 0,
+                            atk: parseFloat(initialCols[2].textContent) || 0,
+                            def: parseFloat(initialCols[3].textContent) || 0,
+                            spd: parseFloat(initialCols[4].textContent) || 0
+                        };
+                        growthStats = {
+                            hp: parseFloat(growthCols[1].textContent) || 0,
+                            atk: parseFloat(growthCols[2].textContent) || 0,
+                            def: parseFloat(growthCols[3].textContent) || 0,
+                            spd: parseFloat(growthCols[4].textContent) || 0
+                        };
+                    }
+                }
+
                 const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
 
                 if(rankingRows.length > 0) {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'ranking-item';
 
-                    // 3. 타이틀 및 이미지 래퍼 생성
+                    // 타이틀 및 이미지 래퍼 생성
                     const headerContainer = document.createElement('div');
                     headerContainer.style.display = 'flex';
                     headerContainer.style.alignItems = 'center';
@@ -17422,7 +17446,7 @@ async function loadPetRankings() {
                     headerContainer.appendChild(title);
                     wrapper.appendChild(headerContainer);
 
-                    // 4. 테이블 생성
+                    // 테이블 생성
                     const table = document.createElement('table');
                     table.style.width = '100%';
                     table.style.borderCollapse = 'collapse';
@@ -17452,11 +17476,45 @@ async function loadPetRankings() {
                         const tr = document.createElement('tr');
                         tr.style.borderBottom = '1px solid var(--border)';
                         
-                        cols.forEach(col => {
+                        cols.forEach((col, index) => {
                           const td = document.createElement('td');
-                          td.textContent = col.textContent.trim();
+                          let originalText = col.textContent.trim();
+                          let innerHTML = originalText;
+
+                          // 스탯 열(내구력, 공격력, 방어력, 순발력)에 대한 증감 계산
+                          if (initialStats && growthStats && index >= 3 && index <= 6) {
+                              const level = parseInt(cols[2].textContent);
+                              
+                              if (!isNaN(level)) {
+                                  const statKeys = ['hp', 'atk', 'def', 'spd'];
+                                  const key = statKeys[index - 3];
+                                  
+                                  // 실제 스탯 숫자만 추출 (예: "1524 (10.52)" -> 1524)
+                                  const actualValue = parseFloat(originalText.split(' ')[0] || originalText);
+                                  
+                                  // 정석 스탯 계산 = 초기치 + (성장치 * (레벨 - 1))
+                                  const stdValue = initialStats[key] + (growthStats[key] * (level - 1));
+                                  
+                                  // 오차 계산 및 소수점 둘째자리 반올림
+                                  const diff = actualValue - stdValue;
+                                  const diffRounded = parseFloat(diff.toFixed(2));
+
+                                  let diffHtml = '';
+                                  if (diffRounded > 0) {
+                                      diffHtml = `<br><span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diffRounded})</span>`;
+                                  } else if (diffRounded < 0) {
+                                      diffHtml = `<br><span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diffRounded})</span>`;
+                                  } else {
+                                      diffHtml = `<br><span style="color: #8b949e; font-size: 11px;">(0)</span>`;
+                                  }
+                                  innerHTML = `${originalText}${diffHtml}`;
+                              }
+                          }
+
+                          td.innerHTML = innerHTML;
                           td.style.textAlign = 'center'; 
                           td.style.padding = '8px';
+                          td.style.verticalAlign = 'middle';
                           tr.appendChild(td);
                         });
                         
@@ -17467,21 +17525,19 @@ async function loadPetRankings() {
                     table.appendChild(tbody);
                     wrapper.appendChild(table);
                     
-                    // 수집된 DOM 요소를 배열에 저장
                     resultElements.push(wrapper);
                   }
             });
 
-            // 5. 원본 사이트의 현재 HTML에 '다음 페이지 번호'를 가진 a 태그가 존재하는지 판별
+            // 4. 다음 페이지 탐색
             const nextLink = doc.querySelector(`a[href*="page=${currentPage + 1}"]`);
             if (nextLink) {
-                currentPage++; // 존재하면 페이지 숫자를 올리고 반복
+                currentPage++; 
             } else {
-                hasNextPage = false; // 없으면 반복 종료
+                hasNextPage = false; 
             }
         }
 
-        // 6. 반복문 종료 후 수집된 모든 결과를 화면에 일괄 렌더링
         container.innerHTML = ''; 
         
         if (resultElements.length > 0) {
