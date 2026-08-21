@@ -5900,6 +5900,22 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+    id: 47,
+    date: "26년 8월 21일",
+    title: "26년 8월 21일 업데이트 공지사항입니다.",
+    summary: "1. 페트 랭킹 시스템 신설 및 스탯 비교 기능 추가",
+    content: `
+        <strong>1) 실시간 페트 랭킹 시스템 추가</strong>
+        <span>- 페트 랭킹을 확인할 수 있는 메뉴가 신설되었습니다.</span>
+        <span>- 특정 페트의 랭킹을 검색하는 기능이 적용되었습니다.</span>
+        <strong>2) 랭킹 상세 정보 표기 강화</strong>
+        <span>- 실제 스탯과 정석 스탯(초기치+성장치 기반) 간의 오차를 계산하여 소수점 단위로 출력하는 기능이 추가되었습니다(+ 파란색, - 빨간색 적용).</span>
+        <strong>3) 내비게이션 메뉴 개편</strong>
+        <span>- 기타 메뉴 목록에 '페트 랭킹 보기' 탭이 추가되었습니다.</span>
+    `
+    },
+
+    {
         id: 46,
         date: "26년 8월 20일",
         title: "26년 8월 20일 업데이트 공지사항입니다.",
@@ -17482,32 +17498,34 @@ async function loadPetRankings() {
                           let innerHTML = originalText;
 
                           // 스탯 열 오차 연산 및 색상 지정 로직
-                          if (initialStats && growthStats && index >= 3 && index <= 6) {
-                              const level = parseInt(cols[2].textContent);
-                              
-                              if (!isNaN(level)) {
-                                  const statKeys = ['hp', 'atk', 'def', 'spd'];
-                                  const key = statKeys[index - 3];
-                                  
-                                  const cleanOriginal = originalText.replace(/,/g, '');
-                                  const actualValue = parseFloat(cleanOriginal.split(' ')[0] || cleanOriginal);
-                                  
-                                  const stdValue = initialStats[key] + (growthStats[key] * (level - 1));
-                                  const diff = actualValue - stdValue;
-                                  const diffRounded = parseFloat(diff.toFixed(2));
+if (initialStats && growthStats && index >= 3 && index <= 6) {
+    const level = parseInt(cols[2].textContent);
+    
+    if (!isNaN(level)) {
+        const statKeys = ['hp', 'atk', 'def', 'spd'];
+        const key = statKeys[index - 3];
+        
+        const cleanOriginal = originalText.replace(/,/g, '');
+        const actualValue = parseFloat(cleanOriginal.split(' ')[0] || cleanOriginal);
+        
+        // 인게임 공식 완벽 적용: 초기치 내림 + (성장치 * 레벨업 횟수) 내림
+        const stdValue = Math.floor(initialStats[key]) + Math.floor(growthStats[key] * (level - 1));
+        
+        // 정수 단위로 오차 계산
+        const diff = actualValue - stdValue;
 
-                                  let diffHtml = '';
-                                  if (diffRounded > 0) {
-                                      diffHtml = `<span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diffRounded})</span>`;
-                                  } else if (diffRounded < 0) {
-                                      diffHtml = `<span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diffRounded})</span>`;
-                                  } else {
-                                      diffHtml = `<span style="color: #8b949e; font-size: 11px;">(0)</span>`;
-                                  }
-                                  
-                                  innerHTML = `${originalText}<br>${diffHtml}`;
-                              }
-                          }
+        let diffHtml = '';
+        if (diff > 0) {
+            diffHtml = `<span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diff})</span>`;
+        } else if (diff < 0) {
+            diffHtml = `<span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diff})</span>`;
+        } else {
+            diffHtml = `<span style="color: #8b949e; font-size: 11px;">(0)</span>`;
+        }
+        
+        innerHTML = `${originalText}<br>${diffHtml}`;
+    }
+}
 
                           td.innerHTML = innerHTML;
                           td.style.textAlign = 'center'; 
