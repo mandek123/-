@@ -17339,36 +17339,40 @@ function loadPetRankings() {
     container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 데이터를 불러오는 중입니다...</div>';
 
     const targetUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
-    // 프록시 서버 주소 변경 적용
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
     fetch(proxyUrl)
       .then(response => {
         if (!response.ok) throw new Error('네트워크 응답 에러');
-        // json() 대신 text()로 원본 HTML 텍스트 반환
         return response.text();
       })
       .then(html => {
         const parser = new DOMParser();
-        // data.contents 대신 반환받은 html 텍스트를 직접 파싱
         const doc = parser.parseFromString(html, 'text/html');
         
-        container.innerHTML = ''; // 로딩 텍스트 제거
+        container.innerHTML = ''; 
 
         const petItems = doc.querySelectorAll('.pet-item');
         
         petItems.forEach(pet => {
           const petNameNode = pet.querySelector('.pet-name');
-          const petName = petNameNode ? petNameNode.textContent.trim() : '이름 없음';
+          let petName = '이름 없음';
+          
+          if (petNameNode) {
+              // 하위 태그(스킬 설명 등)를 제외하고 순수 텍스트(페트 이름)만 추출
+              const clonedNode = petNameNode.cloneNode(true);
+              const children = clonedNode.querySelectorAll('*');
+              children.forEach(child => child.remove());
+              petName = clonedNode.textContent.trim();
+          }
+
           const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
 
           if(rankingRows.length > 0) {
-            // 검색을 위한 묶음(Wrapper) 컨테이너 생성
             const wrapper = document.createElement('div');
             wrapper.className = 'ranking-item';
             wrapper.setAttribute('data-pet-name', petName);
 
-            // 펫 이름 제목
             const title = document.createElement('h4');
             title.innerHTML = `<i class="fa-solid fa-caret-right"></i> [${petName}] TOP 5`;
             title.style.color = 'var(--accent-blue)';
@@ -17376,7 +17380,6 @@ function loadPetRankings() {
             title.style.marginBottom = '10px';
             wrapper.appendChild(title);
 
-            // 테이블 구조 생성
             const table = document.createElement('table');
             table.style.width = '100%';
             table.style.borderCollapse = 'collapse';
@@ -17384,7 +17387,6 @@ function loadPetRankings() {
             table.style.fontSize = '13px';
             table.style.color = 'var(--text-main)';
 
-            // 테이블 헤더
             const thead = document.createElement('thead');
             thead.innerHTML = `
               <tr style="background: rgba(83, 155, 245, 0.1); border-bottom: 2px solid var(--accent-blue);">
@@ -17400,7 +17402,6 @@ function loadPetRankings() {
             `;
             table.appendChild(thead);
 
-            // 테이블 본문 데이터 삽입
             const tbody = document.createElement('tbody');
             rankingRows.forEach(row => {
               const cols = row.querySelectorAll('td');
@@ -17422,8 +17423,6 @@ function loadPetRankings() {
 
             table.appendChild(tbody);
             wrapper.appendChild(table);
-            
-            // 완성된 wrapper를 최종 컨테이너에 삽입
             container.appendChild(wrapper);
           }
         });
@@ -17439,13 +17438,12 @@ function loadPetRankings() {
 
 // 랭킹 검색 필터링 함수
 function filterRankings() {
-    const searchInput = document.getElementById('rankingSearch').value.toLowerCase();
+    const searchInput = document.getElementById('rankingSearch').value.toLowerCase().trim();
     const rankingItems = document.querySelectorAll('.ranking-item');
 
     rankingItems.forEach(item => {
         const petName = item.getAttribute('data-pet-name').toLowerCase();
         
-        // 입력한 검색어가 페트 이름에 포함되어 있으면 표시, 아니면 숨김 처리
         if (petName.includes(searchInput)) {
             item.style.display = ''; 
         } else {
