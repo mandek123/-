@@ -17332,154 +17332,170 @@ function sv_claimBossReward() {
 ========================================================== */
 
 /* ==========================================================
-                  페트랭킹 원본 사이트 직접 검색 시작
+                  페트랭킹 원본 사이트 직접 검색 (전체 페이지) 시작
 ========================================================== */
-function loadPetRankings() {
+async function loadPetRankings() {
     const searchInput = document.getElementById('rankingSearch').value.trim();
     const container = document.getElementById('ranking-container');
-    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 원본 서버에서 데이터를 검색하여 불러오는 중입니다...</div>';
+    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 전체 페이지 데이터를 수집하고 있습니다. 잠시만 기다려주세요...</div>';
 
-    let targetUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
-    
+    let baseUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
     if (searchInput !== '') {
-        targetUrl += `&kw=${encodeURIComponent(searchInput)}`;
+        baseUrl += `&kw=${encodeURIComponent(searchInput)}`;
     }
 
-    const noCacheUrl = targetUrl + '&_t=' + Date.now();
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`;
+    let currentPage = 1;
+    let hasNextPage = true;
+    let resultElements = []; // 여러 페이지에서 수집한 랭킹 표를 담아둘 배열
 
-    fetch(proxyUrl)
-      .then(response => {
-        if (!response.ok) throw new Error('네트워크 응답 에러');
-        return response.text();
-      })
-      .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        container.innerHTML = ''; 
+    try {
+        // 다음 페이지가 존재하고, 최대 10페이지를 넘지 않을 때까지 반복 수집 (무한루프 방지)
+        while (hasNextPage && currentPage <= 10) {
+            const targetUrl = baseUrl + `&page=${currentPage}`;
+            const noCacheUrl = targetUrl + '&_t=' + Date.now();
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`;
 
-        const petItems = doc.querySelectorAll('.pet-item');
-        
-        petItems.forEach(pet => {
-          // 1. 페트 이름 추출
-          const petNameNode = pet.querySelector('.pet-name');
-          let petName = '이름 없음';
-
-          if (petNameNode) {
-              const cleanText = petNameNode.textContent.replace(/\s+/g, ' ').trim();
-              petName = cleanText.split(' ')[0];
-          }
-
-          // 2. 페트 이미지 추출 (새로 추가된 로직)
-          const imgNode = pet.querySelector('.pet-thumb img');
-          let imgSrc = '';
-          if (imgNode) {
-              let rawSrc = imgNode.getAttribute('src');
-              if (rawSrc) {
-                  // 이미지 경로가 상대 경로일 경우 원본 도메인을 붙여 절대 경로로 변환
-                  try {
-                      imgSrc = new URL(rawSrc, 'https://saworld.net/home/bbs/').href;
-                  } catch(e) {
-                      imgSrc = rawSrc;
-                  }
-              }
-          }
-
-          const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
-
-          if(rankingRows.length > 0) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'ranking-item';
-
-            // 3. 타이틀 및 이미지 래퍼(가로 정렬) 생성
-            const headerContainer = document.createElement('div');
-            headerContainer.style.display = 'flex';
-            headerContainer.style.alignItems = 'center';
-            headerContainer.style.gap = '15px';
-            headerContainer.style.marginTop = '25px';
-            headerContainer.style.marginBottom = '15px';
-
-            // 이미지가 정상적으로 추출되었다면 컨테이너에 추가
-            if (imgSrc) {
-                const imgEl = document.createElement('img');
-                imgEl.src = imgSrc;
-                imgEl.style.width = '60px'; // 이미지 가로 크기
-                imgEl.style.height = '60px'; // 이미지 세로 크기
-                imgEl.style.objectFit = 'contain';
-                imgEl.style.borderRadius = '8px';
-                imgEl.style.border = '1px solid var(--border)';
-                imgEl.style.background = 'var(--inner-card)';
-                headerContainer.appendChild(imgEl);
-            }
-
-            // 페트 이름 제목 추가
-            const title = document.createElement('h4');
-            title.innerHTML = `<i class="fa-solid fa-caret-right"></i> [${petName}] TOP 5`;
-            title.style.color = 'var(--accent-blue)';
-            title.style.margin = '0'; // 부모 요소에서 정렬하므로 마진 제거
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error(`네트워크 응답 에러 (페이지 ${currentPage})`);
+            const html = await response.text();
             
-            headerContainer.appendChild(title);
-            wrapper.appendChild(headerContainer);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const petItems = doc.querySelectorAll('.pet-item');
+            if (petItems.length === 0) break; // 해당 페이지에 페트 항목이 없으면 반복 종료
 
-            // 4. 테이블 구조 생성
-            const table = document.createElement('table');
-            table.style.width = '100%';
-            table.style.borderCollapse = 'collapse';
-            table.style.marginBottom = '20px';
-            table.style.fontSize = '13px';
-            table.style.color = 'var(--text-main)';
+            petItems.forEach(pet => {
+                // 1. 페트 이름 추출
+                const petNameNode = pet.querySelector('.pet-name');
+                let petName = '이름 없음';
+                if (petNameNode) {
+                    const cleanText = petNameNode.textContent.replace(/\s+/g, ' ').trim();
+                    petName = cleanText.split(' ')[0];
+                }
 
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-              <tr style="background: rgba(83, 155, 245, 0.1); border-bottom: 2px solid var(--accent-blue);">
-                <th style="padding: 10px; border: 1px solid var(--border);">#</th>
-                <th style="padding: 10px; border: 1px solid var(--border);">닉네임</th>
-                <th style="padding: 10px; border: 1px solid var(--border);">Lv</th>
-                <th style="padding: 10px; border: 1px solid var(--border);">내구력</th>
-                <th style="padding: 10px; border: 1px solid var(--border);">공격력</th>
-                <th style="padding: 10px; border: 1px solid var(--border);">방어력</th>
-                <th style="padding: 10px; border: 1px solid var(--border);">순발력</th>
-                <th style="padding: 10px; border: 1px solid var(--border);">점수</th>
-              </tr>
-            `;
-            table.appendChild(thead);
+                // 2. 페트 이미지 추출
+                const imgNode = pet.querySelector('.pet-thumb img');
+                let imgSrc = '';
+                if (imgNode) {
+                    let rawSrc = imgNode.getAttribute('src');
+                    if (rawSrc) {
+                        try {
+                            imgSrc = new URL(rawSrc, 'https://saworld.net/home/bbs/').href;
+                        } catch(e) {
+                            imgSrc = rawSrc;
+                        }
+                    }
+                }
 
-            const tbody = document.createElement('tbody');
-            rankingRows.forEach(row => {
-              const cols = row.querySelectorAll('td');
-              if(cols.length === 8) {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = '1px solid var(--border)';
-                
-                cols.forEach(col => {
-                  const td = document.createElement('td');
-                  td.textContent = col.textContent.trim();
-                  td.style.textAlign = 'center'; 
-                  td.style.padding = '8px';
-                  tr.appendChild(td);
-                });
-                
-                tbody.appendChild(tr);
-              }
+                const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
+
+                if(rankingRows.length > 0) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'ranking-item';
+
+                    // 3. 타이틀 및 이미지 래퍼 생성
+                    const headerContainer = document.createElement('div');
+                    headerContainer.style.display = 'flex';
+                    headerContainer.style.alignItems = 'center';
+                    headerContainer.style.gap = '15px';
+                    headerContainer.style.marginTop = '25px';
+                    headerContainer.style.marginBottom = '15px';
+
+                    if (imgSrc) {
+                        const imgEl = document.createElement('img');
+                        imgEl.src = imgSrc;
+                        imgEl.style.width = '60px';
+                        imgEl.style.height = '60px';
+                        imgEl.style.objectFit = 'contain';
+                        imgEl.style.borderRadius = '8px';
+                        imgEl.style.border = '1px solid var(--border)';
+                        imgEl.style.background = 'var(--inner-card)';
+                        headerContainer.appendChild(imgEl);
+                    }
+
+                    const title = document.createElement('h4');
+                    title.innerHTML = `<i class="fa-solid fa-caret-right"></i> [${petName}] TOP 5`;
+                    title.style.color = 'var(--accent-blue)';
+                    title.style.margin = '0';
+                    
+                    headerContainer.appendChild(title);
+                    wrapper.appendChild(headerContainer);
+
+                    // 4. 테이블 생성
+                    const table = document.createElement('table');
+                    table.style.width = '100%';
+                    table.style.borderCollapse = 'collapse';
+                    table.style.marginBottom = '20px';
+                    table.style.fontSize = '13px';
+                    table.style.color = 'var(--text-main)';
+
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                      <tr style="background: rgba(83, 155, 245, 0.1); border-bottom: 2px solid var(--accent-blue);">
+                        <th style="padding: 10px; border: 1px solid var(--border);">#</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">닉네임</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">Lv</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">내구력</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">공격력</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">방어력</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">순발력</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">점수</th>
+                      </tr>
+                    `;
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement('tbody');
+                    rankingRows.forEach(row => {
+                      const cols = row.querySelectorAll('td');
+                      if(cols.length === 8) {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid var(--border)';
+                        
+                        cols.forEach(col => {
+                          const td = document.createElement('td');
+                          td.textContent = col.textContent.trim();
+                          td.style.textAlign = 'center'; 
+                          td.style.padding = '8px';
+                          tr.appendChild(td);
+                        });
+                        
+                        tbody.appendChild(tr);
+                      }
+                    });
+
+                    table.appendChild(tbody);
+                    wrapper.appendChild(table);
+                    
+                    // 수집된 DOM 요소를 배열에 저장
+                    resultElements.push(wrapper);
+                  }
             });
 
-            table.appendChild(tbody);
-            wrapper.appendChild(table);
-            container.appendChild(wrapper);
-          }
-        });
+            // 5. 원본 사이트의 현재 HTML에 '다음 페이지 번호'를 가진 a 태그가 존재하는지 판별
+            const nextLink = doc.querySelector(`a[href*="page=${currentPage + 1}"]`);
+            if (nextLink) {
+                currentPage++; // 존재하면 페이지 숫자를 올리고 반복
+            } else {
+                hasNextPage = false; // 없으면 반복 종료
+            }
+        }
 
-        if (container.innerHTML === '') {
+        // 6. 반복문 종료 후 수집된 모든 결과를 화면에 일괄 렌더링
+        container.innerHTML = ''; 
+        
+        if (resultElements.length > 0) {
+            resultElements.forEach(el => container.appendChild(el));
+        } else {
             container.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--accent-orange);">검색된 랭킹 데이터가 없습니다. 페트 이름을 정확히 입력해주세요.</div>';
         }
-      })
-      .catch(error => {
+
+    } catch (error) {
         container.innerHTML = `<div style="text-align:center; padding: 20px; color: red;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}</div>`;
-      });
+    }
 }
 /* ==========================================================
-                  페트랭킹 원본 사이트 직접 검색 끝
+                  페트랭킹 원본 사이트 직접 검색 (전체 페이지) 끝
 ========================================================== */
 </script>
 
