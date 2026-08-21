@@ -3164,15 +3164,24 @@ button[onclick="resetGame()"]:hover {
             </button>
         </div>
         
-        <div class="notice-banner" style="margin-bottom: 20px;">
-            <i class="fa-solid fa-circle-info"></i> 외부 사이트의 실시간 랭킹 데이터를 가져옵니다. 
-            <button onclick="loadPetRankings()" style="margin-left: 10px; padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--accent-blue); color: #fff;">
-                <i class="fa-solid fa-rotate-right"></i> 랭킹 데이터 불러오기
-            </button>
-        </div>
+        <!-- 랭킹 안내 배너 -->
+<div class="notice-banner" style="margin-bottom: 15px; text-align: center;">
+    <i class="fa-solid fa-circle-info"></i> 외부 사이트의 실시간 랭킹 데이터를 가져옵니다. 
+</div>
 
-        <!-- 랭킹 표가 생성될 공간 -->
-        <div id="ranking-container" style="padding: 10px;">
+<!-- 검색창 및 데이터 불러오기 버튼 일체형 배치 (중앙 정렬) -->
+<div class="filter-row" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; padding: 0 10px; width: 100%; box-sizing: border-box;">
+    
+    <input type="text" id="rankingSearch" placeholder="페트 이름 검색 (예: 모가로스)" onkeyup="filterRankings()" style="width: 300px; height: 42px; padding: 0 15px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border); background: var(--inner-card); color: var(--text-main); box-sizing: border-box;">
+    
+    <button onclick="loadPetRankings()" style="height: 42px; padding: 0 20px; font-size: 13px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: var(--accent-blue); color: #fff; white-space: nowrap; font-weight: bold; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <i class="fa-solid fa-rotate-right"></i> 랭킹 데이터 불러오기
+    </button>
+
+</div>
+
+<!-- 랭킹 표가 생성될 공간 -->
+<div id="ranking-container" style="padding: 10px;">
             <div style="text-align: center; color: var(--text-main); font-size: 14px; padding: 20px;">
                 상단의 '랭킹 데이터 불러오기' 버튼을 클릭해주세요.
             </div>
@@ -17330,16 +17339,19 @@ function loadPetRankings() {
     container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 데이터를 불러오는 중입니다...</div>';
 
     const targetUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+    // 프록시 서버 주소 변경 적용
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
     fetch(proxyUrl)
       .then(response => {
         if (!response.ok) throw new Error('네트워크 응답 에러');
-        return response.json();
+        // json() 대신 text()로 원본 HTML 텍스트 반환
+        return response.text();
       })
-      .then(data => {
+      .then(html => {
         const parser = new DOMParser();
-        const doc = parser.parseFromString(data.contents, 'text/html');
+        // data.contents 대신 반환받은 html 텍스트를 직접 파싱
+        const doc = parser.parseFromString(html, 'text/html');
         
         container.innerHTML = ''; // 로딩 텍스트 제거
 
@@ -17351,13 +17363,18 @@ function loadPetRankings() {
           const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
 
           if(rankingRows.length > 0) {
+            // 검색을 위한 묶음(Wrapper) 컨테이너 생성
+            const wrapper = document.createElement('div');
+            wrapper.className = 'ranking-item';
+            wrapper.setAttribute('data-pet-name', petName);
+
             // 펫 이름 제목
             const title = document.createElement('h4');
             title.innerHTML = `<i class="fa-solid fa-caret-right"></i> [${petName}] TOP 5`;
             title.style.color = 'var(--accent-blue)';
             title.style.marginTop = '20px';
             title.style.marginBottom = '10px';
-            container.appendChild(title);
+            wrapper.appendChild(title);
 
             // 테이블 구조 생성
             const table = document.createElement('table');
@@ -17367,7 +17384,7 @@ function loadPetRankings() {
             table.style.fontSize = '13px';
             table.style.color = 'var(--text-main)';
 
-            // 테이블 헤더 (웹페이지 디자인 반영)
+            // 테이블 헤더
             const thead = document.createElement('thead');
             thead.innerHTML = `
               <tr style="background: rgba(83, 155, 245, 0.1); border-bottom: 2px solid var(--accent-blue);">
@@ -17404,18 +17421,37 @@ function loadPetRankings() {
             });
 
             table.appendChild(tbody);
-            container.appendChild(table);
+            wrapper.appendChild(table);
+            
+            // 완성된 wrapper를 최종 컨테이너에 삽입
+            container.appendChild(wrapper);
           }
         });
 
         if (container.innerHTML === '') {
-            container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">랭킹 데이터를 찾을 수 없습니다. 원본 사이트 구조가 변경되었을 수 있습니다.</div>';
+            container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">랭킹 데이터를 찾을 수 없습니다.</div>';
         }
       })
       .catch(error => {
         container.innerHTML = `<div style="text-align:center; padding: 20px; color: red;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}</div>`;
-        console.error('랭킹 데이터 페칭 오류:', error);
       });
+}
+
+// 랭킹 검색 필터링 함수
+function filterRankings() {
+    const searchInput = document.getElementById('rankingSearch').value.toLowerCase();
+    const rankingItems = document.querySelectorAll('.ranking-item');
+
+    rankingItems.forEach(item => {
+        const petName = item.getAttribute('data-pet-name').toLowerCase();
+        
+        // 입력한 검색어가 페트 이름에 포함되어 있으면 표시, 아니면 숨김 처리
+        if (petName.includes(searchInput)) {
+            item.style.display = ''; 
+        } else {
+            item.style.display = 'none'; 
+        }
+    });
 }
 /* ==========================================================
                   페트랭킹 데이터 불러오기 끝
