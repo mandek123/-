@@ -2484,20 +2484,24 @@ button[onclick="resetGame()"]:hover {
             <a href="javascript:void(0);" class="nav-item" id="menu-notice" onclick="showPage('page-notice')">📢 공지사항</a>
 
             <div class="dropdown">
-                <a href="javascript:void(0);" class="nav-item" id="menu-etc">
-                    ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
-                </a>            
-                <a href="javascript:void(0);" onclick="showPage('page-ranking'); closeDropdown();" style="display: flex; align-items: center;">
-    <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
-    <span>페트 랭킹 보기</span>
-    <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-</a>
+    <a href="javascript:void(0);" class="nav-item" id="menu-etc">
+        ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
+    </a>
+    
+    <!-- ✅ 누락되었던 여는 태그 추가 -->
+    <div class="dropdown-content"> 
+        
+        <a href="javascript:void(0);" onclick="showPage('page-ranking'); closeDropdown();" style="display: flex; align-items: center;">
+            <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
+            <span>페트 랭킹 보기</span>
+            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
+        </a>
 
-                    <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
-                        <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
-                        <span>투기장 (PvP)</span>
-                        <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
-                    </a>
+        <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
+            <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
+            <span>투기장 (PvP)</span>
+            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">HOT</span>
+        </a>
 
                     <a href="javascript:void(0);" onclick="showPage('page-weekly-championship'); closeDropdown();" style="display: flex; align-items: center;">
                         <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
