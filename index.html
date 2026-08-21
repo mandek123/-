@@ -2486,8 +2486,13 @@ button[onclick="resetGame()"]:hover {
             <div class="dropdown">
                 <a href="javascript:void(0);" class="nav-item" id="menu-etc">
                     ⚙️ 기타 <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
-                </a>
+                </a>            
                 <div class="dropdown-content">
+                    <a href="javascript:void(0);" onclick="showPage('page-ranking'); closeDropdown();" style="display: flex; align-items: center;">
+                    <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
+                    <span>페트 랭킹 보기</span>
+                    </a>
+
                     <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
                         <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
                         <span>투기장 (PvP)</span>
@@ -3149,6 +3154,32 @@ button[onclick="resetGame()"]:hover {
             </div>
         </div>
     </div>
+<!-- 페트 랭킹 페이지 컨테이너 -->
+<div class="main-container" id="page-ranking" style="display: none;">
+    <div class="card" style="grid-column: span 2;">
+        <div class="card-header" style="justify-content: space-between;">
+            <span><i class="fa-solid fa-trophy"></i> 페트 랭킹 (TOP 5)</span>
+            <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="showPage('page-ency')">
+                <i class="fa-solid fa-arrow-left"></i> 도감으로 돌아가기
+            </button>
+        </div>
+        
+        <div class="notice-banner" style="margin-bottom: 20px;">
+            <i class="fa-solid fa-circle-info"></i> 외부 사이트의 실시간 랭킹 데이터를 가져옵니다. 
+            <button onclick="loadPetRankings()" style="margin-left: 10px; padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--accent-blue); color: #fff;">
+                <i class="fa-solid fa-rotate-right"></i> 랭킹 데이터 불러오기
+            </button>
+        </div>
+
+        <!-- 랭킹 표가 생성될 공간 -->
+        <div id="ranking-container" style="padding: 10px;">
+            <div style="text-align: center; color: var(--text-main); font-size: 14px; padding: 20px;">
+                상단의 '랭킹 데이터 불러오기' 버튼을 클릭해주세요.
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 페트 랭킹 페이지 컨테이너 끝 -->
 
     <div class="main-container" id="page-init-sim">
         <div class="card" style="grid-column: span 2;">
@@ -17289,6 +17320,105 @@ function sv_claimBossReward() {
 }
 /* ==========================================================
                   [만득서바이벌] JS 코드 끝
+========================================================== */
+
+/* ==========================================================
+                  페트랭킹 데이터 불러오기 시작
+========================================================== */
+function loadPetRankings() {
+    const container = document.getElementById('ranking-container');
+    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 데이터를 불러오는 중입니다...</div>';
+
+    const targetUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+
+    fetch(proxyUrl)
+      .then(response => {
+        if (!response.ok) throw new Error('네트워크 응답 에러');
+        return response.json();
+      })
+      .then(data => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+        
+        container.innerHTML = ''; // 로딩 텍스트 제거
+
+        const petItems = doc.querySelectorAll('.pet-item');
+        
+        petItems.forEach(pet => {
+          const petNameNode = pet.querySelector('.pet-name');
+          const petName = petNameNode ? petNameNode.textContent.trim() : '이름 없음';
+          const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
+
+          if(rankingRows.length > 0) {
+            // 펫 이름 제목
+            const title = document.createElement('h4');
+            title.innerHTML = `<i class="fa-solid fa-caret-right"></i> [${petName}] TOP 5`;
+            title.style.color = 'var(--accent-blue)';
+            title.style.marginTop = '20px';
+            title.style.marginBottom = '10px';
+            container.appendChild(title);
+
+            // 테이블 구조 생성
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.marginBottom = '20px';
+            table.style.fontSize = '13px';
+            table.style.color = 'var(--text-main)';
+
+            // 테이블 헤더 (웹페이지 디자인 반영)
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+              <tr style="background: rgba(83, 155, 245, 0.1); border-bottom: 2px solid var(--accent-blue);">
+                <th style="padding: 10px; border: 1px solid var(--border);">#</th>
+                <th style="padding: 10px; border: 1px solid var(--border);">닉네임</th>
+                <th style="padding: 10px; border: 1px solid var(--border);">Lv</th>
+                <th style="padding: 10px; border: 1px solid var(--border);">내구력</th>
+                <th style="padding: 10px; border: 1px solid var(--border);">공격력</th>
+                <th style="padding: 10px; border: 1px solid var(--border);">방어력</th>
+                <th style="padding: 10px; border: 1px solid var(--border);">순발력</th>
+                <th style="padding: 10px; border: 1px solid var(--border);">점수</th>
+              </tr>
+            `;
+            table.appendChild(thead);
+
+            // 테이블 본문 데이터 삽입
+            const tbody = document.createElement('tbody');
+            rankingRows.forEach(row => {
+              const cols = row.querySelectorAll('td');
+              if(cols.length === 8) {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid var(--border)';
+                
+                cols.forEach(col => {
+                  const td = document.createElement('td');
+                  td.textContent = col.textContent.trim();
+                  td.style.textAlign = 'center'; 
+                  td.style.padding = '8px';
+                  tr.appendChild(td);
+                });
+                
+                tbody.appendChild(tr);
+              }
+            });
+
+            table.appendChild(tbody);
+            container.appendChild(table);
+          }
+        });
+
+        if (container.innerHTML === '') {
+            container.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">랭킹 데이터를 찾을 수 없습니다. 원본 사이트 구조가 변경되었을 수 있습니다.</div>';
+        }
+      })
+      .catch(error => {
+        container.innerHTML = `<div style="text-align:center; padding: 20px; color: red;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}</div>`;
+        console.error('랭킹 데이터 페칭 오류:', error);
+      });
+}
+/* ==========================================================
+                  페트랭킹 데이터 불러오기 끝
 ========================================================== */
 </script>
 
