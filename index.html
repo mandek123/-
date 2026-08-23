@@ -17355,9 +17355,12 @@ function sv_claimBossReward() {
                   페트랭킹 원본 사이트 직접 검색 (전체 페이지) 시작
 ========================================================== */
 async function loadPetRankings() {
+    // 💡 시간 지연 함수 (다른 코드와 충돌하지 않도록 함수 내부로 이동)
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
     const searchInput = document.getElementById('rankingSearch').value.trim();
     const container = document.getElementById('ranking-container');
-    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 전체 페이지 데이터를 수집하고 있습니다. 잠시만 기다려주세요...</div>';
+    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 랭킹 데이터를 수집하고 있습니다. 잠시만 기다려주세요...</div>';
 
     let baseUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
     if (searchInput !== '') {
@@ -17368,15 +17371,40 @@ async function loadPetRankings() {
     let hasNextPage = true;
     let resultElements = []; 
 
+    // 💡 3중 프록시 폴백(Fallback) 시스템 - 하나가 막히면 다음 서버로 자동 우회
+    const proxyServers = [
+        'https://api.allorigins.win/raw?url=',
+        'https://corsproxy.io/?',
+        'https://api.codetabs.com/v1/proxy?quest='
+    ];
+
     try {
         while (hasNextPage && currentPage <= 10) {
             const targetUrl = baseUrl + `&page=${currentPage}`;
             const noCacheUrl = targetUrl + '&_t=' + Date.now();
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`;
+            const encodedUrl = encodeURIComponent(noCacheUrl);
+            
+            let html = null;
+            let fetchSuccess = false;
 
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error(`네트워크 응답 에러 (페이지 ${currentPage})`);
-            const html = await response.text();
+            // 💡 등록된 3개의 프록시 서버를 돌아가면서 접속 시도
+            for (let proxy of proxyServers) {
+                try {
+                    const response = await fetch(proxy + encodedUrl);
+                    if (response.ok) {
+                        html = await response.text();
+                        fetchSuccess = true;
+                        break; // 성공하면 반복문 즉시 탈출
+                    }
+                } catch (e) {
+                    console.warn(`[프록시 실패] ${proxy} 서버 응답 없음. 다음 서버로 재시도합니다.`);
+                }
+            }
+
+            // 3개의 프록시가 모두 막혔을 경우 에러 처리
+            if (!fetchSuccess || !html) {
+                throw new Error(`모든 우회 서버가 차단되었거나 응답이 없습니다. (페이지 ${currentPage})`);
+            }
             
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
@@ -17405,7 +17433,7 @@ async function loadPetRankings() {
                     }
                 }
 
-                // 수정된 부분: 초기치/성장치 데이터 정상 추출 (td 기준 4개)
+                // 초기치/성장치 데이터 정상 추출
                 let initialStats = null;
                 let growthStats = null;
                 const statRows = pet.querySelectorAll('.pet-stats tbody tr');
@@ -17497,7 +17525,6 @@ async function loadPetRankings() {
                           let originalText = col.textContent.trim();
                           let innerHTML = originalText;
 
-                          // 스탯 열 오차 연산 및 색상 지정 로직
                           if (initialStats && growthStats && index >= 3 && index <= 6) {
                               const level = parseInt(cols[2].textContent);
                               
@@ -17546,6 +17573,8 @@ async function loadPetRankings() {
             const nextLink = doc.querySelector(`a[href*="page=${currentPage + 1}"]`);
             if (nextLink) {
                 currentPage++; 
+                // 💡 서버 과부하 및 차단을 막기 위해 0.8초 대기 (500ms -> 800ms 로 늘려 더 안전하게)
+                await delay(800); 
             } else {
                 hasNextPage = false; 
             }
@@ -17560,12 +17589,13 @@ async function loadPetRankings() {
         }
 
     } catch (error) {
-        container.innerHTML = `<div style="text-align:center; padding: 20px; color: red;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}</div>`;
+        container.innerHTML = `<div style="text-align:center; padding: 20px; color: #f85149;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}<br><span style="font-size:12px; color:#8b949e;">(원본 서버의 접속 지연 또는 프록시 차단일 수 있습니다. 1~2분 뒤 다시 시도해주세요.)</span></div>`;
     }
 }
 /* ==========================================================
                   페트랭킹 원본 사이트 직접 검색 (전체 페이지) 끝
 ========================================================== */
+
 </script>
 
 <div id="sRankPopup">
