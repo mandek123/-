@@ -17372,7 +17372,7 @@ async function loadPetRankings() {
         while (hasNextPage && currentPage <= 10) {
             const targetUrl = baseUrl + `&page=${currentPage}`;
             const noCacheUrl = targetUrl + '&_t=' + Date.now();
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`;
 
             const response = await fetch(proxyUrl);
             if (!response.ok) throw new Error(`네트워크 응답 에러 (페이지 ${currentPage})`);
