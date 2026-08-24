@@ -17352,12 +17352,9 @@ function sv_claimBossReward() {
 ========================================================== */
 
 /* ==========================================================
-                  페트랭킹 원본 사이트 직접 검색 (전체 페이지) 시작
+                  페트랭킹 원본 사이트 병렬 고속 검색 시작
 ========================================================== */
 async function loadPetRankings() {
-    // 💡 시간 지연 함수 (다른 코드와 충돌하지 않도록 함수 내부로 이동)
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
     const searchInput = document.getElementById('rankingSearch').value.trim();
     const container = document.getElementById('ranking-container');
     container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 랭킹 데이터를 수집하고 있습니다. 잠시만 기다려주세요...</div>';
@@ -17367,57 +17364,76 @@ async function loadPetRankings() {
         baseUrl += `&kw=${encodeURIComponent(searchInput)}`;
     }
 
-    let currentPage = 1;
-    let hasNextPage = true;
     let resultElements = []; 
 
-    // 💡 3중 프록시 폴백(Fallback) 시스템 - 하나가 막히면 다음 서버로 자동 우회
-    const proxyServers = [
+    // 💡 3중 프록시 폴백 시스템
+    const proxies = [
         'https://api.allorigins.win/raw?url=',
         'https://corsproxy.io/?',
         'https://api.codetabs.com/v1/proxy?quest='
     ];
 
+    // 페이지 데이터를 가져오는 내부 함수
+    async function fetchHtml(url) {
+        const noCacheUrl = url + '&_t=' + Date.now();
+        const encodedUrl = encodeURIComponent(noCacheUrl);
+        for (let proxy of proxies) {
+            try {
+                const response = await fetch(proxy + encodedUrl);
+                if (response.ok) return await response.text();
+            } catch (e) {
+                // 막히면 다음 프록시로 넘어감
+            }
+        }
+        throw new Error("우회 서버 응답 없음");
+    }
+
     try {
-        while (hasNextPage && currentPage <= 10) {
-            const targetUrl = baseUrl + `&page=${currentPage}`;
-            const noCacheUrl = targetUrl + '&_t=' + Date.now();
-            const encodedUrl = encodeURIComponent(noCacheUrl);
-            
-            let html = null;
-            let fetchSuccess = false;
+        // 1. 첫 번째 페이지 먼저 로드
+        const html1 = await fetchHtml(baseUrl + '&page=1');
+        const parser = new DOMParser();
+        const doc1 = parser.parseFromString(html1, 'text/html');
 
-            // 💡 등록된 3개의 프록시 서버를 돌아가면서 접속 시도
-            for (let proxy of proxyServers) {
-                try {
-                    const response = await fetch(proxy + encodedUrl);
-                    if (response.ok) {
-                        html = await response.text();
-                        fetchSuccess = true;
-                        break; // 성공하면 반복문 즉시 탈출
-                    }
-                } catch (e) {
-                    console.warn(`[프록시 실패] ${proxy} 서버 응답 없음. 다음 서버로 재시도합니다.`);
-                }
+        // 2. 전체 페이지 수 파악 (빠른 검색을 위해 최대 4페이지만 허용)
+        let maxPage = 1;
+        const pageLinks = doc1.querySelectorAll('a[href*="page="]');
+        pageLinks.forEach(link => {
+            const match = link.href.match(/page=(\d+)/);
+            if (match) {
+                const pageNum = parseInt(match[1]);
+                if (pageNum > maxPage) maxPage = pageNum;
             }
+        });
+        if (maxPage > 4) maxPage = 4; // 원하는 페트는 99% 확률로 1~3페이지 내에 존재함
 
-            // 3개의 프록시가 모두 막혔을 경우 에러 처리
-            if (!fetchSuccess || !html) {
-                throw new Error(`모든 우회 서버가 차단되었거나 응답이 없습니다. (페이지 ${currentPage})`);
+        // 3. 2페이지 이상일 경우 '병렬(Parallel)' 로드하여 속도 극대화
+        let allDocs = [doc1];
+        if (maxPage > 1) {
+            const fetchPromises = [];
+            for (let p = 2; p <= maxPage; p++) {
+                fetchPromises.push(fetchHtml(baseUrl + `&page=${p}`));
             }
-            
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
+            // Promise.all로 나머지 페이지를 1초 만에 한 번에 다 가져옴
+            const htmlResults = await Promise.all(fetchPromises);
+            htmlResults.forEach(html => {
+                allDocs.push(parser.parseFromString(html, 'text/html'));
+            });
+        }
+
+        // 4. 수집된 모든 페이지 데이터 추출
+        allDocs.forEach(doc => {
             const petItems = doc.querySelectorAll('.pet-item');
-            if (petItems.length === 0) break; 
-
             petItems.forEach(pet => {
                 const petNameNode = pet.querySelector('.pet-name');
                 let petName = '이름 없음';
                 if (petNameNode) {
                     const cleanText = petNameNode.textContent.replace(/\s+/g, ' ').trim();
                     petName = cleanText.split(' ')[0];
+                }
+
+                // 💡 검색어와 페트 이름이 완전히 일치하지 않으면 즉시 패스 (속도 최적화 핵심)
+                if (searchInput !== '' && petName !== searchInput) {
+                    return; 
                 }
 
                 const imgNode = pet.querySelector('.pet-thumb img');
@@ -17433,7 +17449,6 @@ async function loadPetRankings() {
                     }
                 }
 
-                // 초기치/성장치 데이터 정상 추출
                 let initialStats = null;
                 let growthStats = null;
                 const statRows = pet.querySelectorAll('.pet-stats tbody tr');
@@ -17569,16 +17584,7 @@ async function loadPetRankings() {
                     resultElements.push(wrapper);
                   }
             });
-
-            const nextLink = doc.querySelector(`a[href*="page=${currentPage + 1}"]`);
-            if (nextLink) {
-                currentPage++; 
-                // 💡 서버 과부하 및 차단을 막기 위해 0.8초 대기 (500ms -> 800ms 로 늘려 더 안전하게)
-                await delay(800); 
-            } else {
-                hasNextPage = false; 
-            }
-        }
+        });
 
         container.innerHTML = ''; 
         
@@ -17589,11 +17595,11 @@ async function loadPetRankings() {
         }
 
     } catch (error) {
-        container.innerHTML = `<div style="text-align:center; padding: 20px; color: #f85149;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}<br><span style="font-size:12px; color:#8b949e;">(원본 서버의 접속 지연 또는 프록시 차단일 수 있습니다. 1~2분 뒤 다시 시도해주세요.)</span></div>`;
+        container.innerHTML = `<div style="text-align:center; padding: 20px; color: #f85149;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}</div>`;
     }
 }
 /* ==========================================================
-                  페트랭킹 원본 사이트 직접 검색 (전체 페이지) 끝
+                  페트랭킹 원본 사이트 병렬 고속 검색 끝
 ========================================================== */
 
 </script>
