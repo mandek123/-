@@ -2491,12 +2491,6 @@ button[onclick="resetGame()"]:hover {
     <!-- ✅ 누락되었던 여는 태그 추가 -->
     <div class="dropdown-content"> 
         
-        <a href="javascript:void(0);" onclick="showPage('page-ranking'); closeDropdown();" style="display: flex; align-items: center;">
-            <i class="fa-solid fa-trophy" style="color: #ffcc00; width: 18px;"></i> 
-            <span>페트 랭킹 보기</span>
-            <span style="background: #f85149; color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; display: inline-block;">NEW</span>
-        </a>
-
         <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
             <i class="fa-solid fa-khanda" style="color: #ff4d4d; width: 18px;"></i> 
             <span>투기장 (PvP)</span>
@@ -3158,41 +3152,6 @@ button[onclick="resetGame()"]:hover {
             </div>
         </div>
     </div>
-<!-- 페트 랭킹 페이지 컨테이너 -->
-<div class="main-container" id="page-ranking">
-    <div class="card" style="grid-column: span 2;">
-        <div class="card-header" style="justify-content: space-between;">
-            <span><i class="fa-solid fa-trophy"></i> 페트 랭킹 (TOP 5)</span>
-            <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="showPage('page-ency')">
-                <i class="fa-solid fa-arrow-left"></i> 도감으로 돌아가기
-            </button>
-        </div>
-        
-        <!-- 랭킹 안내 배너 -->
-<div class="notice-banner" style="margin-bottom: 15px; text-align: center;">
-    <i class="fa-solid fa-circle-info"></i> 외부 사이트의 실시간 랭킹 데이터를 가져옵니다. 
-</div>
-
-<!-- 검색창 및 데이터 불러오기 버튼 일체형 배치 (중앙 정렬) -->
-<div class="filter-row" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; padding: 0 10px; width: 100%; box-sizing: border-box;">
-    
-    <input type="text" id="rankingSearch" placeholder="페트 이름 검색 (예: 모가로스 후 엔터)" onkeypress="if(event.keyCode===13) loadPetRankings()" style="width: 300px; height: 42px; padding: 0 15px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border); background: var(--inner-card); color: var(--text-main); box-sizing: border-box;">
-    
-    <button onclick="loadPetRankings()" style="height: 42px; padding: 0 20px; font-size: 13px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: var(--accent-blue); color: #fff; white-space: nowrap; font-weight: bold; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 6px;">
-        <i class="fa-solid fa-magnifying-glass"></i> 랭킹 데이터 검색
-    </button>
-
-</div>
-
-<!-- 랭킹 표가 생성될 공간 -->
-<div id="ranking-container" style="padding: 10px;">
-            <div style="text-align: center; color: var(--text-main); font-size: 14px; padding: 20px;">
-                상단의 '랭킹 데이터 불러오기' 버튼을 클릭해주세요.
-            </div>
-        </div>
-    </div>
-</div>
-<!-- 페트 랭킹 페이지 컨테이너 끝 -->
 
     <div class="main-container" id="page-init-sim">
         <div class="card" style="grid-column: span 2;">
@@ -5899,6 +5858,17 @@ button[onclick="resetGame()"]:hover {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+        id: 48,
+        date: "26년 8월 24일",
+        title: "26년 8월 24일 업데이트 공지사항입니다.",
+        summary: "1. 페트 랭킹 시스템 삭제",
+        content: `
+            <strong>1) 페트랭킹 시스템 기능 삭제</strong>
+            <span>- 웹페이지의 기술적 문제와 외부 사이트의 과부하로 인해 삭제하는게 맞다고 판단하여 삭제하였습니다. </span>
+        `
+    },
+
     {
     id: 47,
     date: "26년 8월 21일",
@@ -17349,257 +17319,6 @@ function sv_claimBossReward() {
 }
 /* ==========================================================
                   [만득서바이벌] JS 코드 끝
-========================================================== */
-
-/* ==========================================================
-                  페트랭킹 원본 사이트 병렬 고속 검색 시작
-========================================================== */
-async function loadPetRankings() {
-    const searchInput = document.getElementById('rankingSearch').value.trim();
-    const container = document.getElementById('ranking-container');
-    container.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> 랭킹 데이터를 수집하고 있습니다. 잠시만 기다려주세요...</div>';
-
-    let baseUrl = 'https://saworld.net/home/bbs/board.php?bo_table=info_pet';
-    if (searchInput !== '') {
-        baseUrl += `&kw=${encodeURIComponent(searchInput)}`;
-    }
-
-    let resultElements = []; 
-
-    // 💡 3중 프록시 폴백 시스템
-    const proxies = [
-        'https://api.allorigins.win/raw?url=',
-        'https://corsproxy.io/?',
-        'https://api.codetabs.com/v1/proxy?quest='
-    ];
-
-    // 페이지 데이터를 가져오는 내부 함수
-    async function fetchHtml(url) {
-        const noCacheUrl = url + '&_t=' + Date.now();
-        const encodedUrl = encodeURIComponent(noCacheUrl);
-        for (let proxy of proxies) {
-            try {
-                const response = await fetch(proxy + encodedUrl);
-                if (response.ok) return await response.text();
-            } catch (e) {
-                // 막히면 다음 프록시로 넘어감
-            }
-        }
-        throw new Error("우회 서버 응답 없음");
-    }
-
-    try {
-        // 1. 첫 번째 페이지 먼저 로드
-        const html1 = await fetchHtml(baseUrl + '&page=1');
-        const parser = new DOMParser();
-        const doc1 = parser.parseFromString(html1, 'text/html');
-
-        // 2. 전체 페이지 수 파악 (빠른 검색을 위해 최대 4페이지만 허용)
-        let maxPage = 1;
-        const pageLinks = doc1.querySelectorAll('a[href*="page="]');
-        pageLinks.forEach(link => {
-            const match = link.href.match(/page=(\d+)/);
-            if (match) {
-                const pageNum = parseInt(match[1]);
-                if (pageNum > maxPage) maxPage = pageNum;
-            }
-        });
-        if (maxPage > 4) maxPage = 4; // 원하는 페트는 99% 확률로 1~3페이지 내에 존재함
-
-        // 3. 2페이지 이상일 경우 '병렬(Parallel)' 로드하여 속도 극대화
-        let allDocs = [doc1];
-        if (maxPage > 1) {
-            const fetchPromises = [];
-            for (let p = 2; p <= maxPage; p++) {
-                fetchPromises.push(fetchHtml(baseUrl + `&page=${p}`));
-            }
-            // Promise.all로 나머지 페이지를 1초 만에 한 번에 다 가져옴
-            const htmlResults = await Promise.all(fetchPromises);
-            htmlResults.forEach(html => {
-                allDocs.push(parser.parseFromString(html, 'text/html'));
-            });
-        }
-
-        // 4. 수집된 모든 페이지 데이터 추출
-        allDocs.forEach(doc => {
-            const petItems = doc.querySelectorAll('.pet-item');
-            petItems.forEach(pet => {
-                const petNameNode = pet.querySelector('.pet-name');
-                let petName = '이름 없음';
-                if (petNameNode) {
-                    const cleanText = petNameNode.textContent.replace(/\s+/g, ' ').trim();
-                    petName = cleanText.split(' ')[0];
-                }
-
-                // 💡 검색어와 페트 이름이 완전히 일치하지 않으면 즉시 패스 (속도 최적화 핵심)
-                if (searchInput !== '' && petName !== searchInput) {
-                    return; 
-                }
-
-                const imgNode = pet.querySelector('.pet-thumb img');
-                let imgSrc = '';
-                if (imgNode) {
-                    let rawSrc = imgNode.getAttribute('src');
-                    if (rawSrc) {
-                        try {
-                            imgSrc = new URL(rawSrc, 'https://saworld.net/home/bbs/').href;
-                        } catch(e) {
-                            imgSrc = rawSrc;
-                        }
-                    }
-                }
-
-                let initialStats = null;
-                let growthStats = null;
-                const statRows = pet.querySelectorAll('.pet-stats tbody tr');
-                
-                if (statRows.length >= 2) {
-                    const initialCols = statRows[0].querySelectorAll('td');
-                    const growthCols = statRows[1].querySelectorAll('td');
-                    
-                    if (initialCols.length >= 4 && growthCols.length >= 4) {
-                        initialStats = {
-                            hp: parseFloat(initialCols[0].textContent) || 0,
-                            atk: parseFloat(initialCols[1].textContent) || 0,
-                            def: parseFloat(initialCols[2].textContent) || 0,
-                            spd: parseFloat(initialCols[3].textContent) || 0
-                        };
-                        growthStats = {
-                            hp: parseFloat(growthCols[0].textContent) || 0,
-                            atk: parseFloat(growthCols[1].textContent) || 0,
-                            def: parseFloat(growthCols[2].textContent) || 0,
-                            spd: parseFloat(growthCols[3].textContent) || 0
-                        };
-                    }
-                }
-
-                const rankingRows = pet.querySelectorAll('.rank-table tbody tr');
-
-                if(rankingRows.length > 0) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'ranking-item';
-
-                    const headerContainer = document.createElement('div');
-                    headerContainer.style.display = 'flex';
-                    headerContainer.style.alignItems = 'center';
-                    headerContainer.style.gap = '15px';
-                    headerContainer.style.marginTop = '25px';
-                    headerContainer.style.marginBottom = '15px';
-
-                    if (imgSrc) {
-                        const imgEl = document.createElement('img');
-                        imgEl.src = imgSrc;
-                        imgEl.style.width = '60px';
-                        imgEl.style.height = '60px';
-                        imgEl.style.objectFit = 'contain';
-                        imgEl.style.borderRadius = '8px';
-                        imgEl.style.border = '1px solid var(--border)';
-                        imgEl.style.background = 'var(--inner-card)';
-                        headerContainer.appendChild(imgEl);
-                    }
-
-                    const title = document.createElement('h4');
-                    title.innerHTML = `<i class="fa-solid fa-caret-right"></i> [${petName}] TOP 5`;
-                    title.style.color = 'var(--accent-blue)';
-                    title.style.margin = '0';
-                    
-                    headerContainer.appendChild(title);
-                    wrapper.appendChild(headerContainer);
-
-                    const table = document.createElement('table');
-                    table.style.width = '100%';
-                    table.style.borderCollapse = 'collapse';
-                    table.style.marginBottom = '20px';
-                    table.style.fontSize = '13px';
-                    table.style.color = 'var(--text-main)';
-
-                    const thead = document.createElement('thead');
-                    thead.innerHTML = `
-                      <tr style="background: rgba(83, 155, 245, 0.1); border-bottom: 2px solid var(--accent-blue);">
-                        <th style="padding: 10px; border: 1px solid var(--border);">#</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">닉네임</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">Lv</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">내구력</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">공격력</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">방어력</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">순발력</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">점수</th>
-                      </tr>
-                    `;
-                    table.appendChild(thead);
-
-                    const tbody = document.createElement('tbody');
-                    rankingRows.forEach(row => {
-                      const cols = row.querySelectorAll('td');
-                      if(cols.length === 8) {
-                        const tr = document.createElement('tr');
-                        tr.style.borderBottom = '1px solid var(--border)';
-                        
-                        cols.forEach((col, index) => {
-                          const td = document.createElement('td');
-                          let originalText = col.textContent.trim();
-                          let innerHTML = originalText;
-
-                          if (initialStats && growthStats && index >= 3 && index <= 6) {
-                              const level = parseInt(cols[2].textContent);
-                              
-                              if (!isNaN(level)) {
-                                  const statKeys = ['hp', 'atk', 'def', 'spd'];
-                                  const key = statKeys[index - 3];
-                                  
-                                  const cleanOriginal = originalText.replace(/,/g, '');
-                                  const actualValue = parseFloat(cleanOriginal.split(' ')[0] || cleanOriginal);
-                                  
-                                  const stdValue = initialStats[key] + (growthStats[key] * (level - 1));
-                                  const diff = actualValue - stdValue;
-                                  const diffRounded = parseFloat(diff.toFixed(2));
-
-                                  let diffHtml = '';
-                                  if (diffRounded > 0) {
-                                      diffHtml = `<span style="color: #539bf5; font-size: 11px; font-weight: bold;">(+${diffRounded})</span>`;
-                                  } else if (diffRounded < 0) {
-                                      diffHtml = `<span style="color: #f85149; font-size: 11px; font-weight: bold;">(${diffRounded})</span>`;
-                                  } else {
-                                      diffHtml = `<span style="color: #8b949e; font-size: 11px;">(0)</span>`;
-                                  }
-                                  
-                                  innerHTML = `${originalText}<br>${diffHtml}`;
-                              }
-                          }
-
-                          td.innerHTML = innerHTML;
-                          td.style.textAlign = 'center'; 
-                          td.style.padding = '8px';
-                          td.style.verticalAlign = 'middle';
-                          tr.appendChild(td);
-                        });
-                        
-                        tbody.appendChild(tr);
-                      }
-                    });
-
-                    table.appendChild(tbody);
-                    wrapper.appendChild(table);
-                    
-                    resultElements.push(wrapper);
-                  }
-            });
-        });
-
-        container.innerHTML = ''; 
-        
-        if (resultElements.length > 0) {
-            resultElements.forEach(el => container.appendChild(el));
-        } else {
-            container.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--accent-orange);">검색된 랭킹 데이터가 없습니다. 페트 이름을 정확히 입력해주세요.</div>';
-        }
-
-    } catch (error) {
-        container.innerHTML = `<div style="text-align:center; padding: 20px; color: #f85149;">데이터를 불러오는 중 오류가 발생했습니다.<br>에러 내용: ${error.message}</div>`;
-    }
-}
-/* ==========================================================
-                  페트랭킹 원본 사이트 병렬 고속 검색 끝
 ========================================================== */
 
 </script>
