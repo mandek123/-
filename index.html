@@ -3111,6 +3111,9 @@ button[onclick="resetGame()"]:hover {
                 </div>
             </details>
 
+            <div id="filter-result-count" style="margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #539bf5; display: none; background: rgba(83, 155, 245, 0.1); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.2);">
+            </div>
+
             <div id="ency-list">
             </div>
         </div>
@@ -5859,6 +5862,17 @@ button[onclick="resetGame()"]:hover {
 
 const NOTICE_DATABASE = [
     {
+    id: 49,
+    date: "26년 9월 8일",
+    title: "26년 9월 8일 업데이트 공지사항입니다.",
+    summary: "1. 펫 도감 검색 결과 개수 표시 기능 추가",
+    content: `
+        <strong>1) 펫 도감 검색 결과 개수 표시 기능 추가</strong>
+        <span>- 펫 도감에서 필터 조건 적용 시, 해당 조건에 만족하는 페트의 총 개수(종 수)를 화면에 표시하도록 기능을 업데이트했습니다.</span>
+    `
+    },
+
+    {
         id: 48,
         date: "26년 8월 24일",
         title: "26년 8월 24일 업데이트 공지사항입니다.",
@@ -7149,6 +7163,21 @@ function toggleEncyPetList(listId) {
 
             currentPage = 1;
             
+    const resultCountEl = document.getElementById('filter-result-count');
+    
+    if (isFiltering) {
+        if (resultCountEl) {
+            resultCountEl.style.display = 'block';
+            resultCountEl.innerHTML = `<i class="fa-solid fa-list-check"></i> 검색 결과: 총 <span style="color: #ffffff;">${filtered.length}</span>종의 페트가 발견되었습니다.`;
+        }
+        renderPetsPaginated(filtered);
+    } else {
+        if (resultCountEl) {
+            resultCountEl.style.display = 'none'; // 필터링 조건이 없을 때는 카운트 숨김
+        }
+        renderPetsGrouped(PET_DATABASE);
+    }
+
             if (isFiltering) {
                 renderPetsPaginated(filtered);
             } else {
