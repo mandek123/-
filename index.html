@@ -3124,17 +3124,36 @@ button[onclick="resetGame()"]:hover {
     <div class="main-container" id="page-ency-status">
         <div class="card" style="grid-column: span 2;">
             <div class="card-header" style="justify-content: space-between;">
-                <span><i class="fa-solid fa-square-check"></i> 나의 도감 현황</span>
-                <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="showPage('page-ency')"><i class="fa-solid fa-arrow-left"></i> 도감으로 돌아가기</button>
-            </div>
+    <span><i class="fa-solid fa-square-check"></i> 나의 도감 현황</span>
+    <div style="display: flex; gap: 8px;">
+        <!-- 도감으로 돌아가기 버튼을 먼저 배치 -->
+        <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="showPage('page-ency')">
+            <i class="fa-solid fa-arrow-left"></i> 도감으로 돌아가기
+        </button>
+        
+        <!-- 엑셀로 추출 버튼을 나중에 배치 -->
+        <button class="btn-write" style="background: #2ea043; border: 1px solid rgba(46, 160, 67, 0.4); color: #fff; font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="exportRegisteredPetsToExcel()">
+            <i class="fa-solid fa-file-excel"></i> 엑셀로 추출
+        </button>
+    </div>
+</div>
             
             <div class="notice-banner" style="background: rgba(83, 155, 245, 0.1); border-color: rgba(83, 155, 245, 0.2); color: #539bf5; text-align: left; padding: 12px 15px; font-size: 13.5px; word-break: keep-all;">
     <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i> 펫 도감에서 <strong>[등록]</strong> 체크한 목록을 바탕으로 현재 활성화된 능력치 현황을 보여줍니다. <strong style="color: #79c0ff;"><i class="fa-solid fa-hand-pointer" style="margin-left: 4px; margin-right: 2px;"></i>각 도감 카드를 클릭</strong>하여 등록된 페트들을 확인해 보세요.
 </div>
-            <div id="encyProgress" style="font-size: 14px; font-weight: bold; color: var(--accent-blue); margin-bottom: 15px; background: rgba(83, 155, 245, 0.1); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.2); display: inline-block;">
-                나의 도감 달성률 불러오는 중...
-            </div>
-        <div id="ency-status-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;"></div>
+
+<!-- margin-bottom: 20px; 가 추가되었습니다 -->
+<div style="background: rgba(46, 160, 67, 0.1); border-left: 3px solid #2ea043; padding: 8px 10px; border-radius: 4px; color: #adbac7; font-size: 12.5px; margin-top: 10px; margin-bottom: 20px;">
+    <strong style="color: #2ea043;"><i class="fa-solid fa-file-excel" style="margin-right: 4px;"></i> 엑셀 추출 안내:</strong> 
+    다운로드한 파일 실행 시 <span style="color: #ff7b72;">"파일 형식과 확장명이 일치하지 않습니다"</span>라는 경고가 뜰 수 있습니다. 
+    이는 표 서식(색상/테두리) 유지를 위해 발생하는 정상적인 현상이니 <strong>'예'</strong>를 누르고 안심하고 사용하시면 됩니다.
+</div>
+
+<div id="encyProgress" style="font-size: 14px; font-weight: bold; color: var(--accent-blue); margin-bottom: 15px; background: rgba(83, 155, 245, 0.1); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(83, 155, 245, 0.2); display: inline-block;">
+    나의 도감 달성률 불러오는 중...
+</div>
+
+<div id="ency-status-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;"></div>
     </div>
 </div>
 
@@ -5589,7 +5608,6 @@ button[onclick="resetGame()"]:hover {
 { category: "사신(四神)류", name: "비취룡", img: "./images/884.gif", elements: "지8 수2", hp: 61.84, atk: 13.11, def: 8.34, spd: 7.88, ghp: 10.76, gatk: 2.28, gdef: 1.45, gspd: 1.37, passive: "격노", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
 { category: "드래곤류", name: "본드래곤", img: "./images/885.gif", elements: "지5 수5", hp: 59.58, atk: 12.93, def: 7.76, spd: 8.63, ghp: 10.37, gatk: 2.25, gdef: 1.35, gspd: 1.50, passive: "격노", grade: "일반", encyBuff: "레이드 펫 방어력 1% 증가" },
 
-{ category: "미정", name: "만득", img: "./images/MAN1.gif", elements: "미정", hp: 99.99, atk: 99.99, def: 99.99, spd: 99.99, ghp: 99.99, gatk: 99.99, gdef: 99.99, gspd: 99.99, passive: "미정", grade: "미정", encyBuff: "???" },
 
 { category: "모가로스류", name: "푸룡[進]", img: "./images/886.gif", elements: "지2 수8", hp: 60.93, atk: 12.58, def: 7.78, spd: 7.56, ghp: 11.04, gatk: 2.28, gdef: 1.41, gspd: 1.37, passive: "격노", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복", isRideable: true },
 { category: "메이류", name: "토르[還]", img: "./images/887.gif", elements: "수9 화1", hp: 58.81, atk: 13.00, def: 8.16, spd: 6.81, ghp: 10.66, gatk: 2.36, gdef: 1.48, gspd: 1.23, passive: "잔상", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
@@ -5861,6 +5879,20 @@ button[onclick="resetGame()"]:hover {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+    id: 50,
+    date: "26년 9월 9일",
+    title: "26년 9월 9일 업데이트 공지사항입니다.",
+    summary: "1. 나의 도감 현황 엑셀 추출 기능 추가",
+    content: `
+        <strong>1) 나의 도감 현황 엑셀 추출 기능 추가</strong>
+        <span>- '나의 도감 현황' 메뉴에 등록된 페트 목록을 엑셀(.xls) 파일로 다운로드할 수 있는 '엑셀로 추출' 버튼을 추가했습니다.</span>
+        <span>- 엑셀 추출 시 등록된 페트들이 각 도감 능력치(카테고리)별로 그룹화되어 저장됩니다.</span>
+        <strong>※ 데이터 백업 권장 안내</strong>
+        <span>- 만득월드 웹페이지가 향후 언제 사라질지 알 수 없으므로, 필요하신 유저분들은 해당 기능을 이용하여 본인의 도감 데이터를 미리 저장해 두시기를 권장합니다.</span>
+    `
+    },
+
     {
     id: 49,
     date: "26년 9월 8일",
@@ -17349,6 +17381,96 @@ function sv_claimBossReward() {
 /* ==========================================================
                   [만득서바이벌] JS 코드 끝
 ========================================================== */
+
+/* ==========================================================
+   도감 등록 목록 엑셀(XLS) 서식 적용 추출 로직
+   ========================================================== */
+function exportRegisteredPetsToExcel() {
+    const regData = getRegisteredPets();
+    const groupedMap = {};
+    let totalCount = 0;
+
+    // 1. 등록된 페트를 도감능력별로 그룹화
+    PET_DATABASE.forEach(pet => {
+        if (regData[pet.name]) {
+            if (!groupedMap[pet.encyBuff]) {
+                groupedMap[pet.encyBuff] = [];
+            }
+            groupedMap[pet.encyBuff].push(pet.name);
+            totalCount++;
+        }
+    });
+
+    if (totalCount === 0) {
+        alert("도감에 등록된 페트가 없습니다.");
+        return;
+    }
+
+    // 2. 엑셀에서 인식할 수 있는 HTML 테이블 서식 생성 (CSS 스타일 포함)
+    let htmlString = `
+    <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+    <head>
+        <meta charset="utf-8">
+        <style>
+            table { border-collapse: collapse; width: 100%; font-family: 'Malgun Gothic', sans-serif; }
+            th, td { border: 1px solid #cccccc; padding: 8px; }
+            .header-row { background-color: #539bf5; color: #ffffff; font-weight: bold; text-align: center; font-size: 14px; }
+            .sub-header { background-color: #e6f2ff; font-weight: bold; text-align: center; color: #333333; }
+            .data-num { text-align: center; color: #555555; }
+            .data-name { text-align: left; font-weight: bold; color: #222222; }
+            .spacer { border: none; height: 20px; }
+        </style>
+    </head>
+    <body>
+        <table>
+    `;
+
+    // 3. 그룹화된 데이터를 테이블 태그로 조립
+    Object.keys(groupedMap).sort().forEach(buff => {
+        htmlString += `
+            <tr>
+                <td colspan="2" class="header-row">[ ${buff} ]</td>
+            </tr>
+            <tr>
+                <td class="sub-header" style="width: 80px;">연번</td>
+                <td class="sub-header" style="width: 250px;">페트 이름</td>
+            </tr>
+        `;
+        
+        groupedMap[buff].sort().forEach((petName, index) => {
+            htmlString += `
+            <tr>
+                <td class="data-num">${index + 1}</td>
+                <td class="data-name">${petName}</td>
+            </tr>`;
+        });
+        
+        // 항목 간 간격
+        htmlString += `<tr><td colspan="2" class="spacer"></td></tr>`;
+    });
+
+    htmlString += `
+        </table>
+    </body>
+    </html>
+    `;
+
+    // 4. XLS 파일로 다운로드 처리
+    const blob = new Blob([htmlString], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    link.download = `나의_페트도감_${dateStr}.xls`;
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
 
 </script>
 
