@@ -2956,8 +2956,12 @@ button[onclick="resetGame()"]:hover {
         
     <div class="main-container" id="page-ency"> 
     <div class="card" style="grid-column: span 2;">
-        <div class="card-header" style="justify-content: space-between;">
+        <div class="card-header" style="justify-content: space-between; align-items: center;">
             <span><i class="fa-solid fa-book"></i> 펫 도감</span>
+            
+            <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; gap: 6px; align-items: center;" onclick="showPage('page-ency-status')">
+                나의 도감 현황 확인하기 <i class="fa-solid fa-arrow-right"></i>
+            </button>
         </div>
         
         <div class="notice-banner" style="margin-bottom: 20px;">
