@@ -5868,7 +5868,7 @@ const NOTICE_DATABASE = [
         <span>- 만득월드 웹페이지가 향후 언제 사라질지 알 수 없으므로, 필요하신 유저분들은 해당 기능을 이용하여 본인의 도감 데이터를 미리 백업해 두시기를 권장합니다.</span>
     `
     },
-    
+
     {
     id: 50,
     date: "26년 9월 9일",
@@ -17373,30 +17373,17 @@ function sv_claimBossReward() {
 ========================================================== */
 
 /* ==========================================================
-   도감 등록 목록 엑셀(XLS) 서식 및 카테고리별 색상 적용 추출 로직
+   도감 전체 목록 엑셀(XLS) 추출 - 상단 안내문 및 하단 산출 포함
    ========================================================== */
 function exportRegisteredPetsToExcel() {
     const regData = getRegisteredPets();
     const groupedMap = {};
-    let totalCount = 0;
 
-    // 1. 등록된 페트를 도감능력별로 그룹화
     PET_DATABASE.forEach(pet => {
-        if (regData[pet.name]) {
-            if (!groupedMap[pet.encyBuff]) {
-                groupedMap[pet.encyBuff] = [];
-            }
-            groupedMap[pet.encyBuff].push(pet.name);
-            totalCount++;
-        }
+        if (!groupedMap[pet.encyBuff]) groupedMap[pet.encyBuff] = [];
+        groupedMap[pet.encyBuff].push(pet.name);
     });
 
-    if (totalCount === 0) {
-        alert("도감에 등록된 페트가 없습니다.");
-        return;
-    }
-
-    // 2. 엑셀에서 인식할 수 있는 HTML 테이블 서식 생성
     let htmlString = `
     <html xmlns:x="urn:schemas-microsoft-com:office:excel">
     <head>
@@ -17405,58 +17392,86 @@ function exportRegisteredPetsToExcel() {
             table { border-collapse: collapse; width: 100%; font-family: 'Malgun Gothic', sans-serif; }
             th, td { border: 1px solid #cccccc; padding: 8px; }
             .data-num { text-align: center; color: #555555; }
-            .data-name { text-align: left; font-weight: bold; color: #222222; }
+            .data-name { text-align: left; font-weight: bold; }
             .spacer { border: none; height: 20px; }
+            .reg-o { color: #2ea043; font-weight: bold; text-align: center; }
+            .reg-x { color: #cccccc; text-align: center; }
+            .name-o { color: #222222; }
+            .name-x { color: #888888; }
+            .notice-title { background-color: #2c3e50; color: #ffffff; font-weight: bold; text-align: center; font-size: 14px; }
+            .notice-body { background-color: #f8f9fa; color: #333333; text-align: left; font-size: 12px; }
         </style>
     </head>
     <body>
         <table>
+            <!-- 1. 최상단 이용 안내문 조립 -->
+            <tr>
+                <td colspan="3" class="notice-title">[ 도감 관리 스프레드시트 이용 안내 ]</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="notice-body" style="border-bottom: none;"><b>※ 필수:</b> 엑셀로 열었을 경우, 상단의 <b>[편집 사용]</b>을 클릭해야 하단 달성 현황 수식이 정상 작동합니다.</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="notice-body" style="border-top: none;"><b>※ 수정 방법:</b> 도감 등록 상태를 변경하려면 '등록' 열의 <b>[-]</b> 기호를 대문자 <b>[O]</b>로 변경하세요.</td>
+            </tr>
+            <tr><td colspan="3" class="spacer"></td></tr>
     `;
 
-    // 3. 그룹화된 데이터를 테이블 태그로 조립 (색상 동적 할당 적용)
-    Object.keys(groupedMap).sort().forEach(buff => {
-        
-        // [색상 자동 배정 로직]
-        let headerBg = "#5f6368"; // 기본 메인 배경 (회색)
-        let subBg = "#f1f3f4";    // 기본 서브 배경 (연회색)
-        let headerColor = "#ffffff"; // 메인 글자색 (흰색)
+    // 상단 안내문 4줄 반영하여 첫 데이터 시작 행 5로 설정
+    let currentRow = 5;
 
-        // 키워드에 따라 색상 분기
-        if (buff.includes("회복")) {
-            headerBg = "#4285f4"; // 파란색
-            subBg = "#e8f0fe";
-        } else if (buff.includes("공격")) {
-            headerBg = "#ea4335"; // 빨간색
-            subBg = "#fce8e6";
-        } else if (buff.includes("순발")) {
-            headerBg = "#fbbc04"; // 노란색
-            subBg = "#fef7e0";
-            headerColor = "#000000"; // 가독성을 위해 검은 글씨
-        } else if (buff.includes("방어")) {
-            headerBg = "#34a853"; // 초록색
-            subBg = "#e6f4ea";
-        }
+    // 2. 카테고리별 데이터 조립
+    Object.keys(groupedMap).sort().forEach(buff => {
+        const numPets = groupedMap[buff].length;
+        const startRow = currentRow + 2;
+        const endRow = currentRow + 1 + numPets;
+
+        let headerBg = "#5f6368", subBg = "#f1f3f4", headerColor = "#ffffff";
+        if (buff.includes("회복")) { headerBg = "#4285f4"; subBg = "#e8f0fe"; } 
+        else if (buff.includes("공격")) { headerBg = "#ea4335"; subBg = "#fce8e6"; } 
+        else if (buff.includes("순발")) { headerBg = "#fbbc04"; subBg = "#fef7e0"; headerColor = "#000000"; } 
+        else if (buff.includes("방어")) { headerBg = "#34a853"; subBg = "#e6f4ea"; }
 
         htmlString += `
             <tr>
-                <td colspan="2" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; font-size: 14px;">[ ${buff} ]</td>
+                <td colspan="3" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; font-size: 14px;">[ ${buff} ]</td>
             </tr>
             <tr>
                 <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 80px;">연번</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 80px;">등록</td>
                 <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 250px;">페트 이름</td>
             </tr>
         `;
         
         groupedMap[buff].sort().forEach((petName, index) => {
+            const isReg = regData[petName];
+            const regClass = isReg ? "reg-o" : "reg-x";
+            const nameClass = isReg ? "name-o" : "name-x";
+            const regText = isReg ? "O" : "-";
+
             htmlString += `
             <tr>
                 <td class="data-num">${index + 1}</td>
-                <td class="data-name">${petName}</td>
+                <td class="${regClass}">${regText}</td>
+                <td class="data-name ${nameClass}">${petName}</td>
             </tr>`;
         });
         
-        // 항목 간 간격
-        htmlString += `<tr><td colspan="2" class="spacer"></td></tr>`;
+        const fmlaO = `=COUNTIF(B${startRow}:B${endRow},&quot;O&quot;)`;
+        const fmlaX = `=&quot;미등록 : &quot;&amp;COUNTIF(B${startRow}:B${endRow},&quot;-&quot;)`;
+        const textO = `=COUNTIF(B${startRow}:B${endRow},"O")`;
+        const textX = `="미등록 : "&COUNTIF(B${startRow}:B${endRow},"-")`;
+
+        htmlString += `
+            <tr>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center;">달성 현황</td>
+                <td style="color: #2ea043; font-weight: bold; text-align: center; background-color: #f9f9f9;" x:fmla="${fmlaO}">${textO}</td>
+                <td style="color: #ea4335; font-weight: bold; text-align: left; background-color: #f9f9f9;" x:fmla="${fmlaX}">${textX}</td>
+            </tr>
+            <tr><td colspan="3" class="spacer"></td></tr>
+        `;
+        
+        currentRow += (4 + numPets);
     });
 
     htmlString += `
@@ -17465,7 +17480,6 @@ function exportRegisteredPetsToExcel() {
     </html>
     `;
 
-    // 4. XLS 파일로 다운로드 처리
     const blob = new Blob([htmlString], { type: 'application/vnd.ms-excel' });
     const url = URL.createObjectURL(blob);
     
@@ -17473,7 +17487,7 @@ function exportRegisteredPetsToExcel() {
     link.href = url;
     
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    link.download = `나의_페트도감_${dateStr}.xls`;
+    link.download = `나의_페트도감_전체현황_${dateStr}.xls`;
     
     document.body.appendChild(link);
     link.click();
@@ -17483,103 +17497,110 @@ function exportRegisteredPetsToExcel() {
 }
 
 /* ==========================================================
-   도감 등록 목록 구글 시트(클립보드) 카테고리별 색상 포함 복사 로직
+   도감 전체 목록 구글 시트(클립보드) - 텍스트 잘림 현상 수정
    ========================================================== */
 function copyToClipboardForSheets() {
     const regData = getRegisteredPets();
     const groupedMap = {};
-    let totalCount = 0;
 
-    // 1. 등록된 페트를 도감능력별로 그룹화
     PET_DATABASE.forEach(pet => {
-        if (regData[pet.name]) {
-            if (!groupedMap[pet.encyBuff]) {
-                groupedMap[pet.encyBuff] = [];
-            }
-            groupedMap[pet.encyBuff].push(pet.name);
-            totalCount++;
-        }
+        if (!groupedMap[pet.encyBuff]) groupedMap[pet.encyBuff] = [];
+        groupedMap[pet.encyBuff].push(pet.name);
     });
 
-    if (totalCount === 0) {
-        alert("도감에 등록된 페트가 없습니다.");
-        return;
-    }
+    // 1. 최상단 이용 안내문 조립 (텍스트 잘림 방지를 위해 두 줄로 분할)
+    let plainText = `[ 도감 관리 스프레드시트 이용 안내 ]\n※ 수정 방법: 도감 등록 상태를 변경하려면\n'등록' 열의 [-] 기호를 대문자 [O]로 변경하세요.\n\n`;
+    
+    let htmlText = `
+    <table style="border-collapse: collapse; font-family: sans-serif;">
+        <tr>
+            <td colspan="3" style="background-color: #2c3e50; color: #ffffff; font-weight: bold; padding: 12px; font-size: 14px; text-align: center; border: 1px solid #cccccc;">[ 도감 관리 스프레드시트 이용 안내 ]</td>
+        </tr>
+        <tr>
+            <td colspan="3" style="background-color: #f8f9fa; color: #333333; padding: 10px 10px 2px 10px; font-size: 12px; border: 1px solid #cccccc; border-bottom: none;">
+                <b>※ 수정 방법:</b> 도감 등록 상태를 변경하려면
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="background-color: #f8f9fa; color: #333333; padding: 2px 10px 10px 10px; font-size: 12px; border: 1px solid #cccccc; border-top: none;">
+                '등록' 열의 <b>[-]</b> 기호를 대문자 <b>[O]</b>로 변경하세요.
+            </td>
+        </tr>
+        <tr><td colspan="3" style="height: 20px; border: none;"></td></tr>
+    `;
 
-    // 2. 일반 텍스트(메모장용)와 HTML(구글시트/엑셀용) 문자열 조립
-    let plainText = "";
-    let htmlText = `<table style="border-collapse: collapse; font-family: sans-serif;">`;
+    // 상단 안내문이 4줄(행)을 차지하므로, 첫 번째 데이터 표의 시작 행(Row)은 5가 됩니다.
+    let currentRow = 5;
 
+    // 2. 카테고리별 데이터 조립
     Object.keys(groupedMap).sort().forEach(buff => {
-        // [색상 자동 배정 로직]
-        let headerBg = "#5f6368"; // 기본 메인 배경 (회색)
-        let subBg = "#f1f3f4";    // 기본 서브 배경 (연회색)
-        let headerColor = "#ffffff"; // 메인 글자색 (흰색)
+        const numPets = groupedMap[buff].length;
+        const startRow = currentRow + 2;
+        const endRow = currentRow + 1 + numPets;
 
-        // 키워드에 따라 색상 분기
-        if (buff.includes("회복")) {
-            headerBg = "#4285f4"; // 파란색 (Google Blue)
-            subBg = "#e8f0fe";
-        } else if (buff.includes("공격")) {
-            headerBg = "#ea4335"; // 빨간색 (Google Red)
-            subBg = "#fce8e6";
-        } else if (buff.includes("순발")) {
-            headerBg = "#fbbc04"; // 노란색 (Google Yellow)
-            subBg = "#fef7e0";
-            headerColor = "#000000"; // 노란 바탕은 검은 글씨가 가독성이 좋음
-        } else if (buff.includes("방어")) {
-            headerBg = "#34a853"; // 초록색 (Google Green)
-            subBg = "#e6f4ea";
-        }
+        let headerBg = "#5f6368", subBg = "#f1f3f4", headerColor = "#ffffff";
+        if (buff.includes("회복")) { headerBg = "#4285f4"; subBg = "#e8f0fe"; } 
+        else if (buff.includes("공격")) { headerBg = "#ea4335"; subBg = "#fce8e6"; } 
+        else if (buff.includes("순발")) { headerBg = "#fbbc04"; subBg = "#fef7e0"; headerColor = "#000000"; } 
+        else if (buff.includes("방어")) { headerBg = "#34a853"; subBg = "#e6f4ea"; }
 
-        // [일반 텍스트 조립]
-        plainText += `[ ${buff} ]\n연번\t페트 이름\n`;
-        
-        // [HTML 조립 - 조건부 색상 서식 적용]
+        plainText += `[ ${buff} ]\n연번\t등록\t페트 이름\n`;
         htmlText += `
             <tr>
-                <td colspan="2" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px;">[ ${buff} ]</td>
+                <td colspan="3" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px;">[ ${buff} ]</td>
             </tr>
             <tr>
                 <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 80px;">연번</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 80px;">등록</td>
                 <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 250px;">페트 이름</td>
             </tr>
         `;
 
-        // [데이터 열 조립]
         groupedMap[buff].sort().forEach((petName, index) => {
-            plainText += `${index + 1}\t${petName}\n`;
+            const isReg = regData[petName];
+            const regText = isReg ? "O" : "-";
+            const regHtml = isReg ? `<span style="color: #2ea043; font-weight: bold;">O</span>` : `<span style="color: #cccccc;">-</span>`;
+            const nameColor = isReg ? "#222222" : "#888888";
+
+            plainText += `${index + 1}\t${regText}\t${petName}\n`;
             htmlText += `
             <tr>
                 <td style="text-align: center; border: 1px solid #cccccc; padding: 6px; color: #555555;">${index + 1}</td>
-                <td style="text-align: left; border: 1px solid #cccccc; padding: 6px; font-weight: bold;">${petName}</td>
+                <td style="text-align: center; border: 1px solid #cccccc; padding: 6px;">${regHtml}</td>
+                <td style="text-align: left; border: 1px solid #cccccc; padding: 6px; font-weight: bold; color: ${nameColor};">${petName}</td>
             </tr>`;
         });
         
-        plainText += `\n`;
-        htmlText += `<tr><td colspan="2" style="height: 15px; border: none;"></td></tr>`;
+        const formulaO = `=COUNTIF(B${startRow}:B${endRow}, "O")`;
+        const formulaX = `="미등록 : "&COUNTIF(B${startRow}:B${endRow}, "-")`;
+
+        plainText += `달성 현황\t${formulaO}\t${formulaX}\n\n`;
+        htmlText += `
+            <tr>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px;">달성 현황</td>
+                <td style="color: #2ea043; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; background-color: #f9f9f9;">${formulaO}</td>
+                <td style="color: #ea4335; font-weight: bold; text-align: left; border: 1px solid #cccccc; padding: 6px; background-color: #f9f9f9;">${formulaX}</td>
+            </tr>
+            <tr><td colspan="3" style="height: 15px; border: none;"></td></tr>
+        `;
+
+        currentRow += (4 + numPets);
     });
 
     htmlText += `</table>`;
 
-    // 3. 최신 클립보드 API를 사용하여 HTML 서식 복사 실행
     try {
         const clipboardItem = new ClipboardItem({
             'text/plain': new Blob([plainText], { type: 'text/plain' }),
             'text/html': new Blob([htmlText], { type: 'text/html' })
         });
-        
         navigator.clipboard.write([clipboardItem]).then(() => {
-            alert("✅ 표 서식이 포함된 데이터가 복사되었습니다!\n빈 구글 스프레드시트에서 Ctrl + V로 붙여넣으세요.");
+            alert("✅ 안내문과 수식이 포함된 데이터가 복사되었습니다!\n빈 구글 스프레드시트의 [A1] 셀을 클릭하고 Ctrl + V로 붙여넣으세요.");
         }).catch(err => {
-            navigator.clipboard.writeText(plainText).then(() => {
-                alert("데이터가 복사되었습니다!\n(권한 문제로 색상 서식은 제외되었습니다.)");
-            });
+            navigator.clipboard.writeText(plainText).then(() => { alert("데이터가 복사되었습니다!"); });
         });
     } catch (e) {
-        navigator.clipboard.writeText(plainText).then(() => {
-            alert("데이터가 복사되었습니다!\n(현재 브라우저가 서식 복사를 지원하지 않아 텍스트만 복사되었습니다.)");
-        });
+        navigator.clipboard.writeText(plainText).then(() => { alert("데이터가 복사되었습니다!"); });
     }
 }
 
