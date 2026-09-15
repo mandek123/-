@@ -3094,16 +3094,19 @@ button[onclick="resetGame()"]:hover {
         </div>
 
     <div class="main-container" id="page-ency-status">
-        <div class="card" style="grid-column: span 2;">
-            <div class="card-header" style="justify-content: space-between;">
+                <div class="card" style="grid-column: span 2;">
+        <div class="card-header" style="justify-content: space-between;">
     <span><i class="fa-solid fa-square-check"></i> 나의 도감 현황</span>
     <div style="display: flex; gap: 8px;">
-        <!-- 도감으로 돌아가기 버튼을 먼저 배치 -->
         <button class="btn-write" style="background: var(--inner-card); border: 1px solid var(--border); color: var(--text-main); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="showPage('page-ency')">
             <i class="fa-solid fa-arrow-left"></i> 도감으로 돌아가기
         </button>
         
-        <!-- 엑셀로 추출 버튼을 나중에 배치 -->
+        <!-- ▼ 구글 시트 복사 버튼 추가 ▼ -->
+        <button class="btn-write" style="background: #0f9d58; border: 1px solid rgba(15, 157, 88, 0.4); color: #fff; font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="copyToClipboardForSheets()">
+            <i class="fa-brands fa-google"></i> 시트 복사
+        </button>
+        
         <button class="btn-write" style="background: #2ea043; border: 1px solid rgba(46, 160, 67, 0.4); color: #fff; font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="exportRegisteredPetsToExcel()">
             <i class="fa-solid fa-file-excel"></i> 엑셀로 추출
         </button>
@@ -17355,7 +17358,7 @@ function sv_claimBossReward() {
 ========================================================== */
 
 /* ==========================================================
-   도감 등록 목록 엑셀(XLS) 서식 적용 추출 로직
+   도감 등록 목록 엑셀(XLS) 서식 및 카테고리별 색상 적용 추출 로직
    ========================================================== */
 function exportRegisteredPetsToExcel() {
     const regData = getRegisteredPets();
@@ -17378,7 +17381,7 @@ function exportRegisteredPetsToExcel() {
         return;
     }
 
-    // 2. 엑셀에서 인식할 수 있는 HTML 테이블 서식 생성 (CSS 스타일 포함)
+    // 2. 엑셀에서 인식할 수 있는 HTML 테이블 서식 생성
     let htmlString = `
     <html xmlns:x="urn:schemas-microsoft-com:office:excel">
     <head>
@@ -17386,8 +17389,6 @@ function exportRegisteredPetsToExcel() {
         <style>
             table { border-collapse: collapse; width: 100%; font-family: 'Malgun Gothic', sans-serif; }
             th, td { border: 1px solid #cccccc; padding: 8px; }
-            .header-row { background-color: #539bf5; color: #ffffff; font-weight: bold; text-align: center; font-size: 14px; }
-            .sub-header { background-color: #e6f2ff; font-weight: bold; text-align: center; color: #333333; }
             .data-num { text-align: center; color: #555555; }
             .data-name { text-align: left; font-weight: bold; color: #222222; }
             .spacer { border: none; height: 20px; }
@@ -17397,15 +17398,37 @@ function exportRegisteredPetsToExcel() {
         <table>
     `;
 
-    // 3. 그룹화된 데이터를 테이블 태그로 조립
+    // 3. 그룹화된 데이터를 테이블 태그로 조립 (색상 동적 할당 적용)
     Object.keys(groupedMap).sort().forEach(buff => {
+        
+        // [색상 자동 배정 로직]
+        let headerBg = "#5f6368"; // 기본 메인 배경 (회색)
+        let subBg = "#f1f3f4";    // 기본 서브 배경 (연회색)
+        let headerColor = "#ffffff"; // 메인 글자색 (흰색)
+
+        // 키워드에 따라 색상 분기
+        if (buff.includes("회복")) {
+            headerBg = "#4285f4"; // 파란색
+            subBg = "#e8f0fe";
+        } else if (buff.includes("공격")) {
+            headerBg = "#ea4335"; // 빨간색
+            subBg = "#fce8e6";
+        } else if (buff.includes("순발")) {
+            headerBg = "#fbbc04"; // 노란색
+            subBg = "#fef7e0";
+            headerColor = "#000000"; // 가독성을 위해 검은 글씨
+        } else if (buff.includes("방어")) {
+            headerBg = "#34a853"; // 초록색
+            subBg = "#e6f4ea";
+        }
+
         htmlString += `
             <tr>
-                <td colspan="2" class="header-row">[ ${buff} ]</td>
+                <td colspan="2" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; font-size: 14px;">[ ${buff} ]</td>
             </tr>
             <tr>
-                <td class="sub-header" style="width: 80px;">연번</td>
-                <td class="sub-header" style="width: 250px;">페트 이름</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 80px;">연번</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 250px;">페트 이름</td>
             </tr>
         `;
         
@@ -17442,6 +17465,107 @@ function exportRegisteredPetsToExcel() {
     
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+}
+
+/* ==========================================================
+   도감 등록 목록 구글 시트(클립보드) 카테고리별 색상 포함 복사 로직
+   ========================================================== */
+function copyToClipboardForSheets() {
+    const regData = getRegisteredPets();
+    const groupedMap = {};
+    let totalCount = 0;
+
+    // 1. 등록된 페트를 도감능력별로 그룹화
+    PET_DATABASE.forEach(pet => {
+        if (regData[pet.name]) {
+            if (!groupedMap[pet.encyBuff]) {
+                groupedMap[pet.encyBuff] = [];
+            }
+            groupedMap[pet.encyBuff].push(pet.name);
+            totalCount++;
+        }
+    });
+
+    if (totalCount === 0) {
+        alert("도감에 등록된 페트가 없습니다.");
+        return;
+    }
+
+    // 2. 일반 텍스트(메모장용)와 HTML(구글시트/엑셀용) 문자열 조립
+    let plainText = "";
+    let htmlText = `<table style="border-collapse: collapse; font-family: sans-serif;">`;
+
+    Object.keys(groupedMap).sort().forEach(buff => {
+        // [색상 자동 배정 로직]
+        let headerBg = "#5f6368"; // 기본 메인 배경 (회색)
+        let subBg = "#f1f3f4";    // 기본 서브 배경 (연회색)
+        let headerColor = "#ffffff"; // 메인 글자색 (흰색)
+
+        // 키워드에 따라 색상 분기
+        if (buff.includes("회복")) {
+            headerBg = "#4285f4"; // 파란색 (Google Blue)
+            subBg = "#e8f0fe";
+        } else if (buff.includes("공격")) {
+            headerBg = "#ea4335"; // 빨간색 (Google Red)
+            subBg = "#fce8e6";
+        } else if (buff.includes("순발")) {
+            headerBg = "#fbbc04"; // 노란색 (Google Yellow)
+            subBg = "#fef7e0";
+            headerColor = "#000000"; // 노란 바탕은 검은 글씨가 가독성이 좋음
+        } else if (buff.includes("방어")) {
+            headerBg = "#34a853"; // 초록색 (Google Green)
+            subBg = "#e6f4ea";
+        }
+
+        // [일반 텍스트 조립]
+        plainText += `[ ${buff} ]\n연번\t페트 이름\n`;
+        
+        // [HTML 조립 - 조건부 색상 서식 적용]
+        htmlText += `
+            <tr>
+                <td colspan="2" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px;">[ ${buff} ]</td>
+            </tr>
+            <tr>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 80px;">연번</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 250px;">페트 이름</td>
+            </tr>
+        `;
+
+        // [데이터 열 조립]
+        groupedMap[buff].sort().forEach((petName, index) => {
+            plainText += `${index + 1}\t${petName}\n`;
+            htmlText += `
+            <tr>
+                <td style="text-align: center; border: 1px solid #cccccc; padding: 6px; color: #555555;">${index + 1}</td>
+                <td style="text-align: left; border: 1px solid #cccccc; padding: 6px; font-weight: bold;">${petName}</td>
+            </tr>`;
+        });
+        
+        plainText += `\n`;
+        htmlText += `<tr><td colspan="2" style="height: 15px; border: none;"></td></tr>`;
+    });
+
+    htmlText += `</table>`;
+
+    // 3. 최신 클립보드 API를 사용하여 HTML 서식 복사 실행
+    try {
+        const clipboardItem = new ClipboardItem({
+            'text/plain': new Blob([plainText], { type: 'text/plain' }),
+            'text/html': new Blob([htmlText], { type: 'text/html' })
+        });
+        
+        navigator.clipboard.write([clipboardItem]).then(() => {
+            alert("✅ 표 서식이 포함된 데이터가 복사되었습니다!\n빈 구글 스프레드시트에서 Ctrl + V로 붙여넣으세요.");
+        }).catch(err => {
+            navigator.clipboard.writeText(plainText).then(() => {
+                alert("데이터가 복사되었습니다!\n(권한 문제로 색상 서식은 제외되었습니다.)");
+            });
+        });
+    } catch (e) {
+        navigator.clipboard.writeText(plainText).then(() => {
+            alert("데이터가 복사되었습니다!\n(현재 브라우저가 서식 복사를 지원하지 않아 텍스트만 복사되었습니다.)");
+        });
+    }
 }
 
 </script>
