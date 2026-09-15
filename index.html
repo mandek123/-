@@ -5870,7 +5870,7 @@ const NOTICE_DATABASE = [
         <strong>※ 데이터 백업 권장 안내</strong>
         <span>- 만득월드 웹페이지가 향후 언제 사라질지 알 수 없으므로, 필요하신 유저분들은 해당 기능을 이용하여 본인의 도감 데이터를 미리 백업해 두시기를 권장합니다.</span>
     `
-},
+    },
 
     {
     id: 50,
@@ -17376,7 +17376,7 @@ function sv_claimBossReward() {
 ========================================================== */
 
 /* ==========================================================
-   도감 전체 목록 엑셀(XLS) 추출 - 상단 안내문 및 하단 산출 포함
+   도감 전체 목록 엑셀(XLS) 추출 - 한셀 호환성 및 디자인 수정
    ========================================================== */
 function exportRegisteredPetsToExcel() {
     const regData = getRegisteredPets();
@@ -17387,35 +17387,28 @@ function exportRegisteredPetsToExcel() {
         groupedMap[pet.encyBuff].push(pet.name);
     });
 
+    // 1. 테이블 전체에 맑은 고딕 폰트를 강제 적용하고 겹침 방지를 위해 높이(height)를 지정합니다.
     let htmlString = `
     <html xmlns:x="urn:schemas-microsoft-com:office:excel">
     <head>
         <meta charset="utf-8">
         <style>
-            table { border-collapse: collapse; width: 100%; font-family: 'Malgun Gothic', sans-serif; }
-            th, td { border: 1px solid #cccccc; padding: 8px; }
-            .data-num { text-align: center; color: #555555; }
-            .data-name { text-align: left; font-weight: bold; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #cccccc; padding: 6px 8px; vertical-align: middle; }
             .spacer { border: none; height: 20px; }
-            .reg-o { color: #2ea043; font-weight: bold; text-align: center; }
-            .reg-x { color: #cccccc; text-align: center; }
-            .name-o { color: #222222; }
-            .name-x { color: #888888; }
-            .notice-title { background-color: #2c3e50; color: #ffffff; font-weight: bold; text-align: center; font-size: 14px; }
-            .notice-body { background-color: #f8f9fa; color: #333333; text-align: left; font-size: 12px; }
         </style>
     </head>
     <body>
-        <table>
-            <!-- 1. 최상단 이용 안내문 조립 -->
+        <table style="font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;">
+            <!-- 최상단 이용 안내문 조립 (높이 지정으로 겹침 방지) -->
             <tr>
-                <td colspan="3" class="notice-title">[ 도감 관리 스프레드시트 이용 안내 ]</td>
+                <td colspan="3" style="background-color: #2c3e50; color: #ffffff; font-weight: bold; text-align: center; font-size: 14px; height: 35px; border: 1px solid #2c3e50;">[ 도감 관리 스프레드시트 이용 안내 ]</td>
             </tr>
             <tr>
-                <td colspan="3" class="notice-body" style="border-bottom: none;"><b>※ 필수:</b> 엑셀로 열었을 경우, 상단의 <b>[편집 사용]</b>을 클릭해야 하단 달성 현황 수식이 정상 작동합니다.</td>
+                <td colspan="3" style="background-color: #f8f9fa; color: #333333; text-align: left; font-size: 12px; height: 35px; border: 1px solid #cccccc; border-bottom: none;"><b>※ 필수:</b> 엑셀로 열었을 경우, 상단의 <b>[편집 사용]</b>을 클릭해야 하단 달성 현황 수식이 정상 작동합니다.</td>
             </tr>
             <tr>
-                <td colspan="3" class="notice-body" style="border-top: none;"><b>※ 수정 방법:</b> 도감 등록 상태를 변경하려면 '등록' 열의 <b>[-]</b> 기호를 대문자 <b>[O]</b>로 변경하세요.</td>
+                <td colspan="3" style="background-color: #f8f9fa; color: #333333; text-align: left; font-size: 12px; height: 35px; border: 1px solid #cccccc; border-top: none;"><b>※ 수정 방법:</b> 도감 등록 상태를 변경하려면 '등록' 열의 <b>[-]</b> 기호를 대문자 <b>[O]</b>로 변경하세요.</td>
             </tr>
             <tr><td colspan="3" class="spacer"></td></tr>
     `;
@@ -17437,7 +17430,7 @@ function exportRegisteredPetsToExcel() {
 
         htmlString += `
             <tr>
-                <td colspan="3" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; font-size: 14px;">[ ${buff} ]</td>
+                <td colspan="3" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; font-size: 14px; height: 30px;">[ ${buff} ]</td>
             </tr>
             <tr>
                 <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 80px;">연번</td>
@@ -17448,15 +17441,17 @@ function exportRegisteredPetsToExcel() {
         
         groupedMap[buff].sort().forEach((petName, index) => {
             const isReg = regData[petName];
-            const regClass = isReg ? "reg-o" : "reg-x";
-            const nameClass = isReg ? "name-o" : "name-x";
+            
+            // 💡 CSS 클래스 대신 태그 안에 직접 색상과 굵기를 지정 (한셀 등 모든 프로그램 완벽 호환)
             const regText = isReg ? "O" : "-";
+            const regStyle = isReg ? "color: #2ea043; font-weight: bold; text-align: center;" : "color: #aaaaaa; text-align: center;";
+            const nameStyle = isReg ? "color: #222222; font-weight: bold; text-align: left;" : "color: #999999; font-weight: normal; text-align: left;";
 
             htmlString += `
             <tr>
-                <td class="data-num">${index + 1}</td>
-                <td class="${regClass}">${regText}</td>
-                <td class="data-name ${nameClass}">${petName}</td>
+                <td style="text-align: center; color: #555555;">${index + 1}</td>
+                <td style="${regStyle}">${regText}</td>
+                <td style="${nameStyle}">${petName}</td>
             </tr>`;
         });
         
