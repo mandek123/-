@@ -1,0 +1,79 @@
+/* 만득이 키우기 · battlefield scene and unit feel */
+#idle-field.idle-field, .idle-field {
+    height: 300px !important;
+    background:
+        url("../img/clouds.svg?v=2") repeat-x 0 18px / 900px 120px,
+        url("../img/scene-meadow.svg?v=2") center bottom / cover no-repeat,
+        #5cc8ff !important;
+    border: 3px solid #1d1a12 !important; border-radius: 18px !important;
+    box-shadow: 6px 7px 0 #1d1a12 !important;
+    animation: idle-clouds 90s linear infinite;
+}
+@keyframes idle-clouds { to { background-position: 900px 18px, center bottom, 0 0; } }
+.idle-field::after { display: none !important; }
+
+/* units */
+.idle-entity img {
+    filter: drop-shadow(0 3px 0 rgba(29, 26, 18, .25)) !important;
+    animation: idle-bob 1.3s ease-in-out infinite;
+}
+.idle-entity:nth-child(2n) img { animation-delay: -.4s; }
+.idle-entity:nth-child(3n) img { animation-delay: -.8s; }
+@keyframes idle-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+.idle-entity > div:first-child { background: rgba(29, 26, 18, .32) !important; filter: none !important; width: 46px !important; height: 11px !important; }
+
+/* name tags */
+.idle-entity > div:last-child {
+    background: #fff7e6 !important; color: #1d1a12 !important; border: 2px solid #1d1a12 !important;
+    border-radius: 8px !important; box-shadow: 2px 2px 0 #1d1a12 !important; font-weight: 800 !important; padding: 2px 7px !important;
+}
+.idle-entity:not(.facing-right) > div:last-child { background: #ffd9d4 !important; }
+.boss-entity > div:last-child { background: #ffd400 !important; font-size: 13px !important; }
+
+/* enemy hp bars */
+.idle-entity > div[style*="top: -12px"] {
+    border: 2px solid #1d1a12 !important; background: #4a4033 !important; height: 9px !important; width: 52px !important; border-radius: 5px !important;
+}
+.idle-entity > div[style*="top: -12px"] > div { background: linear-gradient(180deg, #ff7a6b, #e0362c) !important; }
+
+/* boss */
+.boss-entity { filter: none !important; }
+.boss-entity::before {
+    content: ''; position: absolute; bottom: -6px; left: 50%; width: 130px; height: 34px; translate: -50% 0;
+    border-radius: 50%; border: 4px solid #ff3b30; box-shadow: 0 0 18px rgba(255, 59, 48, .6);
+    animation: boss-ring 1.2s ease-in-out infinite;
+}
+@keyframes boss-ring { 50% { opacity: .45; scale: 1.08; } }
+
+/* hits and attacks */
+@keyframes idle-hit {
+    0% { filter: brightness(1); translate: 0 0; }
+    25% { filter: brightness(2.4) saturate(.4); translate: -4px 0; }
+    55% { filter: brightness(1.3); translate: 4px 0; }
+    100% { filter: brightness(1); translate: 0 0; }
+}
+.anim-hit { animation: idle-hit .26s ease-out !important; }
+@keyframes atkLungeRight { 0% { transform: translateX(0) scale(1); } 40% { transform: translateX(26px) scale(1.12, .92); } 100% { transform: translateX(0) scale(1); } }
+@keyframes atkLungeLeft { 0% { transform: translateX(0) scale(1); } 40% { transform: translateX(-26px) scale(1.12, .92); } 100% { transform: translateX(0) scale(1); } }
+
+/* damage numbers */
+.dmg-text {
+    font-family: 'Black Han Sans', 'Pretendard', sans-serif !important; font-weight: 400 !important;
+    -webkit-text-stroke: 4px #1d1a12; paint-order: stroke fill; text-shadow: none !important;
+    animation: idle-pop .7s cubic-bezier(.16, 1, .3, 1) forwards !important;
+}
+.dmg-text[style*="color: var(--t1)"] { color: #fff7e6 !important; }
+.dmg-text[style*="--acc-gold"] { color: #ffd400 !important; font-size: 26px !important; }
+.dmg-text[style*="--acc-red"] { color: #ff6b5b !important; }
+.dmg-text[style*="--acc-green"] { color: #45ffb0 !important; }
+.dmg-text[style*="--acc-blue-2"] { color: #7fdcff !important; }
+@keyframes idle-pop {
+    0% { transform: scale(.4); opacity: 0; }
+    20% { transform: scale(1.25); opacity: 1; }
+    40% { transform: scale(1); }
+    100% { transform: translateY(-34px) scale(1); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .idle-field, .idle-entity img, .boss-entity::before { animation: none !important; }
+}

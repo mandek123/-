@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 120">
+  <!-- drifting clouds, tiles horizontally -->
+  <g fill="#ffffff" stroke="#1d1a12" stroke-width="3" stroke-linejoin="round">
+    <path d="M60 70 Q60 48 84 48 Q92 28 118 34 Q138 20 156 40 Q182 38 182 62 Q196 70 184 80 L72 80 Q52 80 60 70Z"/>
+    <path d="M430 50 Q430 34 448 34 Q456 20 476 25 Q492 16 504 32 Q524 30 524 48 Q534 54 524 62 L440 62 Q424 62 430 50Z"/>
+    <path d="M700 84 Q700 66 722 66 Q730 50 752 55 Q770 44 784 62 Q806 60 806 80 Q818 86 808 94 L712 94 Q694 94 700 84Z"/>
+  </g>
+</svg>
