@@ -2431,10 +2431,10 @@ button[onclick="resetGame()"]:hover {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <script>document.documentElement.setAttribute('data-theme','toon')</script>
-<link rel="stylesheet" href="./css/tokens.css?v=20261006160852">
-<link rel="stylesheet" href="./css/components.css?v=20261006160852">
-<link rel="stylesheet" href="./css/toon.css?v=20261006160852">
-<link rel="stylesheet" href="./css/pages.css?v=20261006160852">
+<link rel="stylesheet" href="./css/tokens.css?v=20261006163000">
+<link rel="stylesheet" href="./css/components.css?v=20261006163000">
+<link rel="stylesheet" href="./css/toon.css?v=20261006163000">
+<link rel="stylesheet" href="./css/pages.css?v=20261006163000">
 </head>
 
 <body>
@@ -17454,7 +17454,7 @@ function exportRegisteredPetsToExcel() {
         <meta charset="utf-8">
         <style>
             table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: middle; }
+            th, td { border: 1px solid #cccccc; padding: 6px 8px; vertical-align: middle; }
             .spacer { border: none; height: 20px; }
         </style>
     </head>
@@ -17462,13 +17462,13 @@ function exportRegisteredPetsToExcel() {
         <table style="font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;">
             <!-- 최상단 이용 안내문 조립 (높이 지정으로 겹침 방지) -->
             <tr>
-                <td colspan="3" style="background-color: var(--bg-blue); color: var(--t1); font-weight: bold; text-align: center; font-size: 14px; height: 35px; border: 1px solid var(--acc-blue);">[ 도감 관리 스프레드시트 이용 안내 ]</td>
+                <td colspan="3" style="background-color: #2c3e50; color: #ffffff; font-weight: bold; text-align: center; font-size: 14px; height: 35px; border: 1px solid #2c3e50;">[ 도감 관리 스프레드시트 이용 안내 ]</td>
             </tr>
             <tr>
-                <td colspan="3" style="background-color: #f8f9fa; color: var(--t3); text-align: left; font-size: 12px; height: 35px; border: 1px solid var(--line); border-bottom: none;"><b>※ 필수:</b> 엑셀로 열었을 경우, 상단의 <b>[편집 사용]</b>을 클릭해야 하단 달성 현황 수식이 정상 작동합니다.</td>
+                <td colspan="3" style="background-color: #f8f9fa; color: #333333; text-align: left; font-size: 12px; height: 35px; border: 1px solid #cccccc; border-bottom: none;"><b>※ 필수:</b> 엑셀로 열었을 경우, 상단의 <b>[편집 사용]</b>을 클릭해야 하단 달성 현황 수식이 정상 작동합니다.</td>
             </tr>
             <tr>
-                <td colspan="3" style="background-color: #f8f9fa; color: var(--t3); text-align: left; font-size: 12px; height: 35px; border: 1px solid var(--line); border-top: none;"><b>※ 수정 방법:</b> 도감 등록 상태를 변경하려면 '등록' 열의 <b>[-]</b> 기호를 대문자 <b>[O]</b>로 변경하세요.</td>
+                <td colspan="3" style="background-color: #f8f9fa; color: #333333; text-align: left; font-size: 12px; height: 35px; border: 1px solid #cccccc; border-top: none;"><b>※ 수정 방법:</b> 도감 등록 상태를 변경하려면 '등록' 열의 <b>[-]</b> 기호를 대문자 <b>[O]</b>로 변경하세요.</td>
             </tr>
             <tr><td colspan="3" class="spacer"></td></tr>
     `;
@@ -17493,9 +17493,9 @@ function exportRegisteredPetsToExcel() {
                 <td colspan="3" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; font-size: 14px; height: 30px;">[ ${buff} ]</td>
             </tr>
             <tr>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center; width: 80px;">연번</td>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center; width: 80px;">등록</td>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center; width: 250px;">페트 이름</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 80px;">연번</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 80px;">등록</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; width: 250px;">페트 이름</td>
             </tr>
         `;
         
@@ -17509,7 +17509,7 @@ function exportRegisteredPetsToExcel() {
 
             htmlString += `
             <tr>
-                <td style="text-align: center; color: var(--t3);">${index + 1}</td>
+                <td style="text-align: center; color: #555555;">${index + 1}</td>
                 <td style="${regStyle}">${regText}</td>
                 <td style="${nameStyle}">${petName}</td>
             </tr>`;
@@ -17522,9 +17522,9 @@ function exportRegisteredPetsToExcel() {
 
         htmlString += `
             <tr>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center;">달성 현황</td>
-                <td style="color: var(--acc-green); font-weight: bold; text-align: center; background-color: #f9f9f9;" x:fmla="${fmlaO}">${textO}</td>
-                <td style="color: var(--acc-red); font-weight: bold; text-align: left; background-color: #f9f9f9;" x:fmla="${fmlaX}">${textX}</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center;">달성 현황</td>
+                <td style="color: #2ea043; font-weight: bold; text-align: center; background-color: #f9f9f9;" x:fmla="${fmlaO}">${textO}</td>
+                <td style="color: #ea4335; font-weight: bold; text-align: left; background-color: #f9f9f9;" x:fmla="${fmlaX}">${textX}</td>
             </tr>
             <tr><td colspan="3" class="spacer"></td></tr>
         `;
@@ -17572,15 +17572,15 @@ function copyToClipboardForSheets() {
     let htmlText = `
     <table style="border-collapse: collapse; font-family: sans-serif;">
         <tr>
-            <td colspan="3" style="background-color: var(--bg-blue); color: var(--t1); font-weight: bold; padding: 12px; font-size: 14px; text-align: center; border: 1px solid var(--line);">[ 도감 관리 스프레드시트 이용 안내 ]</td>
+            <td colspan="3" style="background-color: #2c3e50; color: #ffffff; font-weight: bold; padding: 12px; font-size: 14px; text-align: center; border: 1px solid #cccccc;">[ 도감 관리 스프레드시트 이용 안내 ]</td>
         </tr>
         <tr>
-            <td colspan="3" style="background-color: #f8f9fa; color: var(--t3); padding: 10px 10px 2px 10px; font-size: 12px; border: 1px solid var(--line); border-bottom: none;">
+            <td colspan="3" style="background-color: #f8f9fa; color: #333333; padding: 10px 10px 2px 10px; font-size: 12px; border: 1px solid #cccccc; border-bottom: none;">
                 <b>※ 수정 방법:</b> 도감 등록 상태를 변경하려면
             </td>
         </tr>
         <tr>
-            <td colspan="3" style="background-color: #f8f9fa; color: var(--t3); padding: 2px 10px 10px 10px; font-size: 12px; border: 1px solid var(--line); border-top: none;">
+            <td colspan="3" style="background-color: #f8f9fa; color: #333333; padding: 2px 10px 10px 10px; font-size: 12px; border: 1px solid #cccccc; border-top: none;">
                 '등록' 열의 <b>[-]</b> 기호를 대문자 <b>[O]</b>로 변경하세요.
             </td>
         </tr>
@@ -17605,27 +17605,27 @@ function copyToClipboardForSheets() {
         plainText += `[ ${buff} ]\n연번\t등록\t페트 이름\n`;
         htmlText += `
             <tr>
-                <td colspan="3" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; border: 1px solid var(--line); padding: 6px;">[ ${buff} ]</td>
+                <td colspan="3" style="background-color: ${headerBg}; color: ${headerColor}; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px;">[ ${buff} ]</td>
             </tr>
             <tr>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center; border: 1px solid var(--line); padding: 6px; width: 80px;">연번</td>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center; border: 1px solid var(--line); padding: 6px; width: 80px;">등록</td>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center; border: 1px solid var(--line); padding: 6px; width: 250px;">페트 이름</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 80px;">연번</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 80px;">등록</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; width: 250px;">페트 이름</td>
             </tr>
         `;
 
         groupedMap[buff].sort().forEach((petName, index) => {
             const isReg = regData[petName];
             const regText = isReg ? "O" : "-";
-            const regHtml = isReg ? `<span style="color: var(--acc-green); font-weight: bold;">O</span>` : `<span style="color: var(--t2);">-</span>`;
+            const regHtml = isReg ? `<span style="color: #2ea043; font-weight: bold;">O</span>` : `<span style="color: #cccccc;">-</span>`;
             const nameColor = isReg ? "#222222" : "#888888";
 
             plainText += `${index + 1}\t${regText}\t${petName}\n`;
             htmlText += `
             <tr>
-                <td style="text-align: center; border: 1px solid var(--line); padding: 6px; color: var(--t3);">${index + 1}</td>
-                <td style="text-align: center; border: 1px solid var(--line); padding: 6px;">${regHtml}</td>
-                <td style="text-align: left; border: 1px solid var(--line); padding: 6px; font-weight: bold; color: ${nameColor};">${petName}</td>
+                <td style="text-align: center; border: 1px solid #cccccc; padding: 6px; color: #555555;">${index + 1}</td>
+                <td style="text-align: center; border: 1px solid #cccccc; padding: 6px;">${regHtml}</td>
+                <td style="text-align: left; border: 1px solid #cccccc; padding: 6px; font-weight: bold; color: ${nameColor};">${petName}</td>
             </tr>`;
         });
         
@@ -17635,9 +17635,9 @@ function copyToClipboardForSheets() {
         plainText += `달성 현황\t${formulaO}\t${formulaX}\n\n`;
         htmlText += `
             <tr>
-                <td style="background-color: ${subBg}; color: var(--t3); font-weight: bold; text-align: center; border: 1px solid var(--line); padding: 6px;">달성 현황</td>
-                <td style="color: var(--acc-green); font-weight: bold; text-align: center; border: 1px solid var(--line); padding: 6px; background-color: #f9f9f9;">${formulaO}</td>
-                <td style="color: var(--acc-red); font-weight: bold; text-align: left; border: 1px solid var(--line); padding: 6px; background-color: #f9f9f9;">${formulaX}</td>
+                <td style="background-color: ${subBg}; color: #333333; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px;">달성 현황</td>
+                <td style="color: #2ea043; font-weight: bold; text-align: center; border: 1px solid #cccccc; padding: 6px; background-color: #f9f9f9;">${formulaO}</td>
+                <td style="color: #ea4335; font-weight: bold; text-align: left; border: 1px solid #cccccc; padding: 6px; background-color: #f9f9f9;">${formulaX}</td>
             </tr>
             <tr><td colspan="3" style="height: 15px; border: none;"></td></tr>
         `;
@@ -17671,7 +17671,7 @@ function copyToClipboardForSheets() {
 </div>
 
 
-<script src="./js/home.js?v=20261006160852"></script>
-<script src="./js/bgm.js?v=20261006160852"></script>
+<script src="./js/home.js?v=20261006163000"></script>
+<script src="./js/bgm.js?v=20261006163000"></script>
 </body>
 </html>

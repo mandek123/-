@@ -150,5 +150,13 @@
 :root[data-theme="toon"] .arena-top-rank { width: 100%; box-sizing: border-box; }
 :root[data-theme="toon"] .final-stat-display, :root[data-theme="toon"] .guide-content { background: var(--pg-well) !important; border: 2px solid var(--pg-ink) !important; border-radius: 14px !important; }
 .card-header.is-dup { justify-content: flex-end !important; }
-:root[data-theme="toon"] .filter-row { flex-wrap: wrap !important; gap: 10px !important; }
-:root[data-theme="toon"] .filter-row > * { flex: 1 1 150px !important; min-width: 0 !important; }
+:root[data-theme="toon"] .filter-row { flex-wrap: nowrap !important; gap: 8px !important; }
+:root[data-theme="toon"] .filter-row > * { flex: 1 1 0 !important; min-width: 0 !important; }
+:root[data-theme="toon"] .filter-row select, :root[data-theme="toon"] .filter-row input { padding-left: 10px !important; padding-right: 24px !important; font-size: 13px !important; text-overflow: ellipsis; }
+@media (max-width: 900px) {
+    :root[data-theme="toon"] .filter-row { flex-wrap: wrap !important; }
+    :root[data-theme="toon"] .filter-row > * { flex: 1 1 30% !important; }
+}
+:root[data-theme="toon"] .filter-row .custom-select-trigger,
+:root[data-theme="toon"] .filter-row .custom-select-trigger * { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; font-size: 13px !important; }
+:root[data-theme="toon"] .filter-row .custom-select-trigger { padding-left: 10px !important; padding-right: 8px !important; gap: 4px; }

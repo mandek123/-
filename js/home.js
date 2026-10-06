@@ -66,27 +66,14 @@
         btn.innerHTML = '<i class="fa-solid ' + p[1] + '"></i> <span>' + p[2] + '</span><em>추천</em>';
     }
 
-    // top notice: show one notice at a time, fading between the latest three
-    var tkTimer;
+    // top notice: the latest notice scrolls right to left, one line, looping
     function makeTicker() {
-        clearInterval(tkTimer);
         var bar = document.getElementById('top-notice-banner');
         if (!bar || typeof NOTICE_DATABASE === 'undefined' || !NOTICE_DATABASE.length) return;
-        var items = NOTICE_DATABASE.slice(0, 3), i = 0;
-        bar.innerHTML = '<div class="tk"><span class="tk-tag">공지</span><span class="tk-msg" aria-live="polite"></span>' +
+        var n = NOTICE_DATABASE[0];
+        bar.innerHTML = '<div class="tk"><span class="tk-tag">공지</span>' +
+            '<div class="tk-lane"><span class="tk-run"><b>' + esc(n.date) + '</b>' + esc(n.summary || n.title) + '</span></div>' +
             '<button type="button" class="tk-more" onclick="showPage(\'page-notice\')">더보기</button></div>';
-        var msg = bar.querySelector('.tk-msg');
-        function show() {
-            var n = items[i];
-            msg.innerHTML = '<b>' + esc(n.date) + '</b>' + esc(n.summary || n.title);
-        }
-        show();
-        if (items.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        tkTimer = setInterval(function () {
-            if (bar.matches(':hover')) return;
-            msg.classList.add('is-out');
-            setTimeout(function () { i = (i + 1) % items.length; show(); msg.classList.remove('is-out'); }, 500);
-        }, 6000);
     }
     window.addEventListener('load', function () { setTimeout(makeTicker, 0); });
     // the page's own script may refill the banner later; keep our single-notice version

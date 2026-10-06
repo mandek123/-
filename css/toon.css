@@ -334,8 +334,6 @@
 :root[data-theme="toon"] [style*=";color:#c9d1d9"] { color: var(--t2) !important; }
 :root[data-theme="toon"] .page-btn.active { color: #fff !important; }
 :root[data-theme="toon"] .desktop-notice [style] { color: inherit !important; }
-:root[data-theme="toon"] .desktop-notice span:first-child { color: #ffd400 !important; }
-:root[data-theme="toon"] .desktop-notice span:last-child { color: #7fdcff !important; }
 :root[data-theme="toon"] .group-page-btn.active,
 :root[data-theme="toon"] .btn-update-info,
 :root[data-theme="toon"] #page-battle [style*="color: #1a1a1a"] { color: #fff !important; }
@@ -359,11 +357,17 @@
 
 /* ---------- top notice: one at a time, fades in and out ---------- */
 :root[data-theme="toon"] .desktop-notice { padding: 0 16px !important; font-size: 16px !important; border: 0 !important; border-radius: 0 !important; }
-:root[data-theme="toon"] .tk { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 50px; max-width: 1240px; margin: 0 auto; }
-:root[data-theme="toon"] .tk-tag { flex: none; font-size: 12px; font-weight: 900; color: #0b0b0b; background: #ffd400; padding: 5px 9px; border-radius: 6px; }
-:root[data-theme="toon"] .tk-msg { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; transition: opacity .5s ease, transform .5s var(--ease); }
-:root[data-theme="toon"] .tk-msg b { color: #ffd400; margin-right: 10px; }
-:root[data-theme="toon"] .tk-msg.is-out { opacity: 0; transform: translateY(8px); }
+:root[data-theme="toon"] .tk { display: flex; align-items: center; justify-content: flex-start; gap: 14px; min-height: 50px; max-width: 1240px; margin: 0 auto; }
+:root[data-theme="toon"] .tk-tag { flex: none; font-size: 12px; font-weight: 900; color: #0b0b0b !important; background: #ffd400; padding: 5px 9px; border-radius: 6px; }
+:root[data-theme="toon"] .tk-lane { flex: 1; min-width: 0; overflow: hidden; }
+:root[data-theme="toon"] .tk-run { display: inline-block; white-space: nowrap; padding-left: 100%; font-weight: 700; animation: tk-run 26s linear infinite; }
+:root[data-theme="toon"] .tk-run b { color: #ffd400; margin-right: 12px; }
+:root[data-theme="toon"] .desktop-notice:hover .tk-run { animation-play-state: paused; }
+@keyframes tk-run { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) {
+    :root[data-theme="toon"] .tk-run { animation: none; padding-left: 0; }
+    :root[data-theme="toon"] .tk-lane { text-overflow: ellipsis; }
+}
 :root[data-theme="toon"] .tk-more { flex: none; background: none; border: 2px solid #fff7e6; color: #fff7e6; border-radius: 8px; padding: 5px 10px; font: 800 13px/1 var(--font-body); cursor: pointer; }
 :root[data-theme="toon"] .tk-more:hover { background: #fff7e6; color: #0b0b0b; }
 
