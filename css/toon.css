@@ -358,7 +358,7 @@
 :root[data-theme="toon"] .th-badge-sub { margin-top: 2px; }
 
 /* ---------- top notice: one at a time, fades in and out ---------- */
-:root[data-theme="toon"] .desktop-notice { padding: 0 16px !important; font-size: 16px !important; border-bottom: 3px solid #0b0b0b !important; }
+:root[data-theme="toon"] .desktop-notice { padding: 0 16px !important; font-size: 16px !important; border: 0 !important; border-radius: 0 !important; }
 :root[data-theme="toon"] .tk { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 50px; max-width: 1240px; margin: 0 auto; }
 :root[data-theme="toon"] .tk-tag { flex: none; font-size: 12px; font-weight: 900; color: #0b0b0b; background: #ffd400; padding: 5px 9px; border-radius: 6px; }
 :root[data-theme="toon"] .tk-msg { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; transition: opacity .5s ease, transform .5s var(--ease); }
