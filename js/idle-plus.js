@@ -16,7 +16,8 @@
         setTimeout(function () { el.remove(); }, life || 600);
         return el;
     }
-    function shake(power) {
+    function shake() {
+        return;   // screen shake removed on request (too dizzy); kept as a no-op so callers stay simple
         var f = field(); if (!f || REDUCED) return;
         f.style.setProperty('--shake', power + 'px');
         f.classList.remove('is-shaking'); void f.offsetWidth; f.classList.add('is-shaking');

@@ -2431,12 +2431,12 @@ button[onclick="resetGame()"]:hover {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <script>document.documentElement.setAttribute('data-theme','toon')</script>
-<link rel="stylesheet" href="./css/tokens.css?v=20261006200434">
-<link rel="stylesheet" href="./css/components.css?v=20261006200434">
-<link rel="stylesheet" href="./css/toon.css?v=20261006200434">
-<link rel="stylesheet" href="./css/pages.css?v=20261006200434">
-<link rel="stylesheet" href="./css/survival.css?v=20261006200434">
-<link rel="stylesheet" href="./css/idle.css?v=20261006200434">
+<link rel="stylesheet" href="./css/tokens.css?v=20261006202355">
+<link rel="stylesheet" href="./css/components.css?v=20261006202355">
+<link rel="stylesheet" href="./css/toon.css?v=20261006202355">
+<link rel="stylesheet" href="./css/pages.css?v=20261006202355">
+<link rel="stylesheet" href="./css/survival.css?v=20261006202355">
+<link rel="stylesheet" href="./css/idle.css?v=20261006202355">
 </head>
 
 <body>
@@ -5916,6 +5916,37 @@ button[onclick="resetGame()"]:hover {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+    id: 52,
+    date: "26년 10월 6일",
+    title: "26년 10월 6일 만득월드 리뉴얼 공지사항입니다.",
+    summary: "1. 웹페이지 전체 리뉴얼 | 2. 만득서바이벌·만득이 키우기 게임 리뉴얼 | 3. 펫 도감 정보 오류 수정",
+    content: `
+        <strong>1) 웹페이지 전체 리뉴얼</strong>
+        <span>- <b>새 디자인:</b> 홈페이지 전체를 밝은 만화풍 디자인으로 새롭게 바꿨습니다. 모든 메뉴의 기능과 계산 공식, 저장된 데이터는 그대로입니다.</span>
+        <span>- <b>새 홈 화면:</b> 랜덤 펫 소개, 최신 공지, 추천 메뉴, 전체 메뉴 바로가기가 추가되었습니다.</span>
+        <span>- <b>메뉴 페이지 정리:</b> 각 메뉴 상단에 제목과 설명, 홈 버튼이 추가되었고, 글씨가 잘 보이도록 색 대비를 개선했습니다.</span>
+        <span>- <b>펫 이미지 개선:</b> 모든 펫 이미지의 흰 배경을 없애 어느 화면에서나 깔끔하게 보입니다. (움직이는 모습은 그대로입니다)</span>
+        <span>- <b>배경음악:</b> 직접 제작한 배경음악 5곡(BGM_1~5)이 추가되었습니다. 홈 화면 또는 오른쪽 아래 BGM 버튼으로 켜고 끌 수 있습니다.</span>
+        <strong>2) 만득서바이벌 리뉴얼</strong>
+        <span>- <b>그래픽:</b> 석기시대 초원 맵, 새 시작 화면, 만득이 기본 캐릭터, 보석·고기·보상 상자·보스 등장 연출이 새로 적용되었습니다.</span>
+        <span>- <b>타격감:</b> 피격 번쩍임, 데미지 숫자, 처치 효과, 효과음이 추가되었습니다. (효과음은 게임 화면 오른쪽 위 버튼으로 끌 수 있습니다)</span>
+        <span>- <b>신규 무기 3종:</b> 모닥불 오라, 번개 토템, 돌도끼 투척</span>
+        <span>- <b>신규 몬스터 2종:</b> 돌진형(! 표시 후 돌진), 분열형(처치 시 새끼 2마리로 분열)</span>
+        <span>- <b>맵 이벤트:</b> 플레이 중 운석 낙하, 고기 축제, 보석 비, 몬스터 대행진이 일정 시간마다 발생합니다.</span>
+        <span>- <b>모바일 조작:</b> 휴대폰에서 화면을 터치해 끌면 조이스틱으로 이동할 수 있습니다.</span>
+        <strong>3) 만득이 키우기 리뉴얼</strong>
+        <span>- <b>스테이지 배경:</b> 1~10 초원, 11~20 화산, 21~30 동굴 순으로 배경이 바뀌며 반복됩니다.</span>
+        <span>- <b>전투 연출:</b> 공격 궤적, 타격 불꽃, 크리티컬, 회복, 회피, 처치, 보스 등장, 버프 사용 연출이 추가되었습니다. 전투 공식과 수치는 그대로입니다.</span>
+        <strong>4) 펫 도감 정보 오류 수정</strong>
+        <span>- <b>라나프:</b> 도감능력이 '레이드 캐릭터 공격력 1% 증가'로 잘못 표기되어 있던 것을 '레이드 펫 순발력 1% 증가'로 수정했습니다.</span>
+        <strong>※ 안내</strong>
+        <span>- 화면이 예전 모습으로 보이면 새로고침(Ctrl + F5)을 한 번 해주세요.</span>
+        <span>- 오류 및 건의사항을 제보해주시면 적극 반영하겠습니다!</span>
+    `
+    },
+
+
     {
     id: 51,
     date: "26년 9월 15일",
@@ -17673,11 +17704,11 @@ function copyToClipboardForSheets() {
 </div>
 
 
-<script src="./js/pets-clean.js?v=20261006200434"></script>
-<script src="./js/home.js?v=20261006200434"></script>
-<script src="./js/bgm.js?v=20261006200434"></script>
-<script src="./js/survival-plus.js?v=20261006200434"></script>
-<script src="./js/survival-content.js?v=20261006200434"></script>
-<script src="./js/idle-plus.js?v=20261006200434"></script>
+<script src="./js/pets-clean.js?v=20261006202355"></script>
+<script src="./js/home.js?v=20261006202355"></script>
+<script src="./js/bgm.js?v=20261006202355"></script>
+<script src="./js/survival-plus.js?v=20261006202355"></script>
+<script src="./js/survival-content.js?v=20261006202355"></script>
+<script src="./js/idle-plus.js?v=20261006202355"></script>
 </body>
 </html>
