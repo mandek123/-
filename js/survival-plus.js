@@ -5,6 +5,13 @@
     if (typeof sv_draw !== 'function' || typeof sv_ctx === 'undefined') return;
 
     var INK = '#1d1a12';
+    function asset(name) { var i = new Image(); i.src = './img/game/' + name; return i; }
+    var ART = {
+        gemSky: asset('gem-sky.png'), gemGreen: asset('gem-green.png'), gemYellow: asset('gem-yellow.png'), gemRed: asset('gem-red.png'),
+        diamond: asset('diamond.webp'), meat: asset('meat.png'), manduk: asset('manduk.webp'), boss: asset('boss-banner.webp'),
+        chest: asset('chest.png'), egg: asset('egg.png'), stoneaxe: asset('stoneaxe.png')
+    };
+    function ready(i) { return i && i.complete && i.naturalWidth > 0; }
     var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /* ================= sprites: drop the white box around pet GIFs ================= */
@@ -203,7 +210,7 @@
     var origBoss = sv_spawnBoss;
     sv_spawnBoss = function () {
         var r = origBoss.apply(this, arguments);
-        banners.push({ text: '보스 등장!', life: 2.2, maxLife: 2.2 });
+        banners.push({ text: '보스 등장!', life: 2.4, maxLife: 2.4, img: ART.boss });
         play('boss'); shake = Math.max(shake, 10);
         return r;
     };
@@ -232,6 +239,13 @@
         sv_ctx.beginPath(); sv_ctx.ellipse(x, y, r, r * 0.38, 0, 0, Math.PI * 2); sv_ctx.fill();
     }
     function gem(g, t) {
+        var art = g.isBossDrop ? ART.diamond : g.value >= 10 ? ART.gemRed : g.value >= 6 ? ART.gemYellow : g.value >= 3 ? ART.gemGreen : ART.gemSky;
+        if (ready(art)) {
+            var sz = g.isBossDrop ? 54 : 26, bob2 = Math.sin(t * 4 + g.x * 0.05) * 2;
+            shadow(g.x, g.y + sz * 0.45, sz * 0.35);
+            sv_ctx.drawImage(art, g.x - sz / 2, g.y - sz / 2 + bob2, sz, sz);
+            return;
+        }
         var big = g.isBossDrop, s = big ? 16 : (g.value >= 10 ? 9 : g.value >= 3 ? 7.5 : 6);
         var col = big ? ['#e3c2ff', '#9b4dff'] : g.value >= 10 ? ['#ffd1d1', '#ff4b3e'] : g.value >= 3 ? ['#c9ffe4', '#21c77a'] : ['#d4f3ff', '#2fa8ff'];
         var bob = Math.sin(t * 4 + g.x * 0.05) * 2;
@@ -244,6 +258,12 @@
         sv_ctx.restore();
     }
     function meat(m, t) {
+        if (ready(ART.meat)) {
+            var mz = m.isBossDrop ? 64 : 30, mb = Math.sin(t * 3 + m.x) * 2;
+            shadow(m.x, m.y + mz * 0.42, mz * 0.38);
+            sv_ctx.drawImage(ART.meat, m.x - mz / 2, m.y - mz / 2 + mb, mz, mz * 47 / 44);
+            return;
+        }
         var k = m.isBossDrop ? 2.2 : 1, bob = Math.sin(t * 3 + m.x) * 2;
         shadow(m.x, m.y + 12 * k, 12 * k);
         sv_ctx.save(); sv_ctx.translate(m.x, m.y + bob); sv_ctx.scale(k, k); sv_ctx.rotate(-0.5);
@@ -293,13 +313,24 @@
         // area effects under the actors
         sv_aoeEffects.forEach(function (a) {
             if (a.type === 'claw') {
-                var k = a.life / a.maxLife;
-                g.save(); g.translate(a.x, a.y); g.globalAlpha = 0.35 * k;
-                g.fillStyle = '#bfe9ff'; g.beginPath(); g.arc(0, 0, a.radius, 0, 7); g.fill();
-                g.globalAlpha = k; g.strokeStyle = '#ffffff'; g.lineWidth = 6; g.lineCap = 'round';
-                var off = (a.hitsLeft % 2 === 0) ? 0.5 : -0.5;
-                for (var i = -1; i <= 1; i++) {
-                    g.beginPath(); g.arc(0, 0, a.radius * (0.55 + i * 0.12), off - 1.1, off + 1.1); g.stroke();
+                var k = a.life / a.maxLife, swipe = (a.hitTimer / (a.hitInterval || 0.25));
+                swipe = 1 - Math.max(0, Math.min(1, swipe));                 // 0 -> 1 during each strike
+                var dir = (a.hitsLeft % 2 === 0) ? 1 : -1, base = dir > 0 ? -2.2 : 0.9;
+                var ang = base + dir * swipe * 1.8;
+                g.save(); g.translate(a.x, a.y);
+                g.globalAlpha = 0.22 * k; g.fillStyle = '#bfe9ff'; g.beginPath(); g.arc(0, 0, a.radius, 0, 7); g.fill();
+                // frost trail behind the claw
+                g.globalAlpha = 0.85 * k; g.lineCap = 'round';
+                [[0.62, 10, '#ffffff'], [0.74, 6, '#bfe9ff'], [0.5, 6, '#bfe9ff']].forEach(function (l) {
+                    g.strokeStyle = l[2]; g.lineWidth = l[1];
+                    g.beginPath(); g.arc(0, 0, a.radius * l[0], dir > 0 ? base : ang, dir > 0 ? ang : base); g.stroke();
+                });
+                // the claw itself sweeping along the arc
+                if (weaponImg(a.img)) {
+                    var rr = a.radius * 0.62, cs = Math.max(56, a.radius * 0.6);
+                    g.globalAlpha = Math.min(1, k * 1.6);
+                    g.translate(Math.cos(ang) * rr, Math.sin(ang) * rr); g.rotate(ang + (dir > 0 ? Math.PI / 2 : -Math.PI / 2));
+                    g.drawImage(a.img, -cs / 2, -cs / 2, cs, cs);
                 }
                 g.restore();
             } else if (a.type === 'drop') {
@@ -311,6 +342,8 @@
                 g.restore();
             }
         });
+
+        (window.SVPlus.under || []).forEach(function (fn) { fn(g, t, dt, L, T, R, B); });
 
         // actors, sorted by depth
         var actors = [];
@@ -385,6 +418,8 @@
             g.restore();
         });
 
+        (window.SVPlus.over || []).forEach(function (fn) { fn(g, t, dt, L, T, R, B); });
+
         // particles and rings
         sv_particles.forEach(function (pt) {
             g.globalAlpha = Math.max(0, pt.life / pt.maxLife); g.fillStyle = pt.color;
@@ -424,8 +459,13 @@
             if (bn.life <= 0) { banners.splice(b, 1); continue; }
             var p = 1 - bn.life / bn.maxLife, a = p < 0.15 ? p / 0.15 : bn.life < 0.4 ? bn.life / 0.4 : 1;
             g.save(); g.globalAlpha = a; g.translate(sv_cw / 2, sv_ch * 0.3); g.rotate(-0.05); g.scale(1 + (1 - a) * 0.3, 1 + (1 - a) * 0.3);
-            g.font = "64px 'Black Han Sans', 'Pretendard', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
-            g.lineWidth = 14; g.strokeStyle = INK; g.strokeText(bn.text, 0, 0); g.fillStyle = '#ff3b30'; g.fillText(bn.text, 0, 0);
+            if (bn.img && ready(bn.img)) {
+                var bw = Math.min(sv_cw * 0.8, 720), bh = bw / 3;
+                g.drawImage(bn.img, -bw / 2, -bh / 2, bw, bh);
+            } else {
+                g.font = "64px 'Black Han Sans', 'Pretendard', sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+                g.lineWidth = 14; g.strokeStyle = INK; g.strokeText(bn.text, 0, 0); g.fillStyle = bn.color || '#ff3b30'; g.fillText(bn.text, 0, 0);
+            }
             g.restore();
         }
     };
@@ -437,6 +477,10 @@
         g.beginPath(); g.ellipse(p.x, p.y + 20, 26 + Math.sin(t * 4) * 2, 10, 0, 0, 7); g.stroke(); g.restore();
         var bob = moving ? 1 + Math.sin(t * 16) * 0.06 : 1 + Math.sin(t * 3) * 0.02;
         var drawn = sv_selectedCharImgPath ? drawSprite(SV_IMAGES.player, p.x, p.y - 6, 58, p.facingX > 0, bob) : null;
+        if (!drawn && ready(ART.manduk)) {
+            g.save(); g.translate(p.x, p.y + 22); g.scale(p.facingX < 0 ? -1 : 1, bob);
+            g.drawImage(ART.manduk, -34, -68, 68, 68); g.restore(); drawn = true;
+        }
         if (!drawn) {
             g.save(); g.translate(p.x, p.y); g.scale(1, bob);
             g.fillStyle = '#ffd400'; g.strokeStyle = INK; g.lineWidth = 3;
@@ -447,6 +491,14 @@
         }
         bar(p.x, p.y + 32, 44, 5, p.hp / p.maxHp, p.hp / p.maxHp > 0.3 ? '#45d07a' : '#ff3b30');
     }
+
+    window.SVPlus = {
+        under: [], over: [], ART: ART, ready: ready, play: play, SFX: SFX, label: label, bar: bar, shadow: shadow,
+        ring: function (x, y, r, max, life, color) { rings.push({ x: x, y: y, r: r, max: max, life: life, maxLife: life, color: color }); },
+        banner: function (text, color, img) { banners.push({ text: text, color: color, img: img, life: 2.2, maxLife: 2.2 }); },
+        shake: function (v) { shake = Math.max(shake, v); },
+        drawSprite: drawSprite
+    };
 
     /* ================= touch joystick ================= */
     var stick = document.createElement('div');
@@ -478,6 +530,13 @@
         wrap.addEventListener('pointerup', end); wrap.addEventListener('pointercancel', end);
         if (sv_canvas) sv_canvas.style.touchAction = 'none';
     }
+
+    var title = document.querySelector('#sv-start-screen .sv-modal-title');
+    if (title) title.textContent = '만득서바이벌';
+    var charBtn = document.querySelector('#sv-start-screen button[onclick*="sv_openCharSelect"]');
+    if (charBtn) charBtn.classList.add('sv-btn-light');
+    var noneBox = document.getElementById('sv-current-char-none');
+    if (noneBox) noneBox.innerHTML = '<img src="./img/game/manduk.webp" alt="만득이">';
 
     /* ================= sound toggle ================= */
     var sfxBtn = document.createElement('button');

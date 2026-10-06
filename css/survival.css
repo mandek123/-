@@ -70,7 +70,7 @@
     border-radius: 50%; background: #ffd400; border: 3px solid #1d1a12; box-shadow: 2px 3px 0 #1d1a12;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
     #sv-ui-time { top: 84px !important; }
     .sv-sfx-toggle { top: 118px; }
 }
@@ -83,3 +83,33 @@
 @media (prefers-reduced-motion: reduce) {
     #sv-levelup-modal .sv-upgrade-card { animation: none; }
 }
+
+/* start screen: key art and readable text */
+#survival-fullscreen-wrapper #sv-start-screen {
+    background:
+        linear-gradient(180deg, rgba(29, 26, 18, .25) 0%, rgba(29, 26, 18, .82) 62%),
+        url("../img/game/start-art.webp") center top / cover no-repeat,
+        #3f6b2e !important;
+    justify-content: flex-end !important; padding-bottom: 6vh;
+}
+#sv-start-screen > div:nth-child(2) { color: #ffd400 !important; text-shadow: 0 2px 0 #1d1a12; }
+#sv-start-screen > div[style*="display: flex"] > div div[style*="color"] { text-shadow: none !important; }
+#sv-start-screen [style*="--acc-blue-2"] { color: #084f8f !important; }
+#sv-start-screen [style*="color: var(--t3)"] { color: #5c4d33 !important; }
+#sv-current-char-name { color: #084f8f !important; }
+#survival-fullscreen-wrapper .sv-btn.sv-btn-light { background: #ffd400 !important; color: #1d1a12 !important; }
+#sv-char-select-modal [style*="background: #21262d"] { background: #fff7e6 !important; border: 2px solid #1d1a12 !important; }
+#sv-char-list div[style*="color: var(--t2)"] { color: #1d1a12 !important; }
+#sv-gameover-modal, #sv-boss-reward-modal { color: #fff7e6; }
+#sv-boss-reward-content { background: #fff7e6; color: #1d1a12; border: 3px solid #1d1a12; border-radius: 18px; box-shadow: 6px 7px 0 #1d1a12; padding: 24px 32px; text-align: center; }
+.sv-chest { display: block; width: 96px; height: auto; margin: 0 auto 12px; image-rendering: pixelated; animation: sv-chest 1s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes sv-chest { 0% { transform: scale(.3) rotate(-20deg); } 60% { transform: scale(1.15) rotate(6deg); } 100% { transform: none; } }
+.sv-upgrade-card.is-new { position: relative; }
+.sv-upgrade-card.is-new::after {
+    content: 'NEW'; position: absolute; top: -12px; right: 14px; font: 900 11px/1 'Pretendard', sans-serif; letter-spacing: .06em;
+    background: #45ffb0; color: #1d1a12; border: 2px solid #1d1a12; padding: 4px 8px; border-radius: 6px;
+}
+.sv-upgrade-icon i { font-size: 34px; color: #1d1a12; }
+.sv-upgrade-icon img { image-rendering: auto; }
+#sv-current-char-none { background: #fff !important; border: 2px solid #1d1a12 !important; overflow: hidden; }
+#sv-current-char-none img { width: 100%; height: 100%; object-fit: contain; }

@@ -1,15 +1,69 @@
 /* 만득이 키우기 · battlefield scene and unit feel */
 #idle-field.idle-field, .idle-field {
     height: 300px !important;
-    background:
-        url("../img/clouds.svg?v=2") repeat-x 0 18px / 900px 120px,
-        url("../img/scene-meadow.svg?v=2") center bottom / cover no-repeat,
-        #5cc8ff !important;
+    background: url("../img/game/bg-meadow.webp") center 78% / cover no-repeat, #5cc8ff !important;
     border: 3px solid #1d1a12 !important; border-radius: 18px !important;
     box-shadow: 6px 7px 0 #1d1a12 !important;
-    animation: idle-clouds 90s linear infinite;
+    transition: background-image .4s;
 }
-@keyframes idle-clouds { to { background-position: 900px 18px, center bottom, 0 0; } }
+#idle-field[data-zone="volcano"] { background: url("../img/game/bg-volcano.webp") center 78% / cover no-repeat, #3a0f0a !important; }
+#idle-field[data-zone="cave"] { background: url("../img/game/bg-cave.webp") center bottom / cover no-repeat, #0e2433 !important; }
+#idle-field[data-zone="volcano"] .idle-entity > div:last-child, #idle-field[data-zone="cave"] .idle-entity > div:last-child { box-shadow: 2px 2px 0 #1d1a12, 0 0 0 2px rgba(255,255,255,.2) !important; }
+
+/* field reactions */
+#idle-field.is-shaking { animation: field-shake .32s cubic-bezier(.36, .07, .19, .97); }
+@keyframes field-shake {
+    20% { transform: translate(calc(var(--shake, 5px) * -1), 2px); }
+    40% { transform: translate(var(--shake, 5px), -2px); }
+    60% { transform: translate(calc(var(--shake, 5px) * -.6), 1px); }
+    80% { transform: translate(calc(var(--shake, 5px) * .4), 0); }
+}
+#idle-field.is-hurt::before {
+    content: ''; position: absolute; inset: 0; z-index: 900; pointer-events: none; border-radius: inherit;
+    box-shadow: inset 0 0 60px 10px rgba(255, 59, 48, .7); animation: hurt-fade .45s ease-out forwards;
+}
+@keyframes hurt-fade { from { opacity: 1; } to { opacity: 0; } }
+
+/* effects */
+.fx { position: absolute; pointer-events: none; z-index: 950; translate: -50% -50%; }
+.fx-burst { width: 56px; height: 56px; background:
+    conic-gradient(from 0deg, #fff7e6 0 10deg, transparent 10deg 45deg, #ffd400 45deg 55deg, transparent 55deg 90deg, #fff7e6 90deg 100deg, transparent 100deg 135deg, #ffd400 135deg 145deg, transparent 145deg 180deg, #fff7e6 180deg 190deg, transparent 190deg 225deg, #ffd400 225deg 235deg, transparent 235deg 270deg, #fff7e6 270deg 280deg, transparent 280deg 315deg, #ffd400 315deg 325deg, transparent 325deg);
+    -webkit-mask: radial-gradient(circle, transparent 18%, #000 20%, #000 70%, transparent 72%); mask: radial-gradient(circle, transparent 18%, #000 20%, #000 70%, transparent 72%);
+    animation: fx-burst .38s ease-out forwards; }
+.fx-burst--crit { width: 120px; height: 120px; filter: drop-shadow(0 0 6px #ffd400); animation-duration: .5s; }
+.fx-burst--red { filter: hue-rotate(-40deg) saturate(3); }
+@keyframes fx-burst { from { scale: .3; opacity: 1; rotate: 0deg; } to { scale: 1.4; opacity: 0; rotate: 30deg; } }
+.fx-slash { width: 130px; height: 10px; border-radius: 10px; background: linear-gradient(90deg, transparent, #fff, #ffd400, transparent);
+    rotate: -30deg; box-shadow: 0 0 12px #ffd400; animation: fx-slash .42s ease-out forwards; }
+@keyframes fx-slash { from { scale: .2 1; opacity: 1; } 50% { scale: 1.1 1; } to { scale: 1.2 .3; opacity: 0; } }
+.fx-word { font: 400 22px/1 'Black Han Sans', 'Pretendard', sans-serif; color: #ffd400; -webkit-text-stroke: 5px #1d1a12; paint-order: stroke fill;
+    white-space: nowrap; rotate: -6deg; animation: fx-word .8s cubic-bezier(.16, 1, .3, 1) forwards; }
+@keyframes fx-word { 0% { scale: .3; opacity: 0; } 20% { scale: 1.25; opacity: 1; } 35% { scale: 1; } 100% { translate: -50% -120%; opacity: 0; } }
+.fx-heal i { position: absolute; width: 14px; height: 14px; background:
+    linear-gradient(#45ffb0, #45ffb0) center / 4px 100% no-repeat, linear-gradient(#45ffb0, #45ffb0) center / 100% 4px no-repeat;
+    filter: drop-shadow(0 0 3px #1d1a12); animation: fx-rise .9s ease-out forwards; }
+.fx-heal i:nth-child(1) { left: -20px; } .fx-heal i:nth-child(2) { left: 0; animation-delay: .1s; } .fx-heal i:nth-child(3) { left: 18px; animation-delay: .2s; } .fx-heal i:nth-child(4) { left: -6px; animation-delay: .3s; }
+@keyframes fx-rise { from { translate: 0 0; opacity: 0; } 20% { opacity: 1; } to { translate: 0 -46px; opacity: 0; } }
+.fx-dodge i { position: absolute; width: 34px; height: 3px; background: #7fdcff; border-radius: 3px; animation: fx-dodge .45s ease-out forwards; }
+.fx-dodge i:nth-child(1) { top: -10px; } .fx-dodge i:nth-child(2) { top: 0; left: 8px; } .fx-dodge i:nth-child(3) { top: 10px; }
+@keyframes fx-dodge { from { translate: 20px 0; opacity: 1; } to { translate: -30px 0; opacity: 0; } }
+.fx-poof i { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff7e6; border: 2px solid #1d1a12; animation: fx-poof .6s ease-out forwards; }
+.fx-poof i:nth-child(1) { --dx: -30px; --dy: -14px; } .fx-poof i:nth-child(2) { --dx: 28px; --dy: -18px; } .fx-poof i:nth-child(3) { --dx: -22px; --dy: 16px; }
+.fx-poof i:nth-child(4) { --dx: 24px; --dy: 14px; } .fx-poof i:nth-child(5) { --dx: 0; --dy: -30px; } .fx-poof i:nth-child(6) { --dx: 4px; --dy: 22px; }
+@keyframes fx-poof { from { translate: 0 0; scale: .4; opacity: 1; } to { translate: var(--dx) var(--dy); scale: 1.4; opacity: 0; } }
+.fx-swing { width: 60px; height: 60px; border-radius: 50%; border: 5px solid transparent; border-right-color: #fff7e6; border-top-color: rgba(255, 247, 230, .6);
+    animation: fx-swing .26s ease-out forwards; }
+.fx-swing.is-left { border-right-color: transparent; border-left-color: #ffb3a8; border-top-color: rgba(255, 179, 168, .6); }
+@keyframes fx-swing { from { rotate: -70deg; opacity: 1; scale: .7; } to { rotate: 40deg; opacity: 0; scale: 1.1; } }
+.fx-stage, .fx-boss, .fx-buff { left: 50%; top: 45%; text-align: center; }
+.fx-stage { animation: fx-card 1.8s cubic-bezier(.16, 1, .3, 1) forwards; }
+.fx-stage b { display: block; font: 400 46px/1 'Black Han Sans', 'Pretendard', sans-serif; color: #fff7e6; -webkit-text-stroke: 9px #1d1a12; paint-order: stroke fill; text-shadow: 4px 5px 0 #1d1a12; }
+.fx-stage span { display: inline-block; margin-top: 8px; background: #1d1a12; color: #ffd400; font-weight: 900; font-size: 14px; padding: 5px 12px; border-radius: 999px; }
+.fx-boss { width: min(80%, 560px); animation: fx-card 2.2s cubic-bezier(.16, 1, .3, 1) forwards; }
+.fx-boss img { width: 100%; height: auto; display: block; }
+.fx-buff b { font: 400 40px/1 'Black Han Sans', 'Pretendard', sans-serif; color: #ffd400; -webkit-text-stroke: 8px #1d1a12; paint-order: stroke fill; }
+.fx-buff { animation: fx-card 1.4s cubic-bezier(.16, 1, .3, 1) forwards; }
+@keyframes fx-card { 0% { scale: .4; opacity: 0; } 15% { scale: 1.1; opacity: 1; } 25% { scale: 1; } 80% { opacity: 1; } 100% { opacity: 0; scale: 1.05; } }
 .idle-field::after { display: none !important; }
 
 /* units */
@@ -75,5 +129,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .idle-field, .idle-entity img, .boss-entity::before { animation: none !important; }
+    .idle-field, .idle-entity img, .boss-entity::before, .fx, .fx * { animation: none !important; }
+    .fx { display: none; }
 }
