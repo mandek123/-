@@ -1,0 +1,154 @@
+/* 만득월드 · inner pages, rebuilt in the title-card world.
+   Layout and behavior stay with the page scripts; this file only restyles them. */
+
+:root[data-theme="toon"] {
+    --pg-ink: #0b0b0b;
+    --pg-cel: #fff7e6;
+    --pg-well: #fbf1db;
+    --pg-rule: rgba(11, 11, 11, .16);
+}
+
+/* ---------- page header (injected by home.js) ---------- */
+.pg-head {
+    grid-column: 1 / -1; width: 100%; box-sizing: border-box;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    margin: 0 0 6px; padding: 4px 4px 10px;
+}
+.pg-ic {
+    width: 62px; height: 62px; flex: none; display: grid; place-items: center;
+    border: 3px solid var(--pg-ink); border-radius: 16px; font-size: 26px; color: var(--pg-ink);
+    box-shadow: 4px 5px 0 var(--pg-ink); transform: rotate(-4deg); background: #ffd400;
+}
+.pg-ic--calc { background: #fff7e6; }
+.pg-ic--ency { background: #b780ff; }
+.pg-ic--game { background: #45ffb0; }
+.pg-ic--info { background: #ffd400; }
+.pg-titles { min-width: 0; flex: 1; }
+.pg-title {
+    margin: 0; font: 400 clamp(2rem, 4.2vw, 3.1rem)/1.05 var(--font-display); letter-spacing: -.01em;
+    color: var(--pg-cel); -webkit-text-stroke: 9px var(--pg-ink); paint-order: stroke fill; text-shadow: 5px 6px 0 var(--pg-ink);
+}
+.pg-desc { margin: 10px 0 0; font-weight: 800; font-size: 15px; color: var(--pg-ink); }
+.pg-home {
+    flex: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font: 800 14px/1 var(--font-body); color: var(--pg-ink); background: var(--pg-cel);
+    border: 3px solid var(--pg-ink); border-radius: 12px; padding: 11px 16px; box-shadow: 3px 4px 0 var(--pg-ink);
+    transition: transform .18s var(--ease), box-shadow .18s var(--ease);
+}
+.pg-home:hover { transform: translate(-2px, -2px); box-shadow: 5px 6px 0 var(--pg-ink); }
+
+/* ---------- cards ---------- */
+:root[data-theme="toon"] .main-container:not(#page-home) { gap: 28px !important; }
+:root[data-theme="toon"] .main-container:not(#page-home) .card {
+    background: var(--pg-cel) !important; border: 3px solid var(--pg-ink) !important;
+    border-radius: 20px !important; box-shadow: 7px 8px 0 var(--pg-ink) !important; padding: 28px !important;
+}
+:root[data-theme="toon"] .main-container:not(#page-home) .card .card {
+    box-shadow: none !important; border-width: 2px !important; background: var(--pg-well) !important; border-radius: 14px !important;
+}
+:root[data-theme="toon"] .card-header, :root[data-theme="toon"] .card-title {
+    font: 400 1.5rem/1.15 var(--font-display) !important; color: var(--pg-ink) !important;
+    padding-bottom: 16px; margin-bottom: 22px !important; border-bottom: 3px dashed var(--pg-rule);
+    display: flex !important; align-items: center; gap: 12px;
+}
+:root[data-theme="toon"] .card-header > i:first-child, :root[data-theme="toon"] .card-title > i:first-child {
+    width: 38px !important; height: 38px; flex: none; display: inline-grid !important; place-items: center;
+    background: var(--pg-ink) !important; color: #ffd400 !important; border-radius: 10px; font-size: 16px !important;
+}
+
+/* ---------- labels, text ---------- */
+:root[data-theme="toon"] .main-container:not(#page-home) label,
+:root[data-theme="toon"] .main-container:not(#page-home) .label,
+:root[data-theme="toon"] .input-group label { font-weight: 800 !important; font-size: 13.5px !important; color: #2c2416 !important; letter-spacing: 0; }
+:root[data-theme="toon"] .main-container:not(#page-home) { line-height: 1.6; }
+
+/* ---------- fields ---------- */
+:root[data-theme="toon"] .main-container:not(#page-home) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+:root[data-theme="toon"] .main-container:not(#page-home) select,
+:root[data-theme="toon"] .main-container:not(#page-home) .custom-select-trigger {
+    min-height: 46px; border: 2.5px solid var(--pg-ink) !important; border-radius: 12px !important;
+    background-color: #fffdf7 !important; font-weight: 700 !important; font-size: 15px !important; box-shadow: inset 0 -3px 0 rgba(11, 11, 11, .06);
+}
+:root[data-theme="toon"] .main-container:not(#page-home) input:focus,
+:root[data-theme="toon"] .main-container:not(#page-home) select:focus { box-shadow: 0 0 0 4px #ffd400 !important; }
+
+/* ---------- buttons ---------- */
+:root[data-theme="toon"] .main-container:not(#page-home) .btn-calc {
+    font: 400 1.15rem/1 var(--font-display) !important; letter-spacing: .01em;
+    border: 3px solid var(--pg-ink) !important; border-radius: 14px !important;
+    box-shadow: 4px 5px 0 var(--pg-ink) !important; padding: 16px 18px !important; min-height: 52px;
+}
+:root[data-theme="toon"] .main-container:not(#page-home) .btn-calc:not([style*="background"]) { background: #ffd400 !important; color: var(--pg-ink) !important; }
+:root[data-theme="toon"] .main-container:not(#page-home) .btn-calc:hover { transform: translate(-2px, -2px); box-shadow: 6px 7px 0 var(--pg-ink) !important; }
+:root[data-theme="toon"] .main-container:not(#page-home) .btn-calc:active { transform: translate(2px, 3px); box-shadow: 1px 1px 0 var(--pg-ink) !important; }
+:root[data-theme="toon"] .main-container:not(#page-home) button:not(.btn-calc):not(.pg-home):not(.th-ep) { border-radius: 10px; font-weight: 800; }
+
+/* ---------- result tiles ---------- */
+:root[data-theme="toon"] .res-box {
+    background: #fff !important; border: 2.5px solid var(--pg-ink) !important; border-radius: 14px !important;
+    box-shadow: none !important; padding: 16px 18px !important;
+}
+:root[data-theme="toon"] .res-box.char, :root[data-theme="toon"] .res-box.pet, :root[data-theme="toon"] .res-box.full-width { border-left-width: 2.5px !important; }
+:root[data-theme="toon"] .res-box.char { background: #e6f7ff !important; }
+:root[data-theme="toon"] .res-box.pet { background: #fff4c2 !important; }
+:root[data-theme="toon"] .res-box.full-width { background: #f1e6ff !important; }
+:root[data-theme="toon"] .res-label { font-size: 12.5px !important; font-weight: 800 !important; color: #5c4d33 !important; margin-bottom: 6px !important; }
+:root[data-theme="toon"] .res-val { font: 400 1.65rem/1.15 var(--font-display) !important; color: var(--pg-ink) !important; letter-spacing: 0 !important; }
+
+/* ---------- lists, tables, notices ---------- */
+:root[data-theme="toon"] .table-row { padding: 12px 4px !important; border-bottom: 2px dashed var(--pg-rule) !important; font-weight: 600; }
+:root[data-theme="toon"] .main-container:not(#page-home) table { border-collapse: separate; border-spacing: 0; width: 100%; font-variant-numeric: tabular-nums; }
+:root[data-theme="toon"] .main-container:not(#page-home) th { background: var(--pg-ink) !important; color: var(--pg-cel) !important; font-weight: 800; padding: 10px 12px !important; border: 0 !important; }
+:root[data-theme="toon"] .main-container:not(#page-home) th:first-child { border-radius: 10px 0 0 10px; }
+:root[data-theme="toon"] .main-container:not(#page-home) th:last-child { border-radius: 0 10px 10px 0; }
+:root[data-theme="toon"] .main-container:not(#page-home) td { padding: 10px 12px !important; border: 0 !important; border-bottom: 2px dashed var(--pg-rule) !important; }
+:root[data-theme="toon"] .notice-item {
+    background: #fff !important; border: 2.5px solid var(--pg-ink) !important; border-radius: 16px !important; padding: 22px 24px !important; margin-bottom: 18px !important;
+}
+:root[data-theme="toon"] .notice-item strong { font-weight: 800; color: var(--pg-ink); }
+
+/* ---------- tags, chips ---------- */
+:root[data-theme="toon"] .tag {
+    border: 2px solid var(--pg-ink) !important; border-radius: 999px !important;
+    padding: 3px 10px !important; font-weight: 900 !important; font-size: 11.5px !important; color: var(--pg-ink) !important;
+}
+:root[data-theme="toon"] .tag-top { background: #ff3b30 !important; }
+:root[data-theme="toon"] .tag-high { background: #ffd400 !important; }
+:root[data-theme="toon"] .tag-normal { background: #fff !important; }
+:root[data-theme="toon"] .tag-passive { background: #45ffb0 !important; }
+
+/* ---------- collapsible groups ---------- */
+:root[data-theme="toon"] details { border-radius: 14px; }
+:root[data-theme="toon"] summary { cursor: pointer; font-weight: 800 !important; }
+:root[data-theme="toon"] .input-group-title { color: var(--pg-ink) !important; font: 400 1.1rem/1.2 var(--font-display) !important; }
+
+/* ---------- pagination ---------- */
+:root[data-theme="toon"] .page-btn, :root[data-theme="toon"] .group-page-btn {
+    min-width: 38px; height: 38px; border: 2.5px solid var(--pg-ink) !important; border-radius: 10px !important;
+    background: #fff !important; color: var(--pg-ink) !important; font-weight: 900 !important;
+}
+:root[data-theme="toon"] .page-btn.active, :root[data-theme="toon"] .group-page-btn.active { background: var(--pg-ink) !important; color: #ffd400 !important; }
+
+@media (max-width: 600px) {
+    .pg-head { gap: 12px; }
+    .pg-ic { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
+    .pg-title { -webkit-text-stroke-width: 7px; text-shadow: 3px 4px 0 var(--pg-ink); }
+    .pg-home { order: 3; }
+    :root[data-theme="toon"] .main-container:not(#page-home) .card { padding: 20px !important; box-shadow: 5px 6px 0 var(--pg-ink) !important; }
+}
+.te-ic { margin-right: .35em; font-size: .92em; }
+:root[data-theme="toon"] .res-box .te-ic, :root[data-theme="toon"] .res-label i { font-size: 1em !important; display: inline !important; margin: 0 .35em 0 0 !important; opacity: 1; transform: none !important; color: inherit !important; }
+:root[data-theme="toon"] .filter-row select, :root[data-theme="toon"] .filter-row input { font-size: 13.5px !important; white-space: nowrap; }
+.card-header.is-dup .dup-txt, .card-header.is-dup > i:first-child { display: none !important; }
+.card-header.is-dup { justify-content: flex-end; border-bottom: 0; padding-bottom: 0; margin-bottom: 14px !important; min-height: 0; }
+.card-header.is-dup.is-empty { display: none !important; }
+:root[data-theme="toon"] .arena-card,
+:root[data-theme="toon"] .arena-top-rank {
+    background: var(--pg-cel) !important; border: 3px solid var(--pg-ink) !important;
+    border-radius: 20px !important; box-shadow: 7px 8px 0 var(--pg-ink) !important;
+}
+:root[data-theme="toon"] .arena-top-rank { width: 100%; box-sizing: border-box; }
+:root[data-theme="toon"] .final-stat-display, :root[data-theme="toon"] .guide-content { background: var(--pg-well) !important; border: 2px solid var(--pg-ink) !important; border-radius: 14px !important; }
+.card-header.is-dup { justify-content: flex-end !important; }
+:root[data-theme="toon"] .filter-row { flex-wrap: wrap !important; gap: 10px !important; }
+:root[data-theme="toon"] .filter-row > * { flex: 1 1 150px !important; min-width: 0 !important; }
