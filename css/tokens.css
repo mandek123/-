@@ -1,0 +1,82 @@
+/* 만득월드 theme tokens. Page code paints only with these. */
+
+/* ---------- 만화 (toon): bright cel world ---------- */
+:root[data-theme="toon"] {
+    color-scheme: light;
+    --ground: #40c6ff;
+    --s0: #f2e4c4;
+    --s1: #fff7e6;
+    --s2: #fbefd6;
+    --s3: #ecdcb8;
+    --line: #c9b48a;
+    --line-strong: #0b0b0b;
+    --t1: #0b0b0b;
+    --t2: #2c2416;
+    --t3: #5c4d33;
+    --acc-blue: #084f8f;
+    --acc-blue-2: #07558a;
+    --acc-red: #a51d14;
+    --acc-orange: #874200;
+    --acc-gold: #6b4d00;
+    --acc-green: #0b5c2b;
+    --acc-green-2: #0e6531;
+    --acc-purple: #5a2fa8;
+    --bg-blue: #10609f;
+    --bg-red: #c22a20;
+    --bg-orange: #a85600;
+    --bg-gold: #f2b800;
+    --bg-green: #157a40;
+    --bg-purple: #6a3fc8;
+    --shade-rgb: 214, 190, 140;
+    --hi-rgb: 70, 50, 20;
+    --t3-rgb: 106, 90, 61;
+    --blue-rgb: 22, 119, 201;
+    --red-rgb: 224, 54, 44;
+    --orange-rgb: 229, 122, 0;
+    --gold-rgb: 200, 150, 0;
+    --green-rgb: 31, 157, 85;
+    --purple-rgb: 124, 77, 219;
+    --field-bg: #fffdf7;
+    --field-border: #0b0b0b;
+    --field-focus: #ffd400;
+
+    --card-border: 3px solid #0b0b0b;
+    --card-radius: 16px;
+    --card-shadow: 5px 6px 0 #0b0b0b;
+    --chip-bg: #0b0b0b;
+    --chip-ink: #ffd400;
+    --btn-bg: #ffd400;
+    --btn-ink: #0b0b0b;
+    --btn-border: 3px solid #0b0b0b;
+    --btn-radius: 12px;
+    --btn-shadow: 3px 4px 0 #0b0b0b;
+    --font-display: 'Black Han Sans', 'Pretendard', sans-serif;
+    --font-body: 'Pretendard', sans-serif;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+}
+
+/* the original stylesheet's variables, re-pointed at the active theme */
+:root[data-theme] {
+    --bg-color: var(--s0);
+    --card-bg: var(--s1);
+    --inner-card: var(--s2);
+    --input-bg: var(--field-bg);
+    --border: var(--line);
+    --text-main: var(--t2);
+    --text-highlight: var(--t1);
+    --accent: var(--acc-green);
+    --accent-blue: var(--acc-blue);
+    --accent-orange: var(--acc-orange);
+    --hover-bg: rgba(var(--hi-rgb), .07);
+    /* arena page variables */
+    --royal-gold: var(--acc-gold);
+    --deep-burgundy: var(--s2);
+    --bright-red: var(--bg-red);
+    --border-gold: rgba(var(--gold-rgb), .45);
+    --active-green: var(--acc-green-2);
+    --target-red: var(--acc-red);
+    --bot-easy: var(--acc-green);
+    --bot-normal: var(--acc-orange);
+    --bot-hard: var(--acc-red);
+    --user-blue: var(--acc-blue-2);
+}
