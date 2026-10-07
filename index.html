@@ -2431,12 +2431,12 @@ button[onclick="resetGame()"]:hover {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <script>document.documentElement.setAttribute('data-theme','toon')</script>
-<link rel="stylesheet" href="./css/tokens.css?v=20261007134258">
-<link rel="stylesheet" href="./css/components.css?v=20261007134258">
-<link rel="stylesheet" href="./css/toon.css?v=20261007134258">
-<link rel="stylesheet" href="./css/pages.css?v=20261007134258">
-<link rel="stylesheet" href="./css/survival.css?v=20261007134258">
-<link rel="stylesheet" href="./css/idle.css?v=20261007134258">
+<link rel="stylesheet" href="./css/tokens.css?v=20261007135620">
+<link rel="stylesheet" href="./css/components.css?v=20261007135620">
+<link rel="stylesheet" href="./css/toon.css?v=20261007135620">
+<link rel="stylesheet" href="./css/pages.css?v=20261007135620">
+<link rel="stylesheet" href="./css/survival.css?v=20261007135620">
+<link rel="stylesheet" href="./css/idle.css?v=20261007135620">
 </head>
 
 <body>
@@ -2591,17 +2591,18 @@ button[onclick="resetGame()"]:hover {
       </div>
 
       <div class="th-live">
-        <button type="button" class="th-live-card" onclick="showPage('page-arena')">
+        <a class="th-live-card" href="./games/pet-rhythm/">
+          <span class="th-tag th-tag--new">NEW</span>
+          <span class="th-live-icon th-live-icon--red"><i class="fa-solid fa-music"></i></span>
+          <strong>페트 리듬 러시</strong><small>페트와 함께하는 리듬게임</small>
+        </a>
+        <button type="button" class="th-live-card" onclick="showPage('page-idle-rpg')">
           <span class="th-tag">HOT</span>
-          <span class="th-live-icon th-live-icon--red"><i class="fa-solid fa-khanda"></i></span>
-          <strong>투기장 (PvP)</strong><small>월간 실시간 랭킹 대전</small>
-        </button>
-        <button type="button" class="th-live-card" onclick="showPage('page-raid')">
-          <span class="th-live-icon th-live-icon--violet"><i class="fa-solid fa-skull"></i></span>
-          <strong>1인 레이드</strong><small>실시간으로 저장되는 레이드</small>
+          <span class="th-live-icon th-live-icon--violet"><i class="fa-solid fa-gamepad"></i></span>
+          <strong>만득이 키우기</strong><small>페트와 함께하는 자동 사냥</small>
         </button>
         <button type="button" class="th-live-card" onclick="sv_openSurvivalMode()">
-          <span class="th-tag th-tag--new">NEW</span>
+          <span class="th-tag">HOT</span>
           <span class="th-live-icon th-live-icon--green"><i class="fa-solid fa-ghost"></i></span>
           <strong>만득서바이벌</strong><small>뱀서류 미니게임</small>
         </button>
@@ -17731,11 +17732,11 @@ function copyToClipboardForSheets() {
 </div>
 
 
-<script src="./js/pets-clean.js?v=20261007134258"></script>
-<script src="./js/home.js?v=20261007134258"></script>
-<script src="./js/bgm.js?v=20261007134258"></script>
-<script src="./js/survival-plus.js?v=20261007134258"></script>
-<script src="./js/survival-content.js?v=20261007134258"></script>
-<script src="./js/idle-plus.js?v=20261007134258"></script>
+<script src="./js/pets-clean.js?v=20261007135620"></script>
+<script src="./js/home.js?v=20261007135620"></script>
+<script src="./js/bgm.js?v=20261007135620"></script>
+<script src="./js/survival-plus.js?v=20261007135620"></script>
+<script src="./js/survival-content.js?v=20261007135620"></script>
+<script src="./js/idle-plus.js?v=20261007135620"></script>
 </body>
 </html>
