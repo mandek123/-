@@ -50,7 +50,7 @@
     --btn-border: 3px solid #0b0b0b;
     --btn-radius: 12px;
     --btn-shadow: 3px 4px 0 #0b0b0b;
-    --font-display: 'Pretendard', sans-serif;
+    --font-display: 'Black Han Sans', 'Pretendard', sans-serif;
     --font-body: 'Pretendard', sans-serif;
     --ease: cubic-bezier(.16, 1, .3, 1);
 }
