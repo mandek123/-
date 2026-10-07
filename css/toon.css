@@ -425,3 +425,4 @@
 :root[data-theme="toon"] .th-title{-webkit-text-stroke-width:11px;text-shadow:6px 7px 0 #191815}
 :root[data-theme="toon"] .th-badge-word{-webkit-text-stroke-width:5px;text-shadow:2px 3px 0 #191815}
 :root[data-theme="toon"] .nav-logo{-webkit-text-stroke-width:3px}
+:root[data-theme="toon"] .menu-new-badge{display:inline-block;background:#45ffb0;color:#17251f;border:1px solid #17251f;border-radius:4px;font-size:10px;font-weight:800;line-height:1.4;padding:2px 5px;margin-left:6px;white-space:nowrap}
