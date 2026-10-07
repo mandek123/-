@@ -3,21 +3,32 @@ const $=id=>document.getElementById(id),keys=['d','f','j','k'],colors=['#f4ce77'
 let team=[],patternSeed=0,charges=[0,0,0,0],stamina=100,maxStamina=100,totalDamage=0;
 let rival,rivalHp=0,rivalMax=0,defeated=0;
 // 패턴과 곡 속도가 달라졌으므로 이전 기록을 보존하고 새 규칙으로 별도 집계한다.
-const rankKey='manduk-rhythm-local-v4';
+const rankKey='manduk-rhythm-local-v5';
 let sharedRecords=[],sharedState={},pendingRank=null;
 $('rank-scope').textContent=RhythmOnline.enabled?'전체 이용자 기록':'이 기기 기록';
 if(RhythmOnline.enabled)$('nickname-status').textContent='닉네임은 이 브라우저에 저장돼요. 완주하면 닉네임·점수·정확도·콤보가 전체 이용자 랭킹에 공개됩니다.';
 const nicknameKey='manduk-rhythm-nickname';
-let savedNickname='',performanceNickname='';
+const fixedNicknameKey='manduk-rhythm-fixed-nickname-v5';
+let savedNickname='',performanceNickname='',fixedNickname='';
 try{savedNickname=localStorage.getItem(nicknameKey)?.trim().slice(0,16)||savedNickname;}catch{}
+try{fixedNickname=localStorage.getItem(fixedNicknameKey)||'';}catch{}
+if(fixedNickname)savedNickname=fixedNickname;
 $('nickname').value=savedNickname;
+function lockNickname(name){
+  localStorage.setItem(fixedNicknameKey,name);localStorage.setItem(nicknameKey,name);
+  fixedNickname=savedNickname=name;$('nickname').value=name;$('nickname').readOnly=true;$('save-nickname').hidden=true;
+  $('nickname-status').textContent=`랭킹 닉네임: ${name} · 이 브라우저의 최초 이름을 사용하며, 곡·난이도별 최고 기록 하나만 등록합니다.`;
+}
+if(fixedNickname)lockNickname(fixedNickname);
 function saveNickname(announce=true){
+  if(fixedNickname){$('nickname').value=fixedNickname;return true;}
   const name=$('nickname').value.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,16);
   if(!name){$('nickname-status').textContent='닉네임을 입력해주세요. 빈 이름으로는 기록을 등록하지 않습니다.';return false;}
   savedNickname=name;
   $('nickname').value=savedNickname;
   try{localStorage.setItem(nicknameKey,savedNickname);if(announce)$('nickname-status').textContent=`“${savedNickname}” 저장 완료. 다음 완주 기록부터 이 이름을 사용해요. 이전 기록 이름은 유지됩니다.`;}
   catch{$('nickname-status').textContent='이 공연에는 적용했지만, 브라우저 저장이 차단되어 다음에 다시 입력해야 해요.';}
+  try{lockNickname(savedNickname);}catch{$('nickname-status').textContent='브라우저 저장을 허용해야 닉네임을 유지할 수 있어요.';return false;}
   return true;
 }
 $('nickname-form').onsubmit=e=>{e.preventDefault();saveNickname();};
@@ -32,7 +43,7 @@ nicknameGate.querySelector('form').onsubmit=e=>{
   if(saveNickname()){nicknameGate.close();$('start').focus();}
   else nicknameGate.querySelector('.nickname-gate-error').textContent='닉네임을 입력해주세요.';
 };
-if(!savedNickname||savedNickname==='플레이어')nicknameGate.showModal();
+if(!fixedNickname){$('first-nickname').value=savedNickname==='플레이어'?'':savedNickname;nicknameGate.showModal();}
 let ctx,gain,fxGain,source,buffer,notes=[],running=false,paused=false,loading=false,finished=false,startAt=0,duration=0;
 let score=0,combo=0,best=0,perfect=0,good=0,miss=0,ghost=0,feverUntil=-1,offset=0,lastSecond=-99;
 let flashes=[0,0,0,0],particles=[],cache=new Map(),W=400,H=480,dpr=1;
@@ -99,14 +110,14 @@ async function refreshRanks(){
 async function uploadRank(){
   if(!pendingRank)return;
   const entry=pendingRank;$('retry-rank').hidden=true;$('rank-status').textContent='완주 기록을 전체 랭킹에 등록하는 중입니다.';
-  try{await RhythmOnline.save(entry.record,entry.id);if(pendingRank===entry)pendingRank=null;await refreshRanks();$('rank-status').textContent='완주 기록이 전체 이용자 랭킹에 등록됐어요. TOP5에 들면 목록에 표시됩니다.';}
+  try{const updated=await RhythmOnline.save(entry.record);if(pendingRank===entry)pendingRank=null;await refreshRanks();$('rank-status').textContent=updated?'최고 기록이 등록·갱신됐어요. 곡·난이도별 한 자리만 사용합니다.':'기존 최고 기록을 유지합니다. 추가 순위는 등록하지 않습니다.';}
   catch{$('retry-rank').hidden=false;$('rank-status').textContent='전체 랭킹 등록에 실패했어요. 이 화면을 닫기 전에 기록 등록 다시 시도를 눌러주세요.';}
 }
 function saveRank(acc){
   const r={name:performanceNickname,track:Rhythm.tracks[Number($('track').value)].name,level:$('level').value,score,accuracy:Math.round(acc*100),combo:best,pets:team.map(p=>p.name),date:new Date().toISOString()};
-  try{const rows=[...readRanks(),r].sort((a,b)=>b.score-a.score||b.accuracy-a.accuracy),counts={};const kept=rows.filter(x=>{const key=x.track+'/'+x.level;counts[key]=(counts[key]||0)+1;return counts[key]<=10;});localStorage.setItem(rankKey,JSON.stringify(kept));$('rank-status').textContent='이 기기에 기록을 저장했습니다. 곡·난이도별로 비교하세요.';renderRanks();}
+  try{const rows=[...readRanks(),r].sort((a,b)=>b.score-a.score||b.accuracy-a.accuracy||b.combo-a.combo),groups=new Set();const kept=rows.filter(x=>{const key=x.track+'/'+x.level;if(groups.has(key))return false;groups.add(key);return true;});localStorage.setItem(rankKey,JSON.stringify(kept));$('rank-status').textContent='이 브라우저의 곡·난이도별 최고 기록을 저장했습니다.';renderRanks();}
   catch{$('rank-status').textContent='브라우저 저장이 차단되어 기록을 저장하지 못했어요.';}
-  if(RhythmOnline.enabled){pendingRank={record:r,id:crypto.randomUUID()};uploadRank();}
+  if(RhythmOnline.enabled){pendingRank={record:r};uploadRank();}
 }
 async function audioReady(){if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();gain=ctx.createGain();gain.connect(ctx.destination);fxGain=ctx.createGain();fxGain.connect(ctx.destination);}await ctx.resume();gain.gain.value=Number($('volume').value)/100;}
 function impactSound(lane,strong=true,skill=false){
@@ -181,6 +192,7 @@ async function start(){
   const button=$('start');button.disabled=true;button.textContent='음악 준비 중…';$('status').textContent='브라우저에서 음악을 만드는 중입니다.';
   try{
     await audioReady();
+    if(RhythmOnline.enabled){performanceNickname=await RhythmOnline.identity(performanceNickname);lockNickname(performanceNickname);}
     const track=Rhythm.tracks[Number($('track').value)];
     if(!cache.has(track.name))cache.set(track.name,await Rhythm.music(track));buffer=cache.get(track.name);
     if(source){try{source.stop();}catch{}source.disconnect();}
