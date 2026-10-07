@@ -25,13 +25,13 @@
 .pg-ic--info { background: #ffd400; }
 .pg-titles { min-width: 0; flex: 1; }
 .pg-title {
-    margin: 0; font: 400 clamp(2rem, 4.2vw, 3.1rem)/1.05 var(--font-display); letter-spacing: -.01em;
+    margin: 0; font: 600 clamp(2rem, 4.2vw, 3.1rem)/1.05 var(--font-display); letter-spacing: -.01em;
     color: var(--pg-cel); -webkit-text-stroke: 9px var(--pg-ink); paint-order: stroke fill; text-shadow: 5px 6px 0 var(--pg-ink);
 }
-.pg-desc { margin: 10px 0 0; font-weight: 800; font-size: 15px; color: var(--pg-ink); }
+.pg-desc { margin: 10px 0 0; font-weight: 600; font-size: 15px; color: var(--pg-ink); }
 .pg-home {
     flex: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
-    font: 800 14px/1 var(--font-body); color: var(--pg-ink); background: var(--pg-cel);
+    font: 600 14px/1 var(--font-body); color: var(--pg-ink); background: var(--pg-cel);
     border: 3px solid var(--pg-ink); border-radius: 12px; padding: 11px 16px; box-shadow: 3px 4px 0 var(--pg-ink);
     transition: transform .18s var(--ease), box-shadow .18s var(--ease);
 }
@@ -47,7 +47,7 @@
     box-shadow: none !important; border-width: 2px !important; background: var(--pg-well) !important; border-radius: 14px !important;
 }
 :root[data-theme="toon"] .card-header, :root[data-theme="toon"] .card-title {
-    font: 400 1.5rem/1.15 var(--font-display) !important; color: var(--pg-ink) !important;
+    font: 600 1.5rem/1.15 var(--font-display) !important; color: var(--pg-ink) !important;
     padding-bottom: 16px; margin-bottom: 22px !important; border-bottom: 3px dashed var(--pg-rule);
     display: flex !important; align-items: center; gap: 12px;
 }
@@ -59,7 +59,7 @@
 /* ---------- labels, text ---------- */
 :root[data-theme="toon"] .main-container:not(#page-home) label,
 :root[data-theme="toon"] .main-container:not(#page-home) .label,
-:root[data-theme="toon"] .input-group label { font-weight: 800 !important; font-size: 13.5px !important; color: #2c2416 !important; letter-spacing: 0; }
+:root[data-theme="toon"] .input-group label { font-weight: 600 !important; font-size: 13.5px !important; color: #2c2416 !important; letter-spacing: 0; }
 :root[data-theme="toon"] .main-container:not(#page-home) { line-height: 1.6; }
 
 /* ---------- fields ---------- */
@@ -74,14 +74,14 @@
 
 /* ---------- buttons ---------- */
 :root[data-theme="toon"] .main-container:not(#page-home) .btn-calc {
-    font: 400 1.15rem/1 var(--font-display) !important; letter-spacing: .01em;
+    font: 600 1.15rem/1 var(--font-display) !important; letter-spacing: .01em;
     border: 3px solid var(--pg-ink) !important; border-radius: 14px !important;
     box-shadow: 4px 5px 0 var(--pg-ink) !important; padding: 16px 18px !important; min-height: 52px;
 }
 :root[data-theme="toon"] .main-container:not(#page-home) .btn-calc:not([style*="background"]) { background: #ffd400 !important; color: var(--pg-ink) !important; }
 :root[data-theme="toon"] .main-container:not(#page-home) .btn-calc:hover { transform: translate(-2px, -2px); box-shadow: 6px 7px 0 var(--pg-ink) !important; }
 :root[data-theme="toon"] .main-container:not(#page-home) .btn-calc:active { transform: translate(2px, 3px); box-shadow: 1px 1px 0 var(--pg-ink) !important; }
-:root[data-theme="toon"] .main-container:not(#page-home) button:not(.btn-calc):not(.pg-home):not(.th-ep) { border-radius: 10px; font-weight: 800; }
+:root[data-theme="toon"] .main-container:not(#page-home) button:not(.btn-calc):not(.pg-home):not(.th-ep) { border-radius: 10px; font-weight: 600; }
 
 /* ---------- result tiles ---------- */
 :root[data-theme="toon"] .res-box {
@@ -92,25 +92,25 @@
 :root[data-theme="toon"] .res-box.char { background: #e6f7ff !important; }
 :root[data-theme="toon"] .res-box.pet { background: #fff4c2 !important; }
 :root[data-theme="toon"] .res-box.full-width { background: #f1e6ff !important; }
-:root[data-theme="toon"] .res-label { font-size: 12.5px !important; font-weight: 800 !important; color: #5c4d33 !important; margin-bottom: 6px !important; }
-:root[data-theme="toon"] .res-val { font: 400 1.65rem/1.15 var(--font-display) !important; color: var(--pg-ink) !important; letter-spacing: 0 !important; }
+:root[data-theme="toon"] .res-label { font-size: 12.5px !important; font-weight: 600 !important; color: #5c4d33 !important; margin-bottom: 6px !important; }
+:root[data-theme="toon"] .res-val { font: 600 1.65rem/1.15 var(--font-display) !important; color: var(--pg-ink) !important; letter-spacing: 0 !important; }
 
 /* ---------- lists, tables, notices ---------- */
 :root[data-theme="toon"] .table-row { padding: 12px 4px !important; border-bottom: 2px dashed var(--pg-rule) !important; font-weight: 600; }
 :root[data-theme="toon"] .main-container:not(#page-home) table { border-collapse: separate; border-spacing: 0; width: 100%; font-variant-numeric: tabular-nums; }
-:root[data-theme="toon"] .main-container:not(#page-home) th { background: var(--pg-ink) !important; color: var(--pg-cel) !important; font-weight: 800; padding: 10px 12px !important; border: 0 !important; }
+:root[data-theme="toon"] .main-container:not(#page-home) th { background: var(--pg-ink) !important; color: var(--pg-cel) !important; font-weight: 600; padding: 10px 12px !important; border: 0 !important; }
 :root[data-theme="toon"] .main-container:not(#page-home) th:first-child { border-radius: 10px 0 0 10px; }
 :root[data-theme="toon"] .main-container:not(#page-home) th:last-child { border-radius: 0 10px 10px 0; }
 :root[data-theme="toon"] .main-container:not(#page-home) td { padding: 10px 12px !important; border: 0 !important; border-bottom: 2px dashed var(--pg-rule) !important; }
 :root[data-theme="toon"] .notice-item {
     background: #fff !important; border: 2.5px solid var(--pg-ink) !important; border-radius: 16px !important; padding: 22px 24px !important; margin-bottom: 18px !important;
 }
-:root[data-theme="toon"] .notice-item strong { font-weight: 800; color: var(--pg-ink); }
+:root[data-theme="toon"] .notice-item strong { font-weight: 600; color: var(--pg-ink); }
 
 /* ---------- tags, chips ---------- */
 :root[data-theme="toon"] .tag {
     border: 2px solid var(--pg-ink) !important; border-radius: 999px !important;
-    padding: 3px 10px !important; font-weight: 900 !important; font-size: 11.5px !important; color: var(--pg-ink) !important;
+    padding: 3px 10px !important; font-weight: 700 !important; font-size: 11.5px !important; color: var(--pg-ink) !important;
 }
 :root[data-theme="toon"] .tag-top { background: #ff3b30 !important; }
 :root[data-theme="toon"] .tag-high { background: #ffd400 !important; }
@@ -119,13 +119,13 @@
 
 /* ---------- collapsible groups ---------- */
 :root[data-theme="toon"] details { border-radius: 14px; }
-:root[data-theme="toon"] summary { cursor: pointer; font-weight: 800 !important; }
-:root[data-theme="toon"] .input-group-title { color: var(--pg-ink) !important; font: 400 1.1rem/1.2 var(--font-display) !important; }
+:root[data-theme="toon"] summary { cursor: pointer; font-weight: 600 !important; }
+:root[data-theme="toon"] .input-group-title { color: var(--pg-ink) !important; font: 600 1.1rem/1.2 var(--font-display) !important; }
 
 /* ---------- pagination ---------- */
 :root[data-theme="toon"] .page-btn, :root[data-theme="toon"] .group-page-btn {
     min-width: 38px; height: 38px; border: 2.5px solid var(--pg-ink) !important; border-radius: 10px !important;
-    background: #fff !important; color: var(--pg-ink) !important; font-weight: 900 !important;
+    background: #fff !important; color: var(--pg-ink) !important; font-weight: 700 !important;
 }
 :root[data-theme="toon"] .page-btn.active, :root[data-theme="toon"] .group-page-btn.active { background: var(--pg-ink) !important; color: #ffd400 !important; }
 
@@ -160,3 +160,4 @@
 :root[data-theme="toon"] .filter-row .custom-select-trigger,
 :root[data-theme="toon"] .filter-row .custom-select-trigger * { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; font-size: 13px !important; }
 :root[data-theme="toon"] .filter-row .custom-select-trigger { padding-left: 10px !important; padding-right: 8px !important; gap: 4px; }
+:root[data-theme="toon"] .pg-title{color:var(--pg-ink);-webkit-text-stroke:0;text-shadow:none;line-height:1.3}

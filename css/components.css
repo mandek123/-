@@ -67,7 +67,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--bg-blue); bord
 
 .btn-calc, .btn-battle, .btn-battle-act, .btn-battle-action, .btn-use, .btn-write, .sv-btn {
     border-radius: var(--btn-radius) !important;
-    font-weight: 800 !important;
+    font-weight: 600 !important;
 }
 
 .table-row { border-bottom-color: var(--line) !important; font-variant-numeric: tabular-nums; }
@@ -128,7 +128,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--bg-blue); bord
     position: fixed; right: 16px; bottom: 16px; z-index: 2000;
     display: inline-flex; align-items: center; gap: 8px;
     padding: 8px 14px 8px 9px; cursor: pointer;
-    font: 800 13px/1 var(--font-body); color: var(--t1);
+    font: 600 13px/1 var(--font-body); color: var(--t1);
     background: var(--s1); border: var(--card-border); border-radius: 999px; box-shadow: 3px 4px 0 var(--line-strong);
     transition: transform .18s var(--ease), box-shadow .18s var(--ease);
 }

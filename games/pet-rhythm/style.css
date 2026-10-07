@@ -14,3 +14,6 @@
 
 header .home-button{font:800 13px/1.2 'Noto Sans KR',sans-serif;background:var(--yellow);border:2px solid var(--ink);border-radius:9px;padding:9px 13px;white-space:nowrap}header .home-button:focus-visible{outline:3px solid #144fbc;outline-offset:4px}@media(max-width:760px){header .home-button{font-size:11px;padding:7px 8px}header{gap:8px}.nickname-form button[hidden]{display:none}}
 .nickname-form button[hidden]{display:none}
+
+/* Compact Korean labels use the body font instead of the heavy display face. */
+:root{--display:"Noto Sans KR",sans-serif}.heading h1,.score strong,.cover h2,.ranking h2,.song-ranking h3,.nickname-gate h2{font-weight:700}.actor span,.song-ranking strong,.pad span{font-weight:600}.song-ranking strong{font-size:12px}.song-ranking small{font-size:11px}.ranking p{font-size:12px}.pet-info small{font-size:12px;line-height:1.6}
