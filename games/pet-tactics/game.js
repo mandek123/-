@@ -20,7 +20,7 @@ const items={
 function role(d){return d.heal?'치유형':skillFor(d)==='guard'||d.def>=10?'수비형':['fireball','freeze','tide'].includes(skillFor(d))?'원거리형':'공격형';}
 function sale(u){return pet(u).cost*3**(u.star-1);}
 function isLootRound(){return state.round%4===0;}
-function gearHtml(u){return u.item?`<span class="gear-mark" title="${items[u.item].name}">${icon(items[u.item].icon)}</span>`:'';}
+function gearHtml(u){return u.item?`<span class="gear-mark" title="${items[u.item].name}"><img src="assets/gear-${u.item}.png" alt="${items[u.item].name}"></span>`:'';}
 const grades=['','일반','고급','희귀','영웅','전설'];
 const skills={heal:{name:'생명의 손길',icon:'heart',text:'가장 다친 아군 1마리를 공격력의 145%만큼 회복합니다. 치유 조합 효과도 적용됩니다.'},guard:{name:'대지의 갑옷',icon:'shield',text:'자신에게 공격력의 100% 보호막을 얻고 120% 피해로 공격합니다. 보호막은 최대 체력의 50%까지 쌓입니다.'},quake:{name:'지진 강타',icon:'earth',text:'대상에게 150% 피해, 대상 주변의 다른 적 최대 2마리에게 75% 피해를 줍니다.'},freeze:{name:'빙결 송곳니',icon:'water',text:'155% 피해를 주고 3초 동안 대상의 이동 속도를 30% 낮추며 공격 간격을 40% 늘립니다.'},tide:{name:'회복의 파도',icon:'water',text:'체력이 가장 낮은 아군 최대 2마리를 각각 공격력의 85%만큼 회복합니다. 치유 조합 효과도 적용됩니다.'},fireball:{name:'화염 폭발',icon:'fire',text:'대상에게 165% 피해, 대상 주변의 다른 적 최대 2마리에게 65% 피해를 줍니다.'},burn:{name:'불꽃 낙인',icon:'fire',text:'165% 피해를 주고 3초 동안 초당 공격력의 30% 화상 피해를 줍니다. 화상은 중첩되지 않고 새 화상으로 갱신됩니다.'},flurry:{name:'질풍 연격',icon:'wind',text:'대상에게 공격력의 80% 피해로 3번 연속 공격합니다.'},gale:{name:'바람의 가호',icon:'wind',text:'150% 피해로 공격하고 3초 동안 자신의 공격 간격을 20% 줄입니다.'}};
 function skillFor(d){return d.heal?'heal':({지:['guard','quake'],수:['freeze','tide'],화:['fireball','burn'],풍:['flurry','gale']})[d.element][hash(d.name)%2];}
@@ -249,7 +249,12 @@ $('again').onclick=()=>{$('result').close();fresh();};$('close-result').onclick=
 
 function renderEquipment(){
   const p=user(),u=p.roster.find(x=>x.uid===selected);
-  $('equipment').innerHTML=`<div><h3>${icon('bag')} 장비 보관함</h3><p>내 페트 선택 → 아이템 선택 · 페트당 1개</p></div>`+(p.inventory.length?p.inventory.map(i=>`<button data-equip="${i.uid}" ${busy||state.ended||!u||u.item?'disabled':''}>${icon(items[i.id].icon)}<b>${items[i.id].name}</b><small>${items[i.id].text}</small></button>`).join(''):'<p>4·8·12·16라운드 탐험에서 1개씩 획득합니다.</p>')+(u?.item?`<button data-unequip="1" ${busy||state.ended?'disabled':''}>${items[u.item].name} 해제 → 보관함</button>`:'');
+  const blocked=busy||state.ended||!u||u.item;
+  const effect=id=>items[id].text.split(' · ').map(text=>`<span>${escape(text)}</span>`).join('');
+  const hint=busy?'전투가 끝나면 장비를 바꿀 수 있어요.':state.ended?'대회가 종료되었습니다.':!u?'내 전장이나 대기석의 페트를 선택하면 장착할 수 있어요.':u.item?`${pet(u).name}의 장비를 해제하면 다른 장비를 장착할 수 있어요.`:`${pet(u).name}에게 장착할 아이템을 고르세요.`;
+  $('equipment').innerHTML=`<div class="equipment-heading"><h3>${icon('bag')} 장비 보관함</h3><span class="equipment-count">보유 ${p.inventory.length}개</span></div><p class="equipment-help">${escape(hint)} <b>페트당 1개</b></p>`+
+    (u?.item?`<div class="equipped-panel"><img src="assets/gear-${u.item}.png" alt=""><div><small>${escape(pet(u).name)} · 장착 중</small><b>${items[u.item].name}</b><div class="equipment-effect">${effect(u.item)}</div></div><button class="unequip-button" data-unequip="1" ${busy||state.ended?'disabled':''}>장비 해제</button></div>`:'')+
+    (p.inventory.length?`<div class="equipment-grid">${p.inventory.map(i=>`<button class="equipment-card" data-item="${i.id}" data-equip="${i.uid}" ${blocked?'disabled':''}><span class="equipment-art"><img src="assets/gear-${i.id}.png" alt=""></span><b>${items[i.id].name}</b><span class="equipment-effect">${effect(i.id)}</span><span class="equipment-action">${blocked?'보관 중':'장착하기'}</span></button>`).join('')}</div>`:'<div class="equipment-empty">보관 중인 장비가 없어요.<span>4·8·12·16라운드 탐험에서 1개씩 획득합니다.</span></div>');
 }
 function equipAI(p){for(const u of units(p))if(!u.item&&p.inventory.length){const i=p.inventory.findIndex(x=>pet(u).heal?x.id==='spring':role(pet(u))==='수비형'?['shell','stone','vitality'].includes(x.id):['fang','feather'].includes(x.id));u.item=p.inventory.splice(Math.max(0,i),1)[0].id;}}
 function neutral(p){const bot=createPlayer('탐험 수호자',null);bot.neutral=true;bot.roster=units(p).slice(0,Math.max(1,Math.floor(units(p).length/2))).map(u=>({id:u.id,uid:uid(),slot:u.slot,star:1}));return bot;}
