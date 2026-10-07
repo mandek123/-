@@ -31,6 +31,7 @@ const icon=name=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[n
 Object.assign(paths,{eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12m7 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0',refresh:'M20 8a8 8 0 1 0 0 8m0-14v6h-6',wind:'M2 8h14a3 3 0 1 0-3-3M2 12h18a3 3 0 1 1-3 3M2 16h9',water:'M12 2C9 7 4 10 4 15a8 8 0 0 0 16 0c0-5-5-8-8-13z',fire:'M13 2c2 7-3 6-1 10 2-1 3-3 3-5 8 9 6 15-3 15S1 15 7 9c0 4 2 4 2 4s-1-6 4-11',earth:'M12 21V5M12 16C0 16 2 5 2 5s10-2 10 11m0-3c0-10 10-10 10-10s2 10-10 10',warning:'m12 3 10 18H2zM12 9v5m0 3v1'});
 const elementIcon=e=>icon(({지:'earth',수:'water',화:'fire',풍:'wind'})[e]);
 const badge=e=>`<span class="element-badge" data-element="${e}">${elementIcon(e)}${e} 속성</span>`;
+paths.home='m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7';
 document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
 const portraits=PETS.map(p=>p.img);
 function avatar(p){return `<span class="portrait player-${state.players.indexOf(p)}"><img src="${portraits[p.avatar]||portraits[state.players.indexOf(p)]}" alt=""></span>`;}
