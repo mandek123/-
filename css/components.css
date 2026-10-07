@@ -112,7 +112,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--bg-blue); bord
 .th-news-item time { grid-row: span 2; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .th-news-item strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .th-news-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.th-live { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 26px; }
+.th-live { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 26px; }
 .th-live-card { position: relative; box-sizing: border-box; text-decoration: none; text-align: left; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; font-family: var(--font-body); }
 .th-live-icon { grid-row: span 2; display: grid; place-items: center; }
 .th-guide { max-width: 1320px; margin: 0 auto; padding: 8px 32px 72px; }

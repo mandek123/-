@@ -176,6 +176,20 @@
         };
     }
 
+    var gameCard = document.getElementById('th-game-rotate'), showSurvival = false;
+    function rotateFeaturedGame() {
+        if (!gameCard || document.hidden || !gameCard.getClientRects().length || gameCard.matches(':hover, :focus-within')) return;
+        showSurvival = !showSurvival;
+        gameCard.querySelector('strong').textContent = showSurvival ? '만득서바이벌' : '만득이 키우기';
+        gameCard.querySelector('small').textContent = showSurvival ? '뱀서류 미니게임' : '페트와 함께하는 자동 사냥';
+        gameCard.querySelector('.th-live-icon').className = 'th-live-icon th-live-icon--' + (showSurvival ? 'green' : 'violet');
+        gameCard.querySelector('i').className = 'fa-solid ' + (showSurvival ? 'fa-ghost' : 'fa-gamepad');
+    }
+    if (gameCard) {
+        gameCard.onclick = function () { if (showSurvival) window.sv_openSurvivalMode(); else window.showPage('page-idle-rpg'); };
+        setInterval(rotateFeaturedGame, 8000);
+    }
+
     renderPageHeads();
     window.addEventListener('load', function () { setTimeout(function () { iconize(); }, 0); });
     renderPet();
