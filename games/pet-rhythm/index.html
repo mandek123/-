@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>페트 리듬 러시 · 만득월드</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;600;800&display=swap"><link rel="stylesheet" href="style.css?v=20261007133747"></head>
+<body><main>
+<header><a href="../../" aria-label="만득월드 홈으로">만득<span>월드</span></a><span>리듬게임</span><button id="pause" disabled>일시정지</button></header>
+<div class="heading"><div><h1>페트 리듬 <span>러시</span></h1><p>비트를 맞추고, 페트와 함께 몰아쳐요.</p></div><div class="score"><small>점수</small><strong id="score">000000</strong></div></div>
+<div class="game">
+<section class="battle" aria-label="페트 공연 무대">
+<div class="scene"><div class="scene-top"><b id="track-label">BGM_1 · 112 BPM</b><span id="clock">00:00 / 00:39</span></div><div class="streak"><strong id="combo">0</strong><span>COMBO</span></div><div id="fever" hidden>FEVER TIME ×2</div><div class="actors" id="actors"></div><div id="burst"></div><div class="scene-bottom"><b id="stage-message">네 페트의 합동 공연</b><span>화면 흔들림 없음</span></div></div>
+<div class="progress"><div id="progress"></div></div>
+<div class="performance"><span>정확도 <b id="accuracy">—</b></span><span>최고 콤보 <b id="best">0</b></span><span>다음 피버 <b id="charge">15회</b></span></div>
+<div class="rival"><img id="rival-img" alt=""><div><b id="rival-name"></b><span id="rival-health"></span><div class="rival-bar"><div id="rival-bar"></div></div></div><strong id="defeated">0승</strong></div>
+<p class="battle-help">노트를 맞추면 페트가 라이벌을 공격해요. 체력이 0이 되면 다음 라이벌이 등장합니다. 승리 횟수는 점수와 별개예요.</p>
+<div class="settings" id="settings"><label>곡 선택<select id="track"></select></label><label>난이도<select id="level"><option value="easy">쉬움</option><option value="normal" selected>보통</option></select></label></div>
+<div class="shuffle-row"><button id="shuffle">페트 랜덤 바꾸기</button><span id="roster-count"></span></div>
+<div class="pet-info" id="pet-info"></div><p class="skill-help">페트별 충전이 차면 자동 발동: 그 타격의 피해 3배 + 무대 에너지 5 회복(치유 페트는 15). 에너지가 0이면 공격 피해가 절반으로 줄어요.</p><div class="power"><span>무대 에너지 <b id="stamina"></b></span><span>누적 타격 <b id="damage">0</b></span></div>
+<div class="audio-settings"><label>음악 <input id="volume" type="range" min="0" max="100" value="65"></label><label>효과음 <input id="sfx-volume" type="range" min="0" max="100" value="35"></label><label>타이밍 <input id="offset" type="range" min="-200" max="200" step="10" value="0"><output id="offset-label">0 ms</output></label></div>
+<details><summary>게임 방법 · 페트 능력 · 타이밍</summary><p>블록이 아래 노란 판정선에 닿을 때 <b>D · F · J · K</b>를 누르세요. 휴대폰은 아래 4개 버튼을 터치하세요.</p><p>길쭉한 노트는 꼬리 끝까지 누르고, 같은 높이의 노트는 두 키를 동시에 누르세요. 중간에 떼면 롱노트가 실패합니다.</p><p>15회 연속 성공하면 5초간 피버! 점수가 2배가 됩니다. 빈 레인 연타는 콤보를 끊습니다.</p><p><b>공격</b>은 타격 피해, <b>체력</b>은 최대 무대 에너지, <b>방어</b>는 미스 에너지 손실 감소, <b>순발력</b>은 스킬 충전에 쓰입니다. 충전이 차면 자동 강화 타격(피해 3배)! 치유 페트는 에너지 15, 다른 페트는 5를 회복합니다. 표시는 원래 패시브 기술이 아니라 이 게임의 강화 타격·회복 효과입니다. 에너지가 0이면 타격이 약해지고 성공할 때 회복됩니다.</p><p>라이벌 체력·방어도 도감 수치에서 계산합니다. 전투·스킬 공식은 시제품 전용이며 원래 게임 공식과 다릅니다. <b>페트 능력은 랭킹 점수에 영향을 주지 않습니다.</b> 에너지가 없어도 곡은 끝까지 플레이할 수 있습니다.</p><p>블루투스 이어폰 등으로 소리가 늦게 들리면 타이밍을 + 방향으로 조절하세요. 화면 흔들림 없이 페트와 타격만 움직입니다.</p></details>
+<p id="status" role="status">곡과 난이도를 고른 뒤 시작하세요.</p>
+<section class="ranking" aria-label="곡별 랭킹"><h2>곡별 TOP 5</h2><p><span id="rank-scope">이 기기 기록</span> · 난이도 <b id="rank-level">보통</b> · 1위 금 / 2위 은 / 3위 동</p><form id="nickname-form" class="nickname-form"><label for="nickname">닉네임</label><input id="nickname" maxlength="16" placeholder="플레이어" autocomplete="nickname" aria-describedby="nickname-status"><button id="save-nickname" type="submit">닉네임 저장</button></form><p id="nickname-status" role="status">닉네임은 이 브라우저에 저장돼요. 곡을 끝내면 그 이름으로 점수가 자동 등록됩니다.</p><div id="rank-list" class="rank-grid"></div><p id="rank-status" role="status">완주하면 기록이 자동 저장됩니다.</p><button id="refresh-ranks" type="button">랭킹 새로고침</button><button id="retry-rank" type="button" hidden>기록 등록 다시 시도</button></section>
+</section>
+<section class="rhythm" aria-label="4레인 리듬게임">
+<div class="highway"><canvas id="canvas" aria-label="음악에 맞춰 내려오는 4레인 노트"></canvas><div id="judgement" aria-hidden="true">READY</div><div class="cover" id="cover"><b class="stamp">LET’S RUSH!</b><h2>비트 위로<br>페트 출동!</h2><p>노란 선에 맞춰 D · F · J · K<br>헤드폰을 쓰면 더 정확해요.</p><button id="start">공연 시작</button></div></div>
+<div class="pads" id="pads"></div><div class="legend"><span>길쭉한 노트는 끝까지 유지</span><span>같은 높이는 동시 입력</span><span>PERFECT ±100ms</span></div>
+</section></div><footer>만득월드 · 페트 리듬 러시<span>D · F · J · K 또는 터치로 플레이하세요.</span></footer>
+</main><script>window.RHYTHM_SHARED_RANKING=false;</script><script src="pets.js?v=20261007133747"></script><script src="rhythm.js?v=20261007133747"></script><script src="online.js?v=20261007133747"></script><script src="game.js?v=20261007133747"></script></body></html>

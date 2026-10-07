@@ -2431,12 +2431,12 @@ button[onclick="resetGame()"]:hover {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <script>document.documentElement.setAttribute('data-theme','toon')</script>
-<link rel="stylesheet" href="./css/tokens.css?v=20261006202355">
-<link rel="stylesheet" href="./css/components.css?v=20261006202355">
-<link rel="stylesheet" href="./css/toon.css?v=20261006202355">
-<link rel="stylesheet" href="./css/pages.css?v=20261006202355">
-<link rel="stylesheet" href="./css/survival.css?v=20261006202355">
-<link rel="stylesheet" href="./css/idle.css?v=20261006202355">
+<link rel="stylesheet" href="./css/tokens.css?v=20261007133200">
+<link rel="stylesheet" href="./css/components.css?v=20261007133200">
+<link rel="stylesheet" href="./css/toon.css?v=20261007133200">
+<link rel="stylesheet" href="./css/pages.css?v=20261007133200">
+<link rel="stylesheet" href="./css/survival.css?v=20261007133200">
+<link rel="stylesheet" href="./css/idle.css?v=20261007133200">
 </head>
 
 <body>
@@ -2471,6 +2471,8 @@ button[onclick="resetGame()"]:hover {
     </a>
 
     <div class="dropdown-content">
+
+        <a href="./games/pet-rhythm/"><i class="fa-solid fa-music" style="width:18px"></i> 페트 리듬 러시</a>
 
         <a href="javascript:void(0);" onclick="showPage('page-arena'); closeDropdown();" style="display: flex; align-items: center;">
             <i class="fa-solid fa-khanda" style="color: var(--acc-red); width: 18px;"></i>
@@ -2630,6 +2632,7 @@ button[onclick="resetGame()"]:hover {
       </section>
       <section>
         <h3><i class="fa-solid fa-gamepad th-shelf-ic th-shelf-ic--game"></i> 미니게임 · 랭킹</h3>
+        <a class="th-ep" href="./games/pet-rhythm/">페트 리듬 러시 <span>리듬게임</span></a>
         <button type="button" class="th-ep" onclick="showPage('page-weekly-championship')">펫 육성 챔피언십 <span>주간 랭킹</span></button>
         <button type="button" class="th-ep" onclick="showPage('page-arena')">투기장 (PvP) <span>월간 랭킹</span></button>
         <button type="button" class="th-ep" onclick="showPage('page-raid')">1인 레이드</button>
@@ -2645,7 +2648,6 @@ button[onclick="resetGame()"]:hover {
     </div>
   </div>
 </div>
-
 <div class="main-container" id="page-notice">
     <div class="card" style="grid-column: span 2;">
         <div class="card-header"><i class="fa-solid fa-bullhorn"></i> 공지사항</div>
@@ -5473,7 +5475,7 @@ button[onclick="resetGame()"]:hover {
 
             { category: "아마란류", name: "아마란", img: "./images/723.gif", elements: "수8 화2", hp: 42.93, atk: 9.46, def: 5.53, spd: 5.67, ghp: 9.99, gatk: 2.20, gdef: 1.29, gspd: 1.32, passive: "전투 집중", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복" },
             { category: "아마란류", name: "아마란스", img: "./images/724.gif", elements: "수8 화2", hp: 62.04, atk: 13.52, def: 7.82, spd: 8.10, ghp: 10.79, gatk: 2.35, gdef: 1.36, gspd: 1.41, passive: "창공의 권능", grade: "일반", encyBuff: "레이드 매턴 캐릭터 HP 5 회복", isRideable: true },
-            { category: "아마란류", name: "초아란", img: "./images/725.gif", elements: "지8 풍2", hp: 42.90, atk: 9.27, def: 5.68, spd: 5.67, ghp: 9.98, gatk: 2.16, gdef: 1.32, gspd: 1.32, passive: "전투 집중", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
+            { category: "아마란류", name: "초아란", img: "./images-clean/choaran-portrait.png", elements: "지8 풍2", hp: 42.90, atk: 9.27, def: 5.68, spd: 5.67, ghp: 9.98, gatk: 2.16, gdef: 1.32, gspd: 1.32, passive: "전투 집중", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가" },
             { category: "아마란류", name: "초아란스", img: "./images/726.gif", elements: "지8 풍2", hp: 60.64, atk: 13.40, def: 8.02, spd: 8.10, ghp: 10.55, gatk: 2.33, gdef: 1.40, gspd: 1.41, passive: "티아트의 축복", grade: "일반", encyBuff: "레이드 캐릭터 방어력 1% 증가", isRideable: true },
             { category: "아마란류", name: "로즈란", img: "./images/727.gif", elements: "수2 화8", hp: 42.81, atk: 9.54, def: 5.53, spd: 5.67, ghp: 9.96, gatk: 2.22, gdef: 1.29, gspd: 1.32, passive: "전투 집중", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가" },
             { category: "아마란류", name: "로즈란스", img: "./images/728.gif", elements: "수2 화8", hp: 59.72, atk: 13.74, def: 7.59, spd: 8.16, ghp: 10.39, gatk: 2.39, gdef: 1.32, gspd: 1.42, passive: "광휘의 화조", grade: "일반", encyBuff: "레이드 캐릭터 공격력 1% 증가", isRideable: true },
@@ -5916,6 +5918,31 @@ button[onclick="resetGame()"]:hover {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    {
+    id: 53,
+    date: "26년 10월 7일",
+    title: "페트 리듬 러시 신규 미니게임 안내",
+    summary: "페트 리듬 러시 오픈 | 랜덤 페트 48종 · 4곡 · 롱노트와 동시 입력 | 닉네임 저장과 곡별 TOP5",
+    content: `
+        <strong>1) 새로운 미니게임: 페트 리듬 러시</strong>
+        <span>- 홈의 미니게임 메뉴 또는 상단 기타 메뉴에서 페트 리듬 러시를 시작할 수 있습니다.</span>
+        <span>- D/F/J/K 키 또는 휴대폰 터치 버튼으로 노트를 맞춰보세요. 길쭉한 노트는 끝까지 누르고, 같은 높이의 노트는 동시에 입력합니다.</span>
+        <span>- Afterglow(팝), Blue Hour(재즈), Sidewalk(힙합), Stone Pulse(트라이벌): 직접 만든 연주곡 4곡을 제공합니다. 각 곡은 구간별로 멜로디와 반주가 달라집니다.</span>
+        <strong>2) 페트와 함께하는 공연</strong>
+        <span>- 실제 도감의 페트 48종에서 속성별 4종을 랜덤 편성합니다. 페트 랜덤 바꾸기는 곡과 난이도를 유지합니다.</span>
+        <span>- 노트를 맞추면 페트가 라이벌을 공격합니다. 라이벌 체력이 0이 되면 승리가 쌓이고 다음 라이벌이 등장합니다. 승리 횟수는 랭킹 점수와 별개입니다.</span>
+        <span>- 페트별 충전이 차면 해당 타격의 피해가 3배가 되고 무대 에너지 5를 회복합니다. 치유 페트는 15를 회복합니다. 페트 능력은 랭킹 점수에 영향을 주지 않습니다.</span>
+        <strong>3) 닉네임과 기록</strong>
+        <span>- 닉네임 입력 후 닉네임 저장을 누르면 이 브라우저에 기억합니다. 공연 시작 시 입력한 이름도 자동 저장합니다. 이전 기록의 이름은 바뀌지 않습니다.</span>
+        <span>- 곡을 끝내면 점수가 자동 저장되고 곡·난이도별 TOP5를 표시합니다. 1~3등은 금·은·동메달, 4~5등은 순위 숫자만 표시합니다.</span>
+        <span>- 랭킹 범위는 게임의 TOP5 상단 안내에서 확인할 수 있습니다.</span>
+        <strong>4) 편안한 플레이</strong>
+        <span>- 쉬움 123개, 보통 233개 노트. PERFECT ±100ms, GOOD ±185ms로 판정 여유를 늘렸습니다.</span>
+        <span>- 음악과 효과음 음량을 각각 조절할 수 있습니다. 일시정지와 타이밍 보정을 지원하며 화면은 흔들리지 않습니다.</span>
+        <span>- 초아란 이미지를 투명 배경 초상화로 교체했습니다. 기존 게임의 저장 기록과 공식은 유지됩니다.</span>
+    `
+    },
+
     {
     id: 52,
     date: "26년 10월 6일",
@@ -17704,11 +17731,11 @@ function copyToClipboardForSheets() {
 </div>
 
 
-<script src="./js/pets-clean.js?v=20261006202355"></script>
-<script src="./js/home.js?v=20261006202355"></script>
-<script src="./js/bgm.js?v=20261006202355"></script>
-<script src="./js/survival-plus.js?v=20261006202355"></script>
-<script src="./js/survival-content.js?v=20261006202355"></script>
-<script src="./js/idle-plus.js?v=20261006202355"></script>
+<script src="./js/pets-clean.js?v=20261007133200"></script>
+<script src="./js/home.js?v=20261007133200"></script>
+<script src="./js/bgm.js?v=20261007133200"></script>
+<script src="./js/survival-plus.js?v=20261007133200"></script>
+<script src="./js/survival-content.js?v=20261007133200"></script>
+<script src="./js/idle-plus.js?v=20261007133200"></script>
 </body>
 </html>
