@@ -278,7 +278,10 @@
             card.innerHTML = c.icon + '<div class="sv-upgrade-name">' + c.name + '</div><div class="sv-upgrade-desc">' + c.desc + '</div>';
             card.onclick = function () {
                 c.action(); modal.style.display = 'none'; sv_gameState = 'playing'; sv_lastTime = performance.now();
-                sv_updateUI(); sv_updateStatusUI(); sv_reqId = requestAnimationFrame(sv_gameLoop);
+                sv_updateUI(); sv_updateStatusUI();
+                if (sv_reqId !== null) cancelAnimationFrame(sv_reqId);
+                sv_reqId = null;
+                if (sv_gameState === 'playing') sv_reqId = requestAnimationFrame(sv_gameLoop);
             };
             container.appendChild(card);
         });

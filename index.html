@@ -2431,12 +2431,12 @@ button[onclick="resetGame()"]:hover {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <script>document.documentElement.setAttribute('data-theme','toon')</script>
-<link rel="stylesheet" href="./css/tokens.css?v=20261007200525">
-<link rel="stylesheet" href="./css/components.css?v=20261007200525">
-<link rel="stylesheet" href="./css/toon.css?v=20261007200525">
-<link rel="stylesheet" href="./css/pages.css?v=20261007200525">
-<link rel="stylesheet" href="./css/survival.css?v=20261007200525">
-<link rel="stylesheet" href="./css/idle.css?v=20261007200525">
+<link rel="stylesheet" href="./css/tokens.css?v=20261007204024">
+<link rel="stylesheet" href="./css/components.css?v=20261007204024">
+<link rel="stylesheet" href="./css/toon.css?v=20261007204024">
+<link rel="stylesheet" href="./css/pages.css?v=20261007204024">
+<link rel="stylesheet" href="./css/survival.css?v=20261007204024">
+<link rel="stylesheet" href="./css/idle.css?v=20261007204024">
 </head>
 
 <body>
@@ -8600,44 +8600,6 @@ let simTotalCount = 0;
 let currentSimPet = null;
 let isSimLocked = false;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. 저장된 데이터가 있는지 확인
-    if (loadGame()) {
-        console.log("저장된 게임 데이터를 불러왔습니다.");
-        
-        // 게임 화면 표시
-        document.getElementById('idle-start-screen').style.display = 'none';
-        document.getElementById('idle-top-stats').style.display = 'flex';
-        document.getElementById('idle-main-screen').style.display = 'block';
-        
-        // 게임 루프 시작
-        idGame.started = true;
-        spawnWave(); 
-        idGame.lastTime = performance.now();
-        idGame.loop = requestAnimationFrame(gameLoop);
-        setInterval(updateUI, 200);
-    } else {
-        // [해결책] 저장된 데이터가 없을 때 시작 화면 강제 표시 및 검색창 초기화
-        console.log("새 게임 시작: 시작 화면을 표시합니다.");
-        const startScreen = document.getElementById('idle-start-screen');
-        if (startScreen) {
-            startScreen.style.display = 'block';
-            startScreen.innerHTML = `
-                <h2 style="color: var(--t1);">시작할 페트를 검색하세요</h2>
-                <input type="text" id="starterPetSearch" oninput="searchStarterPet()" placeholder="페트 이름 입력..." style="padding:10px; width:200px; border-radius: 4px; border: none;">
-                <div id="starter-search-results" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px;"></div>
-            `;
-            searchStarterPet(); // 검색창 내용을 채우는 함수 실행
-        }
-        document.getElementById('idle-main-screen').style.display = 'none';
-        document.getElementById('idle-top-stats').style.display = 'none';
-    }
-
-    // 자동 저장
-    setInterval(() => {
-        if (idGame.started) saveGame();
-    }, 30000);
-});
 
 function updateSimPetInfo() {
     const petImg = document.getElementById('sim-pet-img');
@@ -13482,7 +13444,7 @@ function startGameWithPet(petData, growthBonus) {
     
     idGame.lastTime = performance.now();
     idGame.loop = requestAnimationFrame(gameLoop);
-    setInterval(updateUI, 200); 
+    setInterval(() => updateUI(true), 200);
     saveGame(); 
 }
 
@@ -14126,7 +14088,7 @@ function renderEntities() {
 }
 
 let offlineRewardProcessed = false; 
-function updateUI() {
+function updateUI(periodic = false) {
     // 💡 웹페이지 진입 시 자동 팝업을 막기 위해 오프라인 보상 로직을 제거했습니다.
     
     const stoneEl = document.getElementById('ui-stone');
@@ -14428,10 +14390,22 @@ function updateUI() {
         }
     }
     
-    renderWarehouse();
+    if (!periodic) renderWarehouse();
+    else {
+        // Currency changes affect highlights, not warehouse structure.
+        document.querySelectorAll('#warehouse-container button[onclick^="awaken"]').forEach(btn => {
+            const action = btn.getAttribute('onclick');
+            const second = action.startsWith('awakenPet2') || action.startsWith('awakenItem2');
+            const ready = action.startsWith('awakenPet')
+                ? (second ? idGame.stone >= 50e20 : idGame.diamond >= 10000)
+                : idGame.stone >= (second ? 30e20 : 100000000);
+            btn.parentElement.classList.toggle('target-blink-purple', second && ready);
+            btn.parentElement.classList.toggle('target-blink-yellow', !second && ready);
+        });
+    }
     const shopTab = document.getElementById('tab-shop');
     if (shopTab && shopTab.style.display !== 'none') {
-        renderShop();
+        if (!periodic || !document.getElementById('shop-pet-train-list')) renderShop();
         updateDynamicShopElements();
     }
     // --- 1차/2차 각성 가능 여부 체크 및 창고 탭 깜빡임 효과 ---
@@ -14701,9 +14675,27 @@ function updateDynamicShopElements() {
 
     Object.keys(ITEM_DATABASE).forEach(key => {
         const itemBtn = document.getElementById(`shop-item-btn-${key}`);
-        if(itemBtn) itemBtn.style.background = idGame.diamond >= ITEM_DATABASE[key].price ? '#d29922' : '#30363d';
+        if(itemBtn) {
+            itemBtn.disabled = idGame.diamond < ITEM_DATABASE[key].price;
+            itemBtn.style.background = itemBtn.disabled ? '#30363d' : '#539bf5';
+            itemBtn.style.color = itemBtn.disabled ? '#8b949e' : '#fff';
+            itemBtn.style.cursor = itemBtn.disabled ? 'not-allowed' : 'pointer';
+        }
     });
 
+    [['goldBoost', 'goldMultiplier', 1000, '#fca311', '#000'],
+     ['atkBoost', 'atkMultiplier', 1000, '#ff4d4d', '#fff'],
+     ['defBoost', 'dmgReduction', 2000, '#539bf5', '#fff']].forEach(([action, buff, price, color, textColor]) => {
+        const btn = document.querySelector(`[onclick="activateBuff('${action}')"]`);
+        if (!btn) return;
+        const left = idGame.buffs && idGame.buffs[buff]
+            ? Math.max(0, Math.ceil((idGame.buffs[buff].endTime - Date.now()) / 60000)) : 0;
+        btn.disabled = left > 0 || idGame.diamond < price;
+        btn.textContent = left > 0 ? `대기중 (${left}분)` : `${price.toLocaleString()} 다이아`;
+        btn.style.background = btn.disabled ? '#30363d' : color;
+        btn.style.color = btn.disabled ? '#8b949e' : textColor;
+        btn.style.cursor = btn.disabled ? 'not-allowed' : 'pointer';
+    });
     let battlePets = Array.isArray(idGame.fieldPets) ? idGame.fieldPets : [];
     let trainHtml = '';
 
@@ -14745,12 +14737,12 @@ function updateDynamicShopElements() {
                     <img src="${pet.img || './images/A1.png'}" style="width:45px; height:45px; object-fit:contain; background: rgba(var(--shade-rgb), 0.3); border-radius: 8px; padding:2px;">
                     <div style="flex-grow:1;">
                         <div style="font-size:14px; font-weight:bold; color: var(--t1);">${pet.name || '무명 페트'}</div>
-                        <div style="font-size:12px; color: var(--acc-orange);">Lv.${petLevel}</div>
+                        <div data-train="level" style="font-size:12px; color: var(--acc-orange);">Lv.${petLevel}</div>
                     </div>
                 </div>
                 <div style="font-size:12px; color: var(--t3); display:flex; flex-direction:column; gap:2px;">
-                    <div style="display:flex; justify-content:space-between;"><span>공격력</span> <span style="color: var(--t1);">${formatStatNumber(curAtk)} <span style="color: var(--acc-green);">(→${formatStatNumber(nextAtk)})</span></span></div>
-                    <div style="display:flex; justify-content:space-between;"><span>공격속도</span> <span style="color: var(--acc-blue);">${petAtkMaxCd}초</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>공격력</span> <span data-train="attack" style="color: var(--t1);">${formatStatNumber(curAtk)} <span style="color: var(--acc-green);">(→${formatStatNumber(nextAtk)})</span></span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>공격속도</span> <span data-train="speed" style="color: var(--acc-blue);">${petAtkMaxCd}초</span></div>
                 </div>
                 <button onclick="buyPetLevel('${pet.id}', ${cost})" style="margin-top:auto; padding:10px; background: ${idGame.stone >= cost ? '#539bf5' : '#30363d'}; border: none; border-radius: 6px; color: var(--t1); cursor:pointer; font-weight:bold; font-size:12px;">
                     스톤 ${formatKoreanNumber(cost)}
@@ -14759,8 +14751,27 @@ function updateDynamicShopElements() {
         });
     }
 
-    if (trainListContainer.innerHTML.replace(/\s+/g, '') !== trainHtml.replace(/\s+/g, '')) {
-        trainListContainer.innerHTML = trainHtml;
+    if (trainListContainer._trainHtml !== trainHtml) {
+        const roster = JSON.stringify(battlePets.map(p => [p.id, p.name, p.img]));
+        if (trainListContainer._roster !== roster) {
+            trainListContainer.innerHTML = trainHtml;
+            trainListContainer._roster = roster;
+        } else if (battlePets.length) {
+            // Keep pressed buttons alive while numbers and affordability change.
+            const template = document.createElement('template');
+            template.innerHTML = trainHtml;
+            Array.from(trainListContainer.children).forEach((card, i) => {
+                const fresh = template.content.children[i];
+                card.querySelectorAll('[data-train]').forEach(el => {
+                    el.innerHTML = fresh.querySelector(`[data-train="${el.dataset.train}"]`).innerHTML;
+                });
+                const btn = card.querySelector('button'), nextBtn = fresh.querySelector('button');
+                btn.textContent = nextBtn.textContent;
+                btn.style.background = nextBtn.style.background;
+                btn.setAttribute('onclick', nextBtn.getAttribute('onclick'));
+            });
+        }
+        trainListContainer._trainHtml = trainHtml;
     }
 }
 
@@ -14813,6 +14824,7 @@ function buyPet() {
     addGameLog(`✨ [${petData.name}] 소환 성공! 창고로 이동되었습니다.`, '#ff7b72');
     saveGame();
     renderShop();
+    renderWarehouse();
 }
 
 if (typeof currentWarehouseTab === 'undefined') window.currentWarehouseTab = 'pet'; 
@@ -15269,13 +15281,22 @@ document.addEventListener('DOMContentLoaded', () => {
         spawnWave(); 
         idGame.lastTime = performance.now();
         idGame.loop = requestAnimationFrame(gameLoop);
-        setInterval(updateUI, 200);
+        setInterval(() => updateUI(true), 200);
     } else {
         console.log("저장된 데이터 없음 - 시작 화면 표시");
         document.getElementById('idle-start-screen').style.display = 'block';
         document.getElementById('idle-top-stats').style.display = 'none';
         document.getElementById('idle-main-screen').style.display = 'none';
-        searchStarterPet();
+        const startScreen = document.getElementById('idle-start-screen');
+        if (startScreen) {
+            startScreen.style.display = 'block';
+            startScreen.innerHTML = `
+                <h2 style="color: var(--t1);">시작할 페트를 검색하세요</h2>
+                <input type="text" id="starterPetSearch" oninput="searchStarterPet()" placeholder="페트 이름 입력..." style="padding:10px; width:200px; border-radius: 4px; border: none;">
+                <div id="starter-search-results" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px;"></div>
+            `;
+            searchStarterPet(); // 검색창 내용을 채우는 함수 실행
+        }
     }
 
     autoSaveInterval = setInterval(() => {
@@ -16407,7 +16428,7 @@ function sv_startGame() {
     sv_lastTime = performance.now();
     sv_updateUI();
     
-    if (sv_reqId) cancelAnimationFrame(sv_reqId);
+    if (sv_reqId !== null) cancelAnimationFrame(sv_reqId);
     sv_reqId = requestAnimationFrame(sv_gameLoop);
 }
 
@@ -16577,7 +16598,9 @@ function sv_checkLevelUp() {
                 sv_lastTime = performance.now();
                 sv_updateUI();
                 sv_updateStatusUI(); 
-                sv_reqId = requestAnimationFrame(sv_gameLoop);
+                if (sv_reqId !== null) cancelAnimationFrame(sv_reqId);
+                sv_reqId = null;
+                if (sv_gameState === 'playing') sv_reqId = requestAnimationFrame(sv_gameLoop);
             };
             container.appendChild(card);
         });
@@ -17262,9 +17285,10 @@ function sv_gameOver() {
 }
 
 function sv_gameLoop(time) {
+    sv_reqId = null;
     if (sv_wrapper.style.display === 'none' || sv_gameState !== 'playing') {
         sv_lastTime = time;
-        sv_reqId = requestAnimationFrame(sv_gameLoop);
+
         return; 
     }
     
@@ -17273,6 +17297,7 @@ function sv_gameLoop(time) {
     sv_lastTime = time;
 
     sv_update(dt);
+    if (sv_gameState !== 'playing' || sv_wrapper.style.display === 'none') return;
     sv_draw();
     sv_updateUI(); // 💡 핵심: 매 프레임마다 UI(타이머, 체력, 경험치)를 갱신하도록 추가!
     sv_reqId = requestAnimationFrame(sv_gameLoop);
@@ -17487,7 +17512,9 @@ function sv_claimBossReward() {
     sv_updateUI();
     sv_updateStatusUI();
     sv_checkLevelUp(); // 잭팟으로 경험치 꽉 찼을 경우 즉시 렙업 창 호출
-    requestAnimationFrame(sv_gameLoop);
+    if (sv_reqId !== null) cancelAnimationFrame(sv_reqId);
+    sv_reqId = null;
+    if (sv_gameState === 'playing') sv_reqId = requestAnimationFrame(sv_gameLoop);
 }
 /* ==========================================================
                   [만득서바이벌] JS 코드 끝
@@ -17729,11 +17756,11 @@ function copyToClipboardForSheets() {
 </div>
 
 
-<script src="./js/pets-clean.js?v=20261007200525"></script>
-<script src="./js/home.js?v=20261007200525"></script>
-<script src="./js/bgm.js?v=20261007200525"></script>
-<script src="./js/survival-plus.js?v=20261007200525"></script>
-<script src="./js/survival-content.js?v=20261007200525"></script>
-<script src="./js/idle-plus.js?v=20261007200525"></script>
+<script src="./js/pets-clean.js?v=20261007204024"></script>
+<script src="./js/home.js?v=20261007204024"></script>
+<script src="./js/bgm.js?v=20261007204024"></script>
+<script src="./js/survival-plus.js?v=20261007204024"></script>
+<script src="./js/survival-content.js?v=20261007204024"></script>
+<script src="./js/idle-plus.js?v=20261007204024"></script>
 </body>
 </html>

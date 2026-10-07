@@ -58,7 +58,8 @@ function merge(p){
 }
 function fresh(){
   if(busy)return;
-  state={season,rosterVersion:3,shopOddsVersion:2,round:1,ended:false,players:[createPlayer(profile?.name||'나',null),...['숲길 탐험가','별빛 여행자','달빛 조련사','새벽 모험가'].map(name=>createPlayer(name,null))],log:[]};
+  if(state&&profile&&state.rankStarted&&!state.resultRecorded&&!finishRecord(state.ended?user().place:5,!state.ended))return;
+  state={runId:uid(),rankStarted:!!profile,season,rosterVersion:3,shopOddsVersion:2,round:1,ended:false,players:[createPlayer(profile?.name||'나',null),...['숲길 탐험가','별빛 여행자','달빛 조련사','새벽 모험가'].map(name=>createPlayer(name,null))],log:[]};
   for(const p of state.players){
     startingPets(p);shop(p);
   }
@@ -234,7 +235,7 @@ function endGame(){
     const survivors=state.players.filter(p=>p.hp>0),out=state.players.filter(p=>p.hp<=0&&p.place===null).sort((a,b)=>strength(b)-strength(a));out.forEach((p,i)=>p.place=survivors.length+i+1);
   }
   const remaining=state.players.filter(p=>p.hp>0).sort((a,b)=>b.hp-a.hp||strength(b)-strength(a));remaining.forEach((p,i)=>p.place=i+1);
-  state.ended=true;seasonRecord.games++;if(user().place===1)seasonRecord.wins++;seasonRecord.best=Math.min(seasonRecord.best,user().place);record();saveHistory();remember();render();showResult();
+  state.ended=true;finishRecord(user().place,false);remember();render();showResult();
 }
 function showResult(){const p=user();$('result-title').textContent=`대회 ${p.place}위`;$('result-text').textContent=`${state.round}라운드 · ${p.wins}승. ${p.place===1?'축하해요! AI 참가자들을 넘어 우승했습니다.':'다른 속성과 배치로 다시 도전해보세요.'}`;if(!$('result').open)$('result').showModal();}
 $('scout-tabs').onclick=e=>{const b=e.target.closest('[data-scout]');if(!b)return;scoutIndex=Number(b.dataset.scout);inspected=null;render();$('scout-detail').innerHTML='<p>상대 페트를 누르면 여기에 정보가 표시됩니다.</p>';};
@@ -245,7 +246,7 @@ $('bench').onclick=e=>{const button=e.target.closest('[data-bench]');if(!button|
 $('sell').onclick=()=>{if(busy||state.ended)return;const p=user(),u=p.roster.find(u=>u.uid===selected);if(!u)return;p.gold+=sale(u);if(u.item)p.inventory.push({uid:uid(),id:u.item});p.roster=p.roster.filter(v=>v.uid!==u.uid);selected=null;remember();render();message('페트를 판매하고 골드를 돌려받았습니다.');};
 $('reroll').onclick=()=>{if(busy||state.ended||user().gold<2)return;user().gold-=2;shop(user());remember();render();message('상점이 바뀌었습니다.');};
 $('experience').onclick=()=>{const p=user();if(busy||state.ended||p.gold<4||p.level>=6)return;p.gold-=4;gainXP(p,4);remember();render();message('경험치 +4. 레벨이 오르면 더 많은 페트를 배치할 수 있습니다.');};
-$('ready').onclick=startBattle;$('new-game').onclick=()=>{if(confirm('진행 중인 대회를 끝내고 새 대회를 시작할까요? 시즌 전적은 유지됩니다.'))fresh();};
+$('ready').onclick=startBattle;$('new-game').onclick=()=>{if(confirm('진행 중인 대회를 포기하고 새 대회를 시작할까요? 중도 포기는 5위로 기록됩니다.'))fresh();};
 $('again').onclick=()=>{$('result').close();fresh();};$('close-result').onclick=()=>$('result').close();
 
 function renderEquipment(){
@@ -260,13 +261,47 @@ function renderEquipment(){
 function equipAI(p){for(const u of units(p))if(!u.item&&p.inventory.length){const i=p.inventory.findIndex(x=>pet(u).heal?x.id==='spring':role(pet(u))==='수비형'?['shell','stone','vitality'].includes(x.id):['fang','feather'].includes(x.id));u.item=p.inventory.splice(Math.max(0,i),1)[0].id;}}
 function neutral(p){const bot=createPlayer('탐험 수호자',null);bot.neutral=true;bot.roster=units(p).slice(0,Math.max(1,Math.floor(units(p).length/2))).map(u=>({id:u.id,uid:uid(),slot:u.slot,star:1}));return bot;}
 function grantLoot(){const ids=Object.keys(items),offset=Math.floor(Math.random()*ids.length);state.players.filter(p=>p.hp>0).forEach((p,i)=>{if(p!==user()){const encounter=makeCombat(p,neutral(p));while(!encounter.done)tick(encounter,.1);}const id=ids[(offset+i)%ids.length];p.inventory.push({id,uid:uid()});if(p!==user())equipAI(p);state.log.push(`${state.round}R 탐험 · ${p.name}: ${items[id].name} 획득`);});}
-function saveHistory(){if(!profile)return;try{const key='manduk-tactics-history-v1',history=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(history)){history.push({id:uid(),playerId:profile.id,nickname:profile.name,avatar:profile.avatar,season,place:user().place,round:state.round,wins:user().wins,at:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(history.slice(-100)));}}catch{message('전적 저장 공간을 확인해주세요. 이번 대회 결과는 진행 저장에 남습니다.');}}
+function finishRecord(place,forfeit){
+  if(state.resultRecorded)return true;if(!profile)return false;
+  const result={id:state.runId||uid(),playerId:profile.id,nickname:profile.name,avatar:profile.avatar,season,place,round:state.round,wins:user().wins,forfeit,ranked:state.rankStarted,at:new Date().toISOString()};
+  try{
+    const key='manduk-tactics-history-v1',history=JSON.parse(localStorage.getItem(key)||'[]');
+    if(!Array.isArray(history))throw Error('전적 저장 오류');
+    if(!history.some(r=>r.id===result.id))localStorage.setItem(key,JSON.stringify([...history,result].slice(-100)));
+    if(state.rankStarted)TacticsRanking.enqueue({id:result.id,season,place});
+    state.resultRecorded=true;state.ended=true;user().place=place;remember();
+    seasonRecord.games++;if(place===1)seasonRecord.wins++;seasonRecord.best=Math.min(seasonRecord.best,place);record();
+    void refreshSeasonRanking();return true;
+  }catch{warn('기록 저장이 차단됐어요. 브라우저 저장 공간을 확인해주세요.');return false;}
+}
+let rankingRequest=0;
+function localRank(){
+  try{const rows=JSON.parse(localStorage.getItem('manduk-tactics-history-v1')||'[]').filter(r=>r.season===season&&r.playerId===profile?.id&&r.ranked===true),recent=rows.slice(-20);return {games:rows.length,recent,score:recent.length?recent.reduce((n,r)=>n+[0,100,70,40,15,0][r.place],0)/recent.length:0};}catch{return {games:0,recent:[],score:0};}
+}
+function rankingMine(){const r=localRank();$('ranking-mine').textContent=profile?`${profile.name} · 최근 평균 ${r.score.toFixed(1)}점 · ${Math.min(10,r.games)} / 10경기${r.games<10?' · '+(10-r.games)+'경기 더 플레이하면 랭킹에 등록됩니다.':' · 순위 등록 조건 달성'}`:'프로필을 저장하면 시즌 기록을 시작합니다.';}
+async function refreshSeasonRanking(){
+  const request=++rankingRequest,chosen=$('ranking-season').value||season;rankingMine();$('ranking-refresh').disabled=true;
+  $('ranking-status').textContent=TacticsRanking.enabled?'시즌 기록을 불러오는 중입니다.':'로컬 미리보기 · 기록은 이 브라우저에만 저장됩니다.';
+  let uploadFailed=false;
+  try{
+    if(TacticsRanking.enabled&&profile)try{await TacticsRanking.flush(profile);}catch{uploadFailed=true;}
+    const rows=TacticsRanking.enabled?await TacticsRanking.read(chosen):[];if(request!==rankingRequest)return;
+    const selfId=TacticsRanking.enabled&&typeof firebase!=='undefined'&&firebase.apps.length?firebase.auth().currentUser?.uid:null;
+    $('ranking-rows').innerHTML=rows.length?rows.slice(0,50).map((r,i)=>{const count=Math.min(20,r.games);return `<tr class="${r.id===selfId?'rank-self':''}"><td>${i+1}위</td><td><span class="rank-profile"><img src="${PETS[r.avatar]?.img||PETS[0].img}" alt="">${escape(r.name)}</span></td><td>${r.score.toFixed(1)}점</td><td>${(r.places/count).toFixed(2)}위</td><td>${Math.round(r.recentWins/count*100)}%</td><td>${r.games}경기</td></tr>`;}).join(''):'<tr><td class="ranking-empty" colspan="6">아직 등록된 조련사가 없어요. 시즌에서 10경기를 플레이하면 순위에 참여합니다.</td></tr>';
+    if(TacticsRanking.enabled)$('ranking-status').textContent=uploadFailed||TacticsRanking.pending()?`기록 ${TacticsRanking.pending()}개가 전송 대기 중입니다. 새로고침을 눌러 다시 등록해주세요.`:'전체 이용자 시즌 TOP 50 · 평균 순위·우승률은 최근 20경기 기준입니다.';
+  }catch{if(request===rankingRequest){$('ranking-rows').innerHTML='<tr><td class="ranking-empty" colspan="6">랭킹에 연결하지 못했어요. 새로고침을 눌러 다시 시도해주세요.</td></tr>';$('ranking-status').textContent='인터넷 연결을 확인해주세요. 대회 기록은 브라우저에 보관됩니다.';}}
+  finally{if(request===rankingRequest)$('ranking-refresh').disabled=false;}
+}
+const rankingMonths=Array.from({length:12},(_,i)=>{const d=new Date(Number(season.slice(0,4)),Number(season.slice(4))-1-i,1);return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;});
+$('ranking-season').innerHTML=rankingMonths.map(s=>`<option value="${s}">${s.slice(0,4)}.${s.slice(4)}</option>`).join('');
+$('ranking-season').onchange=refreshSeasonRanking;$('ranking-refresh').onclick=refreshSeasonRanking;
+window.addEventListener('online',()=>void refreshSeasonRanking());
 function portraitOptions(){const query=$('portrait-search').value.trim().toLowerCase(),options=PETS.map((p,id)=>({p,id})).filter(({p})=>[p.name,p.element,p.category].some(x=>x.toLowerCase().includes(query)));$('portrait-options').innerHTML=options.length?options.map(({p,id})=>`<button type="button" data-portrait="${id}" aria-pressed="${id===portraitChoice}"><img src="${p.img}" alt=""><span>${escape(p.name)}</span></button>`).join(''):'<p>검색 결과가 없습니다. 다른 이름이나 속성을 입력해주세요.</p>';$('portrait-preview').innerHTML=`<img src="${PETS[portraitChoice].img}" alt=""><b>${escape(PETS[portraitChoice].name)}</b>`;}
 $('deselect').onclick=()=>{selected=null;inspected=null;shopViewed=null;render();$('scout-detail').innerHTML='<p>상대 페트를 누르면 여기에 정보가 표시됩니다.</p>';};
 $('equipment').onclick=e=>{const b=e.target.closest('button');if(!b||busy||state.ended)return;const p=user(),u=p.roster.find(x=>x.uid===selected);if(!u)return;if(b.dataset.unequip&&u.item){p.inventory.push({uid:uid(),id:u.item});delete u.item;}else{const index=p.inventory.findIndex(i=>i.uid===b.dataset.equip);if(index<0||u.item)return;u.item=p.inventory.splice(index,1)[0].id;}remember();render();};
 $('portrait-search').oninput=portraitOptions;
 $('portrait-options').onclick=e=>{const b=e.target.closest('[data-portrait]');if(b){portraitChoice=Number(b.dataset.portrait);portraitOptions();}};
-$('profile-form').onsubmit=e=>{e.preventDefault();if(profile)return;const name=$('nickname').value.trim();if(!name||name.length>12){$('profile-error').textContent='닉네임을 1~12자로 입력해주세요.';return;}const next={id:uid(),name,avatar:portraitChoice,createdAt:new Date().toISOString()};try{localStorage.setItem(profileKey,JSON.stringify(next));}catch{$('profile-error').textContent='브라우저 저장을 허용한 뒤 다시 시도해주세요.';return;}profile=next;user().name=name;user().avatar=portraitChoice;remember();$('profile-gate').close();render();};
+$('profile-form').onsubmit=e=>{e.preventDefault();if(profile)return;const name=$('nickname').value.trim();if(!name||name.length>12){$('profile-error').textContent='닉네임을 1~12자로 입력해주세요.';return;}const next={id:uid(),name,avatar:portraitChoice,createdAt:new Date().toISOString()};try{localStorage.setItem(profileKey,JSON.stringify(next));}catch{$('profile-error').textContent='브라우저 저장을 허용한 뒤 다시 시도해주세요.';return;}profile=next;state.rankStarted=true;user().name=name;user().avatar=portraitChoice;remember();$('profile-gate').close();render();void refreshSeasonRanking();};
 $('profile-gate').addEventListener('cancel',e=>e.preventDefault());
 
 if(state&&state.shopOddsVersion!==2){for(const p of state.players)p.shop=p.shop.map(id=>id!==null&&!shopOdds[p.level][catalog.get(id).cost-1]?offer(p):id);state.shopOddsVersion=2;remember();}
@@ -277,3 +312,8 @@ if(state){prepareAI();render();message(state.ended?'이전 대회의 결과가 �
 
 if(repairedStart)message('시작 편성 오류를 수정해 1라운드를 다시 구성했습니다. 닉네임·시즌 전적은 유지하고 이전 진행은 백업했습니다.');
 if(!profile){portraitOptions();$('profile-gate').showModal();}
+
+if(state&&!state.ended&&profile){state.runId=state.runId||uid();state.rankStarted=true;remember();}
+void refreshSeasonRanking();
+
+if(state.ended&&state.rankStarted&&!state.resultRecorded&&profile)finishRecord(user().place,false);
