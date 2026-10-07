@@ -8,16 +8,31 @@ let sharedRecords=[],sharedState={},pendingRank=null;
 $('rank-scope').textContent=RhythmOnline.enabled?'전체 이용자 기록':'이 기기 기록';
 if(RhythmOnline.enabled)$('nickname-status').textContent='닉네임은 이 브라우저에 저장돼요. 완주하면 닉네임·점수·정확도·콤보가 전체 이용자 랭킹에 공개됩니다.';
 const nicknameKey='manduk-rhythm-nickname';
-let savedNickname='플레이어';
+let savedNickname='',performanceNickname='';
 try{savedNickname=localStorage.getItem(nicknameKey)?.trim().slice(0,16)||savedNickname;}catch{}
 $('nickname').value=savedNickname;
 function saveNickname(announce=true){
-  savedNickname=$('nickname').value.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,16)||'플레이어';
+  const name=$('nickname').value.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,16);
+  if(!name){$('nickname-status').textContent='닉네임을 입력해주세요. 빈 이름으로는 기록을 등록하지 않습니다.';return false;}
+  savedNickname=name;
   $('nickname').value=savedNickname;
   try{localStorage.setItem(nicknameKey,savedNickname);if(announce)$('nickname-status').textContent=`“${savedNickname}” 저장 완료. 다음 완주 기록부터 이 이름을 사용해요. 이전 기록 이름은 유지됩니다.`;}
   catch{$('nickname-status').textContent='이 공연에는 적용했지만, 브라우저 저장이 차단되어 다음에 다시 입력해야 해요.';}
+  return true;
 }
 $('nickname-form').onsubmit=e=>{e.preventDefault();saveNickname();};
+$('nickname').addEventListener('change',()=>saveNickname(false));
+const nicknameGate=document.createElement('dialog');
+nicknameGate.className='nickname-gate';
+nicknameGate.setAttribute('aria-labelledby','nickname-gate-title');
+nicknameGate.innerHTML='<form><h2 id="nickname-gate-title">어떤 이름으로 공연할까요?</h2><p>랭킹에 표시할 닉네임을 입력해주세요.<br>다음 방문에도 이 브라우저에서 기억합니다.</p><label for="first-nickname">닉네임</label><input id="first-nickname" maxlength="16" required placeholder="예: 만득" autocomplete="nickname"><button type="submit">저장하고 입장</button><p class="nickname-gate-error" role="status"></p></form>';
+document.body.append(nicknameGate);
+nicknameGate.querySelector('form').onsubmit=e=>{
+  e.preventDefault();$('nickname').value=$('first-nickname').value;
+  if(saveNickname()){nicknameGate.close();$('start').focus();}
+  else nicknameGate.querySelector('.nickname-gate-error').textContent='닉네임을 입력해주세요.';
+};
+if(!savedNickname||savedNickname==='플레이어')nicknameGate.showModal();
 let ctx,gain,fxGain,source,buffer,notes=[],running=false,paused=false,loading=false,finished=false,startAt=0,duration=0;
 let score=0,combo=0,best=0,perfect=0,good=0,miss=0,ghost=0,feverUntil=-1,offset=0,lastSecond=-99;
 let flashes=[0,0,0,0],particles=[],cache=new Map(),W=400,H=480,dpr=1;
@@ -88,7 +103,7 @@ async function uploadRank(){
   catch{$('retry-rank').hidden=false;$('rank-status').textContent='전체 랭킹 등록에 실패했어요. 이 화면을 닫기 전에 기록 등록 다시 시도를 눌러주세요.';}
 }
 function saveRank(acc){
-  const r={name:savedNickname,track:Rhythm.tracks[Number($('track').value)].name,level:$('level').value,score,accuracy:Math.round(acc*100),combo:best,pets:team.map(p=>p.name),date:new Date().toISOString()};
+  const r={name:performanceNickname,track:Rhythm.tracks[Number($('track').value)].name,level:$('level').value,score,accuracy:Math.round(acc*100),combo:best,pets:team.map(p=>p.name),date:new Date().toISOString()};
   try{const rows=[...readRanks(),r].sort((a,b)=>b.score-a.score||b.accuracy-a.accuracy),counts={};const kept=rows.filter(x=>{const key=x.track+'/'+x.level;counts[key]=(counts[key]||0)+1;return counts[key]<=10;});localStorage.setItem(rankKey,JSON.stringify(kept));$('rank-status').textContent='이 기기에 기록을 저장했습니다. 곡·난이도별로 비교하세요.';renderRanks();}
   catch{$('rank-status').textContent='브라우저 저장이 차단되어 기록을 저장하지 못했어요.';}
   if(RhythmOnline.enabled){pendingRank={record:r,id:crypto.randomUUID()};uploadRank();}
@@ -159,7 +174,10 @@ function celebrate(){
 }
 function lock(value){$('track').disabled=value;$('level').disabled=value;$('offset').disabled=value;$('shuffle').disabled=value;$('nickname').disabled=value;$('save-nickname').disabled=value;}
 async function start(){
-  if(loading||running)return;if(finished)randomize();saveNickname(false);patternSeed=crypto.getRandomValues(new Uint32Array(1))[0];loading=true;finished=false;lock(true);
+  if(loading||running)return;
+  if(!saveNickname(false)){if(!nicknameGate.open)nicknameGate.showModal();$('status').textContent='랭킹에 사용할 닉네임을 먼저 입력해주세요.';return;}
+  performanceNickname=savedNickname;
+  if(finished)randomize();patternSeed=crypto.getRandomValues(new Uint32Array(1))[0];loading=true;finished=false;lock(true);
   const button=$('start');button.disabled=true;button.textContent='음악 준비 중…';$('status').textContent='브라우저에서 음악을 만드는 중입니다.';
   try{
     await audioReady();
@@ -171,7 +189,7 @@ async function start(){
     score=combo=best=perfect=good=miss=ghost=0;feverUntil=-1;particles=[];lastSecond=-99;
     startAt=ctx.currentTime+2.5;source=ctx.createBufferSource();source.buffer=buffer;source.connect(gain);source.start(startAt);
     running=true;paused=false;$('pause').disabled=false;$('pause').textContent='일시정지';$('cover').hidden=true;
-    $('track-label').textContent=`${track.name} · ${track.bpm} BPM`;$('status').textContent='노란 판정선에 맞춰 D · F · J · K를 누르세요.';stats();
+    $('track-label').textContent=`${track.name} · ${track.bpm} BPM`;$('status').textContent=`랭킹 닉네임: ${performanceNickname} · 노란 판정선에 맞춰 D · F · J · K를 누르세요.`;stats();
   }catch(e){lock(false);$('cover').hidden=false;button.disabled=false;button.textContent='다시 시작';$('status').textContent='음악을 시작하지 못했어요. Chrome 또는 Edge에서 다시 열어주세요.';console.error(e);}
   finally{loading=false;}
 }
