@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id),keys=['d','f','j','k'],colors=['#f4ce77'
 let team=[],patternSeed=0,charges=[0,0,0,0],stamina=100,maxStamina=100,totalDamage=0;
 let rival,rivalHp=0,rivalMax=0,defeated=0;
 // 패턴과 곡 속도가 달라졌으므로 이전 기록을 보존하고 새 규칙으로 별도 집계한다.
-const rankKey='manduk-rhythm-local-v5';
+const rankKey='manduk-rhythm-local-music-v6';
 let sharedRecords=[],sharedState={},pendingRank=null;
 $('rank-scope').textContent=RhythmOnline.enabled?'전체 이용자 기록':'이 기기 기록';
 if(RhythmOnline.enabled)$('nickname-status').textContent='닉네임은 이 브라우저에 저장돼요. 완주하면 닉네임·점수·정확도·콤보가 전체 이용자 랭킹에 공개됩니다.';
@@ -123,7 +123,7 @@ async function audioReady(){if(!ctx){ctx=new (window.AudioContext||window.webkit
 function impactSound(lane,strong=true,skill=false){
   if(!ctx||ctx.state!=='running')return;
   const track=Rhythm.tracks[Number($('track').value)],jazz=track.genre==='재즈',hip=track.genre==='힙합',tribal=track.genre==='트라이벌';
-  const t=ctx.currentTime,root=Rhythm.chordRoot(track,running?time():0),intervals=jazz?[0,4,7,11]:hip?[0,3,7,10]:[0,4,7,12];
+  const t=ctx.currentTime,root=Rhythm.chordRoot(track,running?time():0),intervals=track.mode==='minor'?[0,3,7,10]:[0,4,7,12];
   const f=440*2**((root+intervals[lane]+(hip?-12:0)-69)/12),len=jazz?.13:hip?.10:.085,volume=Number($('sfx-volume').value)/100;
   if(!volume)return;
   for(const [harmonic,amp] of [[1,1],[2,jazz?.22:.09]]){
@@ -189,12 +189,12 @@ async function start(){
   if(!saveNickname(false)){if(!nicknameGate.open)nicknameGate.showModal();$('status').textContent='랭킹에 사용할 닉네임을 먼저 입력해주세요.';return;}
   performanceNickname=savedNickname;
   if(finished)randomize();patternSeed=crypto.getRandomValues(new Uint32Array(1))[0];loading=true;finished=false;lock(true);
-  const button=$('start');button.disabled=true;button.textContent='음악 준비 중…';$('status').textContent='브라우저에서 음악을 만드는 중입니다.';
+  const button=$('start');button.disabled=true;button.textContent='음악 준비 중…';$('status').textContent='음악을 불러오는 중입니다.';
   try{
     await audioReady();
     if(RhythmOnline.enabled){performanceNickname=await RhythmOnline.identity(performanceNickname);lockNickname(performanceNickname);}
     const track=Rhythm.tracks[Number($('track').value)];
-    if(!cache.has(track.name))cache.set(track.name,await Rhythm.music(track));buffer=cache.get(track.name);
+    if(!cache.has(track.name)){if(cache.size>=2)cache.clear();cache.set(track.name,await Rhythm.music(track,ctx));}buffer=cache.get(track.name);
     if(source){try{source.stop();}catch{}source.disconnect();}
     notes=Rhythm.chart(track,$('level').value,patternSeed);duration=buffer.duration;offset=Number($('offset').value)/1000;
     inputs.forEach(s=>s.clear());impacts=[];holdGrace=0;charges=[0,0,0,0];stamina=maxStamina;totalDamage=0;defeated=0;nextRival();dataStats();
@@ -267,7 +267,7 @@ function frame(){
 $('start').onclick=start;$('pause').onclick=togglePause;
 $('volume').oninput=()=>{if(gain)gain.gain.setTargetAtTime(Number($('volume').value)/100,ctx.currentTime,.03);};
 $('offset').oninput=()=>$('offset-label').textContent=`${$('offset').value} ms`;
-$('track').onchange=()=>{const track=Rhythm.tracks[Number($('track').value)];$('track-label').textContent=`${track.name} · ${track.genre} · ${track.bpm} BPM`;$('clock').textContent=`00:00 / 00:${Math.ceil(Rhythm.BEATS*60/track.bpm)}`;renderRanks();};
+$('track').onchange=()=>{const track=Rhythm.tracks[Number($('track').value)];$('track-label').textContent=`${track.name} · ${track.genre} · 약 ${Math.round(track.bpm)} BPM`;$('clock').textContent=`00:00 / 00:${Math.ceil(track.duration)}`;renderRanks();};
 $('level').onchange=()=>{renderRanks();refreshRanks();};$('shuffle').onclick=randomize;
 $('refresh-ranks').onclick=refreshRanks;$('retry-rank').onclick=uploadRank;
 $('pads').addEventListener('pointerdown',e=>{const btn=e.target.closest('[data-lane]');if(btn){e.preventDefault();btn.setPointerCapture(e.pointerId);pressLane(Number(btn.dataset.lane),'pointer:'+e.pointerId);}});
