@@ -15,11 +15,12 @@
   const eventId = params.get('id');
   let editing = false, key = null, saveTimer = null;
   const meta = { createdAt: 0 };
+  let decisions = { accepted: [], rejected: [] }, applications = {};
   const editable = () => view === 'new' || editing;
 
   function readJSON(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
 
-  function doc() { return { draft: readForm(), state, createdAt: meta.createdAt }; }
+  function doc() { return { draft: readForm(), state, createdAt: meta.createdAt, decisions }; }
 
   function listSummary() {
     const f = readForm();
@@ -59,6 +60,7 @@
     const method = document.querySelector(`input[name=method][value="${d.method || 'random'}"]`);
     if (method) method.checked = true;
     $('random-seed').checked = d.randomSeed !== false;
+    $('apply-open').checked = d.applyOpen !== false;
   }
 
   function readForm() {
@@ -68,6 +70,7 @@
       players: $('players').value.split('\n').map(s => s.trim()).filter(Boolean),
       teamList: $('team-list').value,
       randomSeed: $('random-seed').checked,
+      applyOpen: $('apply-open').checked,
     };
     INFO.forEach(k => { f[k] = $(k).value.trim(); });
     return f;
@@ -278,6 +281,83 @@
   $('reset').addEventListener('click', reset);
   $('print').addEventListener('click', () => window.print());
 
+  // ---------- 참가 신청 ----------
+  const DISCORD = /^(?=.{2,32}$)[a-z0-9_.]+$|^.{2,32}#\d{4}$/i;
+  async function loadApplications() {
+    try { applications = await S.store.listApply(eventId); } catch (e) { applications = {}; }
+    renderApply();
+  }
+
+  function renderApply() {
+    if (view !== 'event') return;
+    const mine = applications[S.browserId()];
+    const open = $('apply-open').checked;
+    const n = Object.keys(applications).length;
+    $('apply-box').hidden = editing || (!open && !mine);
+    $('apply-count').textContent = n ? `신청 ${n}명` : '';
+    $('apply-form').hidden = !!mine || !open;
+    let msg = '';
+    if (mine) {
+      const st = decisions.accepted.includes(S.browserId()) ? '✅ 수락됨' : decisions.rejected.includes(S.browserId()) ? '❌ 거절됨' : '⏳ 주최자 확인 대기 중';
+      msg = `${mine.nick} 님으로 신청했어요 · ${st}`;
+    } else if (!open) msg = '신청이 마감되었어요.';
+    $('apply-status').textContent = msg;
+    renderApplicants();
+  }
+
+  function renderApplicants() {
+    $('applicants').hidden = !editing;
+    if (!editing) return;
+    const items = Object.entries(applications).sort((a, b) => (a[1].at || 0) - (b[1].at || 0));
+    $('applicants-count').textContent = items.length ? items.length + '명' : '';
+    if (!items.length) { $('applicant-list').replaceChildren(el('p', 'hint-sm', '아직 신청자가 없어요.')); return; }
+    $('applicant-list').replaceChildren(...items.map(([bid, a]) => {
+      const row = el('div', 'applicant');
+      const acc = decisions.accepted.includes(bid), rej = decisions.rejected.includes(bid);
+      if (acc) row.classList.add('accepted');
+      if (rej) row.classList.add('rejected');
+      const who = el('div', 'applicant-who');
+      who.append(el('b', '', a.nick), el('span', '', 'Discord: ' + a.discord));
+      row.append(who, el('span', 'applicant-state', acc ? '수락됨' : rej ? '거절됨' : '대기'));
+      const yes = el('button', 'btn btn-sm', acc ? '수락 취소' : '수락');
+      yes.type = 'button';
+      yes.addEventListener('click', () => decide(bid, a, acc ? null : 'accepted'));
+      const no = el('button', 'btn btn-sm', rej ? '거절 취소' : '거절');
+      no.type = 'button';
+      no.addEventListener('click', () => decide(bid, a, rej ? null : 'rejected'));
+      row.append(yes, no);
+      return row;
+    }));
+  }
+
+  function decide(bid, a, to) {
+    decisions.accepted = decisions.accepted.filter(x => x !== bid);
+    decisions.rejected = decisions.rejected.filter(x => x !== bid);
+    const lines = $('players').value.split('\n').map(s => s.trim()).filter(Boolean);
+    if (to) decisions[to].push(bid);
+    if (to === 'accepted' && !lines.includes(a.nick)) lines.push(a.nick);
+    if (to !== 'accepted') { const i = lines.indexOf(a.nick); if (i >= 0) lines.splice(i, 1); }
+    $('players').value = lines.join('\n');
+    summary(); save(); renderApply();
+  }
+
+  async function submitApply(e) {
+    e.preventDefault();
+    const nick = $('apply-nick').value.trim(), discord = $('apply-discord').value.trim().replace(/^@/, '');
+    const err = $('apply-error');
+    if (!nick) { err.textContent = '인게임 닉네임을 입력하세요.'; return; }
+    if (discord.includes('@') || !DISCORD.test(discord)) { err.textContent = '디스코드 아이디를 확인하세요. 이메일은 넣을 수 없어요. (영문·숫자·_·. 2~32자)'; return; }
+    err.textContent = '신청 중…';
+    const bid = S.browserId();
+    try {
+      await S.store.apply(eventId, bid, { nick: nick.slice(0, 16), discord: discord.slice(0, 32), at: Date.now() });
+      err.textContent = '';
+    } catch (ex) {
+      err.textContent = ex instanceof S.WrongPassword ? '이 브라우저에서는 이미 신청했어요.' : '신청하지 못했어요. 잠시 후 다시 시도하세요.';
+    }
+    await loadApplications();
+  }
+
   // ---------- 목록 ----------
   const STATUS = { ready: ['준비 중', 'ready'], live: ['진행 중', 'live'], done: ['종료', 'done'] };
   async function showList() {
@@ -336,7 +416,7 @@
     $('done').hidden = !on;
     $('delete').hidden = !on;
     if (!on) setSaveState('');
-    summary(); render();
+    summary(); render(); renderApply();
   }
 
   async function showEvent() {
@@ -352,7 +432,9 @@
     $('event-view').hidden = false;
     meta.createdAt = d.createdAt || 0;
     fill(d.draft); state = d.state || null;
+    decisions = Object.assign({ accepted: [], rejected: [] }, d.decisions);
     $('edit').hidden = false;
+    await loadApplications();
     summary(); render();
   }
 
@@ -393,6 +475,8 @@
     catch (e) { setSaveState('삭제 실패', true); }
   });
   $('register-btn').addEventListener('click', register);
+  $('apply-form').addEventListener('submit', submitApply);
+  $('apply-open').addEventListener('input', renderApply);
 
   if (view === 'list') showList();
   else if (view === 'new') showNew();

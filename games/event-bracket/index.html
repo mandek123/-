@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261013155335">
+<link rel="stylesheet" href="style.css?v=20261013160916">
 </head>
 <body>
 <header class="topbar">
@@ -60,6 +60,22 @@
       <h2><span class="ic">🎁</span> 상품</h2>
       <ol id="prize-view" class="prizes"></ol>
     </article>
+  </section>
+
+  <section class="card apply-card" id="apply-box" hidden>
+    <h2><span class="ic">🙋</span> 참가 신청 <small class="apply-count" id="apply-count"></small></h2>
+    <p class="apply-status" id="apply-status"></p>
+    <form class="apply-form" id="apply-form">
+      <label class="field">인게임 닉네임
+        <input id="apply-nick" maxlength="16" required placeholder="예) 만득이">
+      </label>
+      <label class="field">디스코드 아이디 <small>이메일 말고 아이디</small>
+        <input id="apply-discord" maxlength="32" required placeholder="예) manduk_01">
+      </label>
+      <button class="btn btn-main" type="submit">🙋 신청하기</button>
+    </form>
+    <p class="pw-error" id="apply-error" role="alert"></p>
+    <p class="hint-sm">신청은 브라우저마다 한 번만 할 수 있어요. 주최자가 수락하면 참가자 명단에 자동으로 들어가요. 디스코드 아이디는 대회 연락용으로 주최자에게 전달돼요.</p>
   </section>
 
   <details class="card setup" id="setup" open>
@@ -126,6 +142,13 @@
 
     <div class="options">
       <label><input type="checkbox" id="random-seed" checked> 대진 랜덤 배치</label>
+      <label><input type="checkbox" id="apply-open" checked> 참가 신청 받기</label>
+    </div>
+
+    <div class="applicants" id="applicants" hidden>
+      <h3>🙋 신청자 <small id="applicants-count"></small></h3>
+      <p class="hint-sm">수락하면 닉네임이 참가자 칸에 자동으로 들어가요. 팀 직접 구성일 때는 아래 명단을 보고 팀 목록에 직접 넣어 주세요. 대진표를 이미 만들었다면 다시 만들어야 반영돼요.</p>
+      <div class="applicant-list" id="applicant-list"></div>
     </div>
 
     <p class="summary" id="summary" role="status"></p>
@@ -187,8 +210,8 @@
     </div>
   </form>
 </dialog>
-<script src="bracket.js?v=20261013155335"></script>
-<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261013155335"></script>
-<script src="app.js?v=20261013155335"></script>
+<script src="bracket.js?v=20261013160916"></script>
+<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261013160916"></script>
+<script src="app.js?v=20261013160916"></script>
 </body>
 </html>

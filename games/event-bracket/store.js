@@ -50,12 +50,18 @@
     remove(id, key) {
       return this.req('PATCH', '', { ['events/' + id]: null, ['event_list/' + id]: null, ['event_proof/' + id]: key });
     },
+    async listApply(id) { return (await this.req('GET', 'event_apply/' + id)) || {}; },
+    apply(id, bid, entry) { return this.req('PUT', `event_apply/${id}/${bid}`, entry); },
   };
 
   // 같은 규칙을 흉내 내는 이 브라우저 전용 저장소 (Firebase 규칙 게시 전 미리보기용)
   const local = {
     shared: false,
-    read() { try { return JSON.parse(localStorage.getItem(LOCAL)) || { events: {}, list: {}, keys: {} }; } catch (e) { return { events: {}, list: {}, keys: {} }; } },
+    read() {
+      let db = null;
+      try { db = JSON.parse(localStorage.getItem(LOCAL)); } catch (e) { /* 새로 만듦 */ }
+      return Object.assign({ events: {}, list: {}, keys: {}, apply: {} }, db || {});
+    },
     write(db) { localStorage.setItem(LOCAL, JSON.stringify(db)); },
     check(db, id, key) { if (db.keys[id] !== key) throw new WrongPassword('권한 없음'); },
     async list() { return this.read().list; },
@@ -77,7 +83,27 @@
       delete db.events[id]; delete db.list[id]; delete db.keys[id];
       this.write(db);
     },
+    async listApply(id) { return this.read().apply[id] || {}; },
+    async apply(id, bid, entry) {
+      const db = this.read();
+      db.apply[id] = db.apply[id] || {};
+      if (db.apply[id][bid] || !db.events[id]) throw new WrongPassword('이미 신청');
+      db.apply[id][bid] = entry;
+      this.write(db);
+    },
   };
 
-  root.EventStore = { store: root.EVENT_SHARED ? remote : local, hashKey, newId, WrongPassword };
+  // 이 브라우저 고유 번호. 같은 글에 한 번만 신청할 수 있게 신청 위치로 쓴다.
+  function browserId() {
+    const K = 'mandeuk_event_browser_id';
+    let v = null;
+    try { v = localStorage.getItem(K); } catch (e) { /* 저장 불가 */ }
+    if (!v || !/^[a-z0-9]{12,32}$/.test(v)) {
+      v = (newId() + newId()).slice(0, 20);
+      try { localStorage.setItem(K, v); } catch (e) { /* 저장 불가 */ }
+    }
+    return v;
+  }
+
+  root.EventStore = { store: root.EVENT_SHARED ? remote : local, hashKey, newId, browserId, WrongPassword };
 })(this);
