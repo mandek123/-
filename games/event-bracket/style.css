@@ -203,6 +203,13 @@ hr{border:0;border-top:3px dashed #d9c79c;margin:6px 0 18px}
 .event-card:hover{transform:translate(-2px,-2px);box-shadow:7px 8px 0 var(--ink);background:#fff}
 .event-card .status{align-self:flex-start;padding:2px 9px;border-radius:6px;border:2px solid var(--ink);font:700 12px/1.5 var(--body)}
 .status.ready{background:#fff}.status.live{background:var(--mint)}.status.done{background:var(--ink);color:var(--yellow)}
+.event-card.is-ready{background:#fff6d6}
+.event-card.is-recruiting{background:linear-gradient(160deg,#fff3b0,#ffd84d);}
+.event-card.is-recruiting .status{background:var(--red);color:#fff;animation:pulse 1.8s ease-in-out infinite}
+.event-card.is-live{background:linear-gradient(160deg,#e6fff3,#9ff5cf)}
+.event-card.is-done{background:#ece6d8}
+.event-card.is-done .event-title{color:var(--ink3)}
+@keyframes pulse{50%{transform:scale(1.06)}}
 .event-title{font:400 23px/1.25 var(--display);word-break:keep-all}
 .event-meta{font-weight:600;font-size:13px;color:var(--ink3)}
 .event-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:auto;padding-top:8px;border-top:2px dashed #d9c79c;font-weight:700;font-size:13px}

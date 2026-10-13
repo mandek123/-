@@ -424,7 +424,16 @@
       const card = el('a', 'event-card');
       card.href = '?id=' + encodeURIComponent(id);
       const [label, cls] = STATUS[e.status] || STATUS.ready;
-      card.append(el('span', 'status ' + cls, label), el('b', 'event-title', e.title || '이벤트'));
+      const badge = el('span', 'status ' + cls, label);
+      card.classList.add('is-' + cls);
+      card.append(badge, el('b', 'event-title', e.title || '이벤트'));
+      // 목록 요약엔 신청 여부가 없어 준비 중 글만 본문을 읽어 확인
+      if (cls === 'ready') S.store.get(id).then(d => {
+        if (d && d.draft && d.draft.applyOpen !== false) {
+          badge.textContent = '준비 중 · 신청서 받는 중';
+          card.classList.add('is-recruiting');
+        }
+      }).catch(() => {});
       card.append(el('span', 'event-meta', [e.host && '주최 ' + e.host, e.when].filter(Boolean).join(' · ') || '일정 미정'));
       const foot = el('span', 'event-foot', `${e.mode}:${e.mode}` + (e.teams ? ` · ${e.teams}팀` : ''));
       if (e.champion) foot.append(el('em', '', '🏆 ' + e.champion));
