@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>이벤트 대진표 · 만득월드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="style.css?v=20261013155335">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="../../"><img src="../../img/game/manduk.webp" alt="">만득월드</a>
+  <nav>
+    <button id="print" class="btn" type="button">인쇄</button>
+    <a class="btn" href="../../">홈</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-text">
+      <span class="chip">EVENT · 토너먼트</span>
+      <h1 id="title-view">이벤트 대진표</h1>
+      <p id="meta-view" class="meta"></p>
+    </div>
+    <img class="hero-mascot" src="../../img/game/manduk.webp" alt="">
+  </section>
+
+  <section id="list-view" hidden>
+    <div class="list-head">
+      <h2><span class="ic">📋</span> 이벤트 목록</h2>
+      <a class="btn btn-main" href="?new=1">✏️ 글쓰기</a>
+    </div>
+    <p class="store-note" id="store-note"></p>
+    <div class="event-list" id="event-list"></div>
+    <p class="empty card" id="list-empty" hidden>아직 등록된 이벤트가 없어요. <b>글쓰기</b>로 첫 대회를 열어 보세요!</p>
+    <div class="card legacy" id="legacy" hidden>
+      <p>이 브라우저에 예전에 만들던 대진표가 있어요.</p>
+      <a class="btn" href="?new=1&amp;legacy=1">불러와서 글쓰기</a>
+    </div>
+  </section>
+
+  <div class="toolbar" id="toolbar" hidden>
+    <a class="btn" href="./">← 목록</a>
+    <span class="save-state" id="save-state" role="status"></span>
+    <button class="btn" id="edit" type="button" hidden>🔒 수정</button>
+    <button class="btn" id="done" type="button" hidden>수정 끝내기</button>
+    <button class="btn btn-danger" id="delete" type="button" hidden>삭제</button>
+  </div>
+
+  <div id="event-view" hidden>
+  <section class="info" id="info-view" hidden>
+    <article class="card rules-card" id="rules-box" hidden>
+      <h2><span class="ic">📜</span> 경기 규칙</h2>
+      <div id="rules-view" class="rules"></div>
+    </article>
+    <article class="card prize-card" id="prize-box" hidden>
+      <h2><span class="ic">🎁</span> 상품</h2>
+      <ol id="prize-view" class="prizes"></ol>
+    </article>
+  </section>
+
+  <details class="card setup" id="setup" open>
+    <summary><h2>대회 설정</h2><span class="hint-sm">주최자 입력</span></summary>
+
+    <div class="grid2">
+      <label class="field">대회 이름
+        <input id="title" maxlength="40" placeholder="예) 10월 만득 PK 대회">
+      </label>
+      <label class="field">주최자
+        <input id="host" maxlength="30" placeholder="예) 만득길드">
+      </label>
+      <label class="field">일시
+        <input id="when" maxlength="40" placeholder="예) 10월 20일(일) 오후 8시">
+      </label>
+      <label class="field">장소 · 채널
+        <input id="where" maxlength="40" placeholder="예) 만득서버1채널 · 디스코드 #대회">
+      </label>
+    </div>
+
+    <label class="field">경기 규칙 <small>한 줄에 하나씩</small>
+      <textarea id="rules" rows="5" placeholder="예) 3판 2선승제&#10;펫 교체 1회 허용&#10;지각 10분 시 기권"></textarea>
+    </label>
+
+    <div class="grid5">
+      <label class="field gold">🥇 우승
+        <input id="prize1" maxlength="60" placeholder="예) 다이아 3000">
+      </label>
+      <label class="field silver">🥈 준우승
+        <input id="prize2" maxlength="60" placeholder="예) 다이아 1500">
+      </label>
+      <label class="field bronze">🥉 3위
+        <input id="prize3" maxlength="60" placeholder="예) 다이아 500">
+      </label>
+      <label class="field">🏅 4위
+        <input id="prize5" maxlength="60" placeholder="예) 다이아 200">
+      </label>
+      <label class="field">🎈 참가상
+        <input id="prize4" maxlength="60" placeholder="예) 전원 활력 물약">
+      </label>
+    </div>
+
+    <hr>
+
+    <fieldset class="seg modes">
+      <legend>대전 방식</legend>
+      <label><input type="radio" name="mode" value="1" checked><span>1 : 1</span></label>
+      <label><input type="radio" name="mode" value="3"><span>3 : 3</span></label>
+      <label><input type="radio" name="mode" value="5"><span>5 : 5</span></label>
+    </fieldset>
+
+    <fieldset class="seg team-method" id="team-method" hidden>
+      <legend>팀 구성 방식</legend>
+      <label><input type="radio" name="method" value="random" checked><span>올랜덤<small>참가자를 적으면 팀을 무작위로 나눠요</small></span></label>
+      <label><input type="radio" name="method" value="fixed"><span>팀 직접 구성<small>미리 정한 팀으로 대진표만 만들어요</small></span></label>
+    </fieldset>
+
+    <label class="field" id="players-field"><span id="players-label">참가자</span> <small id="players-help">한 줄에 한 명</small>
+      <textarea id="players" rows="8" placeholder="만득이&#10;초아란&#10;..."></textarea>
+    </label>
+    <label class="field" id="teams-field" hidden>팀 목록 <small id="teams-help"></small>
+      <textarea id="team-list" rows="8"></textarea>
+    </label>
+
+    <div class="options">
+      <label><input type="checkbox" id="random-seed" checked> 대진 랜덤 배치</label>
+    </div>
+
+    <p class="summary" id="summary" role="status"></p>
+    <div class="actions">
+      <button id="make" class="btn btn-main" type="button">대진표 만들기</button>
+      <button id="reset" class="btn" type="button">대진표 초기화</button>
+    </div>
+
+    <div class="register" id="register" hidden>
+      <hr>
+      <h3>글 등록</h3>
+      <p class="hint-sm">비밀번호를 아는 사람만 나중에 이 글과 대진표를 수정·삭제할 수 있어요. 비밀번호는 다시 찾을 수 없으니 꼭 기억하세요.</p>
+      <div class="grid2">
+        <label class="field">비밀번호 <small>4자 이상</small>
+          <input id="pw-new" type="password" autocomplete="new-password" minlength="4" maxlength="40">
+        </label>
+        <label class="field">비밀번호 확인
+          <input id="pw-new2" type="password" autocomplete="new-password" maxlength="40">
+        </label>
+      </div>
+      <p class="pw-error" id="register-error" role="alert"></p>
+      <button id="register-btn" class="btn btn-main" type="button">📮 등록하기</button>
+    </div>
+  </details>
+
+  <section id="result" hidden>
+    <div class="card bracket-card">
+      <div class="bracket-head">
+        <h2><span class="ic">⚔️</span> 대진표</h2>
+        <span class="progress" id="progress"></span>
+      </div>
+      <p class="hint" id="bracket-hint">이긴 팀을 누르면 다음 라운드로 올라가요. 다시 누르면 취소돼요.</p>
+      <div class="bracket-wrap"><div class="bracket" id="bracket"></div></div>
+      <div class="third-box" id="third-box" hidden>
+        <div class="round-head third-head"><b>3·4위전</b><small>4강에서 진 두 팀</small></div>
+        <div id="third-match"></div>
+      </div>
+      <p class="waiting" id="waiting" hidden></p>
+    </div>
+
+    <section class="card results" id="results" hidden>
+      <h2><span class="ic">🏆</span> 최종 결과</h2>
+      <div class="podium" id="podium"></div>
+      <p class="fourth" id="fourth" hidden></p>
+    </section>
+  </section>
+  </div>
+</main>
+
+<dialog id="pw-dialog">
+  <form id="pw-form">
+    <h2>🔒 글쓴이 확인</h2>
+    <p>글을 쓸 때 정한 비밀번호를 입력하세요.</p>
+    <input id="pw-input" type="password" autocomplete="current-password" maxlength="40" required>
+    <p class="pw-error" id="pw-error" role="alert"></p>
+    <div class="actions">
+      <button class="btn btn-main" type="submit">확인</button>
+      <button class="btn" type="button" id="pw-cancel">취소</button>
+    </div>
+  </form>
+</dialog>
+<script src="bracket.js?v=20261013155335"></script>
+<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261013155335"></script>
+<script src="app.js?v=20261013155335"></script>
+</body>
+</html>
