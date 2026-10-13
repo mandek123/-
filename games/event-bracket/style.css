@@ -34,7 +34,7 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 120px}
 
 /* 타이틀 카드 */
 .hero{position:relative;display:flex;align-items:center;gap:20px;padding:26px 30px;margin-bottom:22px;background:var(--cream);border:var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 92% 50%,rgba(255,212,0,.22) 0 10deg,transparent 10deg 20deg);pointer-events:none}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% 50%,rgba(255,212,0,.55) 0 70px,rgba(255,212,0,.18) 71px 110px,transparent 111px),radial-gradient(rgba(11,11,11,.07) 1.3px,transparent 1.8px) 0 0/12px 12px;pointer-events:none}
 .hero-text{position:relative;flex:1;min-width:0}
 .chip{display:inline-block;padding:4px 10px;border-radius:7px;background:var(--ink);color:var(--yellow);font:700 12px/1.2 var(--body);letter-spacing:.06em;transform:rotate(-2deg)}
 .hero h1{margin:10px 0 6px;font-size:clamp(32px,5vw,54px);line-height:1.05;text-shadow:3px 3px 0 var(--yellow);word-break:keep-all}
@@ -246,4 +246,8 @@ dialog input:focus{outline:none;box-shadow:0 0 0 4px var(--yellow)}
 .applicant-state{font:700 12px/1 var(--body);padding:4px 8px;border-radius:6px;background:var(--ink);color:var(--yellow)}
 .btn-sm{padding:6px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}
 @media(max-width:640px){.apply-form{grid-template-columns:1fr}.applicant{grid-template-columns:1fr auto}}
+.team-apply{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0 12px}
+.apply-form.is-team{grid-template-columns:1fr 1fr}
+.apply-form.is-team .team-apply,.apply-form.is-team .btn{grid-column:1/-1;justify-self:start}
+.applicant-who .team-members{display:block;color:var(--ink2);font-weight:600}
 [hidden]{display:none!important}

@@ -294,12 +294,13 @@
     const open = $('apply-open').checked;
     const n = Object.keys(applications).length;
     $('apply-box').hidden = editing || (!open && !mine);
-    $('apply-count').textContent = n ? `신청 ${n}명` : '';
+    $('apply-count').textContent = n ? `신청 ${n}${teamMode() ? '팀' : '명'}` : '';
     $('apply-form').hidden = !!mine || !open;
+    setupApplyForm();
     let msg = '';
     if (mine) {
       const st = decisions.accepted.includes(S.browserId()) ? '✅ 수락됨' : decisions.rejected.includes(S.browserId()) ? '❌ 거절됨' : '⏳ 주최자 확인 대기 중';
-      msg = `${mine.nick} 님으로 신청했어요 · ${st}`;
+      msg = (mine.team ? `${mine.team} (대표 ${mine.nick})로` : `${mine.nick} 님으로`) + ` 신청했어요 · ${st}`;
     } else if (!open) msg = '신청이 마감되었어요.';
     $('apply-status').textContent = msg;
     renderApplicants();
@@ -309,7 +310,7 @@
     $('applicants').hidden = !editing;
     if (!editing) return;
     const items = Object.entries(applications).sort((a, b) => (a[1].at || 0) - (b[1].at || 0));
-    $('applicants-count').textContent = items.length ? items.length + '명' : '';
+    $('applicants-count').textContent = items.length ? items.length + (teamMode() ? '팀' : '명') : '';
     if (!items.length) { $('applicant-list').replaceChildren(el('p', 'hint-sm', '아직 신청자가 없어요.')); return; }
     $('applicant-list').replaceChildren(...items.map(([bid, a]) => {
       const row = el('div', 'applicant');
@@ -317,7 +318,9 @@
       if (acc) row.classList.add('accepted');
       if (rej) row.classList.add('rejected');
       const who = el('div', 'applicant-who');
-      who.append(el('b', '', a.nick), el('span', '', 'Discord: ' + a.discord));
+      who.append(el('b', '', a.team ? `${a.team} · 대표 ${a.nick}` : a.nick));
+      if (a.team) who.append(el('span', 'team-members', '팀원: ' + a.members));
+      who.append(el('span', '', 'Discord: ' + a.discord));
       row.append(who, el('span', 'applicant-state', acc ? '수락됨' : rej ? '거절됨' : '대기'));
       const yes = el('button', 'btn btn-sm', acc ? '수락 취소' : '수락');
       yes.type = 'button';
@@ -333,24 +336,70 @@
   function decide(bid, a, to) {
     decisions.accepted = decisions.accepted.filter(x => x !== bid);
     decisions.rejected = decisions.rejected.filter(x => x !== bid);
-    const lines = $('players').value.split('\n').map(s => s.trim()).filter(Boolean);
     if (to) decisions[to].push(bid);
-    if (to === 'accepted' && !lines.includes(a.nick)) lines.push(a.nick);
-    if (to !== 'accepted') { const i = lines.indexOf(a.nick); if (i >= 0) lines.splice(i, 1); }
-    $('players').value = lines.join('\n');
+    if (a.team) {
+      // 팀 신청: 팀 직접 구성 목록에 "팀이름: 팀원, 팀원" 한 줄로 넣고 빼기
+      const line = `${a.team}: ${a.members}`;
+      const lines = $('team-list').value.split('\n').map(s => s.trim()).filter(Boolean).filter(l => l !== line);
+      if (to === 'accepted') {
+        lines.push(line);
+        document.querySelector('input[name=method][value="fixed"]').checked = true;
+      }
+      $('team-list').value = lines.join('\n');
+    } else {
+      const lines = $('players').value.split('\n').map(s => s.trim()).filter(Boolean);
+      if (to === 'accepted' && !lines.includes(a.nick)) lines.push(a.nick);
+      if (to !== 'accepted') { const i = lines.indexOf(a.nick); if (i >= 0) lines.splice(i, 1); }
+      $('players').value = lines.join('\n');
+    }
     summary(); save(); renderApply();
+  }
+
+  const teamMode = () => readForm().mode > 1;
+
+  // 팀전이면 대표자가 팀 이름과 팀원 닉네임을 한 번에 입력
+  function setupApplyForm() {
+    const n = readForm().mode, team = n > 1;
+    $('apply-form').classList.toggle('is-team', team);
+    $('apply-team-field').hidden = !team;
+    $('apply-team').required = team;
+    $('apply-nick-label').textContent = team ? '대표자(팀장) 닉네임' : '인게임 닉네임';
+    const box = $('team-apply');
+    box.hidden = !team;
+    if (box.childElementCount !== Math.max(0, n - 1)) {
+      box.replaceChildren(...Array.from({ length: Math.max(0, n - 1) }, (_, i) => {
+        const l = el('label', 'field', `팀원 ${i + 2} 닉네임`);
+        const inp = el('input', 'apply-member');
+        inp.maxLength = 16;
+        inp.placeholder = '인게임 닉네임';
+        l.append(inp);
+        return l;
+      }));
+    }
+    box.querySelectorAll('input').forEach(i => { i.required = team; });
   }
 
   async function submitApply(e) {
     e.preventDefault();
-    const nick = $('apply-nick').value.trim(), discord = $('apply-discord').value.trim().replace(/^@/, '');
+    const nick = $('apply-nick').value.trim().replace(/[,，:：]/g, ' ').trim(), discord = $('apply-discord').value.trim().replace(/^@/, '');
     const err = $('apply-error');
     if (!nick) { err.textContent = '인게임 닉네임을 입력하세요.'; return; }
+    const entry = { nick: nick.slice(0, 16), discord, at: Date.now() };
+    if (teamMode()) {
+      const team = $('apply-team').value.trim().replace(/[:：,，]/g, ' ').trim();
+      const members = [nick, ...[...document.querySelectorAll('.apply-member')].map(i => i.value.trim())].map(s => s.replace(/[,，:：]/g, ' ').trim());
+      if (!team) { err.textContent = '팀 이름을 입력하세요.'; return; }
+      if (members.some(m => !m)) { err.textContent = '팀원 닉네임을 모두 입력하세요.'; return; }
+      if (new Set(members).size !== members.length) { err.textContent = '팀원 닉네임이 겹쳐요.'; return; }
+      entry.team = team.slice(0, 20);
+      entry.members = members.map(m => m.slice(0, 16)).join(', ');
+    }
     if (discord.includes('@') || !DISCORD.test(discord)) { err.textContent = '디스코드 아이디를 확인하세요. 이메일은 넣을 수 없어요. (영문·숫자·_·. 2~32자)'; return; }
     err.textContent = '신청 중…';
     const bid = S.browserId();
     try {
-      await S.store.apply(eventId, bid, { nick: nick.slice(0, 16), discord: discord.slice(0, 32), at: Date.now() });
+      entry.discord = discord.slice(0, 32);
+      await S.store.apply(eventId, bid, entry);
       err.textContent = '';
     } catch (ex) {
       err.textContent = ex instanceof S.WrongPassword ? '이 브라우저에서는 이미 신청했어요.' : '신청하지 못했어요. 잠시 후 다시 시도하세요.';

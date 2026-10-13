@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261013161859">
+<link rel="stylesheet" href="style.css?v=20261013190635">
 </head>
 <body>
 <header class="topbar">
@@ -66,12 +66,16 @@
     <h2><span class="ic">🙋</span> 참가 신청 <small class="apply-count" id="apply-count"></small></h2>
     <p class="apply-status" id="apply-status"></p>
     <form class="apply-form" id="apply-form">
-      <label class="field">인게임 닉네임
+      <label class="field" id="apply-team-field" hidden>팀 이름
+        <input id="apply-team" maxlength="20" placeholder="예) 불꽃팀">
+      </label>
+      <label class="field"><span id="apply-nick-label">인게임 닉네임</span>
         <input id="apply-nick" maxlength="16" required placeholder="예) 만득이">
       </label>
       <label class="field">디스코드 아이디 <small>이메일 말고 아이디</small>
         <input id="apply-discord" maxlength="32" required placeholder="예) manduk_01">
       </label>
+      <div class="team-apply" id="team-apply" hidden></div>
       <button class="btn btn-main" type="submit">🙋 신청하기</button>
     </form>
     <p class="pw-error" id="apply-error" role="alert"></p>
@@ -210,8 +214,8 @@
     </div>
   </form>
 </dialog>
-<script src="bracket.js?v=20261013161859"></script>
-<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261013161859"></script>
-<script src="app.js?v=20261013161859"></script>
+<script src="bracket.js?v=20261013190635"></script>
+<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261013190635"></script>
+<script src="app.js?v=20261013190635"></script>
 </body>
 </html>
