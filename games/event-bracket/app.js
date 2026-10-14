@@ -15,7 +15,7 @@
   const eventId = params.get('id');
   let editing = false, key = null, saveTimer = null;
   const meta = { createdAt: 0 };
-  let decisions = { accepted: [], rejected: [] }, applications = {};
+  let decisions = { accepted: [], rejected: [], lines: {}, at: {} }, applications = {}, applyLog = {}, editingApply = false;
   const editable = () => view === 'new' || editing;
 
   function readJSON(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
@@ -287,7 +287,38 @@
   const DISCORD = /^(?=.{2,32}$)[a-z0-9_.]+$|^.{2,32}#\d{4}$/i;
   async function loadApplications() {
     try { applications = await S.store.listApply(eventId); } catch (e) { applications = {}; }
+    if (editing) {
+      try { applyLog = await S.store.listApplyLog(eventId); } catch (e) { applyLog = {}; }
+      syncAccepted();
+    }
     renderApply();
+  }
+
+  // 명단에 들어가는 한 줄: 팀 신청은 "팀이름: 팀원, 팀원", 개인은 닉네임
+  const decidedOn = (list, bid) => decisions[list].includes(bid) && (!(bid in decisions.at) || (applications[bid] || {}).at === decisions.at[bid]);
+  const lineOf = a => a.team ? `${a.team}: ${a.members}` : a.nick;
+  function editLines(id, remove, add) {
+    const lines = $(id).value.split('\n').map(s => s.trim()).filter(Boolean);
+    if (remove) { const i = lines.indexOf(remove); if (i >= 0) lines.splice(i, 1); }
+    if (add && !lines.includes(add)) lines.push(add);
+    $(id).value = lines.join('\n');
+  }
+  const listOf = line => line.includes(':') ? 'team-list' : 'players';
+
+  // 수락한 신청서를 신청자가 고치거나 취소하면 명단도 따라 고친다(주최자 화면을 열 때)
+  function syncAccepted() {
+    let changed = false;
+    decisions.accepted.slice().forEach(bid => {
+      const old = decisions.lines[bid];
+      const a = decidedOn('accepted', bid) ? applications[bid] : null;  // 취소했거나 다시 신청했으면 명단에서 뺀다
+      const now = a ? lineOf(a) : null;
+      if (now === old) return;
+      if (old) editLines(listOf(old), old, null);
+      if (now) { editLines(listOf(now), null, now); decisions.lines[bid] = now; }
+      else { decisions.accepted = decisions.accepted.filter(x => x !== bid); delete decisions.lines[bid]; delete decisions.at[bid]; }
+      changed = true;
+    });
+    if (changed) { summary(); save(); }
   }
 
   function renderApply() {
@@ -297,30 +328,53 @@
     const n = Object.keys(applications).length;
     $('apply-box').hidden = editing || (!open && !mine);
     $('apply-count').textContent = n ? '신청 ' + countText() : '';
-    $('apply-form').hidden = !!mine || !open;
+    $('apply-form').hidden = editingApply ? false : !!mine || !open;
+    $('apply-mine').hidden = !mine || editing;
+    $('apply-edit').hidden = editingApply || !open;
+    $('apply-cancel').hidden = editingApply;
+    $('apply-edit-stop').hidden = !editingApply;
+    $('apply-submit').textContent = editingApply ? '✏️ 수정 저장' : '🙋 신청하기';
     setupApplyForm();
     let msg = '';
     if (mine) {
-      const st = decisions.accepted.includes(S.browserId()) ? '✅ 수락됨' : decisions.rejected.includes(S.browserId()) ? '❌ 거절됨' : '⏳ 주최자 확인 대기 중';
+      const st = decidedOn('accepted', S.browserId()) ? '✅ 수락됨' : decidedOn('rejected', S.browserId()) ? '❌ 거절됨' : '⏳ 주최자 확인 대기 중';
       msg = (mine.team ? `${mine.team} (대표 ${mine.nick})로` : isSolo(mine) ? `${mine.nick} 님이 개인으로(팀 랜덤 배정)` : `${mine.nick} 님으로`) + ` 신청했어요 · ${st}`;
+      if (mine.edited) msg += ' · 수정함';
     } else if (!open) msg = '신청이 마감되었어요.';
     $('apply-status').textContent = msg;
     renderApplicants();
   }
 
+  const when = t => new Date(t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const ACT = { create: '신청', edit: '수정', delete: '취소' };
+  function renderLog() {
+    const items = Object.values(applyLog).sort((a, b) => (b.at || 0) - (a.at || 0));
+    $('apply-log-box').hidden = !items.length;
+    $('apply-log-count').textContent = items.length ? items.length + '건' : '';
+    $('apply-log').replaceChildren(...items.map(l => {
+      const li = el('li');
+      li.append(el('time', '', when(l.at)), el('span', 'act ' + l.act, ACT[l.act] || l.act),
+        el('span', '', (l.team ? `${l.team} (${l.members})` : l.nick) + ' · Discord ' + l.discord));
+      return li;
+    }));
+  }
+
   function renderApplicants() {
     $('applicants').hidden = !editing;
     if (!editing) return;
+    renderLog();
     const items = Object.entries(applications).sort((a, b) => (a[1].at || 0) - (b[1].at || 0));
     $('applicants-count').textContent = items.length ? countText() : '';
     if (!items.length) { $('applicant-list').replaceChildren(el('p', 'hint-sm', '아직 신청자가 없어요.')); return; }
     $('applicant-list').replaceChildren(...items.map(([bid, a]) => {
       const row = el('div', 'applicant');
-      const acc = decisions.accepted.includes(bid), rej = decisions.rejected.includes(bid);
+      const acc = decidedOn('accepted', bid), rej = decidedOn('rejected', bid);
       if (acc) row.classList.add('accepted');
       if (rej) row.classList.add('rejected');
       const who = el('div', 'applicant-who');
-      who.append(el('b', '', a.team ? `${a.team} · 대표 ${a.nick}` : isSolo(a) ? `${a.nick} · 개인(랜덤 팀)` : a.nick));
+      const name = el('b', '', a.team ? `${a.team} · 대표 ${a.nick}` : isSolo(a) ? `${a.nick} · 개인(랜덤 팀)` : a.nick);
+      if (a.edited) name.append(el('span', 'edited', '수정됨 ' + when(a.edited)));
+      who.append(name);
       if (a.team) who.append(el('span', 'team-members', '팀원: ' + a.members));
       who.append(el('span', '', 'Discord: ' + a.discord));
       row.append(who, el('span', 'applicant-state', acc ? '수락됨' : rej ? '거절됨' : '대기'));
@@ -339,6 +393,8 @@
     decisions.accepted = decisions.accepted.filter(x => x !== bid);
     decisions.rejected = decisions.rejected.filter(x => x !== bid);
     if (to) decisions[to].push(bid);
+    if (to === 'accepted') decisions.lines[bid] = lineOf(a); else delete decisions.lines[bid];
+    if (to) decisions.at[bid] = a.at; else delete decisions.at[bid];
     if (a.team) {
       // 팀 신청: 팀 직접 구성 목록에 "팀이름: 팀원, 팀원" 한 줄로 넣고 빼기
       const line = `${a.team}: ${a.members}`;
@@ -397,7 +453,9 @@
     const nick = $('apply-nick').value.trim().replace(/[,，:：]/g, ' ').trim(), discord = $('apply-discord').value.trim().replace(/^@/, '');
     const err = $('apply-error');
     if (!nick) { err.textContent = '인게임 닉네임을 입력하세요.'; return; }
-    const entry = { nick: nick.slice(0, 16), discord, at: Date.now() };
+    const mine = applications[S.browserId()];
+    const entry = { nick: nick.slice(0, 16), discord, at: editingApply && mine ? mine.at : Date.now() };
+    if (editingApply) entry.edited = Date.now();
     if (teamMode() && !$('apply-solo').checked) {
       const team = $('apply-team').value.trim().replace(/[:：,，]/g, ' ').trim();
       const members = [nick, ...[...document.querySelectorAll('.apply-member')].map(i => i.value.trim())].map(s => s.replace(/[,，:：]/g, ' ').trim());
@@ -408,15 +466,58 @@
       entry.members = members.map(m => m.slice(0, 16)).join(', ');
     }
     if (discord.includes('@') || !DISCORD.test(discord)) { err.textContent = '디스코드 아이디를 확인하세요. 이메일은 넣을 수 없어요. (영문·숫자·_·. 2~32자)'; return; }
-    err.textContent = '신청 중…';
+    err.textContent = editingApply ? '저장 중…' : '신청 중…';
     const bid = S.browserId();
     try {
       entry.discord = discord.slice(0, 32);
-      await S.store.apply(eventId, bid, entry);
+      await writeApply(bid, entry, editingApply ? 'edit' : 'create');
       err.textContent = '';
+      editingApply = false;
     } catch (ex) {
-      err.textContent = ex instanceof S.WrongPassword ? '이 브라우저에서는 이미 신청했어요.' : '신청하지 못했어요. 잠시 후 다시 시도하세요.';
+      err.textContent = ex instanceof S.WrongPassword
+        ? (editingApply ? '이 신청서를 고칠 권한이 없어요. (신청한 브라우저에서, 이번 업데이트 뒤에 한 신청만 고칠 수 있어요)' : '이 브라우저에서는 이미 신청했어요.')
+        : '저장하지 못했어요. 잠시 후 다시 시도하세요.';
     }
+    await loadApplications();
+  }
+
+  async function writeApply(bid, entry, act) {
+    const src = entry || applications[bid];
+    const log = { bid, act, at: Date.now(), nick: src.nick, discord: src.discord };
+    if (src.team) { log.team = src.team; log.members = src.members; }
+    // 키는 처음 한 번만 남긴다. 취소 뒤 다시 신청하면 남아 있는 키로 증명
+    const REG = 'mandeuk_apply_reg_' + eventId;
+    let reg = false;
+    try { reg = localStorage.getItem(REG) === '1'; } catch (e) { /* 저장 불가 */ }
+    await S.store.apply(eventId, bid, await S.applyKey(eventId, bid), entry, log, act === 'create' && !reg);
+    try { localStorage.setItem(REG, '1'); } catch (e) { /* 저장 불가 */ }
+  }
+
+  function startEditApply() {
+    const mine = applications[S.browserId()];
+    if (!mine) return;
+    editingApply = true;
+    renderApply();
+    $('apply-nick').value = mine.nick;
+    $('apply-discord').value = mine.discord;
+    if (teamMode()) {
+      $('apply-solo').checked = !mine.team;
+      setupApplyForm();
+      if (mine.team) {
+        $('apply-team').value = mine.team;
+        const rest = mine.members.split(',').map(x => x.trim()).slice(1);
+        document.querySelectorAll('.apply-member').forEach((inp, i) => { inp.value = rest[i] || ''; });
+      }
+    }
+    $('apply-nick').focus();
+  }
+
+  async function cancelApply() {
+    if (!confirm('신청을 취소할까요? 주최자에게 취소 기록이 남아요.')) return;
+    const err = $('apply-error');
+    err.textContent = '취소 중…';
+    try { await writeApply(S.browserId(), null, 'delete'); err.textContent = ''; }
+    catch (ex) { err.textContent = ex instanceof S.WrongPassword ? '이 신청서를 취소할 권한이 없어요. (이번 업데이트 전에 한 신청은 주최자에게 말해 주세요)' : '취소하지 못했어요. 잠시 후 다시 시도하세요.'; }
     await loadApplications();
   }
 
@@ -503,7 +604,7 @@
     $('event-view').hidden = false;
     meta.createdAt = d.createdAt || 0;
     fill(d.draft); state = d.state || null;
-    decisions = Object.assign({ accepted: [], rejected: [] }, d.decisions);
+    decisions = Object.assign({ accepted: [], rejected: [], lines: {}, at: {} }, d.decisions);
     $('edit').hidden = false;
     await loadApplications();
     summary(); render();
@@ -538,7 +639,7 @@
     summary(); render();
   }
 
-  $('edit').addEventListener('click', async () => { const k = await askPassword(); if (k) { key = k; setEditing(true); } });
+  $('edit').addEventListener('click', async () => { const k = await askPassword(); if (k) { key = k; setEditing(true); await loadApplications(); } });
   $('done').addEventListener('click', () => setEditing(false));
   $('delete').addEventListener('click', async () => {
     if (!confirm('이 글과 대진표를 삭제할까요? 되돌릴 수 없어요.')) return;
@@ -549,6 +650,9 @@
   $('apply-form').addEventListener('submit', submitApply);
   $('apply-open').addEventListener('input', renderApply);
   $('apply-solo').addEventListener('change', setupApplyForm);
+  $('apply-edit').addEventListener('click', startEditApply);
+  $('apply-cancel').addEventListener('click', cancelApply);
+  $('apply-edit-stop').addEventListener('click', () => { editingApply = false; $('apply-error').textContent = ''; renderApply(); });
 
   if (view === 'list') showList();
   else if (view === 'new') showNew();

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261014203615">
+<link rel="stylesheet" href="style.css?v=20261014210430">
 </head>
 <body>
 <header class="topbar">
@@ -65,6 +65,11 @@
   <section class="card apply-card" id="apply-box" hidden>
     <h2><span class="ic">🙋</span> 참가 신청 <small class="apply-count" id="apply-count"></small></h2>
     <p class="apply-status" id="apply-status"></p>
+    <div class="apply-mine" id="apply-mine" hidden>
+      <button class="btn btn-sm" type="button" id="apply-edit">✏️ 신청서 수정</button>
+      <button class="btn btn-sm" type="button" id="apply-cancel">🗑 신청 취소</button>
+      <button class="btn btn-sm" type="button" id="apply-edit-stop" hidden>수정 그만두기</button>
+    </div>
     <form class="apply-form" id="apply-form">
       <label class="apply-solo" id="apply-solo-field" hidden><input type="checkbox" id="apply-solo"> 팀이 없어요 · 개인으로 신청 (개인 신청자끼리 무작위로 팀을 짜요)</label>
       <p class="hint-sm apply-solo-note" id="apply-solo-note" hidden>인원이 모자라면 빈자리가 있는 채로 팀이 꾸려질 수 있어요.</p>
@@ -78,7 +83,7 @@
         <input id="apply-discord" maxlength="32" required placeholder="예) manduk_01">
       </label>
       <div class="team-apply" id="team-apply" hidden></div>
-      <button class="btn btn-main" type="submit">🙋 신청하기</button>
+      <button class="btn btn-main" type="submit" id="apply-submit">🙋 신청하기</button>
     </form>
     <p class="pw-error" id="apply-error" role="alert"></p>
     <p class="hint-sm">신청은 브라우저마다 한 번만 할 수 있어요. 주최자가 수락하면 참가자 명단에 자동으로 들어가요. 디스코드 아이디는 대회 연락용으로 주최자에게 전달돼요.</p>
@@ -155,6 +160,7 @@
       <h3>🙋 신청자 <small id="applicants-count"></small></h3>
       <p class="hint-sm">수락하면 닉네임이 참가자 칸에 자동으로 들어가요. 팀 직접 구성일 때는 아래 명단을 보고 팀 목록에 직접 넣어 주세요. 대진표를 이미 만들었다면 다시 만들어야 반영돼요.</p>
       <div class="applicant-list" id="applicant-list"></div>
+      <details class="apply-log" id="apply-log-box" hidden><summary>📜 신청 변경 이력 <small id="apply-log-count"></small></summary><ol class="apply-log-list" id="apply-log"></ol></details>
     </div>
 
     <p class="summary" id="summary" role="status"></p>
@@ -216,8 +222,8 @@
     </div>
   </form>
 </dialog>
-<script src="bracket.js?v=20261014203615"></script>
-<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261014203615"></script>
-<script src="app.js?v=20261014203615"></script>
+<script src="bracket.js?v=20261014210430"></script>
+<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261014210430"></script>
+<script src="app.js?v=20261014210430"></script>
 </body>
 </html>

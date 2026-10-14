@@ -262,3 +262,11 @@ dialog input:focus{outline:none;box-shadow:0 0 0 4px var(--yellow)}
 .apply-solo{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-weight:700;margin:0 0 12px;cursor:pointer}
 .apply-solo input{width:18px;height:18px}
 .apply-solo-note{grid-column:1/-1;margin:-6px 0 12px}
+.apply-mine{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.applicant .edited{display:inline-block;margin-left:6px;font:700 11px/1 var(--body);padding:3px 6px;border-radius:6px;background:var(--yellow);color:var(--ink)}
+.apply-log{margin-top:12px}
+.apply-log summary{cursor:pointer;font-weight:800}
+.apply-log-list{margin:8px 0 0;padding-left:20px;display:grid;gap:4px;font-size:13px}
+.apply-log-list .act{font-weight:800;margin-right:4px}
+.apply-log-list .act.delete{color:var(--red,#a51d14)}
+.apply-log-list time{color:var(--ink3);margin-right:6px}
