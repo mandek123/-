@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20261013192134">
+<link rel="stylesheet" href="style.css?v=20261014203615">
 </head>
 <body>
 <header class="topbar">
@@ -66,6 +66,8 @@
     <h2><span class="ic">🙋</span> 참가 신청 <small class="apply-count" id="apply-count"></small></h2>
     <p class="apply-status" id="apply-status"></p>
     <form class="apply-form" id="apply-form">
+      <label class="apply-solo" id="apply-solo-field" hidden><input type="checkbox" id="apply-solo"> 팀이 없어요 · 개인으로 신청 (개인 신청자끼리 무작위로 팀을 짜요)</label>
+      <p class="hint-sm apply-solo-note" id="apply-solo-note" hidden>인원이 모자라면 빈자리가 있는 채로 팀이 꾸려질 수 있어요.</p>
       <label class="field" id="apply-team-field" hidden>팀 이름
         <input id="apply-team" maxlength="20" placeholder="예) 불꽃팀">
       </label>
@@ -214,8 +216,8 @@
     </div>
   </form>
 </dialog>
-<script src="bracket.js?v=20261013192134"></script>
-<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261013192134"></script>
-<script src="app.js?v=20261013192134"></script>
+<script src="bracket.js?v=20261014203615"></script>
+<script>window.EVENT_SHARED=true;</script><script src="store.js?v=20261014203615"></script>
+<script src="app.js?v=20261014203615"></script>
 </body>
 </html>

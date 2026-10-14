@@ -111,9 +111,9 @@
   function syncInputs() {
     const f = readForm();
     $('team-method').hidden = f.mode === 1;
-    $('players-field').hidden = fixedTeams(f);
+    $('players-field').hidden = false;
     $('teams-field').hidden = !fixedTeams(f);
-    $('players-label').textContent = f.mode === 1 ? '참가자' : '참가자 (팀은 무작위로 나눠요)';
+    $('players-label').textContent = f.mode === 1 ? '참가자' : fixedTeams(f) ? '개인 참가자 (서로 무작위로 팀을 짜요 · 모자라면 빈자리 팀)' : '참가자 (팀은 무작위로 나눠요)';
     const sample = Array.from({ length: f.mode }, (_, i) => '멤버' + (i + 1)).join(', ');
     $('teams-help').textContent = `한 줄에 한 팀 · "팀이름: 멤버, 멤버" 형식 · 팀당 ${f.mode}명`;
     $('team-list').placeholder = `불꽃팀: ${sample}\n물결팀: ${sample}\n...`;
@@ -122,7 +122,7 @@
   function plan(f) {
     if (fixedTeams(f)) {
       const { teams, wrong } = B.parseTeams(f.teamList, f.mode);
-      return { teams, waiting: [], wrong };
+      return { teams: teams.concat(B.soloTeams(f.players, f.mode)), waiting: [], wrong };
     }
     return { ...B.makeTeams(f.players, f.mode, f.mode > 1), wrong: [] };
   }
@@ -137,11 +137,12 @@
     else if (n > B.MAX_TEAMS) msg = `팀이 ${n}개예요. 최대 64팀(64강)까지 가능해요.`;
     else {
       const size = B.nextPow2(n);
-      msg = (fixedTeams(f) ? `${n}팀` : f.mode === 1 ? `참가자 ${n}명` : `참가자 ${f.players.length}명 → ${n}팀`) + ` → ${B.roundName(size)}`;
+      const solo = fixedTeams(f) && f.players.length ? ` (개인 ${f.players.length}명 → 랜덤 ${Math.ceil(f.players.length / f.mode)}팀)` : '';
+      msg = (fixedTeams(f) ? `${n}팀${solo}` : f.mode === 1 ? `참가자 ${n}명` : `참가자 ${f.players.length}명 → ${n}팀`) + ` → ${B.roundName(size)}`;
       if (size > n) msg += ` (부전승 ${size - n}팀)`;
       if (p.waiting.length) msg += ` · 대기 ${p.waiting.length}명`;
     }
-    const names = fixedTeams(f) ? p.teams.map(t => t.name) : f.players;
+    const names = fixedTeams(f) ? p.teams.map(t => t.name).concat(f.players) : f.players;
     const dup = names.length - new Set(names).size;
     if (dup) msg += ` · 같은 이름 ${dup}개 있음`;
     if (p.wrong.length) msg += ` · 인원이 ${f.mode}명이 아닌 팀: ${p.wrong.join(', ')}`;
@@ -159,6 +160,7 @@
   }
 
   const real = ti => ti !== null && ti >= 0;
+  const membersText = t => t.members.join(', ') + (t.short ? ` · 빈자리 ${t.short}` : '');
 
   function sideButton(b, r, m, sides, side, w, onPick) {
     const ti = sides[side];
@@ -168,7 +170,7 @@
     else if (ti === null) { btn.classList.add('empty'); btn.append(el('span', 'name', '승자 대기')); }
     else {
       btn.append(el('span', 'name', state.teams[ti].name));
-      if (state.mode > 1) btn.append(el('span', 'members', state.teams[ti].members.join(', ')));
+      if (state.mode > 1) btn.append(el('span', 'members', membersText(state.teams[ti])));
     }
     if (w === side) btn.classList.add('win');
     if (w !== null && w !== side) btn.classList.add('lose');
@@ -240,7 +242,7 @@
       const d = el('div', 'place p' + rank);
       const who = el('div', 'who');
       who.append(el('span', 'medal', medal), el('small', '', label), el('b', '', state.teams[i].name));
-      if (state.mode > 1) who.append(el('span', 'members', state.teams[i].members.join(', ')));
+      if (state.mode > 1) who.append(el('span', 'members', membersText(state.teams[i])));
       if (prize) who.append(el('em', '', prize));
       d.append(who, el('div', 'step', String(rank)));
       return d;
@@ -254,7 +256,7 @@
     if (st[3] !== undefined) {
       const t4 = state.teams[st[3]];
       fourth.replaceChildren(el('span', 'medal', '🏅'), el('small', '', '4위'), el('b', '', t4.name));
-      if (state.mode > 1) fourth.append(el('span', 'members', t4.members.join(', ')));
+      if (state.mode > 1) fourth.append(el('span', 'members', membersText(t4)));
       if (f.prize5) fourth.append(el('em', '', f.prize5));
     }
   }
@@ -294,13 +296,13 @@
     const open = $('apply-open').checked;
     const n = Object.keys(applications).length;
     $('apply-box').hidden = editing || (!open && !mine);
-    $('apply-count').textContent = n ? `신청 ${n}${teamMode() ? '팀' : '명'}` : '';
+    $('apply-count').textContent = n ? '신청 ' + countText() : '';
     $('apply-form').hidden = !!mine || !open;
     setupApplyForm();
     let msg = '';
     if (mine) {
       const st = decisions.accepted.includes(S.browserId()) ? '✅ 수락됨' : decisions.rejected.includes(S.browserId()) ? '❌ 거절됨' : '⏳ 주최자 확인 대기 중';
-      msg = (mine.team ? `${mine.team} (대표 ${mine.nick})로` : `${mine.nick} 님으로`) + ` 신청했어요 · ${st}`;
+      msg = (mine.team ? `${mine.team} (대표 ${mine.nick})로` : isSolo(mine) ? `${mine.nick} 님이 개인으로(팀 랜덤 배정)` : `${mine.nick} 님으로`) + ` 신청했어요 · ${st}`;
     } else if (!open) msg = '신청이 마감되었어요.';
     $('apply-status').textContent = msg;
     renderApplicants();
@@ -310,7 +312,7 @@
     $('applicants').hidden = !editing;
     if (!editing) return;
     const items = Object.entries(applications).sort((a, b) => (a[1].at || 0) - (b[1].at || 0));
-    $('applicants-count').textContent = items.length ? items.length + (teamMode() ? '팀' : '명') : '';
+    $('applicants-count').textContent = items.length ? countText() : '';
     if (!items.length) { $('applicant-list').replaceChildren(el('p', 'hint-sm', '아직 신청자가 없어요.')); return; }
     $('applicant-list').replaceChildren(...items.map(([bid, a]) => {
       const row = el('div', 'applicant');
@@ -318,7 +320,7 @@
       if (acc) row.classList.add('accepted');
       if (rej) row.classList.add('rejected');
       const who = el('div', 'applicant-who');
-      who.append(el('b', '', a.team ? `${a.team} · 대표 ${a.nick}` : a.nick));
+      who.append(el('b', '', a.team ? `${a.team} · 대표 ${a.nick}` : isSolo(a) ? `${a.nick} · 개인(랜덤 팀)` : a.nick));
       if (a.team) who.append(el('span', 'team-members', '팀원: ' + a.members));
       who.append(el('span', '', 'Discord: ' + a.discord));
       row.append(who, el('span', 'applicant-state', acc ? '수락됨' : rej ? '거절됨' : '대기'));
@@ -349,6 +351,7 @@
     } else {
       const lines = $('players').value.split('\n').map(s => s.trim()).filter(Boolean);
       if (to === 'accepted' && !lines.includes(a.nick)) lines.push(a.nick);
+      if (to === 'accepted' && isSolo(a)) document.querySelector('input[name=method][value="fixed"]').checked = true;
       if (to !== 'accepted') { const i = lines.indexOf(a.nick); if (i >= 0) lines.splice(i, 1); }
       $('players').value = lines.join('\n');
     }
@@ -356,14 +359,24 @@
   }
 
   const teamMode = () => readForm().mode > 1;
+  // 팀전에서 팀 이름 없이 들어온 신청 = 개인 신청(랜덤 팀). 저장 규칙에 새 칸을 만들지 않으려고 따로 표시하지 않는다.
+  const isSolo = a => teamMode() && !a.team;
+  function countText() {
+    const all = Object.values(applications), solo = all.filter(isSolo).length;
+    if (!teamMode()) return all.length + '명';
+    return (all.length - solo) + '팀' + (solo ? ` · 개인 ${solo}명` : '');
+  }
 
   // 팀전이면 대표자가 팀 이름과 팀원 닉네임을 한 번에 입력
   function setupApplyForm() {
-    const n = readForm().mode, team = n > 1;
+    const n = readForm().mode;
+    $('apply-solo-field').hidden = n === 1;
+    const team = n > 1 && !$('apply-solo').checked;
     $('apply-form').classList.toggle('is-team', team);
     $('apply-team-field').hidden = !team;
     $('apply-team').required = team;
     $('apply-nick-label').textContent = team ? '대표자(팀장) 닉네임' : '인게임 닉네임';
+    $('apply-solo-note').hidden = !(n > 1 && !team);
     const box = $('team-apply');
     box.hidden = !team;
     if (box.childElementCount !== Math.max(0, n - 1)) {
@@ -385,7 +398,7 @@
     const err = $('apply-error');
     if (!nick) { err.textContent = '인게임 닉네임을 입력하세요.'; return; }
     const entry = { nick: nick.slice(0, 16), discord, at: Date.now() };
-    if (teamMode()) {
+    if (teamMode() && !$('apply-solo').checked) {
       const team = $('apply-team').value.trim().replace(/[:：,，]/g, ' ').trim();
       const members = [nick, ...[...document.querySelectorAll('.apply-member')].map(i => i.value.trim())].map(s => s.replace(/[,，:：]/g, ' ').trim());
       if (!team) { err.textContent = '팀 이름을 입력하세요.'; return; }
@@ -535,6 +548,7 @@
   $('register-btn').addEventListener('click', register);
   $('apply-form').addEventListener('submit', submitApply);
   $('apply-open').addEventListener('input', renderApply);
+  $('apply-solo').addEventListener('change', setupApplyForm);
 
   if (view === 'list') showList();
   else if (view === 'new') showNew();

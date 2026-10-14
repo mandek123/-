@@ -258,3 +258,7 @@ dialog input:focus{outline:none;box-shadow:0 0 0 4px var(--yellow)}
 .apply-form.is-team .team-apply,.apply-form.is-team .btn{grid-column:1/-1;justify-self:start}
 .applicant-who .team-members{display:block;color:var(--ink2);font-weight:600}
 [hidden]{display:none!important}
+
+.apply-solo{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-weight:700;margin:0 0 12px;cursor:pointer}
+.apply-solo input{width:18px;height:18px}
+.apply-solo-note{grid-column:1/-1;margin:-6px 0 12px}

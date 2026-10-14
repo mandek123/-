@@ -43,6 +43,16 @@
     return { teams, waiting: list.slice(count * teamSize) };
   }
 
+  // 팀 없이 개인으로 신청한 사람들끼리 무작위 팀. 모자란 인원은 빈자리를 둔 채 마지막 한 팀으로 묶는다(short = 빈자리 수).
+  function soloTeams(players, teamSize, rand) {
+    const list = shuffle(players, rand), teams = [];
+    for (let i = 0; i < list.length; i += teamSize) {
+      const members = list.slice(i, i + teamSize);
+      teams.push({ name: '랜덤' + (teams.length + 1) + '팀', members, short: teamSize - members.length });
+    }
+    return teams;
+  }
+
   // 팀 직접 구성: 한 줄에 한 팀. "팀이름: 멤버, 멤버" 또는 "멤버, 멤버"(이름 자동)
   function parseTeams(text, teamSize) {
     const teams = [], wrong = [];
@@ -145,6 +155,6 @@
 
   function champion(b) { return winnerOf(b, b.winners.length - 1, 0); }
 
-  const api = { MAX_TEAMS, nextPow2, seedOrder, shuffle, roundName, makeTeams, parseTeams, createBracket, matchSides, setWinner, champion, thirdSides, thirdWinner, setThird, standings };
+  const api = { MAX_TEAMS, nextPow2, seedOrder, shuffle, roundName, makeTeams, soloTeams, parseTeams, createBracket, matchSides, setWinner, champion, thirdSides, thirdWinner, setThird, standings };
   if (typeof module !== 'undefined') module.exports = api; else root.Bracket = api;
 })(this);
