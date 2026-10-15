@@ -160,6 +160,9 @@
   }
 
   const real = ti => ti !== null && ti >= 0;
+  // 경기 번호 순서대로 1~9번 경기장을 돌아가며 배정 [동, 남]
+  const ARENAS = [[37, 31], [50, 31], [63, 31], [37, 44], [50, 44], [63, 44], [37, 57], [50, 57], [63, 57]];
+  const arenaTag = n => { const i = (n - 1) % ARENAS.length; return el('div', 'arena', `📍 ${i + 1}번 경기장 · 동${ARENAS[i][0]} 남${ARENAS[i][1]}`); };
   const membersText = t => t.members.join(', ') + (t.short ? ` · 빈자리 ${t.short}` : '');
 
   function sideButton(b, r, m, sides, side, w, onPick) {
@@ -201,6 +204,7 @@
         if (bye) match.classList.add('is-bye');
         if (w !== null && !bye) match.classList.add('done');
         match.append(sideButton(b, r, m, sides, 0, w), sideButton(b, r, m, sides, 1, w));
+        if (!bye) match.append(arenaTag(no));
         if (r === last) { list.append(match, thirdBox); return; }
         if (m % 2 === 0) { pair = el('div', 'pair'); list.append(pair); }
         pair.append(match);
@@ -227,6 +231,7 @@
       match.append(el('span', 'match-no', tbye ? '부전승' : (++no) + '경기'));
       if (!tbye) { total++; if (tw !== null) played++; }
       match.append(sideButton(b, -1, 0, ts, 0, tw, s => B.setThird(b, s)), sideButton(b, -1, 0, ts, 1, tw, s => B.setThird(b, s)));
+      if (!tbye) match.append(arenaTag(no));
       thirdBox.querySelector('#third-match').replaceChildren(match);
     }
     const st = B.standings(b);
@@ -282,6 +287,19 @@
   $('make').addEventListener('click', make);
   $('reset').addEventListener('click', reset);
   $('print').addEventListener('click', () => window.print());
+  $('save-img').addEventListener('click', async () => {
+    const btn = $('save-img'), box = $('result');
+    btn.disabled = true;
+    box.classList.add('snap');
+    try {
+      const url = await htmlToImage.toPng(box, { pixelRatio: 2, backgroundColor: '#40c6ff' });
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = ($('title').value.trim() || '대진표').replace(/[\\/:*?"<>|]/g, '_') + '.png';
+      a.click();
+    } catch (e) { alert('이미지 저장에 실패했어요. 인쇄 → PDF 저장을 이용해 주세요.'); }
+    finally { box.classList.remove('snap'); btn.disabled = false; }
+  });
 
   // ---------- 참가 신청 ----------
   const DISCORD = /^(?=.{2,32}$)[a-z0-9_.]+$|^.{2,32}#\d{4}$/i;
