@@ -377,8 +377,22 @@
     }));
   }
 
+  // 핀볼 추첨: 글쓴이(수정 모드)만 신청자 명단을 넘긴다. 팀 신청은 팀원 전원, 거절 제외, 신청 순서.
+  function pinballNames() {
+    return Object.entries(applications).filter(([bid]) => !decidedOn('rejected', bid))
+      .sort((a, b) => (a[1].at || 0) - (b[1].at || 0))
+      .flatMap(([, a]) => a.team ? String(a.members || a.nick).split(',') : [a.nick])
+      .map(n => String(n || '').trim()).filter(Boolean);
+  }
+  $('pinball-open').addEventListener('click', () => {
+    const names = [...new Set(pinballNames())];
+    try { localStorage.setItem('mandeuk_pinball_handoff', JSON.stringify({ title: $('title').value, names, at: Date.now() })); } catch (e) { /* 저장 불가 */ }
+    window.open('../event-pinball/', '_blank');
+  });
+
   function renderApplicants() {
     $('applicants').hidden = !editing;
+    $('pinball-box').hidden = !editing;
     if (!editing) return;
     renderLog();
     const items = Object.entries(applications).sort((a, b) => (a[1].at || 0) - (b[1].at || 0));

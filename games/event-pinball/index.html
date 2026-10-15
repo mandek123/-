@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>만득월드 핀볼 추첨</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+:root{
+  --ink:#0b0b0b;--ink2:#2c2416;--ink3:#5c4d33;--sky:#40c6ff;--cream:#fff7e6;--field:#fffdf7;
+  --yellow:#ffd400;--mint:#45ffb0;--red:#c22a20;--gold:#ffd84d;
+  --border:3px solid var(--ink);--shadow:5px 6px 0 var(--ink);--shadow-sm:3px 4px 0 var(--ink);
+  --display:'Black Han Sans','Pretendard',sans-serif;--body:'Pretendard',sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink2);font:500 15px/1.5 var(--body);background:var(--sky) url(../../img/game/bg-meadow.webp) center/cover no-repeat fixed;min-height:100vh}
+h1{font:400 34px/1.1 var(--display);color:var(--cream);-webkit-text-stroke:2px var(--ink);paint-order:stroke;text-shadow:3px 4px 0 var(--ink);margin:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;max-width:1400px;margin:0 auto}
+.top a{color:var(--ink);font-weight:700;background:var(--cream);border:var(--border);border-radius:12px;padding:6px 14px;box-shadow:var(--shadow-sm);text-decoration:none}
+.wrap{display:grid;grid-template-columns:340px 1fr;gap:16px;padding:0 16px 24px;max-width:1400px;margin:0 auto}
+.panel{background:var(--cream);border:var(--border);border-radius:18px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px;align-self:start}
+.panel h2{font:400 20px var(--display);margin:0;color:var(--ink)}
+label{font-weight:700;font-size:14px;color:var(--ink)}
+select,input[type=number],textarea{width:100%;font:500 15px var(--body);border:var(--border);border-radius:10px;padding:8px;background:var(--field)}
+textarea{height:200px;resize:vertical}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+button{font:700 15px var(--body);border:var(--border);border-radius:12px;background:var(--yellow);box-shadow:var(--shadow-sm);padding:9px 12px;cursor:pointer;color:var(--ink)}
+button:active{transform:translate(2px,3px);box-shadow:0 0 0 var(--ink)}
+button.alt{background:var(--field)}
+button.go{background:var(--mint);font:400 22px var(--display)}
+button:disabled{opacity:.5;cursor:default}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modes label{border:var(--border);border-radius:10px;padding:8px;background:var(--field);cursor:pointer;text-align:center;font-size:13px}
+.modes input{display:none}
+.modes label:has(input:checked){background:var(--yellow)}
+.note{font-size:13px;color:var(--ink3);margin:0}
+.err{color:var(--red)}
+.stage{position:relative;border:var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;background:#1d2340;height:calc(100vh - 110px);min-height:520px}
+canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;left:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.hud button{padding:4px 10px;font-size:13px;background:var(--field)}
+.hud button.on{background:var(--yellow)}
+.board{position:absolute;right:82px;top:10px;width:200px;max-height:60%;overflow:auto;background:rgba(255,247,230,.95);border:var(--border);border-radius:12px;padding:8px;font-size:13px}
+.board b{font-family:var(--display);font-weight:400}
+.board ol{margin:4px 0 0;padding-left:22px}
+.board li.win{font-weight:800;color:var(--red)}
+.near{position:absolute;left:10px;top:52px;width:210px;max-height:55%;overflow:auto;background:rgba(255,247,230,.95);border:var(--border);border-radius:12px;padding:8px;font-size:13px}
+.near[hidden]{display:none}
+.near b{font-family:var(--display);font-weight:400}
+.near ol{margin:4px 0;padding-left:22px}
+.near li{cursor:pointer;border-radius:6px;padding:1px 4px}
+.near li:hover{background:var(--field)}
+.near li.hot{background:var(--gold);font-weight:800}
+.near li.cur{outline:2px solid var(--ink)}
+.near small{color:var(--ink3)}
+.status{position:absolute;left:10px;bottom:10px;background:rgba(255,247,230,.95);border:var(--border);border-radius:10px;padding:4px 10px;font-weight:700;font-size:14px}
+.result{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55)}
+.result.show{display:grid}
+.result .card{background:var(--cream);border:var(--border);border-radius:18px;box-shadow:var(--shadow);padding:20px 28px;min-width:280px;max-width:90%;max-height:80%;overflow:auto;text-align:center}
+.result h3{font:400 30px var(--display);margin:0 0 10px}
+.result ol{text-align:left;font-size:18px;font-weight:700}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}.stage{height:75vh}.board{width:150px}}
+</style>
+</head>
+<body>
+<header class="top"><h1>🎯 핀볼 추첨</h1><a href="../event-bracket/">← 이벤트 게시판</a></header>
+<main class="wrap">
+  <section class="panel">
+    <h2>참가자</h2>
+    <p class="note" id="load-msg">이벤트 글 🔒수정 → 🎯 핀볼 추첨에서 신청자를 불러올 수 있어요 (글쓴이 전용).</p>
+    <label for="names">참가자 명단 (한 줄에 한 명, 직접 추가 가능)</label>
+    <textarea id="names" placeholder="만득이&#10;백절불굴&#10;…"></textarea>
+    <p class="note" id="count">0명</p>
+    <h2>규칙</h2>
+    <div class="modes">
+      <label><input type="radio" name="mode" value="first" checked>🥇 먼저 도착한 순서</label>
+      <label><input type="radio" name="mode" value="last">🐢 마지막 도착한 순서</label>
+    </div>
+    <label for="wins">당첨 인원</label>
+    <input type="number" id="wins" min="1" value="1">
+    <label class="row" style="flex:none"><input type="checkbox" id="skills" checked style="flex:none;width:18px;height:18px"> 공마다 스킬 (🧲당기기 · 💥밀어내기)</label>
+    <div class="row"><button class="alt" id="newmap">🗺️ 새 맵</button><button class="alt" id="tour">👀 맵 둘러보기</button></div>
+    <p class="note">시작 전: 판 위에서 휠·드래그, 오른쪽 미니맵 클릭으로 맵을 볼 수 있어요.</p>
+    <button class="go" id="start">시작!</button>
+  </section>
+  <section class="stage">
+    <canvas id="cv"></canvas>
+    <div class="hud"><span id="speeds" style="display:contents"></span><button id="cam" class="on" title="마우스로 화면을 움직이면 자유 시점이 돼요">🎥 자동 추적</button><button id="bgm">🔇 BGM</button><button id="song">🎵 다음 곡</button></div>
+    <div class="near" id="near" hidden><b id="near-title">🎯 당첨 근접</b><ol id="nearlist"></ol><small>이름 클릭 = 그 공 따라가기</small></div>
+    <div class="board" id="board"><b>도착 순서</b><ol id="rank"></ol></div>
+    <div class="status" id="status">참가자를 넣고 시작을 누르세요</div>
+    <div class="result" id="result"><div class="card"><h3>🎉 당첨!</h3><ol id="winners"></ol><button id="close">닫기</button></div></div>
+  </section>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+
+// ---------- 이벤트 글(글쓴이 수정 모드)에서 넘겨준 신청자 명단 ----------
+try {
+  const h = JSON.parse(localStorage.getItem('mandeuk_pinball_handoff'));
+  localStorage.removeItem('mandeuk_pinball_handoff');
+  if (h && Date.now() - h.at < 30 * 60e3 && Array.isArray(h.names)) {
+    $('names').value = h.names.map(String).join('\n');
+    $('load-msg').textContent = `📥 ${h.title || '이벤트'} 신청자 ${h.names.length}명을 불러왔어요.`;
+  }
+} catch (e) { /* 넘겨받은 명단 없음 */ }
+
+// ---------- BGM (리듬게임 음원 재사용) ----------
+const SONGS = ['pop', 'k-pop', 'jazz', 'mellow-hiphop', 'mellow-hiphop-2'];
+const audio = new Audio(); audio.loop = true; audio.volume = .3;
+let bgmOn = false, song = Math.floor(Math.random() * SONGS.length);
+try { bgmOn = localStorage.getItem('mandeuk_pinball_bgm') === '1'; } catch (e) { /* 저장 불가 */ }
+function setSong() { audio.src = `../pet-rhythm/assets/music/${SONGS[song]}.m4a`; }
+function bgmUI() { $('bgm').textContent = bgmOn ? '🔊 BGM' : '🔇 BGM'; $('bgm').classList.toggle('on', bgmOn); }
+function bgmPlay() { if (bgmOn) audio.play().catch(() => {}); }
+setSong(); bgmUI();
+$('bgm').onclick = () => {
+  bgmOn = !bgmOn; bgmUI();
+  try { localStorage.setItem('mandeuk_pinball_bgm', bgmOn ? '1' : '0'); } catch (e) { /* 저장 불가 */ }
+  bgmOn ? bgmPlay() : audio.pause();
+};
+$('song').onclick = () => { song = (song + 1) % SONGS.length; setSong(); bgmPlay(); };
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function names() { return $('names').value.split('\n').map(s => s.trim()).filter(Boolean); }
+function updateCount() { const n = names().length; $('count').textContent = n + '명'; $('wins').max = Math.max(1, n); }
+$('names').oninput = updateCount;
+
+// ---------- 맵 ----------
+const W = 900, R = 11, G = 1500, DT = 1 / 240;
+let map, balls = [], fx = [], running = false, simT = 0, finished = [], speed = 1, camY = 0, follow = null;
+
+function rnd(a, b) { return a + Math.random() * (b - a); }
+function genMap() {
+  const pegs = [], bars = [], walls = [];
+  const SEC = 600, n = 11;
+  let y = 320;
+  const kinds = ['pegs', 'bumpers', 'spinners', 'zigzag', 'funnel', 'pegs', 'spinners', 'bumpers'];
+  for (let i = 0; i < n; i++, y += SEC) {
+    const k = kinds[Math.floor(Math.random() * kinds.length)];
+    if (k === 'pegs') {
+      for (let r = 0; r < 6; r++) for (let x = 40 + (r % 2) * 35; x < W - 30; x += 70) pegs.push({ x: x + rnd(-6, 6), y: y + r * 90, r: 7, e: .5 });
+    } else if (k === 'bumpers') {
+      for (let j = 0; j < 7; j++) pegs.push({ x: rnd(80, W - 80), y: y + rnd(0, SEC - 120), r: rnd(22, 38), e: 1.25, bump: true });
+      for (let x = 60; x < W; x += 120) pegs.push({ x, y: y + SEC - 60, r: 6, e: .5 });
+    } else if (k === 'spinners') {
+      for (let j = 0; j < 4; j++) bars.push({ cx: (j % 2 ? W * .68 : W * .32) + rnd(-40, 40), cy: y + 60 + j * 130, len: rnd(150, 230), a: rnd(0, 6.28), w: rnd(1.5, 3.2) * (Math.random() < .5 ? -1 : 1) });
+    } else if (k === 'zigzag') {
+      for (let j = 0; j < 4; j++) {
+        const left = j % 2 === 0, yy = y + j * 140;
+        walls.push(left ? [0, yy, W * .7, yy + 70] : [W, yy, W * .3, yy + 70]);
+        pegs.push({ x: left ? W * .85 : W * .15, y: yy + 40, r: 16, e: 1.2, bump: true });
+      }
+    } else {
+      walls.push([0, y, W / 2 - 75, y + 220], [W, y, W / 2 + 75, y + 220]);
+      bars.push({ cx: W / 2, cy: y + 330, len: 160, a: 0, w: 4 });
+      pegs.push({ x: W * .2, y: y + 420, r: 26, e: 1.3, bump: true }, { x: W * .8, y: y + 420, r: 26, e: 1.3, bump: true });
+    }
+  }
+  // 마지막 입구: 범퍼 줄 → 깔때기 → 좌우로 움직이는 범퍼 → 입구 아래 회전 막대(다시 튕겨 올릴 수 있음)
+  for (const fx of [.2, .4, .6, .8]) pegs.push({ x: W * fx, y: y + 40, r: 22, e: 1.3, bump: true });
+  walls.push([0, y + 120, W / 2 - 85, y + 340], [W, y + 120, W / 2 + 85, y + 340]);
+  pegs.push({ x: W / 2, x0: W / 2, y: y + 290, r: 26, e: 1.35, bump: true, amp: 90, f: 2.4 });
+  bars.push({ cx: W / 2, cy: y + 430, len: 150, a: 0, w: 5 });
+  pegs.push({ x: W / 2 - 170, y: y + 480, r: 22, e: 1.3, bump: true }, { x: W / 2 + 170, y: y + 480, r: 22, e: 1.3, bump: true });
+  map = { pegs, bars, walls, H: y + 700, finishY: y + 600 };
+}
+
+// ---------- 물리 ----------
+function makeBalls(list) {
+  const cols = Math.floor((W - 60) / (R * 2.6));
+  const order = list.map((n, i) => i).sort(() => Math.random() - .5);
+  balls = list.map((name, i) => {
+    const slot = order[i];
+    return {
+      name, x: 30 + (slot % cols) * R * 2.6 + rnd(-2, 2), y: 40 + Math.floor(slot / cols) * R * 2.6, vx: rnd(-30, 30), vy: 0,
+      hue: (i * 137.5) % 360, done: false, skill: Math.random() < .5 ? 'pull' : 'push', next: rnd(2, 5), lx: 0, ly: 0, lt: 0,
+    };
+  });
+}
+function hitCircle(b, cx, cy, cr, e, svx = 0, svy = 0) {
+  const dx = b.x - cx, dy = b.y - cy, d2 = dx * dx + dy * dy, m = R + cr;
+  if (d2 >= m * m || d2 === 0) return false;
+  const d = Math.sqrt(d2), nx = dx / d, ny = dy / d;
+  b.x = cx + nx * m; b.y = cy + ny * m;
+  const rvx = b.vx - svx, rvy = b.vy - svy, vn = rvx * nx + rvy * ny;
+  if (vn < 0) { b.vx -= (1 + e) * vn * nx; b.vy -= (1 + e) * vn * ny; }
+  return true;
+}
+function hitSeg(b, x1, y1, x2, y2, e, bar) {
+  const ex = x2 - x1, ey = y2 - y1, t = Math.max(0, Math.min(1, ((b.x - x1) * ex + (b.y - y1) * ey) / (ex * ex + ey * ey)));
+  const px = x1 + ex * t, py = y1 + ey * t;
+  // 회전 막대: 닿은 지점의 표면 속도를 더해 쳐 내기
+  const svx = bar ? -bar.w * (py - bar.cy) : 0, svy = bar ? bar.w * (px - bar.cx) : 0;
+  hitCircle(b, px, py, 5, e, svx, svy);
+}
+function barEnds(k) { const c = Math.cos(k.a) * k.len / 2, s = Math.sin(k.a) * k.len / 2; return [k.cx - c, k.cy - s, k.cx + c, k.cy + s]; }
+
+function moveObstacles(t, dt) {
+  for (const k of map.bars) k.a += k.w * dt;
+  for (const p of map.pegs) if (p.amp) { p.x = p.x0 + p.amp * Math.sin(t * p.f); p.vx = p.amp * p.f * Math.cos(t * p.f); }
+}
+function step() {
+  simT += DT;
+  moveObstacles(simT, DT);
+  const live = balls.filter(b => !b.done);
+  for (const b of live) {
+    b.vy += G * DT; b.vx *= .9996; b.vy *= .9996;
+    const sp = Math.hypot(b.vx, b.vy); if (sp > 1700) { b.vx *= 1700 / sp; b.vy *= 1700 / sp; }
+    b.x += b.vx * DT; b.y += b.vy * DT;
+    if (b.x < R) { b.x = R; b.vx = Math.abs(b.vx) * .6; }
+    if (b.x > W - R) { b.x = W - R; b.vx = -Math.abs(b.vx) * .6; }
+    for (const p of map.pegs) if (Math.abs(p.y - b.y) < 60) hitCircle(b, p.x, p.y, p.r, p.e, p.vx || 0);
+    for (const w of map.walls) if (b.y > Math.min(w[1], w[3]) - 20 && b.y < Math.max(w[1], w[3]) + 20) hitSeg(b, ...w, .3);
+    for (const k of map.bars) if (Math.abs(k.cy - b.y) < k.len / 2 + 20) hitSeg(b, ...barEnds(k), .4, k);
+    if (b.y > map.finishY) { b.done = true; finished.push(b); onFinish(b); }
+  }
+  // 공끼리 충돌. ponytail: O(n²), 200명 넘으면 격자 나누기 필요
+  for (let i = 0; i < live.length; i++) for (let j = i + 1; j < live.length; j++) {
+    const a = live[i], c = live[j], dx = c.x - a.x, dy = c.y - a.y, d2 = dx * dx + dy * dy;
+    if (d2 >= 4 * R * R || d2 === 0) continue;
+    const d = Math.sqrt(d2), nx = dx / d, ny = dy / d, o = (2 * R - d) / 2;
+    a.x -= nx * o; a.y -= ny * o; c.x += nx * o; c.y += ny * o;
+    const vn = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+    if (vn < 0) { const j2 = -.9 * vn; a.vx -= j2 * nx; a.vy -= j2 * ny; c.vx += j2 * nx; c.vy += j2 * ny; }
+  }
+  for (const b of live) {
+    if (b.done) continue;
+    // 스킬: 주변 공을 당기거나 밀어냄
+    if ($('skills').checked && simT > b.next) {
+      b.next = simT + rnd(3, 6);
+      const sign = b.skill === 'pull' ? 1 : -1;
+      for (const o of live) {
+        if (o === b || o.done) continue;
+        const dx = b.x - o.x, dy = b.y - o.y, d = Math.hypot(dx, dy);
+        if (d < 170 && d > 0) { const f = (sign > 0 ? 550 : 750) * (1 - d / 170) * sign; o.vx += dx / d * f; o.vy += dy / d * f; }
+      }
+      fx.push({ x: b.x, y: b.y, t: 0, pull: sign > 0 });
+    }
+    // 끼임 방지: 2초 동안 거의 안 움직이면 튕겨 줌
+    if (simT - b.lt > 2) {
+      if (Math.hypot(b.x - b.lx, b.y - b.ly) < 25) { b.vy = -rnd(400, 700); b.vx = rnd(-400, 400); }
+      b.lx = b.x; b.ly = b.y; b.lt = simT;
+    }
+  }
+}
+
+// ---------- 진행 ----------
+const mode = () => document.querySelector('input[name=mode]:checked').value;
+let wins = 1;
+function onFinish(b) {
+  const total = balls.length, n = finished.length;
+  const li = document.createElement('li'); li.textContent = b.name; $('rank').append(li);
+  const won = mode() === 'first' ? n <= wins : n > total - wins;
+  if (won) li.className = 'win';
+  if (mode() === 'first' ? n >= wins : n >= total) end();
+}
+// 당첨에 가장 가까운 공: 먼저 도착 = 결승선에 가까운 순, 마지막 도착 = 가장 뒤처진 순
+function renderNear() {
+  const live = balls.filter(b => !b.done);
+  if (!running || !live.length) { $('near').hidden = true; return; }
+  const first = mode() === 'first';
+  const slots = first ? wins - finished.length : Math.min(wins, live.length);
+  live.sort((a, b) => first ? b.y - a.y : a.y - b.y);
+  $('near').hidden = false;
+  $('near-title').textContent = first ? `🎯 당첨 근접 (남은 자리 ${slots})` : `🐢 꼴찌 근접 (당첨 ${slots}자리)`;
+  $('nearlist').innerHTML = live.slice(0, slots + 3).map((b, i) =>
+    `<li data-i="${balls.indexOf(b)}" class="${i < slots ? 'hot' : ''}${b === follow ? ' cur' : ''}">${esc(b.name)} <small>${Math.max(0, Math.round((map.finishY - b.y) / 10))}m</small></li>`).join('');
+}
+setInterval(renderNear, 250);
+$('nearlist').onclick = e => { const li = e.target.closest('li'); if (li) setCam(balls[+li.dataset.i]); };
+function winnerList() {
+  return mode() === 'first' ? finished.slice(0, wins) : finished.slice(-wins).reverse();
+}
+function end() {
+  running = false;
+  $('winners').innerHTML = winnerList().map(b => `<li>${esc(b.name)}</li>`).join('');
+  $('result').classList.add('show');
+  $('status').textContent = '추첨 끝!';
+  $('start').disabled = false;
+}
+$('close').onclick = () => $('result').classList.remove('show');
+
+$('start').onclick = () => {
+  const list = names();
+  if (list.length < 2) { $('status').textContent = '참가자를 2명 이상 넣어 주세요'; return; }
+  wins = Math.max(1, Math.min(list.length, parseInt($('wins').value, 10) || 1));
+  $('wins').value = wins;
+  if (!map) genMap();
+  for (const k of map.bars) k.a = rnd(0, 6.28);
+  makeBalls(list); finished = []; fx = []; simT = 0; camY = 0; tour = false; setCam('auto');
+  $('rank').innerHTML = ''; $('result').classList.remove('show');
+  running = true; $('start').disabled = true; bgmPlay();
+};
+$('newmap').onclick = () => { if (!running) { genMap(); balls = []; camY = 0; tour = false; $('status').textContent = '새 맵! 둘러보고 시작하세요'; } };
+// 카메라: 'auto' 기준 공 추적 | 'free' 마우스로 자유 이동 | 공 객체 = 그 공 추적. 시작 전·진행 중 모두 휠·드래그·미니맵 클릭 가능
+let tour = false, drag = null, cam = 'auto';
+function setCam(c) { cam = c; $('cam').classList.toggle('on', c === 'auto'); }
+$('cam').onclick = () => setCam('auto');
+$('tour').onclick = () => { if (!running) { camY = 0; tour = true; } };
+function freeCam() { tour = false; if (running) setCam('free'); }
+cv.addEventListener('wheel', e => { e.preventDefault(); freeCam(); camY += e.deltaY * 1.5; }, { passive: false });
+cv.addEventListener('pointerdown', e => {
+  freeCam();
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left;
+  if (x > r.width - MINI) { camY = (e.clientY - r.top) / r.height * map.H - view().viewH / 2; return; }
+  drag = { y: e.clientY, cam: camY }; cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener('pointermove', e => { if (drag) camY = drag.cam - (e.clientY - drag.y) / view().sc; });
+cv.addEventListener('pointerup', () => { drag = null; });
+
+const SPEEDS = [.25, .5, 1, 2, 4];
+$('speeds').innerHTML = SPEEDS.map(s => `<button data-s="${s}" class="${s === 1 ? 'on' : ''}">${s < 1 ? '🐌' : s > 1 ? '⏩' : '▶'} ${s}x</button>`).join('');
+$('speeds').onclick = e => {
+  const s = e.target.closest('button'); if (!s) return;
+  speed = +s.dataset.s;
+  for (const x of $('speeds').children) x.classList.toggle('on', x === s);
+};
+
+// ---------- 그리기 ----------
+const MINI = 70;
+function view() { const sc = (cv.clientWidth - MINI) / W; return { sc, viewH: cv.clientHeight / sc }; }
+let last = performance.now(), acc = 0, idleT = 0;
+const BASE = .5; // 표시 1x = 이전 0.5배 속도 (사용자 요청)
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (!running && map) moveObstacles(idleT += dt * BASE, dt * BASE);
+  if (running) { acc += dt * speed * BASE; let k = 0; while (acc >= DT && k++ < 2000) { step(); acc -= DT; if (!running) break; } }
+  draw(dt);
+  requestAnimationFrame(frame);
+}
+function pickFollow() {
+  const live = balls.filter(b => !b.done);
+  if (!live.length) return null;
+  // 먼저 도착: 선두(가장 아래) 공 / 마지막 도착: 꼴찌(가장 위) 공
+  return live.reduce((p, b) => (mode() === 'first' ? b.y > p.y : b.y < p.y) ? b : p);
+}
+function draw(dt) {
+  const dpr = devicePixelRatio || 1, cw = cv.clientWidth, ch = cv.clientHeight;
+  if (cv.width !== cw * dpr || cv.height !== ch * dpr) { cv.width = cw * dpr; cv.height = ch * dpr; }
+  if (!map) genMap();
+  const mini = MINI, { sc, viewH } = view(), maxCam = map.H - viewH;
+  if (running) {
+    if (cam !== 'auto' && cam !== 'free' && cam.done) setCam('auto');
+    follow = cam === 'auto' ? pickFollow() : cam === 'free' ? null : cam;
+    if (follow) camY += (Math.max(0, Math.min(maxCam, follow.y - viewH * .45)) - camY) * Math.min(1, dt * 5);
+  } else if (tour) {
+    camY += 900 * dt;
+    if (camY >= maxCam) tour = false;
+  }
+  camY = Math.max(0, Math.min(maxCam, camY));
+  if (running) $('status').textContent = `${cam === 'free' ? '🖱️ 자유 시점' : cam === 'auto' ? (mode() === 'first' ? '🥇 선두 추적: ' : '🐢 꼴찌 추적: ') + (follow ? follow.name : '') : '👀 ' + cam.name + ' 추적'} · 도착 ${finished.length}/${balls.length}`;
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#1d2340'; ctx.fillRect(0, 0, cw, ch);
+  ctx.save(); ctx.scale(sc, sc); ctx.translate(0, -camY);
+  const y0 = camY - 60, y1 = camY + viewH + 60;
+  ctx.fillStyle = '#ffd400'; ctx.fillRect(0, map.finishY, W, 8);
+  ctx.font = '400 28px "Black Han Sans"'; ctx.textAlign = 'center'; ctx.fillText('FINISH', W / 2, map.finishY + 44);
+  for (const p of map.pegs) if (p.y > y0 && p.y < y1) {
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283);
+    ctx.fillStyle = p.bump ? '#ff5d8f' : '#cfd8ff'; ctx.fill();
+    if (p.bump) { ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.stroke(); }
+  }
+  ctx.lineCap = 'round'; ctx.strokeStyle = '#8be9ff'; ctx.lineWidth = 10;
+  for (const w of map.walls) { ctx.beginPath(); ctx.moveTo(w[0], w[1]); ctx.lineTo(w[2], w[3]); ctx.stroke(); }
+  ctx.strokeStyle = '#45ffb0';
+  for (const k of map.bars) if (k.cy > y0 - k.len && k.cy < y1 + k.len) { const e = barEnds(k); ctx.beginPath(); ctx.moveTo(e[0], e[1]); ctx.lineTo(e[2], e[3]); ctx.stroke(); }
+  fx = fx.filter(f => (f.t += dt * Math.max(speed * BASE, .25)) < .5);
+  for (const f of fx) {
+    const r = f.pull ? 170 * (1 - f.t * 2) : 170 * f.t * 2;
+    ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(1, r), 0, 6.283);
+    ctx.strokeStyle = f.pull ? 'rgba(80,200,255,.8)' : 'rgba(255,120,60,.8)'; ctx.lineWidth = 4; ctx.stroke();
+  }
+  ctx.font = '700 13px Pretendard'; ctx.lineWidth = 3;
+  for (const b of balls) if (!b.done && b.y > y0 && b.y < y1) {
+    ctx.beginPath(); ctx.arc(b.x, b.y, R, 0, 6.283); ctx.fillStyle = `hsl(${b.hue} 85% 58%)`; ctx.fill();
+    ctx.lineWidth = b === follow ? 4 : 2; ctx.strokeStyle = b === follow ? '#ffd400' : '#000'; ctx.stroke();
+    const label = ($('skills').checked ? (b.skill === 'pull' ? '🧲' : '💥') : '') + b.name;
+    ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.strokeText(label, b.x, b.y - R - 5); ctx.fillStyle = '#fff'; ctx.fillText(label, b.x, b.y - R - 5);
+  }
+  ctx.restore();
+  // 미니맵: 오른쪽에 전체 판과 공 위치
+  const mx = cw - mini, ms = ch / map.H;
+  ctx.fillStyle = '#0e1226'; ctx.fillRect(mx, 0, mini, ch);
+  const mxs = mini / W;
+  for (const p of map.pegs) { ctx.fillStyle = p.bump ? '#ff5d8f' : '#6f7bb0'; ctx.fillRect(mx + p.x * mxs - 1, p.y * ms - 1, p.bump ? 3 : 2, p.bump ? 3 : 2); }
+  ctx.lineWidth = 1.5; ctx.strokeStyle = '#8be9ff';
+  for (const w of map.walls) { ctx.beginPath(); ctx.moveTo(mx + w[0] * mxs, w[1] * ms); ctx.lineTo(mx + w[2] * mxs, w[3] * ms); ctx.stroke(); }
+  ctx.strokeStyle = '#45ffb0';
+  for (const k of map.bars) { const e = barEnds(k); ctx.beginPath(); ctx.moveTo(mx + e[0] * mxs, e[1] * ms); ctx.lineTo(mx + e[2] * mxs, e[3] * ms); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(mx, camY * ms, mini, viewH * ms);
+  for (const b of balls) if (!b.done) { ctx.fillStyle = `hsl(${b.hue} 85% 58%)`; ctx.fillRect(mx + b.x / W * mini - 1.5, b.y * ms - 1.5, 3, 3); }
+  ctx.fillStyle = '#ffd400'; ctx.fillRect(mx, map.finishY * ms, mini, 2);
+}
+updateCount();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
