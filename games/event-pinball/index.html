@@ -128,7 +128,7 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<':
 // '만득*3' = 만득 공 3개 (최대 20개)
 function names() {
   return $('names').value.split('\n').map(s => s.trim()).filter(Boolean).flatMap(s => {
-    const m = s.match(/^(.+?)\s*\*\s*(\d+)$/);
+    const m = s.normalize('NFKC').match(/^(.+?)\s*[*×✕xX]\s*(\d+)$/);
     return m ? Array(Math.min(20, Math.max(1, +m[2]))).fill(m[1]) : [s];
   });
 }
