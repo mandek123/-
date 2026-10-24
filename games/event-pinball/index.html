@@ -125,8 +125,14 @@ $('bgm').onclick = () => {
 };
 $('song').onclick = () => { song = (song + 1) % SONGS.length; setSong(); bgmPlay(); };
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
-function names() { return $('names').value.split('\n').map(s => s.trim()).filter(Boolean); }
-function updateCount() { const n = names().length; $('count').textContent = n + '명'; $('wins').max = Math.max(1, n); }
+// '만득*3' = 만득 공 3개 (최대 20개)
+function names() {
+  return $('names').value.split('\n').map(s => s.trim()).filter(Boolean).flatMap(s => {
+    const m = s.match(/^(.+?)\s*\*\s*(\d+)$/);
+    return m ? Array(Math.min(20, Math.max(1, +m[2]))).fill(m[1]) : [s];
+  });
+}
+function updateCount() { const n = names().length; $('count').textContent = '공 ' + n + '개 (이름*2 = 공 2개)'; $('wins').max = Math.max(1, n); }
 $('names').oninput = updateCount;
 
 // ---------- 맵 ----------
