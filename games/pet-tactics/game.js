@@ -41,7 +41,8 @@ function prepareAI(){if(state.ended||state.aiPreparedRound===state.round)return;
 function remember(){try{localStorage.setItem(saveKey,JSON.stringify(state));}catch{message('진행 저장이 차단됐어요. 이 화면에서 계속 플레이할 수 있습니다.');}}
 function record(){try{localStorage.setItem(seasonKey,JSON.stringify(seasonRecord));}catch{}}
 function createPlayer(name){return {name,hp:40,gold:12,level:3,xp:0,roster:[],shop:[],wins:0,place:null,inventory:[],avatar:Math.floor(Math.random()*PETS.length)};}
-const shopOdds={3:[75,25,0,0,0],4:[50,35,15,0,0],5:[30,35,25,10,0],6:[15,25,30,23,7]};
+const MAXLV=8,shopOdds={3:[75,25,0,0,0],4:[50,35,15,0,0],5:[30,35,25,10,0],6:[15,25,30,23,7],7:[10,20,30,28,12],8:[5,15,25,32,23]};
+const streakGold=p=>{const n=Math.abs(p.streak||0);return n>=5?3:n>=4?2:n>=2?1:0;},income=p=>5+Math.min(5,Math.floor(p.gold/10))+streakGold(p);
 function offer(p){const odds=shopOdds[p.level];let roll=Math.random()*100,cost=1;for(let i=0;i<odds.length;i++){roll-=odds[i];if(roll<0){cost=i+1;break;}}const choices=pool.filter(x=>catalog.get(x.id).cost===cost);return choices[Math.floor(Math.random()*choices.length)].id;}
 function startingPets(p){for(const [i,d] of shuffled(pool.filter(x=>catalog.get(x.id).cost===1)).slice(0,3).entries()){add(p,d.id);p.roster.at(-1).slot=[4,5,1][i];}}
 function shop(p){p.shop=Array.from({length:5},()=>offer(p));}
@@ -66,7 +67,7 @@ function fresh(){
   user().avatar=profile?.avatar??0;
   selected=null;inspected=null;shopViewed=null;scoutIndex=null;prepareAI();remember();render();message('기본 페트 3마리가 배치돼 있어요. 구매·합성하거나 바로 전투를 시작하세요.');
 }
-function valid(s){return s&&s.season===season&&Number.isInteger(s.round)&&s.round>=1&&s.round<=18&&Array.isArray(s.players)&&[4,5].includes(s.players.length)&&s.players.every(p=>typeof p.name==='string'&&Number.isFinite(p.hp)&&Number.isFinite(p.gold)&&p.gold>=0&&Number.isInteger(p.level)&&p.level>=3&&p.level<=6&&Array.isArray(p.roster)&&p.roster.length<=14&&p.roster.every(u=>catalog.has(u.id)&&[1,2,3].includes(u.star)&&typeof u.uid==='string'&&(u.slot===null||(Number.isInteger(u.slot)&&u.slot>=0&&u.slot<8)))&&Array.isArray(p.shop)&&p.shop.length===5&&p.shop.every(id=>id===null||catalog.has(id)))&&Array.isArray(s.log);}
+function valid(s){return s&&s.season===season&&Number.isInteger(s.round)&&s.round>=1&&s.round<=18&&Array.isArray(s.players)&&[4,5].includes(s.players.length)&&s.players.every(p=>typeof p.name==='string'&&Number.isFinite(p.hp)&&Number.isFinite(p.gold)&&p.gold>=0&&Number.isInteger(p.level)&&p.level>=3&&p.level<=MAXLV&&Array.isArray(p.roster)&&p.roster.length<=14&&p.roster.every(u=>catalog.has(u.id)&&[1,2,3].includes(u.star)&&typeof u.uid==='string'&&(u.slot===null||(Number.isInteger(u.slot)&&u.slot>=0&&u.slot<8)))&&Array.isArray(p.shop)&&p.shop.length===5&&p.shop.every(id=>id===null||catalog.has(id)))&&Array.isArray(s.log);}
 try{const data=JSON.parse(localStorage.getItem(seasonKey)||'null');if(data&&Number.isInteger(data.games)&&Number.isInteger(data.wins)&&Number.isInteger(data.best))seasonRecord=data;const saved=JSON.parse(localStorage.getItem(saveKey)||'null');if(valid(saved)){
 state=saved;
 for(const p of state.players){p.inventory=Array.isArray(p.inventory)?p.inventory.filter(i=>items[i.id]&&typeof i.uid==='string'):[];p.avatar=Number.isInteger(p.avatar)&&PETS[p.avatar]?p.avatar:Math.floor(Math.random()*PETS.length);for(const u of p.roster)if(!items[u.item])delete u.item;delete p.preference;}
@@ -79,7 +80,7 @@ function synergies(p){
   return {counts,families};
 }
 function stats(u,p){
-  const d=pet(u),{counts,families}=synergies(p),baseHP=Math.max(180+d.cost*12,Math.min(185+d.cost*20,70+d.hp*3),d.heal?180+d.cost*18:0),baseAtk=Math.max(20+d.cost*3,Math.min(26+d.cost*3,8+d.atk*2.5),d.heal?26+d.cost*2:0),mult=1.8**(u.star-1),tier=(counts[d.element]||0)>=4?2:(counts[d.element]||0)>=2?1:0;
+  const d=pet(u),{counts,families}=synergies(p),baseHP=Math.max(180+d.cost*12,Math.min(185+d.cost*20,70+d.hp*3),d.heal?180+d.cost*18:0),baseAtk=Math.max(20+d.cost*3,Math.min(26+d.cost*3,8+d.atk*2.5),d.heal?26+d.cost*2:0),mult=1.8**(u.star-1),tier=(counts[d.element]||0)>=6?3:(counts[d.element]||0)>=4?2:(counts[d.element]||0)>=2?1:0;
   const result={hp:Math.round((baseHP+Math.max(0,d.def-9)*5)*mult*(families[d.category]>=2?1.12:1)*(d.element==='지'?1+tier*.15:1)),atk:baseAtk*mult*(d.element==='화'?1+tier*.10:1)*(d.element===featured?1.05:1),armor:Math.min(.55,d.def*.02),cooldown:Math.max(.55,Math.min(d.heal?1.15:1.45,1.75-d.spd*.07))/(d.element==='풍'?1+tier*.12:1),heal:1+(d.element==='수'?tier*.25:0)};
   // Roles are derived from this game's skill and defence, not new codex facts.
   if(role(d)==='원거리형'){result.cooldown*=1.02;}
@@ -93,17 +94,17 @@ function render(){
   const p=user();$('season').textContent=`${season.slice(0,4)}.${season.slice(4)} 시즌 · ${featured} 속성 강화`;
   $('season-detail').innerHTML=`${badge(featured)}<strong>이번 달 공격력 +5%</strong><span>이 속성의 모든 페트에게 자동 적용</span><small>매월 등장 페트 24종과 강화 속성이 바뀝니다.</small>`;
   $('season-record').textContent=`이번 시즌 ${seasonRecord.games}전 ${seasonRecord.wins}승 · 최고 ${seasonRecord.games?seasonRecord.best:'—'}위`;
-  $('round').textContent=`${state.round} / 18`;$('health').textContent=p.hp;$('gold').textContent=p.gold;$('level').textContent=`Lv.${p.level} · 최대 ${p.level}마리`;$('level-xp').textContent=p.level>=6?'최고 레벨':`다음 레벨까지 경험치 ${p.xp} / ${threshold(p)}`;
+  $('round').textContent=`${state.round} / 18`;$('health').textContent=p.hp;$('gold').textContent=p.gold;$('level').textContent=`Lv.${p.level} · 최대 ${p.level}마리`;$('level-xp').textContent=p.level>=MAXLV?'최고 레벨':`다음 레벨까지 경험치 ${p.xp} / ${threshold(p)}`;
   $('phase').textContent=busy?'전투 진행 중':state.ended?'대회 종료':isLootRound()?'장비 탐험 라운드':'준비 단계';$('round-progress').style.width=state.round/18*100+'%';
-  $('xp-progress').style.width=(p.level>=6?100:p.xp/(p.level*4)*100)+'%';$('income').textContent=`다음 보상 5G + 이자 ${Math.min(3,Math.floor(p.gold/10))}G ${isLootRound()?'':' + 승리 1G'}`;
+  $('xp-progress').style.width=(p.level>=MAXLV?100:p.xp/(p.level*4)*100)+'%';$('income').textContent=`다음 보상 5G + 이자 ${Math.min(5,Math.floor(p.gold/10))}G + ${p.streak>0?'연승':'연패'} ${streakGold(p)}G${isLootRound()?'':' + 승리 1G'}`;
   const opponents=state.players.filter(q=>q!==p&&q.hp>0),opponent=opponents[(state.round-1)%opponents.length];
   $('duel').innerHTML=`<div>${avatar(p)}<span><b>나의 편성</b><small>${units(p).length}마리 · ${p.wins}승</small></span></div><strong>VS</strong>${opponent?`<div><span><b>${escape(opponent.name)}</b><small>${opponent.wins}승 · ${isLootRound()?'이번 라운드는 장비 탐험':'랜덤 편성'}</small><a class="scout-link" href="#ai-scout">AI 편성 보기</a></span>${avatar(opponent)}</div>`:'<b>대회 종료</b>'}`;
-  if(isLootRound()&&!state.ended)$('duel').innerHTML=`<div>${avatar(p)}<span><b>${escape(p.name)}</b><small>장비 탐험 · 체력 피해 없음</small></span></div><strong>VS</strong><div><span><b>탐험 수호자</b><small>쉬운 중립 봇 · 장비 1개 보장</small></span>${icon('shield')}</div>`;
+  if(isLootRound()&&!state.ended)$('duel').innerHTML=`<div>${avatar(p)}<span><b>${escape(p.name)}</b><small>장비 탐험 · 패배 시 체력 −2</small></span></div><strong>VS</strong><div><span><b>탐험 수호자</b><small>중립 봇 · 장비 1개 보장</small></span>${icon('shield')}</div>`;
   $('capacity').textContent=`배치 ${units(p).length} / ${p.level}마리`;
   $('standings').innerHTML=state.players.slice().sort((a,b)=>(a.place||0)-(b.place||0)||b.hp-a.hp).map(q=>`<div class="competitor player-${state.players.indexOf(q)} ${q===p?'mine':''} ${q.hp<=0?'out':''}"><div class="player-head">${avatar(q)}<div><small class="player-tag">${q===p?'YOU':q.hp<=0?'탈락':'AI'}</small><strong>${escape(q.name)}</strong></div></div><div class="hp"><i style="width:${Math.max(0,q.hp)/40*100}%"></i></div><span>${icon('heart')} ${Math.max(0,q.hp)} <b>${q.place?q.place+'위':q.wins+'승'}</b></span><small>${q===p?'내 편성':'랜덤 편성'} · ${units(q).length}마리</small></div>`).join('');
   $('board').innerHTML=[4,5,6,7,0,1,2,3].map(i=>slotHtml(p.roster.find(u=>u.slot===i),i)).join('');
   const reserves=p.roster.filter(u=>u.slot===null);$('bench').innerHTML=Array.from({length:6},(_,i)=>slotHtml(reserves[i],i,true)).join('');
-  const {counts,families}=synergies(p);$('synergies').innerHTML=elements.map(e=>`<span data-element="${e}" class="synergy ${counts[e]>=2?'active':''}">${elementIcon(e)} ${e} ${counts[e]||0} / ${(counts[e]||0)>=2?4:2} · ${e==='지'?'체력':e==='수'?'치유':e==='화'?'공격':'속도'}</span>`).join('')+Object.entries(families).filter(([,v])=>v>=2).map(([f])=>`<span class="synergy active">${escape(f)} · 체력 +12%</span>`).join('');
+  const {counts,families}=synergies(p);$('synergies').innerHTML=elements.map(e=>`<span data-element="${e}" class="synergy ${counts[e]>=2?'active':''}">${elementIcon(e)} ${e} ${counts[e]||0} / ${(counts[e]||0)>=4?6:(counts[e]||0)>=2?4:2} · ${e==='지'?'체력':e==='수'?'치유':e==='화'?'공격':'속도'}</span>`).join('')+Object.entries(families).filter(([,v])=>v>=2).map(([f])=>`<span class="synergy active">${escape(f)} · 체력 +12%</span>`).join('');
   $('shop-odds').innerHTML=`<b>Lv.${p.level} 등장 확률</b>`+shopOdds[p.level].map((v,i)=>`<span data-cost="${i+1}">${i+1}G <strong>${v}%</strong></span>`).join('');
   $('shop').innerHTML=p.shop.map((id,i)=>{if(id===null)return '<div class="offer sold-offer">구매 완료</div>';const d=catalog.get(id);return `<article class="offer" data-element="${d.element}" data-cost="${d.cost}"><span class="grade-label">${grades[d.cost]} · ${d.cost}G</span><button class="offer-info ${shopViewed===id?'viewing':''}" data-shop-info="${id}" aria-label="${escape(d.name)} 정보 보기"><img src="${d.img}" alt=""><strong>${escape(d.name)}</strong>${badge(d.element)}<small class="role-label">${role(d)} · ${escape(d.category)}</small><small>${skills[skillFor(d)].name}</small><span>${icon('eye')} 정보 보기</span></button><button class="offer-buy" data-buy="${i}" ${busy||state.ended||p.gold<d.cost?'disabled':''}>${icon('coins')} 구매 · ${d.cost}G</button></article>`;}).join('');
   const chosen=p.roster.find(u=>u.uid===selected);$('sell').textContent=chosen?`판매 · ${sale(chosen)}G`:'선택한 페트 판매';$('deselect').disabled=!selected&&!inspected&&shopViewed===null;$('sell').disabled=busy||!chosen||state.ended;
@@ -111,7 +112,7 @@ function render(){
   if(inspectUnit){detail(inspectUnit,inspectPlayer);$('sell').disabled=true;}else if(chosen)detail(chosen,p);else if(shopViewed!==null&&catalog.has(shopViewed))detail({id:shopViewed,star:1},p,true);else $('pet-detail').innerHTML=`<div class="detail-empty">${icon('paw')}<h3>페트를 선택하세요</h3><p>내 전장·대기석 또는 상대 편성에서<br>페트를 누르면 능력치가 표시됩니다.</p></div>`;
   renderEquipment();
   $('ready').disabled=busy||state.ended||!units(p).length;$('ready').textContent=busy?'전투 중…':state.ended?'대회 종료':isLootRound()?'탐험 시작 · 장비 획득':'전투 시작';
-  $('reroll').disabled=busy||state.ended||p.gold<2;$('experience').disabled=busy||state.ended||p.gold<4||p.level>=6;$('new-game').disabled=busy;
+  $('reroll').disabled=busy||state.ended||p.gold<2;$('experience').disabled=busy||state.ended||p.gold<4||p.level>=MAXLV;$('lock').textContent=p.locked?'🔒 상점 잠금 해제':'🔓 상점 잠금';$('lock').disabled=busy||state.ended;$('new-game').disabled=busy;
   $('log').innerHTML=state.log.slice(-8).reverse().map(text=>`<li>${escape(text)}</li>`).join('');
 }
 function statRow(label,value,type){return `<div class="stat-row stat-${type}"><dt>${icon(({hp:'heart',atk:'swords',def:'shield',spd:'wind'})[type])}${label}</dt><dd>${value}</dd></div>`;}
@@ -122,7 +123,7 @@ function renderScout(opponent){
   $('scout-tabs').innerHTML=state.players.slice(1).map((p,i)=>`<button data-scout="${i+1}" aria-pressed="${scoutIndex===i+1}" class="${scoutIndex===i+1?'active':''}" data-element="${featured}">${avatar(p)}<span>${escape(p.name)}<small>${p.hp<=0?'탈락':p===opponent?'이번 상대':'AI 참가자'}</small></span></button>`).join('');
   const p=state.players[scoutIndex];$('scout-summary').innerHTML=`<span>레벨 ${p.level} · 배치 ${units(p).length}/${p.level}</span><span>${p.hp<=0?'탈락한 참가자의 마지막 편성':busy?'전투에 참여한 편성':'이번 라운드 확정 편성'}</span>`;
   $('scout-board').innerHTML=[4,5,6,7,0,1,2,3].map(i=>{const u=p.roster.find(u=>u.slot===i);return u?`<button class="scout-unit ${inspected?.uid===u.uid?'selected':''}" data-inspect="${u.uid}" data-element="${pet(u).element}" data-cost="${pet(u).cost}"><span class="slot-element">${elementIcon(pet(u).element)}</span><img src="${pet(u).img}" alt=""><strong>${escape(pet(u).name)}</strong><small>${'★'.repeat(u.star)} · ${role(pet(u))}</small>${gearHtml(u)}<span class="unit-cost">${pet(u).cost}G</span></button>`:'<div class="scout-empty">빈 칸</div>';}).join('');
-  const {counts,families}=synergies(p);$('scout-synergies').innerHTML=Object.entries(counts).map(([e,v])=>`<span data-element="${e}" class="synergy ${v>=2?'active':''}">${elementIcon(e)} ${e} ${v}/${v>=2?4:2}</span>`).join('')+Object.entries(families).filter(([,v])=>v>=2).map(([f])=>`<span class="synergy active">${escape(f)} · 체력 +12%</span>`).join('');
+  const {counts,families}=synergies(p);$('scout-synergies').innerHTML=Object.entries(counts).map(([e,v])=>`<span data-element="${e}" class="synergy ${v>=2?'active':''}">${elementIcon(e)} ${e} ${v}/${v>=4?6:v>=2?4:2}</span>`).join('')+Object.entries(families).filter(([,v])=>v>=2).map(([f])=>`<span class="synergy active">${escape(f)} · 체력 +12%</span>`).join('');
 }
 function buy(index){
   if(busy||state.ended)return;const p=user(),id=p.shop[index];if(id===null||!catalog.has(id))return;
@@ -138,25 +139,25 @@ function selectSlot(target){
   if(p.roster.filter(u=>u.slot===null).length>6){if(chosen.slot===null)chosen.slot=slot;message('대기석이 가득 차 있어요.');}
   remember();render();
 }
-function threshold(p){return p.level>=6?'MAX':p.level*4;}
-function gainXP(p,amount){p.xp+=amount;while(p.level<6&&p.xp>=p.level*4){p.xp-=p.level*4;p.level++;}if(p.level>=6)p.xp=0;}
+function threshold(p){return p.level>=MAXLV?'MAX':p.level*4;}
+function gainXP(p,amount){p.xp+=amount;while(p.level<MAXLV&&p.xp>=p.level*4){p.xp-=p.level*4;p.level++;}if(p.level>=MAXLV)p.xp=0;}
 function aiPrepare(p){
   if(state.round===1)return;
   if(p.hp<=0)return;
   if(p.draftRound!==state.round){p.draftSeed=uid();p.draftRound=state.round;}
-  if(state.round%3===0&&p.gold>=4&&p.level<6){p.gold-=4;gainXP(p,4);}
-  for(let attempt=0;attempt<8&&p.gold>0;attempt++){
+  while(p.level<MAXLV&&p.gold>=4&&(state.round%2===0&&p.gold>=8||p.gold>=34)){p.gold-=4;gainXP(p,4);}
+  for(let attempt=0;attempt<14&&p.gold>0;attempt++){
     const sorted=p.shop.map((id,i)=>({id,i})).filter(x=>x.id!==null&&catalog.get(x.id).cost<=p.gold).sort((a,b)=>aiValue(p,b.id)-aiValue(p,a.id));
     const choice=sorted[0];if(!choice)break;if(p.roster.length<12){p.gold-=catalog.get(choice.id).cost;add(p,choice.id);p.shop[choice.i]=null;}else break;
-    if(p.shop.every(id=>id===null)&&p.gold>=2){p.gold-=2;shop(p);}
+    if((p.shop.every(id=>id===null)||p.gold>=(state.round>=9?14:30))&&p.gold>=2){p.gold-=2;shop(p);}
   }
   p.roster.sort((a,b)=>aiValue(p,b.id)*b.star-aiValue(p,a.id)*a.star);p.roster.forEach(u=>u.slot=null);
-  const deployed=p.roster.slice(0,p.level).sort((a,b)=>(pet(b).def-pet(a).def));deployed.forEach((u,i)=>u.slot=[4,5,6,7,0,1][i]);
+  const deployed=p.roster.slice(0,p.level).sort((a,b)=>(pet(b).def-pet(a).def));deployed.forEach((u,i)=>u.slot=[4,5,6,7,0,1,2,3][i]);
   equipAI(p);
   while(p.roster.length>p.level+6){const sold=p.roster.pop();p.gold+=sale(sold);if(sold.item)p.inventory.push({uid:uid(),id:sold.item});}
 }
-function aiValue(p,id){const d=catalog.get(id);return d.cost*8+hash(season+p.draftSeed+state.round+id)%25+p.roster.filter(u=>u.id===id&&u.star<3).length*7;}
-function fighters(p,side){return units(p).map(u=>{const s=stats(u,p);if(p.neutral){s.hp=Math.round(s.hp*.6);s.atk*=.65;}return {...u,...s,max:s.hp,side,x:u.slot%4,y:side?Math.floor(u.slot/4):4-Math.floor(u.slot/4),wait:Math.random()*.4,hits:0,shield:0,slowUntil:0,hasteUntil:0,burnUntil:0,burnDps:0};});}
+function aiValue(p,id){const d=catalog.get(id),same=new Set(p.roster.filter(u=>pet(u).element===d.element).map(u=>u.id)).size;return d.cost*8+hash(season+p.draftSeed+state.round+id)%15+p.roster.filter(u=>u.id===id&&u.star<3).length*14+same*5;}
+function fighters(p,side){return units(p).map(u=>{const s=stats(u,p);if(p.neutral){s.hp=Math.round(s.hp*.85);s.atk*=.9;}return {...u,...s,max:s.hp,side,x:u.slot%4,y:side?Math.floor(u.slot/4):4-Math.floor(u.slot/4),wait:Math.random()*.4,hits:0,shield:0,slowUntil:0,hasteUntil:0,burnUntil:0,burnDps:0};});}
 function makeCombat(a,b){return {a,b,time:0,done:false,winner:null,survivors:0,actors:[...fighters(a,0),...fighters(b,1)]};}
 function tick(c,dt,visible=false){
   if(c.done)return;c.time+=dt;
@@ -208,26 +209,26 @@ function startBattle(){
     combat=makeCombat(user(),opponent);
   }render();$('placement').hidden=true;$('battle-stage').hidden=false;$('arena-title').textContent='자동 전투';
   $('fighters').innerHTML=combat.actors.map(f=>`<div data-element="${pet(f).element}" class="fighter ${f.side?'enemy':''}" id="fighter-${f.uid}"><div class="life"><i></i></div><img src="${pet(f).img}" alt="${escape(pet(f).name)}"><span class="unit-label">${escape(pet(f).name)} ${'★'.repeat(f.star)}</span></div>`).join('');
-  paint();message(isLootRound()?'탐험 수호자와 대결합니다. 승패와 무관하게 생존 참가자 모두 장비 1개를 받으며 체력을 잃지 않습니다.':`${opponent.name}와 대결합니다. 홀수 인원은 상대의 복제 편성과 대결하며 원본 상대에게는 피해를 주지 않습니다.`);last=performance.now();elapsed=0;animation=requestAnimationFrame(frame);
+  paint();message(isLootRound()?'탐험 수호자와 대결합니다. 생존 참가자 모두 장비 1개를 받고, 패배하면 체력 2를 잃습니다.':`${opponent.name}와 대결합니다. 홀수 인원은 상대의 복제 편성과 대결하며 원본 상대에게는 피해를 주지 않습니다.`);last=performance.now();elapsed=0;animation=requestAnimationFrame(frame);
 }
 function frame(now){elapsed+=Math.min(.1,(now-last)/1000)*Number($('speed').value);last=now;while(elapsed>=.1&&!combat.done){tick(combat,.1,true);elapsed-=.1;}paint();if(combat.done){setTimeout(settle,650);return;}animation=requestAnimationFrame(frame);}
 function applyResult(c){
   const loser=c.winner===0?c.b:c.a,winner=c.winner===0?c.a:c.b;
-  if(c.winner===null){c.a.hp=Math.max(0,c.a.hp-3);if(!c.ghost)c.b.hp=Math.max(0,c.b.hp-3);state.log.push(`${state.round}R · ${c.a.name} / ${c.b.name} 무승부`);}
-  else{const damage=3+c.survivors+Math.floor(state.round/4);loser.hp=Math.max(0,loser.hp-damage);winner.wins++;winner.gold++;state.log.push(`${state.round}R · ${winner.name} 승리, ${loser.name} 체력 −${damage}`);}
+  if(c.winner===null){const d=2+Math.floor(state.round/4);c.a.hp=Math.max(0,c.a.hp-d);if(!c.ghost)c.b.hp=Math.max(0,c.b.hp-d);c.a.streak=0;c.b.streak=0;state.log.push(`${state.round}R · ${c.a.name} / ${c.b.name} 무승부`);}
+  else{const damage=Math.floor(state.round/4)+c.actors.filter(f=>f.side===c.winner&&f.hp>0).reduce((n,f)=>n+f.star,0);loser.hp=Math.max(0,loser.hp-damage);winner.wins++;winner.gold++;winner.streak=Math.max(0,winner.streak||0)+1;loser.streak=Math.min(0,loser.streak||0)-1;state.log.push(`${state.round}R · ${winner.name} 승리, ${loser.name} 체력 −${damage}`);}
 }
 function settle(){
   if(isLootRound())grantLoot();else{applyResult(combat);for(const c of state.otherBattles||[]){while(!c.done)tick(c,.1);applyResult(c);}}delete state.otherBattles;
   const alive=state.players.filter(p=>p.hp>0),eliminated=state.players.filter(p=>p.hp<=0&&p.place===null).sort((a,b)=>strength(b)-strength(a));eliminated.forEach((p,i)=>p.place=alive.length+i+1);
   busy=false;$('placement').hidden=false;$('battle-stage').hidden=true;$('arena-title').textContent='나의 전장';
   if(user().hp<=0||alive.length<=1||state.round>=18){endGame();return;}
-  for(const p of alive){p.gold+=5+Math.min(3,Math.floor(p.gold/10));gainXP(p,2);shop(p);}state.round++;scoutIndex=null;inspected=null;prepareAI();remember();render();message('전투 종료. 골드와 경험치를 받았어요. 조합을 강화하고 다음 전투를 준비하세요.');
+  for(const p of alive){p.gold+=income(p);gainXP(p,2);if(!p.locked)shop(p);}state.round++;scoutIndex=null;inspected=null;prepareAI();remember();render();message('전투 종료. 골드와 경험치를 받았어요. 조합을 강화하고 다음 전투를 준비하세요.');
 }
 function endGame(){
   // Finish the remaining AI tournament after the human is eliminated.
   while(user().hp<=0&&state.players.filter(p=>p.hp>0).length>1&&state.round<18){
     state.round++;const contestants=state.players.filter(p=>p.hp>0);
-    for(const p of contestants){p.gold+=5+Math.min(3,Math.floor(p.gold/10));gainXP(p,2);shop(p);aiPrepare(p);}
+    for(const p of contestants){p.gold+=income(p);gainXP(p,2);shop(p);aiPrepare(p);}
     if(isLootRound())grantLoot();else{
       const rotation=(state.round-1)%contestants.length,order=[...contestants.slice(rotation),...contestants.slice(0,rotation)],snapshot=JSON.parse(JSON.stringify(order[0]));
       for(let i=0;i<order.length;i+=2){const match=makeCombat(order[i],order[i+1]||snapshot);match.ghost=!order[i+1];while(!match.done)tick(match,.1);applyResult(match);}
@@ -244,8 +245,9 @@ $('shop').onclick=e=>{const buyButton=e.target.closest('[data-buy]');if(buyButto
 $('board').onclick=e=>{const button=e.target.closest('[data-slot]');if(!button)return;const u=user().roster.find(u=>u.uid===button.dataset.slot);selectSlot(u?u.slot:button.dataset.slot);};
 $('bench').onclick=e=>{const button=e.target.closest('[data-bench]');if(!button||busy||state.ended)return;selected=user().roster.find(u=>u.uid===button.dataset.bench)?.uid||null;inspected=null;shopViewed=null;render();};
 $('sell').onclick=()=>{if(busy||state.ended)return;const p=user(),u=p.roster.find(u=>u.uid===selected);if(!u)return;p.gold+=sale(u);if(u.item)p.inventory.push({uid:uid(),id:u.item});p.roster=p.roster.filter(v=>v.uid!==u.uid);selected=null;remember();render();message('페트를 판매하고 골드를 돌려받았습니다.');};
+$('lock').onclick=()=>{if(busy||state.ended)return;user().locked=!user().locked;remember();render();message(user().locked?'상점을 잠갔어요. 다음 라운드에도 그대로 유지됩니다.':'상점 잠금을 풀었어요.');};
 $('reroll').onclick=()=>{if(busy||state.ended||user().gold<2)return;user().gold-=2;shop(user());remember();render();message('상점이 바뀌었습니다.');};
-$('experience').onclick=()=>{const p=user();if(busy||state.ended||p.gold<4||p.level>=6)return;p.gold-=4;gainXP(p,4);remember();render();message('경험치 +4. 레벨이 오르면 더 많은 페트를 배치할 수 있습니다.');};
+$('experience').onclick=()=>{const p=user();if(busy||state.ended||p.gold<4||p.level>=MAXLV)return;p.gold-=4;gainXP(p,4);remember();render();message('경험치 +4. 레벨이 오르면 더 많은 페트를 배치할 수 있습니다.');};
 $('ready').onclick=startBattle;$('new-game').onclick=()=>{if(confirm('진행 중인 대회를 포기하고 새 대회를 시작할까요? 중도 포기는 5위로 기록됩니다.'))fresh();};
 $('again').onclick=()=>{$('result').close();fresh();};$('close-result').onclick=()=>$('result').close();
 
@@ -260,7 +262,7 @@ function renderEquipment(){
 }
 function equipAI(p){for(const u of units(p))if(!u.item&&p.inventory.length){const i=p.inventory.findIndex(x=>pet(u).heal?x.id==='spring':role(pet(u))==='수비형'?['shell','stone','vitality'].includes(x.id):['fang','feather'].includes(x.id));u.item=p.inventory.splice(Math.max(0,i),1)[0].id;}}
 function neutral(p){const bot=createPlayer('탐험 수호자',null);bot.neutral=true;bot.roster=units(p).slice(0,Math.max(1,Math.floor(units(p).length/2))).map(u=>({id:u.id,uid:uid(),slot:u.slot,star:1}));return bot;}
-function grantLoot(){const ids=Object.keys(items),offset=Math.floor(Math.random()*ids.length);state.players.filter(p=>p.hp>0).forEach((p,i)=>{if(p!==user()){const encounter=makeCombat(p,neutral(p));while(!encounter.done)tick(encounter,.1);}const id=ids[(offset+i)%ids.length];p.inventory.push({id,uid:uid()});if(p!==user())equipAI(p);state.log.push(`${state.round}R 탐험 · ${p.name}: ${items[id].name} 획득`);});}
+function grantLoot(){const ids=Object.keys(items),offset=Math.floor(Math.random()*ids.length);state.players.filter(p=>p.hp>0).forEach((p,i)=>{let encounter=combat;if(p!==user()||!combat?.done){encounter=makeCombat(p,neutral(p));while(!encounter.done)tick(encounter,.1);}if(encounter.winner!==0){p.hp=Math.max(0,p.hp-2);state.log.push(`${state.round}R 탐험 · ${p.name} 패배 체력 −2`);}const id=ids[(offset+i)%ids.length];p.inventory.push({id,uid:uid()});if(p!==user())equipAI(p);state.log.push(`${state.round}R 탐험 · ${p.name}: ${items[id].name} 획득`);});}
 function finishRecord(place,forfeit){
   if(state.resultRecorded)return true;if(!profile)return false;
   const result={id:state.runId||uid(),playerId:profile.id,nickname:profile.name,avatar:profile.avatar,season,place,round:state.round,wins:user().wins,forfeit,ranked:state.rankStarted,at:new Date().toISOString()};
