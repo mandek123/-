@@ -145,18 +145,18 @@ function aiPrepare(p){
   if(state.round===1)return;
   if(p.hp<=0)return;
   if(p.draftRound!==state.round){p.draftSeed=uid();p.draftRound=state.round;}
-  while(p.level<MAXLV&&p.gold>=4&&(state.round%2===0&&p.gold>=8||p.gold>=34)){p.gold-=4;gainXP(p,4);}
+  while(p.level<MAXLV&&p.gold>=4&&(state.round%2===0&&p.gold>=8||p.gold>=30)){p.gold-=4;gainXP(p,4);}
   for(let attempt=0;attempt<14&&p.gold>0;attempt++){
     const sorted=p.shop.map((id,i)=>({id,i})).filter(x=>x.id!==null&&catalog.get(x.id).cost<=p.gold).sort((a,b)=>aiValue(p,b.id)-aiValue(p,a.id));
     const choice=sorted[0];if(!choice)break;if(p.roster.length<12){p.gold-=catalog.get(choice.id).cost;add(p,choice.id);p.shop[choice.i]=null;}else break;
-    if((p.shop.every(id=>id===null)||p.gold>=(state.round>=9?14:30))&&p.gold>=2){p.gold-=2;shop(p);}
+    if((p.shop.every(id=>id===null)||p.gold>=(state.round>=9?12:26))&&p.gold>=2){p.gold-=2;shop(p);}
   }
   p.roster.sort((a,b)=>aiValue(p,b.id)*b.star-aiValue(p,a.id)*a.star);p.roster.forEach(u=>u.slot=null);
   const deployed=p.roster.slice(0,p.level).sort((a,b)=>(pet(b).def-pet(a).def));deployed.forEach((u,i)=>u.slot=[4,5,6,7,0,1,2,3][i]);
   equipAI(p);
   while(p.roster.length>p.level+6){const sold=p.roster.pop();p.gold+=sale(sold);if(sold.item)p.inventory.push({uid:uid(),id:sold.item});}
 }
-function aiValue(p,id){const d=catalog.get(id),same=new Set(p.roster.filter(u=>pet(u).element===d.element).map(u=>u.id)).size;return d.cost*8+hash(season+p.draftSeed+state.round+id)%15+p.roster.filter(u=>u.id===id&&u.star<3).length*14+same*5;}
+function aiValue(p,id){const d=catalog.get(id),same=new Set(p.roster.filter(u=>pet(u).element===d.element).map(u=>u.id)).size;return d.cost*8+hash(season+p.draftSeed+state.round+id)%15+p.roster.filter(u=>u.id===id&&u.star<3).length*14+same*6;}
 function fighters(p,side){return units(p).map(u=>{const s=stats(u,p);if(p.neutral){s.hp=Math.round(s.hp*.85);s.atk*=.9;}return {...u,...s,max:s.hp,side,x:u.slot%4,y:side?Math.floor(u.slot/4):4-Math.floor(u.slot/4),wait:Math.random()*.4,hits:0,shield:0,slowUntil:0,hasteUntil:0,burnUntil:0,burnDps:0};});}
 function makeCombat(a,b){return {a,b,time:0,done:false,winner:null,survivors:0,actors:[...fighters(a,0),...fighters(b,1)]};}
 function tick(c,dt,visible=false){
