@@ -5928,10 +5928,10 @@ const NOTICE_DATABASE = [
     {
     id: 54,
     date: "26년 11월 12일",
-    title: "페트 택틱스 업데이트 · 더 깊어진 전략 대전",
-    summary: "연승·연패 보너스, 상점 잠금, 최대 레벨 8 등 새 기능과 함께 AI가 더 강해졌어요.",
+    title: "26년 11월 12일 공지사항",
+    summary: "1. 페트 택틱스 업데이트",
     content: `
-        <span>페트 택틱스가 더 전략적으로 바뀌었습니다.</span>
+        <strong>1. 페트 택틱스 업데이트</strong>
         <strong>새 기능</strong>
         <span>- 연승·연패 보너스: 2연속 +1G, 4연속 +2G, 5연속 이상 +3G를 추가로 받습니다.</span>
         <span>- 상점 잠금: 마음에 드는 상점을 다음 라운드까지 그대로 유지할 수 있습니다.</span>
@@ -7731,7 +7731,7 @@ function calcAccuracy() {
                 sel.style.display = 'none'; 
                 
                 sel.customUpdate = () => {
-                    const textSpan = `<span class="text">${sel.options[sel.selectedIndex].text}</span>`;
+                    const textSpan = `<span class="text">${(sel.options[sel.selectedIndex]||sel.options[0]).text}</span>`;
                     const icon = `<i class="fa-solid fa-chevron-down" style="font-size:12px; opacity:0.7;"></i>`;
                     trigger.innerHTML = `${textSpan} ${icon}`;
                     
@@ -7742,6 +7742,7 @@ function calcAccuracy() {
                 };
                 
                 sel.customUpdate(); 
+                sel.addEventListener('change', sel.customUpdate);
             });
         }
 
@@ -11582,6 +11583,7 @@ function toggleStatInputs(disabled) {
     ids.forEach(id => {
         let el = document.getElementById(id);
         if(el) el.disabled = disabled;
+        if(el && el.customUpdate) el.customUpdate();
     });
 }
 
@@ -11700,6 +11702,7 @@ function updateAttrDisplay() {
 
     const type = typeEl.value;
     const val = valEl ? valEl.value : 10;
+    if (typeEl.customUpdate) typeEl.customUpdate();
 
     if (type && type !== "무") {
         display.innerText = `속성: ${type}(${val})`;
