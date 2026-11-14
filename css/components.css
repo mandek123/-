@@ -146,7 +146,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--bg-blue); bord
     .th-stage { grid-template-columns: 1fr; gap: 22px; }
     .th-rail { flex-direction: row; flex-wrap: wrap; }
     .th-rail > .th-plaque { width: auto; flex: 1 1 180px; }
-    .th-badge, .th-rail-promo { display: none !important; }
+    .th-badge { display: none !important; }
+    .th-rail-promo { flex: 1 1 100%; margin-top: 0 !important; }
     .th-shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 860px) {
@@ -157,7 +158,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--bg-blue); bord
     .th-guide-head { flex-direction: column; align-items: flex-start; gap: 10px; }
 }
 @media (max-width: 768px) {
-    .th-rail { display: none; }   /* phones always show the top navbar */
+    .th-rail > .th-plaque { display: none; }   /* phones use the top navbar; keep online-count promo */
 }
 @media (max-width: 600px) {
     .th-shelf { grid-template-columns: 1fr; }
