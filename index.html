@@ -2555,7 +2555,18 @@ button[onclick="resetGame()"]:hover {
       <button type="button" class="th-plaque" onclick="showPage('page-ency')"><i class="fa-solid fa-book-open"></i> 펫 도감</button>
       <button type="button" class="th-plaque" onclick="showPage('page-ency-status')"><i class="fa-solid fa-square-check"></i> 나의 도감 현황</button>
       <button type="button" class="th-plaque" onclick="showPage('page-exp')"><i class="fa-solid fa-chart-simple"></i> 경험치계산기</button>
-      <div class="th-rail-promo">
+      <div class="th-rail-promo" style="background:#ffd400;border:4px solid #0b0b0b;box-shadow:6px 6px 0 #0b0b0b;animation:mwpulse 1.6s ease-in-out infinite">
+        <style>@keyframes mwpulse{50%{transform:scale(1.03)}}</style>
+        <h3 style="font-size:22px;margin:0 0 6px">📢 새 만득월드 오픈!</h3>
+        <p style="margin:0 0 8px;font-weight:700;line-height:1.5;font-size:14px">기존 만득월드는 저작권 문제가 생길 수 있어 문을 닫습니다.<br>저작권 걱정 없는 새 웹게임 사이트로 옮겨 주세요!</p>
+        <ul style="margin:0 0 10px;padding-left:18px;font-size:13px;line-height:1.6">
+          <li>오픈월드 RPG · 몬스터 로드 · 디펜스 · 오토배틀 등</li>
+          <li>개인정보를 받지 않아요. 편하게 가입하세요</li>
+          <li><b style="color:#c8102e">비밀번호는 다른 곳에서 안 쓰는 비밀번호로!</b></li>
+        </ul>
+        <a class="th-plaque" href="https://mandeukworld.com/" target="_blank" rel="noopener" style="text-decoration:none;box-sizing:border-box;max-width:100%;color:#fff;background:#c8102e;font-size:18px;font-weight:900;line-height:1.3"><i class="fa-solid fa-arrow-right"></i> mandeukworld.com 바로가기</a>
+      </div>
+      <div class="th-rail-promo" style="display:none">
         <h3>만득월드 오픈월드</h3>
         <div id="mo-live" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">
           <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:2px solid #0b0b0b;border-radius:999px;background:#eaffea;font-weight:700;font-size:13px"><i style="width:8px;height:8px;border-radius:50%;background:#22b14c;display:inline-block"></i>온라인 <b id="mo-on">-</b>명</span>
@@ -5959,6 +5970,15 @@ button[onclick="resetGame()"]:hover {
         const noticesPerPage = 3;
 
 const NOTICE_DATABASE = [
+    { id: 59, date: "26년 11월 19일", title: "📢 새 만득월드 오픈 안내 (mandeukworld.com)", summary: "기존 사이트 폐쇄 | 저작권 걱정 없는 새 웹게임 사이트 오픈", content: `
+<strong>1) 새 사이트 오픈</strong>
+<span><b>- 기존 만득월드는 저작권 문제가 생길 수 있어 폐쇄합니다.</b></span>
+<span><b>- 대신 저작권 걱정 없는 그림·음악으로 새 웹게임 사이트를 만들었습니다: <a href="https://mandeukworld.com/" target="_blank" rel="noopener">https://mandeukworld.com/</a></b></span>
+<span>- 오픈월드 RPG, 몬스터 로드, 고블린 방어전, 만득 오토배틀, 서울 최후의 날, 미니게임 등을 즐길 수 있어요.</span>
+<strong>2) 가입 안내</strong>
+<span>- 개인정보(이메일·전화번호 등)는 받지 않습니다. 아이디와 비밀번호만으로 편하게 가입해서 즐겨 주세요.</span>
+<span><b>- 비밀번호는 다른 사이트에서 쓰지 않는 비밀번호를 사용해 주세요.</b></span>
+` },
     { id: 58, date: "26년 11월 17일", title: "만득월드 운영 종료 안내", summary: "이번 주까지만 운영 후 폐쇄 예정 | 도감 저장 부탁드립니다", content: `
 <strong>1) 운영 종료 안내</strong>
 <span><b>- 만득월드는 이번 주(11월 22일 일요일)까지만 유지하고, 이후 폐쇄할 예정입니다.</b></span>
